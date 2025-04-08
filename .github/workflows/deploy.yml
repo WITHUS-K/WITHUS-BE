@@ -1,0 +1,77 @@
+name: Java CI/CD with Docker and GitHub Actions
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build-docker-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle Wrapper
+        run: ./gradlew clean build
+
+      - name: Generate .env file for Docker build args
+        run: |
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" > .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_URL=${{ secrets.DB_URL }}" >> .env
+
+      - name: Build Docker image with dynamic build args
+        run: |
+          build_args=$(awk '{print "--build-arg " $0}' .env | xargs)
+          echo "Using build arguments: $build_args"
+          docker build $build_args -t ${{ secrets.DOCKERHUB_USERNAME }}/withus .
+
+      - name: Docker login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Docker Hub push
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/withus
+
+  run-docker-image-on-ncp:
+    needs: build-docker-image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy on NCP server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.NCP_HOST }}
+          username: ${{ secrets.NCP_USER }}
+          key: ${{ secrets.NCP_SSH_KEY }}
+          script: |
+            docker ps -q --filter "name=withus" | grep -q . && docker stop withus && docker rm withus
+            docker image rm -f ${{ secrets.DOCKERHUB_USERNAME }}/withus || true
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/withus:latest
+            docker run -d -p 8080:8080 --name withus \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e DB_URL=${{ secrets.DB_URL }} \
+              -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
+              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              ${{ secrets.DOCKERHUB_USERNAME }}/withus:latest
+            sleep 5
+            docker ps -f name=withus --format "{{.Status}}" | grep "Up" || (docker logs withus && exit 1)
+            docker image prune -af
