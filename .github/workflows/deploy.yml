@@ -63,15 +63,10 @@ jobs:
           username: ${{ secrets.NCP_USER }}
           key: ${{ secrets.NCP_SSH_KEY }}
           script: |
-            docker ps -q --filter "name=withus" | grep -q . && docker stop withus && docker rm withus
-            docker image rm -f ${{ secrets.DOCKERHUB_USERNAME }}/withus || true
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/withus:latest
-            docker run -d -p 8080:8080 --name withus \
-              -e SPRING_PROFILES_ACTIVE=prod \
-              -e DB_URL=${{ secrets.DB_URL }} \
-              -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
-              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              ${{ secrets.DOCKERHUB_USERNAME }}/withus:latest
-            sleep 5
-            docker ps -f name=withus --format "{{.Status}}" | grep "Up" || (docker logs withus && exit 1)
-            docker image prune -af
+            bash /home/ubuntu/deploy/blue-green.sh \
+              "${{ secrets.DB_URL }}" \
+              "${{ secrets.DB_USERNAME }}" \
+              "${{ secrets.DB_PASSWORD }}" \
+              "${{ secrets.DOCKERHUB_USERNAME }}/withus:latest"
+      
