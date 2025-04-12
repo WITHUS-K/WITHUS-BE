@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.global.config;
 
+import KUSITMS.WITHUS.global.jwt.JwtFilter;
 import KUSITMS.WITHUS.global.jwt.LoginFilter;
 import KUSITMS.WITHUS.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +73,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/login", "/", "/join").permitAll()
                         .anyRequest().authenticated());
+
+        //JWTFilter 등록
+        http
+                .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class);
 
         //필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager() 메소드에 authenticationConfiguration 객체를 넣어야 함) 따라서 등록 필요
         http
