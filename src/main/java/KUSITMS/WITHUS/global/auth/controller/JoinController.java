@@ -6,11 +6,13 @@ import KUSITMS.WITHUS.global.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @ResponseBody
 @RequiredArgsConstructor
+@RequestMapping("api/v1/auth")
 public class JoinController {
 
     private final JoinService joinService;
