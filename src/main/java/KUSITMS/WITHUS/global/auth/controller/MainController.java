@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.domain.auth.controller;
+package KUSITMS.WITHUS.global.auth.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @ResponseBody
-public class AdminController {
+public class MainController {
 
-    @GetMapping("/admin")
-    public String adminP() {
+    @GetMapping("/")
+    public String mainP() {
 
-        return "admin Controller";
+        return "main Controller";
     }
 }

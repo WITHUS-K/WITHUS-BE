@@ -1,10 +1,11 @@
-package KUSITMS.WITHUS.global.jwt;
+package KUSITMS.WITHUS.global.auth.jwt;
 
-import KUSITMS.WITHUS.domain.auth.dto.CustomUserDetails;
-import KUSITMS.WITHUS.global.util.JwtUtil;
+import KUSITMS.WITHUS.global.auth.dto.CustomUserDetails;
+import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,15 +16,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.util.Collection;
 import java.util.Iterator;
 
+@RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    private static final long ACCESS_TOKEN_EXPIRE_MS = 1000 * 60 * 10; // 10분
 
-        this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
+    @Override
+    protected String obtainUsername(HttpServletRequest request) {
+        // 기본은 request.getParameter("username") → email로 바꿔서 클라이언트에서 email, password로 요청 보낼 수 있게끔 수정
+        return request.getParameter("email");
     }
 
     @Override
@@ -44,10 +48,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
 
-        //UserDetailsS
+        //UserDetails
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        String username = customUserDetails.getUsername();
+        // Spring Security의 필수 인터페이스가 username으로 되어있어서 이 부분은 username으로 남김
+        String email = customUserDetails.getUsername();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
@@ -55,7 +60,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String role = auth.getAuthority();
 
-        String token = jwtUtil.createJwt(username, role, 60*60*10L);
+        String token = jwtUtil.createJwt(email, role, ACCESS_TOKEN_EXPIRE_MS);
 
         response.addHeader("Authorization", "Bearer " + token);
     }

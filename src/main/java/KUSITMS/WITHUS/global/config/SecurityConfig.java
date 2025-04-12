@@ -1,8 +1,8 @@
 package KUSITMS.WITHUS.global.config;
 
-import KUSITMS.WITHUS.global.jwt.JwtFilter;
-import KUSITMS.WITHUS.global.jwt.LoginFilter;
-import KUSITMS.WITHUS.global.util.JwtUtil;
+import KUSITMS.WITHUS.global.auth.jwt.JwtFilter;
+import KUSITMS.WITHUS.global.auth.jwt.LoginFilter;
+import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

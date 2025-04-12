@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.domain.auth.dto;
+package KUSITMS.WITHUS.global.auth.dto;
 
 import KUSITMS.WITHUS.domain.user.entity.User;
 import org.springframework.security.core.GrantedAuthority;
@@ -43,7 +43,7 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public String getUsername() {
 
-        return user.getUsername();
+        return user.getEmail();
     }
 
     @Override

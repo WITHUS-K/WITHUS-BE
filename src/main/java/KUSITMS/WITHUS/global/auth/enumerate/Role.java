@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.domain.auth.enumerate;
+package KUSITMS.WITHUS.global.auth.enumerate;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.global.util;
+package KUSITMS.WITHUS.global.auth.jwt.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -23,9 +23,9 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(byteSecretKey);
     }
 
-    public String getUsername(String token) {
+    public String getEmail(String token) {
 
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().get("username", String.class);
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().get("email", String.class);
     }
 
     public String getRole(String token) {
@@ -38,10 +38,10 @@ public class JwtUtil {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getExpiration().before(new Date());
     }
 
-    public String createJwt(String username, String role, Long expiredMs) {
+    public String createJwt(String email, String role, Long expiredMs) {
 
         Claims claims = Jwts.claims();
-        claims.put("username", username);
+        claims.put("email", email);
         claims.put("role", role);
 
         return Jwts.builder()

@@ -1,11 +1,11 @@
-package KUSITMS.WITHUS.global.jwt;
+package KUSITMS.WITHUS.global.auth.jwt;
 
-import KUSITMS.WITHUS.domain.auth.dto.CustomUserDetails;
-import KUSITMS.WITHUS.domain.auth.enumerate.Role;
+import KUSITMS.WITHUS.global.auth.dto.CustomUserDetails;
+import KUSITMS.WITHUS.global.auth.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.entity.User;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
-import KUSITMS.WITHUS.global.util.JwtUtil;
+import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,8 +58,8 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        //토큰에서 username과 role 획득
-        String username = jwtUtil.getUsername(token);
+        //토큰에서 email과 role 획득
+        String email = jwtUtil.getEmail(token);
         String roleStr = jwtUtil.getRole(token);
 
         // enum 변환
@@ -68,11 +68,13 @@ public class JwtFilter extends OncePerRequestFilter {
                 .findFirst()
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_ROLE));
 
-        //userEntity를 생성하여 값 set
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword("temppassword");
-        user.setRole(role);
+        //User 엔티티를 생성하여 값 set
+        User user = User.builder()
+                .email(email)
+                .password("temppassword")
+                .role(role)
+                .build();
+
 
         //UserDetails에 회원 정보 객체 담기
         CustomUserDetails customUserDetails = new CustomUserDetails(user);
