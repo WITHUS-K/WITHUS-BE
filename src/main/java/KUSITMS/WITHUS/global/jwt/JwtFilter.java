@@ -3,6 +3,8 @@ package KUSITMS.WITHUS.global.jwt;
 import KUSITMS.WITHUS.domain.auth.dto.CustomUserDetails;
 import KUSITMS.WITHUS.domain.auth.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.entity.User;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -64,7 +66,7 @@ public class JwtFilter extends OncePerRequestFilter {
         Role role = Arrays.stream(Role.values())
                 .filter(r -> r.getKey().equals(roleStr))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Invalid role in token"));
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_ROLE));
 
         //userEntity를 생성하여 값 set
         User user = new User();
