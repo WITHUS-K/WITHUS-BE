@@ -3,11 +3,10 @@ package KUSITMS.WITHUS.global.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -18,8 +17,21 @@ public class SecurityConfig {
 
     private final String[] allowedUrls = {
             "/swagger-ui/**",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/health"
     };
+
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//
+//        http.cors(Customizer.withDefaults());
+//
+//        http.authorizeHttpRequests((auth) -> auth
+//                .requestMatchers(allowedUrls).permitAll()
+//                .anyRequest().authenticated());
+//
+//        return http.build();
+//    }
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -30,32 +42,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-//        http
-//                .authorizeHttpRequests((auth) -> auth
-//                        .requestMatchers(allowedUrls).permitAll()
-//                        .anyRequest().authenticated()
-//                )
-//                .formLogin(AbstractAuthenticationFilterConfigurer::permitAll         // 누구나 접근 가능하게
-//                )
-//                .logout(LogoutConfigurer::permitAll)
-//                .csrf(AbstractHttpConfigurer::disable);
+        http
+                .csrf((auth) -> auth.disable());
+
+        http
+                .formLogin((auth) -> auth.disable());
+
+        http
+                .httpBasic((auth) -> auth.disable());
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/login").permitAll()
-                        .requestMatchers("/admin").hasRole("ADMIN")
-                        .requestMatchers("/my/**").hasAnyRole("ADMIN", "USER")
-                        .anyRequest().authenticated()
-                );
+                        .requestMatchers("/login", "/", "/join").permitAll()
+                        .anyRequest().authenticated());
 
         http
-                .formLogin((auth) -> auth.loginPage("/login")
-                        .loginProcessingUrl("/loginProc")
-                        .permitAll()
-                );
-
-        http
-                .csrf((auth) -> auth.disable());
+                .sessionManagement((session) -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
