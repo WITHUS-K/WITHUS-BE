@@ -24,20 +24,11 @@ public class SecurityConfig {
     private final String[] allowedUrls = {
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/health"
+            "/health",
+            "/login",
+            "/",
+            "/join"
     };
-
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//
-//        http.cors(Customizer.withDefaults());
-//
-//        http.authorizeHttpRequests((auth) -> auth
-//                .requestMatchers(allowedUrls).permitAll()
-//                .anyRequest().authenticated());
-//
-//        return http.build();
-//    }
 
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
@@ -71,7 +62,8 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/join").permitAll()
+                        .requestMatchers(allowedUrls).permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated());
 
         //JWTFilter 등록

@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.global.jwt;
 
 import KUSITMS.WITHUS.domain.auth.dto.CustomUserDetails;
+import KUSITMS.WITHUS.domain.auth.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.entity.User;
 import KUSITMS.WITHUS.global.util.JwtUtil;
 import jakarta.servlet.FilterChain;
@@ -13,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -56,7 +58,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
         //토큰에서 username과 role 획득
         String username = jwtUtil.getUsername(token);
-        String role = jwtUtil.getRole(token);
+        String roleStr = jwtUtil.getRole(token);
+
+        // enum 변환
+        Role role = Arrays.stream(Role.values())
+                .filter(r -> r.getKey().equals(roleStr))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid role in token"));
 
         //userEntity를 생성하여 값 set
         User user = new User();

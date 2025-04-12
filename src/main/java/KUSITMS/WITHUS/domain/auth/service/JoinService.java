@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.auth.service;
 
 import KUSITMS.WITHUS.domain.auth.dto.JoinDTO;
+import KUSITMS.WITHUS.domain.auth.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.entity.User;
 import KUSITMS.WITHUS.domain.user.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,6 +23,7 @@ public class JoinService {
 
         String username = joinDTO.getUsername();
         String password = joinDTO.getPassword();
+        Role role = joinDTO.getRole();
 
         Boolean isExist = userRepository.existsByUsername(username);
 
@@ -34,7 +36,7 @@ public class JoinService {
 
         data.setUsername(username);
         data.setPassword(bCryptPasswordEncoder.encode(password));
-        data.setRole("ROLE_ADMIN"); // 임의로 다 admin 권한을 줌.
+        data.setRole(role);
 
         userRepository.save(data);
     }

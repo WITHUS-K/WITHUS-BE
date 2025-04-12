@@ -1,9 +1,7 @@
 package KUSITMS.WITHUS.domain.user.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import KUSITMS.WITHUS.domain.auth.enumerate.Role;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,5 +17,7 @@ public class User {
     private String username;
     private String password;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
 }
