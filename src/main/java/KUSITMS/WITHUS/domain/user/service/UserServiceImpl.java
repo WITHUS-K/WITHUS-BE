@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.domain.user.service;
 
 import KUSITMS.WITHUS.domain.user.dto.UserRequestDTO;
-import KUSITMS.WITHUS.global.auth.enumerate.Role;
+import KUSITMS.WITHUS.domain.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.entity.User;
 import KUSITMS.WITHUS.domain.user.repository.UserRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;

@@ -1,6 +1,6 @@
 package KUSITMS.WITHUS.domain.user.entity;
 
-import KUSITMS.WITHUS.global.auth.enumerate.Role;
+import KUSITMS.WITHUS.domain.user.enumerate.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
