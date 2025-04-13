@@ -1,14 +1,11 @@
 package KUSITMS.WITHUS.domain.user.entity;
 
-import KUSITMS.WITHUS.global.auth.enumerate.Role;
+import KUSITMS.WITHUS.domain.user.enumerate.Role;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Getter
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
