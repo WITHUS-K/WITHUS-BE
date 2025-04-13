@@ -22,7 +22,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
-    private static final long ACCESS_TOKEN_EXPIRE_MS = 1000 * 60 * 10; // 10분
+    private static final long ACCESS_TOKEN_EXPIRE_MS = 1000 * 60 * 60 * 10; // 10시간
 
     @Override
     protected String obtainUsername(HttpServletRequest request) {
