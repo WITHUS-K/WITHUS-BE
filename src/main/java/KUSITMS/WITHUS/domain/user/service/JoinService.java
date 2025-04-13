@@ -1,6 +1,6 @@
-package KUSITMS.WITHUS.global.auth.service;
+package KUSITMS.WITHUS.domain.user.service;
 
-import KUSITMS.WITHUS.global.auth.dto.JoinDTO;
+import KUSITMS.WITHUS.domain.user.dto.JoinDTO;
 import KUSITMS.WITHUS.global.auth.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.entity.User;
 import KUSITMS.WITHUS.domain.user.repository.UserRepository;

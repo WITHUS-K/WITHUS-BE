@@ -1,7 +1,7 @@
-package KUSITMS.WITHUS.global.auth.controller;
+package KUSITMS.WITHUS.domain.user.controller;
 
-import KUSITMS.WITHUS.global.auth.dto.JoinDTO;
-import KUSITMS.WITHUS.global.auth.service.JoinService;
+import KUSITMS.WITHUS.domain.user.dto.JoinDTO;
+import KUSITMS.WITHUS.domain.user.service.JoinService;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

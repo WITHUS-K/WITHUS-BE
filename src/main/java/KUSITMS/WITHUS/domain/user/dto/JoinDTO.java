@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.global.auth.dto;
+package KUSITMS.WITHUS.domain.user.dto;
 
 import KUSITMS.WITHUS.global.auth.enumerate.Role;
 
