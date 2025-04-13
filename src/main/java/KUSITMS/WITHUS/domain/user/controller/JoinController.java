@@ -1,6 +1,6 @@
 package KUSITMS.WITHUS.domain.user.controller;
 
-import KUSITMS.WITHUS.domain.user.dto.JoinDTO;
+import KUSITMS.WITHUS.domain.user.dto.UserRequestDTO;
 import KUSITMS.WITHUS.domain.user.service.JoinService;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +18,9 @@ public class JoinController {
     private final JoinService joinService;
 
     @PostMapping("/join")
-    public SuccessResponse<String> joinProcess(JoinDTO joinDTO) {
+    public SuccessResponse<String> joinProcess(UserRequestDTO.Join request) {
 
-        joinService.joinProcess(joinDTO);
+        joinService.joinProcess(request);
 
         return SuccessResponse.ok("회원가입이 완료되었습니다.");
     }

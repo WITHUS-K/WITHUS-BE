@@ -1,6 +1,6 @@
 package KUSITMS.WITHUS.domain.user.service;
 
-import KUSITMS.WITHUS.domain.user.dto.JoinDTO;
+import KUSITMS.WITHUS.domain.user.dto.UserRequestDTO;
 import KUSITMS.WITHUS.global.auth.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.entity.User;
 import KUSITMS.WITHUS.domain.user.repository.UserRepository;
@@ -17,11 +17,11 @@ public class JoinService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public void joinProcess(JoinDTO joinDTO) {
+    public void joinProcess(UserRequestDTO.Join request) {
 
-        String email = joinDTO.email();
-        String password = joinDTO.password();
-        Role role = joinDTO.role();
+        String email = request.email();
+        String password = request.password();
+        Role role = request.role();
 
         if (email == null || email.trim().isEmpty()) {
             throw new CustomException(ErrorCode.INVALID_PARAMETER);
