@@ -10,6 +10,6 @@ public class UserRequestDTO {
     public record Join (
             @Schema(description = "이메일", example = "test@gmail.com") String email,
             @Schema(description = "비밀번호", example = "1234") String password,
-            @Schema(description = "권한", example = "ROLE_USER") Role role
+            @Schema(description = "권한", example = "USER") Role role
     ) {}
 }
