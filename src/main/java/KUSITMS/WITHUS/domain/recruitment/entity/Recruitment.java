@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.entity;
 
+import KUSITMS.WITHUS.domain.application.entity.ApplicationTemplate;
 import KUSITMS.WITHUS.domain.evaluation.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.organization.entity.Organization;
 import KUSITMS.WITHUS.global.common.BaseEntity;
@@ -48,6 +49,14 @@ public class Recruitment extends BaseEntity {
     @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<EvaluationCriteria> evaluationCriteriaList = new ArrayList<>();
+
+    @OneToOne(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ApplicationTemplate applicationTemplate;
+
+    public void setApplicationTemplate(ApplicationTemplate template) {
+        this.applicationTemplate = template;
+        template.associateRecruitment(this);
+    }
 
     public void addEvaluationCriteria(EvaluationCriteria criteria) {
         this.evaluationCriteriaList.add(criteria);

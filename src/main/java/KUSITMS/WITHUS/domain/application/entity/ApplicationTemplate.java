@@ -24,13 +24,17 @@ public class ApplicationTemplate extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RECRUITMENT_ID", nullable = false)
     private Recruitment recruitment;
 
     @Builder.Default
     @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ApplicationQuestion> questions = new ArrayList<>();
+
+    public void associateRecruitment(Recruitment recruitment) {
+        this.recruitment = recruitment;
+    }
 
     public void addQuestion(ApplicationQuestion question) {
         this.questions.add(question);
