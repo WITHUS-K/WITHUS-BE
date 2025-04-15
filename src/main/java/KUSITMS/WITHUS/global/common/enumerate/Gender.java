@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.global.common.enumrate;
+package KUSITMS.WITHUS.global.common.enumerate;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

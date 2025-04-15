@@ -3,7 +3,7 @@ package KUSITMS.WITHUS.domain.user.entity;
 import KUSITMS.WITHUS.domain.application.entity.Comment;
 import KUSITMS.WITHUS.domain.user.enumerate.Role;
 import KUSITMS.WITHUS.global.common.BaseEntity;
-import KUSITMS.WITHUS.global.common.enumrate.Gender;
+import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -1,11 +1,11 @@
 package KUSITMS.WITHUS.domain.application.entity;
 
-import KUSITMS.WITHUS.domain.application.enumrate.ApplicationStatus;
+import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.user.entity.User;
 import KUSITMS.WITHUS.global.common.BaseEntity;
-import KUSITMS.WITHUS.global.common.enumrate.Gender;
+import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 
