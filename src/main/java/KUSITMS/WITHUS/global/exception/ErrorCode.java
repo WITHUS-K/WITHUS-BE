@@ -61,6 +61,10 @@ public enum ErrorCode {
     ORGANIZATION_ALREADY_EXIST("ORGANIZATION400", "이미 존재하는 조직입니다.", HttpStatus.BAD_REQUEST),
     ORGANIZATION_NOT_EXIST("ORGANIZATION404", "존재하지 않는 조직입니다.", HttpStatus.NOT_FOUND),
 
+    // Recruitment (공고)
+    RECRUITMENT_ALREADY_EXIST("RECRUITMENT400", "이미 존재하는 공고입니다.", HttpStatus.BAD_REQUEST),
+    RECRUITMENT_NOT_EXIST("RECRUITMENT404", "존재하지 않는 공고입니다.", HttpStatus.NOT_FOUND),
+
     // Role
     INVALID_ROLE("ROLE400", "잘못된 Role 값입니다.", HttpStatus.BAD_REQUEST),
 

@@ -53,6 +53,42 @@ public class Recruitment extends BaseEntity {
     @OneToOne(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
     private ApplicationTemplate applicationTemplate;
 
+    public static Recruitment create(
+            String title,
+            String content,
+            String fileUrl,
+            LocalDate documentDeadline,
+            LocalDate documentResultDate,
+            LocalDate finalResultDate,
+            Organization organization
+    ) {
+        return Recruitment.builder()
+                .title(title)
+                .content(content)
+                .fileUrl(fileUrl)
+                .documentDeadline(documentDeadline)
+                .documentResultDate(documentResultDate)
+                .finalResultDate(finalResultDate)
+                .organization(organization)
+                .build();
+    }
+
+    public void update(
+            String title,
+            String content,
+            String fileUrl,
+            LocalDate documentDeadline,
+            LocalDate documentResultDate,
+            LocalDate finalResultDate
+    ) {
+        this.title = title;
+        this.content = content;
+        this.fileUrl = fileUrl;
+        this.documentDeadline = documentDeadline;
+        this.documentResultDate = documentResultDate;
+        this.finalResultDate = finalResultDate;
+    }
+
     public void setApplicationTemplate(ApplicationTemplate template) {
         this.applicationTemplate = template;
         template.associateRecruitment(this);
