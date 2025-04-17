@@ -39,10 +39,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationResponseDTO.Detail getById(Long id) {
         Organization organization = organizationRepository.getById(id);
 
-        return new OrganizationResponseDTO.Detail(
-                organization.getId(),
-                organization.getName()
-        );
+        return OrganizationResponseDTO.Detail.from(organization);
     }
 
     /**
@@ -58,10 +55,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         organization.updateName(request.name());
 
-        return new OrganizationResponseDTO.Update(
-                organization.getId(),
-                organization.getName()
-        );
+        return OrganizationResponseDTO.Update.from(organization);
     }
 
     /**
@@ -82,7 +76,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public List<OrganizationResponseDTO.Summary> getAll() {
         return organizationRepository.findAll().stream()
-                .map(organization -> new OrganizationResponseDTO.Summary(organization.getId(), organization.getName()))
+                .map(OrganizationResponseDTO.Summary::from)
                 .toList();
     }
 }
