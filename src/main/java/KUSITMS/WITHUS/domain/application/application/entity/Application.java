@@ -1,5 +1,6 @@
-package KUSITMS.WITHUS.domain.application.entity;
+package KUSITMS.WITHUS.domain.application.application.entity;
 
+import KUSITMS.WITHUS.domain.application.entity.Comment;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.application.template.entity.ApplicationTemplate;
@@ -55,7 +56,7 @@ public class Application extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_ID", nullable = false)
+    @JoinColumn(name = "USER_ID")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -77,6 +78,25 @@ public class Application extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TIME_SLOT_ID")
     private TimeSlot timeSlot;
+
+    public static Application create(
+            String name, Gender gender, String email, String phoneNumber, String university, String major,
+            LocalDate birthDate, String imageUrl, ApplicationTemplate template, Position position
+    ) {
+        return Application.builder()
+                .name(name)
+                .gender(gender)
+                .email(email)
+                .phoneNumber(phoneNumber)
+                .university(university)
+                .major(major)
+                .birthDate(birthDate)
+                .imageUrl(imageUrl)
+                .status(ApplicationStatus.PENDING)
+                .template(template)
+                .position(position)
+                .build();
+    }
 
     public void updateStatus(ApplicationStatus status) {
         this.status = status;
