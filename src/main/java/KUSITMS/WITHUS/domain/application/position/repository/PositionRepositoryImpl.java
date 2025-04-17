@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static KUSITMS.WITHUS.domain.application.entity.QPosition.position;
+import static KUSITMS.WITHUS.domain.application.position.entity.QPosition.position;
 
 @Repository
 @RequiredArgsConstructor

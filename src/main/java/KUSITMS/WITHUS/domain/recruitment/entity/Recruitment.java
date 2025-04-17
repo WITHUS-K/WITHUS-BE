@@ -1,6 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.entity;
 
-import KUSITMS.WITHUS.domain.application.entity.ApplicationTemplate;
+import KUSITMS.WITHUS.domain.application.template.entity.ApplicationTemplate;
 import KUSITMS.WITHUS.domain.evaluation.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.organization.entity.Organization;
 import KUSITMS.WITHUS.global.common.BaseEntity;

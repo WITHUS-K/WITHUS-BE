@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.application.entity;
 
+import KUSITMS.WITHUS.domain.application.template.entity.ApplicationTemplate;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
