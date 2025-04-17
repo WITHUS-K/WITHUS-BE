@@ -1,6 +1,6 @@
-package KUSITMS.WITHUS.domain.application.dto;
+package KUSITMS.WITHUS.domain.application.position.dto;
 
-import KUSITMS.WITHUS.domain.application.entity.Position;
+import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "파트 관련 응답 DTO")

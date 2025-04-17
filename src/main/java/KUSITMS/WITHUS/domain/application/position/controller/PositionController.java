@@ -1,8 +1,8 @@
-package KUSITMS.WITHUS.domain.application.controller;
+package KUSITMS.WITHUS.domain.application.position.controller;
 
-import KUSITMS.WITHUS.domain.application.dto.PositionRequestDTO;
-import KUSITMS.WITHUS.domain.application.dto.PositionResponseDTO;
-import KUSITMS.WITHUS.domain.application.service.PositionService;
+import KUSITMS.WITHUS.domain.application.position.dto.PositionRequestDTO;
+import KUSITMS.WITHUS.domain.application.position.dto.PositionResponseDTO;
+import KUSITMS.WITHUS.domain.application.position.service.PositionService;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

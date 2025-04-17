@@ -1,7 +1,7 @@
-package KUSITMS.WITHUS.domain.application.service;
+package KUSITMS.WITHUS.domain.application.position.service;
 
-import KUSITMS.WITHUS.domain.application.dto.PositionRequestDTO;
-import KUSITMS.WITHUS.domain.application.dto.PositionResponseDTO;
+import KUSITMS.WITHUS.domain.application.position.dto.PositionRequestDTO;
+import KUSITMS.WITHUS.domain.application.position.dto.PositionResponseDTO;
 
 import java.util.List;
 

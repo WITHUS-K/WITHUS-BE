@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.domain.application.dto;
+package KUSITMS.WITHUS.domain.application.position.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

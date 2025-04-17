@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.application.entity;
 
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
+import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.user.entity.User;

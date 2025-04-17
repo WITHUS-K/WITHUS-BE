@@ -1,6 +1,6 @@
-package KUSITMS.WITHUS.domain.application.repository;
+package KUSITMS.WITHUS.domain.application.position.repository;
 
-import KUSITMS.WITHUS.domain.application.entity.Position;
+import KUSITMS.WITHUS.domain.application.position.entity.Position;
 
 import java.util.List;
 
