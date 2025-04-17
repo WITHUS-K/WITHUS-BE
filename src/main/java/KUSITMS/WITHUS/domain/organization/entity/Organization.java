@@ -33,6 +33,15 @@ public class Organization extends BaseEntity {
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserOrganization> userOrganizations = new ArrayList<>();
 
+    public static Organization create(String name) {
+        return Organization.builder()
+                .name(name)
+                .build();
+    }
+    public void updateName(String name) {
+        this.name = name;
+    }
+
     public void addPosition(Position position) {
         this.positions.add(position);
         position.associateOrganization(this);
