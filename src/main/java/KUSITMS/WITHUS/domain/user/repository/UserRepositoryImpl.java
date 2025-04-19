@@ -1,6 +1,8 @@
 package KUSITMS.WITHUS.domain.user.repository;
 
 import KUSITMS.WITHUS.domain.user.entity.User;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -23,5 +25,11 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User save(User user) {
         return userJpaRepository.save(user);
+    }
+
+    @Override
+    public User getById(Long id) {
+        return userJpaRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXIST));
     }
 }

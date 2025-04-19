@@ -1,5 +1,6 @@
-package KUSITMS.WITHUS.domain.application.entity;
+package KUSITMS.WITHUS.domain.application.template.entity;
 
+import KUSITMS.WITHUS.domain.application.entity.ApplicationQuestion;
 import KUSITMS.WITHUS.domain.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;

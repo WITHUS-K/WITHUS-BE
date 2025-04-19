@@ -36,7 +36,7 @@ public enum ErrorCode {
     PARAMETER_VALIDATION_ERROR("COMMON422", "파라미터 검증 에러입니다.", HttpStatus.UNPROCESSABLE_ENTITY),
     PARAMETER_GRAMMAR_ERROR("COMMON422", "파라미터 문법 에러입니다.", HttpStatus.UNPROCESSABLE_ENTITY),
 
-    // Token //TODO - 예시이고 구현하면서 변경하셔도 됩니다.
+    // Token
     TOKEN_INVALID("TOKEN401", "유효하지 않은 Token 입니다.", HttpStatus.UNAUTHORIZED),
     TOKEN_INVALID_ROLE("TOKEN401", "JWT 토큰에 Role 정보가 없습니다.", HttpStatus.UNAUTHORIZED),
     ACCESS_TOKEN_EXPIRED("TOKEN401", "Access Token 이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
@@ -56,6 +56,26 @@ public enum ErrorCode {
     PASSWORDS_NOT_MATCH("PASSWORD401", "입력한 두 개의 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
     USER_NO_PERMISSION("USER403", "권한이 없습니다.", HttpStatus.FORBIDDEN),
     USER_FORBIDDEN("USER403", "유저의 권한이 부족합니다.", HttpStatus.FORBIDDEN),
+
+    // Organization (조직)
+    ORGANIZATION_ALREADY_EXIST("ORGANIZATION400", "이미 존재하는 조직입니다.", HttpStatus.BAD_REQUEST),
+    ORGANIZATION_NOT_EXIST("ORGANIZATION404", "존재하지 않는 조직입니다.", HttpStatus.NOT_FOUND),
+
+    // Recruitment (공고)
+    RECRUITMENT_ALREADY_EXIST("RECRUITMENT400", "이미 존재하는 공고입니다.", HttpStatus.BAD_REQUEST),
+    RECRUITMENT_NOT_EXIST("RECRUITMENT404", "존재하지 않는 공고입니다.", HttpStatus.NOT_FOUND),
+
+    // Position (파트)
+    POSITION_ALREADY_EXIST("POSITION400", "이미 해당 파트가 존재합니다.", HttpStatus.BAD_REQUEST),
+    POSITION_NOT_EXIST("POSITION404", "존재하지 않는 파트입니다.", HttpStatus.NOT_FOUND),
+
+    // Application Template (지원서 양식)
+    TEMPLATE_ALREADY_EXIST("TEMPLATE400", "이미 존재하는 지원서 양식입니다.", HttpStatus.BAD_REQUEST),
+    TEMPLATE_NOT_EXIST("TEMPLATE404", "존재하지 않는 지원서 양식입니다.", HttpStatus.NOT_FOUND),
+
+     // Application (지원서)
+    APPLICATION_ALREADY_EXIST("APPLICATION400", "이미 존재하는 지원서입니다.", HttpStatus.BAD_REQUEST),
+    APPLICATION_NOT_EXIST("APPLICATION404", "존재하지 않는 지원서입니다.", HttpStatus.NOT_FOUND),
 
     // Role
     INVALID_ROLE("ROLE400", "잘못된 Role 값입니다.", HttpStatus.BAD_REQUEST),

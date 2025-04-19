@@ -11,3 +11,6 @@ spring:
 
   jwt:
     secret: ${JWT_SECRET}
+
+springdoc:
+  use-fqn: true
