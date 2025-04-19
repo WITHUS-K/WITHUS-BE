@@ -46,5 +46,12 @@ public class ApplicationController {
     public SuccessResponse<List<ApplicationResponseDTO.Summary>> getByRecruitment(@PathVariable Long recruitmentId) {
         return SuccessResponse.ok(applicationService.getByRecruitmentId(recruitmentId));
     }
+
+    @PatchMapping("/status")
+    @Operation(summary = "지원서 상태 일괄 수정", description = "지원서 ID 리스트와 변경할 상태를 받아 일괄 수정합니다.")
+    public SuccessResponse<String> updateStatus(@RequestBody ApplicationRequestDTO.UpdateStatus request) {
+        applicationService.updateStatus(request);
+        return SuccessResponse.ok("지원서 상태가 성공적으로 수정되었습니다.");
+    }
 }
 

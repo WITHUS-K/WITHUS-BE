@@ -10,4 +10,5 @@ public interface ApplicationService {
     void delete(Long id);
     ApplicationResponseDTO.Detail getById(Long id);
     List<ApplicationResponseDTO.Summary> getByRecruitmentId(Long recruitmentId);
+    void updateStatus(ApplicationRequestDTO.UpdateStatus request);
 }
