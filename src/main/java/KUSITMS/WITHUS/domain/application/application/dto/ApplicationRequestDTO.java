@@ -1,12 +1,16 @@
 package KUSITMS.WITHUS.domain.application.application.dto;
 
+import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Schema(description = "지원서 요청 DTO")
 public class ApplicationRequestDTO {
@@ -41,6 +45,18 @@ public class ApplicationRequestDTO {
             @NotNull Long templateId,
 
             @Schema(description = "파트 ID", example = "1")
-            @NotNull Long positionId
+            @NotNull Long positionId,
+
+            @Schema(description = "면접 가능 시간", example = "[\"2025-04-22T10:00:00\", \"2025-04-23T14:30:00\"]")
+            @NotNull List<LocalDateTime> availableTimes
+    ) {}
+
+    @Schema(description = "지원서 상태 일괄 수정 요청 DTO")
+    public record UpdateStatus(
+            @Schema(description = "지원서 ID 리스트", example = "[1, 2, 3]")
+            @NotEmpty List<Long> applicationIds,
+
+            @Schema(description = "변경할 상태", example = "DOX_PASS")
+            @NotNull ApplicationStatus status
     ) {}
 }

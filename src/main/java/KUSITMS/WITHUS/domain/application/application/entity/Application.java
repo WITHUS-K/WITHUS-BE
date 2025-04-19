@@ -1,11 +1,12 @@
 package KUSITMS.WITHUS.domain.application.application.entity;
 
+import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.entity.Comment;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.application.template.entity.ApplicationTemplate;
-import KUSITMS.WITHUS.domain.interview.entity.Interview;
-import KUSITMS.WITHUS.domain.interview.entity.TimeSlot;
+import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
+import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.user.entity.User;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
@@ -74,6 +75,10 @@ public class Application extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ApplicantAvailability> availabilities = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TIME_SLOT_ID")
