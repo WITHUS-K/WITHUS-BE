@@ -5,6 +5,7 @@ import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,20 +37,28 @@ public class TimeSlotRepositoryImpl implements TimeSlotRepository {
 
     @Override
     public Optional<TimeSlot> findByDateTimeAndInterviewIdAndPosition(LocalDate date, LocalTime startTime, Long interviewId, Long positionId) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(timeSlot.date.eq(date))
+                .and(timeSlot.startTime.eq(startTime))
+                .and(timeSlot.interview.id.eq(interviewId));
+
+        if (positionId != null) {
+            builder.and(timeSlot.position.id.eq(positionId));
+        } else {
+            builder.and(timeSlot.position.isNull());
+        }
+
         return Optional.ofNullable(queryFactory
                 .selectFrom(timeSlot)
-                .where(
-                        timeSlot.date.eq(date),
-                        timeSlot.startTime.eq(startTime),
-                        timeSlot.interview.id.eq(interviewId),
-                        timeSlot.position.id.eq(positionId)
-                )
+                .where(builder)
                 .fetchOne());
     }
 
+
     @Override
     public TimeSlot findOrCreate(LocalDate date, LocalTime startTime, LocalTime endTime, Interview interview, Position position) {
-        return findByDateTimeAndInterviewIdAndPosition(date, startTime, interview.getId(), position.getId())
+        Long positionId = position != null ? position.getId() : null;
+        return findByDateTimeAndInterviewIdAndPosition(date, startTime, interview.getId(), positionId)
                 .orElseGet(() -> save(TimeSlot.builder()
                         .date(date)
                         .startTime(startTime)

@@ -53,6 +53,9 @@ public class InterviewSchedulerService {
                         Collectors.mapping(ApplicantAvailability::getAvailableTime, Collectors.toList())
                 ));
 
+        // 포지션이 있는 경우와 없는 경우 구분
+        boolean hasPosition = applicants.stream().anyMatch(app -> app.getPosition() != null);
+
         // 3. 각 시간대별로 포지션에 따라 타임슬롯을 나누고, 해당 시간에 생성된 슬롯 개수도 함께 관리
         Map<LocalDateTime, Map<Long, TimeSlot>> slotPool = new HashMap<>();
         Map<LocalDateTime, Integer> slotsUsedPerTime = new HashMap<>();
@@ -66,14 +69,14 @@ public class InterviewSchedulerService {
 
         // 5. 백트래킹으로 전체 배정 시도
         Map<Long, TimeSlot> finalAssignment = new HashMap<>();
-        boolean success = backtrackAssign(0, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime, config, interview, finalAssignment);
+        boolean success = backtrackAssign(0, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime, config, interview, finalAssignment, hasPosition);
 
         // 6. 배정 결과 저장
         if (success) {
             finalAssignment.forEach((applicantId, slot) -> {
                 Application app = applicantMap.get(applicantId);
                 app.assignTimeSlot(slot);
-                Long positionId = app.getPosition().getId();
+                Long positionId = app.getPosition() != null ? app.getPosition().getId() : null;
                 System.out.println("배정 완료 - 지원자 ID: " + applicantId + " / 포지션: " + positionId + " / 시간: " + slot.getDate() + " " + slot.getStartTime());
             });
         } else {
@@ -95,7 +98,8 @@ public class InterviewSchedulerService {
             Map<LocalDateTime, Integer> slotsUsedPerTime,
             InterviewConfig config,
             Interview interview,
-            Map<Long, TimeSlot> finalAssignment
+            Map<Long, TimeSlot> finalAssignment,
+            boolean hasPosition
     ) {
         if (index == applicantIds.size()) return true;
 
@@ -108,7 +112,7 @@ public class InterviewSchedulerService {
             int usedSlots = slotsUsedPerTime.getOrDefault(time, 0);
 
             Position position = applicant.getPosition();
-            Long positionId = position.getId();
+            Long positionId = hasPosition && position != null ? position.getId() : 0L;
             TimeSlot currentSlot = positionSlots.get(positionId);
 
             // 이미 생성된 슬롯 존재 -> 인원 수 확인 후 배정
@@ -120,23 +124,22 @@ public class InterviewSchedulerService {
 
                 if (assignedCount < config.applicantPerSlot) {
                     finalAssignment.put(applicantId, currentSlot);
-                    if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime, config, interview, finalAssignment)) return true;
+                    if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime, config, interview, finalAssignment, hasPosition)) return true;
                     finalAssignment.remove(applicantId);
                 }
             }
-
             // 새 슬롯 생성 가능할 경우 -> 생성 후 배정
             else if (usedSlots < config.roomCount) {
                 LocalDate date = time.toLocalDate();
                 LocalTime start = time.toLocalTime();
                 LocalTime end = start.plusMinutes(config.slotMinutes);
 
-                TimeSlot newSlot = timeSlotRepository.findOrCreate(date, start, end, interview, position);
+                TimeSlot newSlot = timeSlotRepository.findOrCreate(date, start, end, interview, hasPosition ? position : null);
                 positionSlots.put(positionId, newSlot);
                 slotsUsedPerTime.put(time, usedSlots + 1);
 
                 finalAssignment.put(applicantId, newSlot);
-                if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime, config, interview, finalAssignment)) return true;
+                if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime, config, interview, finalAssignment, hasPosition)) return true;
 
                 // 실패 시 롤백
                 finalAssignment.remove(applicantId);
@@ -147,6 +150,7 @@ public class InterviewSchedulerService {
 
         return false;
     }
+
 
     /**
      * 특정 면접의 배정된 전체 타임슬롯 조회

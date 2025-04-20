@@ -65,7 +65,7 @@ public class Application extends BaseEntity {
     private ApplicationTemplate template;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "POSITION_ID", nullable = false)
+    @JoinColumn(name = "POSITION_ID")
     private Position position;
 
     @ManyToOne(fetch = FetchType.LAZY)

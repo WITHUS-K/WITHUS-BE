@@ -61,7 +61,7 @@ public class ApplicationResponseDTO {
                     application.getId(),
                     application.getName(),
                     application.getEmail(),
-                    application.getPosition().getName(),
+                    application.getPosition() != null ? application.getPosition().getName() : null,
                     application.getStatus()
             );
         }

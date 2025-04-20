@@ -45,7 +45,7 @@ public class ApplicationRequestDTO {
             @NotNull Long templateId,
 
             @Schema(description = "파트 ID", example = "1")
-            @NotNull Long positionId,
+            Long positionId,
 
             @Schema(description = "면접 가능 시간", example = "[\"2025-04-22T10:00:00\", \"2025-04-23T14:30:00\"]")
             @NotNull List<LocalDateTime> availableTimes

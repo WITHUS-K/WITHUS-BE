@@ -39,7 +39,7 @@ public class TimeSlot extends BaseEntity {
     private Interview interview;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "POSITION_ID", nullable = false)
+    @JoinColumn(name = "POSITION_ID")
     private Position position;
 
     @OneToMany(mappedBy = "timeSlot", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -35,7 +36,9 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Transactional
     public ApplicationResponseDTO.Detail create(ApplicationRequestDTO.Create request) {
         ApplicationTemplate template = templateRepository.getById(request.templateId());
-        Position position = positionRepository.getById(request.positionId());
+        Position position = Optional.ofNullable(request.positionId())
+                .map(positionRepository::getById)
+                .orElse(null);
 
         Application application = Application.create(
                 request.name(),
