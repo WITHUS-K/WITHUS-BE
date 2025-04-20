@@ -28,6 +28,18 @@ public class ApplicationController {
         return SuccessResponse.ok(applicationService.create(request));
     }
 
+    @PostMapping("/bulk")
+    @Operation(summary = "지원서 다건 생성", description = "여러 지원서 데이터를 한 번에 받아 모두 생성합니다.")
+    public SuccessResponse<List<ApplicationResponseDTO.Detail>> createBulk(
+            @Valid @RequestBody List<ApplicationRequestDTO.Create> requests
+    ) {
+        List<ApplicationResponseDTO.Detail> responses = requests.stream()
+                .map(applicationService::create)
+                .toList();
+
+        return SuccessResponse.ok(responses);
+    }
+
     @DeleteMapping("/{id}")
     @Operation(summary = "지원서 삭제", description = "지원서 ID를 통해 해당 지원서를 삭제합니다.")
     public SuccessResponse<String> delete(@PathVariable Long id) {
