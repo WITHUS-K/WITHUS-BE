@@ -33,14 +33,14 @@ public record InterviewScheduleDTO(
             @Schema(description = "지원서 ID") Long applicationId,
             @Schema(description = "이름") String name,
             @Schema(description = "이메일") String email,
-            @Schema(description = "전화번호") String phoneNumber
+            @Schema(description = "파트") String positionName
     ) {
         public static ApplicantInfo from(Application app) {
             return new ApplicantInfo(
                     app.getId(),
                     app.getName(),
                     app.getEmail(),
-                    app.getPhoneNumber()
+                    app.getPosition().getName()
             );
         }
     }
