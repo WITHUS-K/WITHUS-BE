@@ -1,7 +1,7 @@
-package KUSITMS.WITHUS.domain.user.controller;
+package KUSITMS.WITHUS.domain.user.user.controller;
 
-import KUSITMS.WITHUS.domain.user.dto.UserRequestDTO;
-import KUSITMS.WITHUS.domain.user.service.UserService;
+import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
+import KUSITMS.WITHUS.domain.user.user.service.UserService;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

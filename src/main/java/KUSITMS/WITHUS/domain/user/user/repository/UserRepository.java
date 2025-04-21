@@ -1,6 +1,6 @@
-package KUSITMS.WITHUS.domain.user.repository;
+package KUSITMS.WITHUS.domain.user.user.repository;
 
-import KUSITMS.WITHUS.domain.user.entity.User;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
 
 import java.util.List;
 

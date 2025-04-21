@@ -1,9 +1,9 @@
-package KUSITMS.WITHUS.domain.user.service;
+package KUSITMS.WITHUS.domain.user.user.service;
 
-import KUSITMS.WITHUS.domain.user.dto.UserRequestDTO;
-import KUSITMS.WITHUS.domain.user.enumerate.Role;
-import KUSITMS.WITHUS.domain.user.entity.User;
-import KUSITMS.WITHUS.domain.user.repository.UserRepository;
+import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
+import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;

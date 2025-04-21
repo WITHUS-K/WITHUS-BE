@@ -1,6 +1,6 @@
-package KUSITMS.WITHUS.domain.user.dto;
+package KUSITMS.WITHUS.domain.user.user.dto;
 
-import KUSITMS.WITHUS.domain.user.enumerate.Role;
+import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "회원 관련 요청 DTO")

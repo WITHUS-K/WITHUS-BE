@@ -1,8 +1,8 @@
 package KUSITMS.WITHUS.global.auth.jwt;
 
 import KUSITMS.WITHUS.global.auth.dto.CustomUserDetails;
-import KUSITMS.WITHUS.domain.user.enumerate.Role;
-import KUSITMS.WITHUS.domain.user.entity.User;
+import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;

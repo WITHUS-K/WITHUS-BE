@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.global.common.annotation.resolver;
 
-import KUSITMS.WITHUS.domain.user.entity.User;
-import KUSITMS.WITHUS.domain.user.service.UserService;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.domain.user.user.service.UserService;
 import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
 import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
 import lombok.RequiredArgsConstructor;

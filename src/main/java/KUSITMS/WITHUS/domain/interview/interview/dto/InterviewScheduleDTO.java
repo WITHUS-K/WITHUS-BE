@@ -4,7 +4,7 @@ import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.interview.enumerate.InterviewRole;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
-import KUSITMS.WITHUS.domain.user.dto.UserResponseDTO;
+import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;

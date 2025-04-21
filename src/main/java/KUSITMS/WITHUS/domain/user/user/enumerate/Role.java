@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.domain.user.enumerate;
+package KUSITMS.WITHUS.domain.user.user.enumerate;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

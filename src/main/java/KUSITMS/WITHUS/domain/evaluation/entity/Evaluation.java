@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.domain.evaluation.entity;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
-import KUSITMS.WITHUS.domain.user.entity.User;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;

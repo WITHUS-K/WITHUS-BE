@@ -1,6 +1,6 @@
 package KUSITMS.WITHUS.global.auth.dto;
 
-import KUSITMS.WITHUS.domain.user.entity.User;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

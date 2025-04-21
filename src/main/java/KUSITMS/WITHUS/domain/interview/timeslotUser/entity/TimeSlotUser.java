@@ -2,7 +2,7 @@ package KUSITMS.WITHUS.domain.interview.timeslotUser.entity;
 
 import KUSITMS.WITHUS.domain.interview.enumerate.InterviewRole;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
-import KUSITMS.WITHUS.domain.user.entity.User;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
