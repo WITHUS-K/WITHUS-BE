@@ -58,6 +58,9 @@ public class UserOrganizationService {
                 .organization(organization)
                 .build();
 
+        user.addUserOrganization(userOrganization);
+        organization.addUserOrganization(userOrganization);
+
         return userOrganizationRepository.save(userOrganization);
     }
 }
