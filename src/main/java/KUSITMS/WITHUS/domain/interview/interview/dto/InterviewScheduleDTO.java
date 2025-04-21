@@ -1,7 +1,10 @@
 package KUSITMS.WITHUS.domain.interview.interview.dto;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
+import KUSITMS.WITHUS.domain.interview.enumerate.InterviewRole;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
+import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
+import KUSITMS.WITHUS.domain.user.dto.UserResponseDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
@@ -14,17 +17,33 @@ public record InterviewScheduleDTO(
         @Schema(description = "면접 일자") LocalDate date,
         @Schema(description = "시작 시간") LocalTime startTime,
         @Schema(description = "종료 시간") LocalTime endTime,
-        @Schema(description = "지원자 목록") List<ApplicantInfo> applicants
+        @Schema(description = "지원자 목록") List<ApplicantInfo> applicants,
+        @Schema(description = "면접관 목록") List<UserResponseDTO.SummaryForTimeSlot> interviewers,
+        @Schema(description = "안내자 목록") List<UserResponseDTO.SummaryForTimeSlot> assistants
 ) {
 
     public static InterviewScheduleDTO from(TimeSlot slot) {
+        List<TimeSlotUser> users = slot.getTimeSlotUsers();
+
+        List<UserResponseDTO.SummaryForTimeSlot> interviewers = users.stream()
+                .filter(u -> u.getRole() == InterviewRole.INTERVIEWER)
+                .map(u -> UserResponseDTO.SummaryForTimeSlot.from(u.getUser(), u.getRole()))
+                .toList();
+
+        List<UserResponseDTO.SummaryForTimeSlot> assistants = users.stream()
+                .filter(u -> u.getRole() == InterviewRole.ASSISTANT)
+                .map(u -> UserResponseDTO.SummaryForTimeSlot.from(u.getUser(), u.getRole()))
+                .toList();
+
         return new InterviewScheduleDTO(
                 slot.getDate(),
                 slot.getStartTime(),
                 slot.getEndTime(),
                 slot.getApplications().stream()
                         .map(ApplicantInfo::from)
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()),
+                interviewers,
+                assistants
         );
     }
 
