@@ -3,6 +3,7 @@ package KUSITMS.WITHUS.domain.interview.timeslot.entity;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
+import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -46,6 +47,10 @@ public class TimeSlot extends BaseEntity {
     @Builder.Default
     private List<Application> applications = new ArrayList<>();
 
+    @OneToMany(mappedBy = "timeSlot", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<TimeSlotUser> timeSlotUsers = new ArrayList<>();
+
     public void associateInterview(Interview interview) {
         this.interview = interview;
     }
@@ -53,5 +58,10 @@ public class TimeSlot extends BaseEntity {
     public void addApplication(Application application) {
         this.applications.add(application);
         application.assignTimeSlot(this);
+    }
+
+    public void addTimeSlotUser(TimeSlotUser timeSlotUser) {
+        this.timeSlotUsers.add(timeSlotUser);
+        timeSlotUser.assignTimeSlot(this);
     }
 }

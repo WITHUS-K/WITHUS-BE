@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.user.entity;
 
 import KUSITMS.WITHUS.domain.application.entity.Comment;
+import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
 import KUSITMS.WITHUS.domain.user.enumerate.Role;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
@@ -55,6 +56,10 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<TimeSlotUser> timeSlotUsers = new ArrayList<>();
+
     public void changePassword(String newPassword) {
         this.password = newPassword;
     }
@@ -71,5 +76,10 @@ public class User extends BaseEntity {
     public void addComment(Comment comment) {
         this.comments.add(comment);
         comment.associateUser(this);
+    }
+
+    public void addTimeSlotUser(TimeSlotUser timeSlotUser) {
+        this.timeSlotUsers.add(timeSlotUser);
+        timeSlotUser.assignUser(this);
     }
 }

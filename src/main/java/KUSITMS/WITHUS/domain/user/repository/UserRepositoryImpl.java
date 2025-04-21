@@ -6,6 +6,8 @@ import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
@@ -31,5 +33,10 @@ public class UserRepositoryImpl implements UserRepository {
     public User getById(Long id) {
         return userJpaRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXIST));
+    }
+
+    @Override
+    public List<User> findAllById(List<Long> userIds) {
+        return userJpaRepository.findAllById(userIds);
     }
 }
