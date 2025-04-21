@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.application.application.repository;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
+import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -41,5 +42,16 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
     @Override
     public void delete(Long id) {
         applicationJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Application> findPassedByRecruitment(Long recruitmentId) {
+        return queryFactory
+                .selectFrom(application)
+                .where(
+                        application.template.recruitment.id.eq(recruitmentId),
+                        application.status.eq(ApplicationStatus.DOX_PASS)
+                )
+                .fetch();
     }
 }

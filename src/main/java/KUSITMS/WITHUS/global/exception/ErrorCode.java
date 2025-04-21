@@ -73,9 +73,17 @@ public enum ErrorCode {
     TEMPLATE_ALREADY_EXIST("TEMPLATE400", "이미 존재하는 지원서 양식입니다.", HttpStatus.BAD_REQUEST),
     TEMPLATE_NOT_EXIST("TEMPLATE404", "존재하지 않는 지원서 양식입니다.", HttpStatus.NOT_FOUND),
 
-     // Application (지원서)
+    // Application (지원서)
     APPLICATION_ALREADY_EXIST("APPLICATION400", "이미 존재하는 지원서입니다.", HttpStatus.BAD_REQUEST),
     APPLICATION_NOT_EXIST("APPLICATION404", "존재하지 않는 지원서입니다.", HttpStatus.NOT_FOUND),
+
+    // Interview (면접)
+    INTERVIEW_ALREADY_EXIST("INTERVIEW400", "이미 존재하는 면접입니다.", HttpStatus.BAD_REQUEST),
+    INTERVIEW_NOT_EXIST("INTERVIEW404", "존재하지 않는 면접입니다.", HttpStatus.NOT_FOUND),
+
+    // TimeSlot (면접)
+    TIME_SLOT_ALREADY_EXIST("TIME_SLOT400", "이미 존재하는 TimeSlot입니다.", HttpStatus.BAD_REQUEST),
+    TIME_SLOT_NOT_EXIST("TIME_SLOT404", "존재하지 않는 TimeSlot입니다.", HttpStatus.NOT_FOUND),
 
     // Role
     INVALID_ROLE("ROLE400", "잘못된 Role 값입니다.", HttpStatus.BAD_REQUEST),
