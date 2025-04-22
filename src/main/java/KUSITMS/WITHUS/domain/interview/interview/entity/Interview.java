@@ -57,5 +57,6 @@ public class Interview extends BaseEntity {
 
     public void addInterviewerAvailability(InterviewerAvailability availability) {
         this.interviewerAvailabilities.add(availability);
+        availability.associateInterview(this);
     }
 }

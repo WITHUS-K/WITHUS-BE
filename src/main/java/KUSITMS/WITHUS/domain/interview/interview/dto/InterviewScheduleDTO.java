@@ -64,5 +64,22 @@ public record InterviewScheduleDTO(
             );
         }
     }
+
+    @Schema(description = "내 면접 시간 응답 DTO")
+    public record MyInterviewTimeDTO(
+            @Schema(description = "면접 ID") Long interviewId,
+            @Schema(description = "면접 날짜") LocalDate date,
+            @Schema(description = "시작 시간") LocalTime startTime,
+            @Schema(description = "종료 시간") LocalTime endTime
+    ) {
+        public static MyInterviewTimeDTO from(TimeSlot timeSlot) {
+            return new MyInterviewTimeDTO(
+                    timeSlot.getInterview().getId(),
+                    timeSlot.getDate(),
+                    timeSlot.getStartTime(),
+                    timeSlot.getEndTime()
+            );
+        }
+    }
 }
 

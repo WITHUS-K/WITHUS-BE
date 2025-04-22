@@ -38,5 +38,9 @@ public class InterviewerAvailability {
                 .availableTime(time)
                 .build();
     }
+
+    public void associateInterview(Interview interview) {
+        this.interview = interview;
+    }
 }
 

@@ -3,6 +3,8 @@ package KUSITMS.WITHUS.domain.interview.interview.controller;
 import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewScheduleDTO;
 import KUSITMS.WITHUS.domain.interview.interview.service.InterviewSchedulerService;
 import KUSITMS.WITHUS.domain.interview.interview.service.InterviewService;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,5 +45,14 @@ public class InterviewController {
     @Operation(summary = "면접 배정 결과 조회", description = "해당 인터뷰 ID에 배정된 타임슬롯과 지원자 목록을 조회합니다.")
     public SuccessResponse<List<InterviewScheduleDTO>> getSchedule(@PathVariable Long interviewId) {
         return SuccessResponse.ok(schedulerService.getInterviewSchedule(interviewId));
+    }
+
+    @GetMapping("/{interviewId}/my-time-slots")
+    @Operation(summary = "내 면접 배정 결과 조회", description = "해당 인터뷰 ID에 배정된 본인의 정보를 조회합니다.")
+    public SuccessResponse<List<InterviewScheduleDTO.MyInterviewTimeDTO>> getSchedule(
+            @PathVariable Long interviewId,
+            @CurrentUser User user
+    ) {
+        return SuccessResponse.ok(schedulerService.getMyInterviewTimes(interviewId, user));
     }
 }

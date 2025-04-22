@@ -51,7 +51,11 @@ public class InterviewerAvailabilityServiceImpl implements InterviewerAvailabili
         }
 
         List<InterviewerAvailability> availabilities = times.stream()
-                .map(time -> InterviewerAvailability.of(interview, user, time))
+                .map(time -> {
+                    InterviewerAvailability availability = InterviewerAvailability.of(interview, user, time);
+                    interview.addInterviewerAvailability(availability);
+                    return availability;
+                })
                 .toList();
 
         return availabilityRepository.saveAll(availabilities);

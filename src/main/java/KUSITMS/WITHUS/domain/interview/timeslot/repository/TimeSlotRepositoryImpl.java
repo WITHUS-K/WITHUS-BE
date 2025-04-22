@@ -3,6 +3,7 @@ package KUSITMS.WITHUS.domain.interview.timeslot.repository;
 import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import com.querydsl.core.BooleanBuilder;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static KUSITMS.WITHUS.domain.interview.timeslot.entity.QTimeSlot.timeSlot;
+import static KUSITMS.WITHUS.domain.interview.timeslotUser.entity.QTimeSlotUser.timeSlotUser;
 
 @Service
 @RequiredArgsConstructor
@@ -73,6 +75,19 @@ public class TimeSlotRepositoryImpl implements TimeSlotRepository {
         return queryFactory
                 .selectFrom(timeSlot)
                 .where(timeSlot.interview.eq(interview))
+                .orderBy(timeSlot.date.asc(), timeSlot.startTime.asc())
+                .fetch();
+    }
+
+    @Override
+    public List<TimeSlot> findAllByUserInvolved(Long interviewId, User user) {
+        return queryFactory
+                .selectFrom(timeSlot)
+                .join(timeSlot.timeSlotUsers, timeSlotUser).fetchJoin()
+                .where(
+                        timeSlot.interview.id.eq(interviewId),
+                        timeSlotUser.user.eq(user)
+                )
                 .orderBy(timeSlot.date.asc(), timeSlot.startTime.asc())
                 .fetch();
     }

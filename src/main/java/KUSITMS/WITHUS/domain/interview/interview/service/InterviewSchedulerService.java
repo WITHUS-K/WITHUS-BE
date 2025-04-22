@@ -10,6 +10,7 @@ import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.interview.repository.InterviewRepository;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.interview.timeslot.repository.TimeSlotRepository;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -166,6 +167,22 @@ public class InterviewSchedulerService {
                 .map(InterviewScheduleDTO::from)
                 .toList();
     }
+
+    /**
+     * 내 면접 시간 조회 (배정된 타임 슬롯 조회)
+     * @param interviewId 조회할 면접 ID
+     * @param user 현재 로그인 유저
+     * @return 조회된 타임 슬롯 반환
+     */
+    public List<InterviewScheduleDTO.MyInterviewTimeDTO> getMyInterviewTimes(Long interviewId, User user) {
+        interviewRepository.getById(interviewId);
+
+        List<TimeSlot> slots = timeSlotRepository.findAllByUserInvolved(interviewId, user);
+        return slots.stream()
+                .map(InterviewScheduleDTO.MyInterviewTimeDTO::from)
+                .toList();
+    }
+
 
     /**
      * 면접 구성 설정
