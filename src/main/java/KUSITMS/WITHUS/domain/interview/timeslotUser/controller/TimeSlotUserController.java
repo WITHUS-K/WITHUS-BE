@@ -1,6 +1,8 @@
 package KUSITMS.WITHUS.domain.interview.timeslotUser.controller;
 
 import KUSITMS.WITHUS.domain.interview.timeslotUser.dto.TimeSlotUserRequestDTO;
+import KUSITMS.WITHUS.domain.interview.timeslotUser.dto.TimeSlotUserResponseDTO;
+import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.service.TimeSlotUserService;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,6 +10,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/timeslots")
@@ -26,4 +30,17 @@ public class TimeSlotUserController {
         timeSlotUserService.addUsersToTimeSlot(timeSlotId, request.userIds(), request.role());
         return SuccessResponse.ok("타임슬롯에 사용자가 추가되었습니다.");
     }
+
+    @GetMapping("/{timeSlotId}/users")
+    @Operation(summary = "타임슬롯 사용자 조회", description = "특정 타임슬롯에 배정된 사용자 목록을 조회합니다.")
+    public SuccessResponse<List<TimeSlotUserResponseDTO>> getUsersByTimeSlot(
+            @PathVariable Long timeSlotId
+    ) {
+        List<TimeSlotUser> users = timeSlotUserService.getUsersByTimeSlot(timeSlotId);
+        List<TimeSlotUserResponseDTO> response = users.stream()
+                .map(TimeSlotUserResponseDTO::from)
+                .toList();
+        return SuccessResponse.ok(response);
+    }
+
 }

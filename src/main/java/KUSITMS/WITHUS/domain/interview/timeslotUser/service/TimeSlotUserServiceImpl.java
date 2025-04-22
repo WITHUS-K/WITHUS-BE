@@ -4,6 +4,7 @@ import KUSITMS.WITHUS.domain.interview.enumerate.InterviewRole;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.interview.timeslot.repository.TimeSlotRepository;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
+import KUSITMS.WITHUS.domain.interview.timeslotUser.repository.TimeSlotUserRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class TimeSlotUserServiceImpl implements TimeSlotUserService {
 
     private final TimeSlotRepository timeSlotRepository;
     private final UserRepository userRepository;
+    private final TimeSlotUserRepository timeSlotUserRepository;
 
     @Override
     @Transactional
@@ -39,4 +41,8 @@ public class TimeSlotUserServiceImpl implements TimeSlotUserService {
         }
     }
 
+    @Override
+    public List<TimeSlotUser> getUsersByTimeSlot(Long timeSlotId) {
+        return timeSlotUserRepository.findByTimeSlotId(timeSlotId);
+    }
 }
