@@ -23,8 +23,8 @@ public class InterviewController {
 
     @PostMapping
     @Operation(summary = "면접 생성", description = "면접 객체를 생성하고 ID를 반환합니다.")
-    public SuccessResponse<Long> createInterview() {
-        Long interviewId = interviewService.create();
+    public SuccessResponse<Long> createInterview(@RequestParam Long recruitmentId) {
+        Long interviewId = interviewService.create(recruitmentId);
         return SuccessResponse.ok(interviewId);
     }
 

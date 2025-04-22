@@ -1,10 +1,15 @@
 package KUSITMS.WITHUS.domain.interview.interviewAvailabiliy.service;
 
+import KUSITMS.WITHUS.domain.application.application.entity.Application;
+import KUSITMS.WITHUS.domain.application.template.entity.ApplicationTemplate;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.interview.repository.InterviewRepository;
 import KUSITMS.WITHUS.domain.interview.interviewAvailabiliy.entity.InterviewerAvailability;
 import KUSITMS.WITHUS.domain.interview.interviewAvailabiliy.repository.InterviewerAvailabilityRepository;
+import KUSITMS.WITHUS.domain.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +36,19 @@ public class InterviewerAvailabilityServiceImpl implements InterviewerAvailabili
     @Transactional
     public List<InterviewerAvailability> registerAvailability(Long interviewId, User user, List<LocalDateTime> times) {
         Interview interview = interviewRepository.getById(interviewId);
+
+        ApplicationTemplate template = interview.getApplications().stream()
+                .findFirst()
+                .map(Application::getTemplate)
+                .orElseThrow(() -> new CustomException(ErrorCode.TEMPLATE_NOT_EXIST));
+        Recruitment recruitment = template.getRecruitment();
+
+        boolean isManager = recruitment.getOrganization().getUserOrganizations().stream()
+                .anyMatch(uo -> uo.getUser().getId().equals(user.getId()));
+
+        if (!isManager) {
+            throw new CustomException(ErrorCode.USER_NO_PERMISSION);
+        }
 
         List<InterviewerAvailability> availabilities = times.stream()
                 .map(time -> InterviewerAvailability.of(interview, user, time))
