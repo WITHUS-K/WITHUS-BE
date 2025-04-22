@@ -46,6 +46,9 @@ public class UserServiceImpl implements UserService {
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(password))
                 .role(role)
+                .name(request.name())
+                .gender(request.gender())
+                .phoneNumber(request.phoneNumber())
                 .build();
 
         userRepository.save(data);
