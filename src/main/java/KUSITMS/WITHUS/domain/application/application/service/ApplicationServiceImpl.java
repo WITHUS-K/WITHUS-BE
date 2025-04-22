@@ -37,7 +37,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     public ApplicationResponseDTO.Detail create(ApplicationRequestDTO.Create request) {
         ApplicationTemplate template = templateRepository.getById(request.templateId());
         Position position = Optional.ofNullable(request.positionId())
-                .map(positionRepository::getById)
+                .flatMap(positionRepository::findById)
                 .orElse(null);
 
         Application application = Application.create(

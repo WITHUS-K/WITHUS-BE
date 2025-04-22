@@ -55,11 +55,12 @@ public record InterviewScheduleDTO(
             @Schema(description = "파트") String positionName
     ) {
         public static ApplicantInfo from(Application app) {
+            String positionName = app.getPosition() != null ? app.getPosition().getName() : null;
             return new ApplicantInfo(
                     app.getId(),
                     app.getName(),
                     app.getEmail(),
-                    app.getPosition().getName()
+                    positionName
             );
         }
     }
