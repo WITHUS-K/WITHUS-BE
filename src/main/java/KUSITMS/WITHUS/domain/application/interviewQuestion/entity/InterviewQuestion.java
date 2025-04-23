@@ -1,6 +1,6 @@
-package KUSITMS.WITHUS.domain.interview.entity;
+package KUSITMS.WITHUS.domain.application.interviewQuestion.entity;
 
-import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
+import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;
@@ -24,14 +24,14 @@ public class InterviewQuestion extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "INTERVIEW_ID", nullable = false)
-    private Interview interview;
+    private Application application;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 
-    public void associateInterview(Interview interview) {
-        this.interview = interview;
+    public void associateApplication(Application application) {
+        this.application = application;
     }
 
     public void associateUser(User user) {

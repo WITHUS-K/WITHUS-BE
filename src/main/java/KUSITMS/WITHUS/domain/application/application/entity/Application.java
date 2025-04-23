@@ -5,6 +5,7 @@ import KUSITMS.WITHUS.domain.application.entity.Comment;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.application.template.entity.ApplicationTemplate;
+import KUSITMS.WITHUS.domain.application.interviewQuestion.entity.InterviewQuestion;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
@@ -80,6 +81,10 @@ public class Application extends BaseEntity {
     @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ApplicantAvailability> availabilities = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<InterviewQuestion> interviewQuestions = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TIME_SLOT_ID")
     private TimeSlot timeSlot;
@@ -114,6 +119,11 @@ public class Application extends BaseEntity {
 
     public void associateInterview(Interview interview) {
         this.interview = interview;
+    }
+
+    public void addInterviewQuestion(InterviewQuestion question) {
+        this.interviewQuestions.add(question);
+        question.associateApplication(this);
     }
 
     public void assignTimeSlot(TimeSlot timeSlot) {
