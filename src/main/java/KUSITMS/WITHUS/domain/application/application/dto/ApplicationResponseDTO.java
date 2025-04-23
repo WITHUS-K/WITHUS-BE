@@ -3,6 +3,7 @@ package KUSITMS.WITHUS.domain.application.application.dto;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
+import KUSITMS.WITHUS.domain.application.interviewQuestion.dto.InterviewQuestionResponseDTO;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -25,11 +26,16 @@ public class ApplicationResponseDTO {
             @Schema(description = "생년월일") LocalDate birthDate,
             @Schema(description = "이미지 URL") String imageUrl,
             @Schema(description = "상태") ApplicationStatus status,
-            @Schema(description = "면접 가능 시간") List<LocalDateTime> availableTimes
+            @Schema(description = "면접 가능 시간") List<LocalDateTime> availableTimes,
+            @Schema(description = "면접 질문 목록") List<InterviewQuestionResponseDTO.Detail> interviewQuestions
             ) {
         public static Detail from(Application application, List<ApplicantAvailability> availabilityList) {
             List<LocalDateTime> times = availabilityList.stream()
                     .map(ApplicantAvailability::getAvailableTime)
+                    .toList();
+
+            List<InterviewQuestionResponseDTO.Detail> questions = application.getInterviewQuestions().stream()
+                    .map(InterviewQuestionResponseDTO.Detail::from)
                     .toList();
 
             return new Detail(
@@ -43,7 +49,8 @@ public class ApplicationResponseDTO {
                     application.getBirthDate(),
                     application.getImageUrl(),
                     application.getStatus(),
-                    times
+                    times,
+                    questions
             );
         }
     }

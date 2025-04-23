@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.application.interviewQuestion.dto;
 
 import KUSITMS.WITHUS.domain.application.interviewQuestion.entity.InterviewQuestion;
+import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "면접질문 관련 응답 DTO")
@@ -21,12 +22,14 @@ public class InterviewQuestionResponseDTO {
     @Schema(description = "면접질문 조회 응답 DTO")
     public record Detail(
             @Schema(description = "면접질문 ID") Long id,
-            @Schema(description = "내용") String content
-    ) {
+            @Schema(description = "내용") String content,
+            @Schema(description = "질문자 정보") UserResponseDTO.Summary user
+            ) {
         public static Detail from(InterviewQuestion interviewQuestion) {
             return new Detail(
                     interviewQuestion.getId(),
-                    interviewQuestion.getContent()
+                    interviewQuestion.getContent(),
+                    UserResponseDTO.Summary.from(interviewQuestion.getUser())
             );
         }
     }
