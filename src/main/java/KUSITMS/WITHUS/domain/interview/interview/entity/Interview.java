@@ -1,7 +1,6 @@
 package KUSITMS.WITHUS.domain.interview.interview.entity;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
-import KUSITMS.WITHUS.domain.application.interviewQuestion.entity.InterviewQuestion;
 import KUSITMS.WITHUS.domain.interview.interviewAvailabiliy.entity.InterviewerAvailability;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.global.common.BaseEntity;
@@ -27,10 +26,6 @@ public class Interview extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "interview", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TimeSlot> timeSlots = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "interview", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<InterviewQuestion> questions = new ArrayList<>();
 
     @OneToMany(mappedBy = "interview", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
