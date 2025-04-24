@@ -34,4 +34,12 @@ public class Evaluation extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CRITERIA_ID", nullable = false)
     private EvaluationCriteria criteria;
+
+    public void associateEvaluationCriteria(EvaluationCriteria evaluationCriteria) {
+        this.criteria = evaluationCriteria;
+    }
+
+    public void associateApplication(Application application) {
+        this.application = application;
+    }
 }

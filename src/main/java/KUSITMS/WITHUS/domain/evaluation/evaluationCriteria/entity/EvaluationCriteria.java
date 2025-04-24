@@ -40,6 +40,7 @@ public class EvaluationCriteria extends BaseEntity {
 
     public void addEvaluation(Evaluation evaluation) {
         this.evaluations.add(evaluation);
+        evaluation.associateEvaluationCriteria(this);
     }
 
     public void associateRecruitment(Recruitment recruitment) {
