@@ -88,6 +88,14 @@ public enum ErrorCode {
     TIME_SLOT_ALREADY_EXIST("TIME_SLOT400", "이미 존재하는 TimeSlot입니다.", HttpStatus.BAD_REQUEST),
     TIME_SLOT_NOT_EXIST("TIME_SLOT404", "존재하지 않는 TimeSlot입니다.", HttpStatus.NOT_FOUND),
 
+    // EvaluationCriteria (평가 기준)
+    EVALUATION_CRITERIA_ALREADY_EXIST("EVALUATION_CRITERIA400", "이미 존재하는 평가 기준입니다.", HttpStatus.BAD_REQUEST),
+    EVALUATION_CRITERIA_NOT_EXIST("EVALUATION_CRITERIA404", "존재하지 않는 평가 기준입니다.", HttpStatus.NOT_FOUND),
+
+    // Evaluation (평가)
+    EVALUATION_ALREADY_EXIST("EVALUATION400", "이미 존재하는 평가입니다.", HttpStatus.BAD_REQUEST),
+    EVALUATION_NOT_EXIST("EVALUATION404", "존재하지 않는 평가입니다.", HttpStatus.NOT_FOUND),
+
     // Role
     INVALID_ROLE("ROLE400", "잘못된 Role 값입니다.", HttpStatus.BAD_REQUEST),
 
