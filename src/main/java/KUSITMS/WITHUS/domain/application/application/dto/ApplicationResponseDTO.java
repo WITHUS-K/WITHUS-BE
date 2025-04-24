@@ -2,6 +2,8 @@ package KUSITMS.WITHUS.domain.application.application.dto;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
+import KUSITMS.WITHUS.domain.application.comment.dto.CommentResponseDTO;
+import KUSITMS.WITHUS.domain.application.comment.enumerate.CommentType;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.application.interviewQuestion.dto.InterviewQuestionResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.dto.EvaluationResponseDTO;
@@ -30,8 +32,10 @@ public class ApplicationResponseDTO {
             @Schema(description = "상태") ApplicationStatus status,
             @Schema(description = "면접 가능 시간") List<LocalDateTime> availableTimes,
             @Schema(description = "면접 질문 목록") List<InterviewQuestionResponseDTO.Detail> interviewQuestions,
-            @Schema(description = "면접 평가 목록") List<EvaluationResponseDTO.Detail> evaluations
-            ) {
+            @Schema(description = "면접 평가 목록") List<EvaluationResponseDTO.Detail> evaluations,
+            @Schema(description = "서류 코맨트 목록") List<CommentResponseDTO.Detail> documentComments,
+            @Schema(description = "면접 코맨트 목록") List<CommentResponseDTO.Detail> interviewComments
+    ) {
         public static Detail from(Application application, List<ApplicantAvailability> availabilityList, List<Evaluation> evaluationList) {
             List<LocalDateTime> times = availabilityList.stream()
                     .map(ApplicantAvailability::getAvailableTime)
@@ -43,6 +47,16 @@ public class ApplicationResponseDTO {
 
             List<EvaluationResponseDTO.Detail> evaluations = evaluationList.stream()
                     .map(EvaluationResponseDTO.Detail::from)
+                    .toList();
+
+            List<KUSITMS.WITHUS.domain.application.comment.dto.CommentResponseDTO.Detail> documentComments = application.getComments().stream()
+                    .filter(c -> c.getType() == CommentType.DOCUMENT)
+                    .map(CommentResponseDTO.Detail::from)
+                    .toList();
+
+            List<CommentResponseDTO.Detail> interviewComments = application.getComments().stream()
+                    .filter(c -> c.getType() == CommentType.INTERVIEW)
+                    .map(CommentResponseDTO.Detail::from)
                     .toList();
 
             return new Detail(
@@ -58,7 +72,9 @@ public class ApplicationResponseDTO {
                     application.getStatus(),
                     times,
                     questions,
-                    evaluations
+                    evaluations,
+                    documentComments,
+                    interviewComments
             );
         }
     }
