@@ -1,6 +1,6 @@
 package KUSITMS.WITHUS.domain.user.user.entity;
 
-import KUSITMS.WITHUS.domain.application.entity.Comment;
+import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;

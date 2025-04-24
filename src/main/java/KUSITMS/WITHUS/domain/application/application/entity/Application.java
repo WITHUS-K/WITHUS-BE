@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.domain.application.application.entity;
 
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
-import KUSITMS.WITHUS.domain.application.entity.Comment;
+import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.application.template.entity.ApplicationTemplate;

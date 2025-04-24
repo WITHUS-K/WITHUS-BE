@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.domain.application.entity;
+package KUSITMS.WITHUS.domain.application.comment.entity;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
