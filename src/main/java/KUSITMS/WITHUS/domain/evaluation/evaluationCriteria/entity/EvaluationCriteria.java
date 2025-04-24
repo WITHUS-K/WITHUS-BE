@@ -1,5 +1,7 @@
-package KUSITMS.WITHUS.domain.evaluation.entity;
+package KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity;
 
+import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;
@@ -23,6 +25,10 @@ public class EvaluationCriteria extends BaseEntity {
 
     @Column(name = "CONTENT", nullable = false)
     private String content;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "EVALUATION_TYPE", nullable = false)
+    private EvaluationType evaluationType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RECRUITMENT_ID", nullable = false)
