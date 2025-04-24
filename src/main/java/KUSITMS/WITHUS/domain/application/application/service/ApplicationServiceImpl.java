@@ -10,6 +10,8 @@ import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.application.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.application.template.entity.ApplicationTemplate;
 import KUSITMS.WITHUS.domain.application.template.repository.ApplicationTemplateRepository;
+import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
+import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicantAvailabilityRepository applicantAvailabilityRepository;
     private final ApplicationTemplateRepository templateRepository;
     private final PositionRepository positionRepository;
+    private final EvaluationRepository evaluationRepository;
 
     /**
      * 지원서 생성
@@ -34,7 +37,7 @@ public class ApplicationServiceImpl implements ApplicationService {
      */
     @Override
     @Transactional
-    public ApplicationResponseDTO.Detail create(ApplicationRequestDTO.Create request) {
+    public ApplicationResponseDTO.Summary create(ApplicationRequestDTO.Create request) {
         ApplicationTemplate template = templateRepository.getById(request.templateId());
         Position position = Optional.ofNullable(request.positionId())
                 .flatMap(positionRepository::findById)
@@ -61,7 +64,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         applicantAvailabilityRepository.saveAll(availabilities);
 
-        return ApplicationResponseDTO.Detail.from(savedApplication, availabilities);
+        return ApplicationResponseDTO.Summary.from(savedApplication);
     }
 
     /**
@@ -84,8 +87,9 @@ public class ApplicationServiceImpl implements ApplicationService {
     public ApplicationResponseDTO.Detail getById(Long id) {
         Application application = applicationRepository.getById(id);
         List<ApplicantAvailability> availabilityList = applicantAvailabilityRepository.findByApplicationId(id);
+        List<Evaluation> evaluationList = evaluationRepository.findEvaluationsForApplication(id);
 
-        return ApplicationResponseDTO.Detail.from(application, availabilityList);
+        return ApplicationResponseDTO.Detail.from(application, availabilityList, evaluationList);
     }
 
     /**

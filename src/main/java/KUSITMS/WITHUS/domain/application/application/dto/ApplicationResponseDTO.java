@@ -4,6 +4,8 @@ import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.application.interviewQuestion.dto.InterviewQuestionResponseDTO;
+import KUSITMS.WITHUS.domain.evaluation.evaluation.dto.EvaluationResponseDTO;
+import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -27,15 +29,20 @@ public class ApplicationResponseDTO {
             @Schema(description = "이미지 URL") String imageUrl,
             @Schema(description = "상태") ApplicationStatus status,
             @Schema(description = "면접 가능 시간") List<LocalDateTime> availableTimes,
-            @Schema(description = "면접 질문 목록") List<InterviewQuestionResponseDTO.Detail> interviewQuestions
+            @Schema(description = "면접 질문 목록") List<InterviewQuestionResponseDTO.Detail> interviewQuestions,
+            @Schema(description = "면접 평가 목록") List<EvaluationResponseDTO.Detail> evaluations
             ) {
-        public static Detail from(Application application, List<ApplicantAvailability> availabilityList) {
+        public static Detail from(Application application, List<ApplicantAvailability> availabilityList, List<Evaluation> evaluationList) {
             List<LocalDateTime> times = availabilityList.stream()
                     .map(ApplicantAvailability::getAvailableTime)
                     .toList();
 
             List<InterviewQuestionResponseDTO.Detail> questions = application.getInterviewQuestions().stream()
                     .map(InterviewQuestionResponseDTO.Detail::from)
+                    .toList();
+
+            List<EvaluationResponseDTO.Detail> evaluations = evaluationList.stream()
+                    .map(EvaluationResponseDTO.Detail::from)
                     .toList();
 
             return new Detail(
@@ -50,7 +57,8 @@ public class ApplicationResponseDTO {
                     application.getImageUrl(),
                     application.getStatus(),
                     times,
-                    questions
+                    questions,
+                    evaluations
             );
         }
     }

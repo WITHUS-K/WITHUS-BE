@@ -27,7 +27,7 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
     }
 
     @Override
-    public List<Evaluation> findAllByApplicationIdWithCriteriaAndUser(Long applicationId) {
+    public List<Evaluation> findEvaluationsForApplication(Long applicationId) {
         return queryFactory
                 .selectFrom(evaluation)
                 .join(evaluation.criteria).fetchJoin()

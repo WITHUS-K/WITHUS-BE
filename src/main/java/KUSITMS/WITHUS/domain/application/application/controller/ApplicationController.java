@@ -22,7 +22,7 @@ public class ApplicationController {
 
     @PostMapping
     @Operation(summary = "지원서 생성", description = "사용자로부터 받은 정보를 바탕으로 지원서를 생성합니다.")
-    public SuccessResponse<ApplicationResponseDTO.Detail> create(
+    public SuccessResponse<ApplicationResponseDTO.Summary> create(
             @Valid @RequestBody ApplicationRequestDTO.Create request
     ) {
         return SuccessResponse.ok(applicationService.create(request));
@@ -30,10 +30,10 @@ public class ApplicationController {
 
     @PostMapping("/bulk")
     @Operation(summary = "지원서 다건 생성", description = "여러 지원서 데이터를 한 번에 받아 모두 생성합니다.")
-    public SuccessResponse<List<ApplicationResponseDTO.Detail>> createBulk(
+    public SuccessResponse<List<ApplicationResponseDTO.Summary>> createBulk(
             @Valid @RequestBody List<ApplicationRequestDTO.Create> requests
     ) {
-        List<ApplicationResponseDTO.Detail> responses = requests.stream()
+        List<ApplicationResponseDTO.Summary> responses = requests.stream()
                 .map(applicationService::create)
                 .toList();
 
