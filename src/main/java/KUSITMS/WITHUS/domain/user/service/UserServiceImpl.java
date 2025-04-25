@@ -4,6 +4,7 @@ import KUSITMS.WITHUS.domain.user.dto.UserRequestDTO;
 import KUSITMS.WITHUS.domain.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.entity.User;
 import KUSITMS.WITHUS.domain.user.repository.UserRepository;
+import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,33 @@ public class UserServiceImpl implements UserService {
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(password))
                 .role(role)
+                .build();
+
+        userRepository.save(data);
+    }
+
+    @Transactional
+    public void adminJoinProcess(UserRequestDTO.AdminJoin request) {
+
+        String name = request.name();
+        String organizationName = request.organizationName();
+        String email = request.email();
+        String password = request.password();
+        String phoneNumber = request.phoneNumber();
+
+        // 이미 존재하는 사용자인지 확인
+        Boolean isExist = userRepository.existsByEmail(email);
+        if (isExist) {
+            throw new CustomException(ErrorCode.USER_ALREADY_EXIST);
+        }
+
+        User data = User.builder()
+                .name(name)
+                .email(email)
+                .password(bCryptPasswordEncoder.encode(password))
+                .phoneNumber(phoneNumber)
+                .role(Role.ADMIN)
+                .gender(Gender.NONE)
                 .build();
 
         userRepository.save(data);

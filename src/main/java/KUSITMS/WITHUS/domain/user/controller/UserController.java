@@ -18,9 +18,18 @@ public class UserController {
 
     private final UserService joinService;
 
-    @PostMapping("/join")
-    @Operation(summary = "회원가입 API")
-    public SuccessResponse<String> joinProcess(UserRequestDTO.Join request) {
+    @PostMapping("/join/admin")
+    @Operation(summary = "관리자 회원가입 API")
+    public SuccessResponse<String> adminJoinProcess(UserRequestDTO.AdminJoin request) {
+
+        joinService.adminJoinProcess(request);
+
+        return SuccessResponse.ok("회원가입이 완료되었습니다.");
+    }
+
+    @PostMapping("/join/user")
+    @Operation(summary = "사용자 회원가입 API")
+    public SuccessResponse<String> userJoinProcess(UserRequestDTO.Join request) {
 
         joinService.joinProcess(request);
 

@@ -2,6 +2,8 @@ package KUSITMS.WITHUS.domain.user.dto;
 
 import KUSITMS.WITHUS.domain.user.enumerate.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 @Schema(description = "회원 관련 요청 DTO")
 public class UserRequestDTO {
@@ -11,5 +13,23 @@ public class UserRequestDTO {
             @Schema(description = "이메일", example = "test@gmail.com") String email,
             @Schema(description = "비밀번호", example = "1234") String password,
             @Schema(description = "권한", example = "USER") Role role
+    ) {}
+
+    @Schema(description = "관리자 회원가입 요청 DTO")
+    public record AdminJoin(
+            @Schema(description = "이름", example = "홍길동")
+            @NotBlank String name,
+
+            @Schema(description = "동아리명", example = "큐시즘")
+            @NotBlank String organizationName,
+
+            @Schema(description = "이메일", example = "admin@example.com")
+            @Email @NotBlank String email,
+
+            @Schema(description = "비밀번호", example = "1234")
+            @NotBlank String password,
+
+            @Schema(description = "휴대폰 번호", example = "01012345678")
+            @NotBlank String phoneNumber
     ) {}
 }
