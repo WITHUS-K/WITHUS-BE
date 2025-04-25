@@ -100,6 +100,11 @@ public enum ErrorCode {
     // Role
     INVALID_ROLE("ROLE400", "잘못된 Role 값입니다.", HttpStatus.BAD_REQUEST),
 
+    // OrganizationRole (조직 역할)
+    ORGANIZATION_ROLE_ALREADY_EXIST("ORGANIZATION_ROLE400", "이미 추가된 역할입니다.", HttpStatus.BAD_REQUEST),
+    DUPLICATE_ORGANIZATION_ROLE_NAME("ORGANIZATION_ROLE400", "이미 존재하는 역할명입니다.", HttpStatus.BAD_REQUEST),
+    ORGANIZATION_ROLE_NOT_EXIST("ORGANIZATION_ROLE404", "등록되지 않은 조직 역할입니다.", HttpStatus.NOT_FOUND),
+
     // EMAIL
     EMAIL_VERIFICATION_EXPIRED("EMAIL_VERIFICATION404", "인증 코드가 만료되었습니다.", HttpStatus.NOT_FOUND),
     EMAIL_VERIFICATION_INVALID("EMAIL_VERIFICATION401", "유효하지 않은 인증 코드입니다.", HttpStatus.UNAUTHORIZED),
