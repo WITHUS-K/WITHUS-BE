@@ -1,6 +1,9 @@
 package KUSITMS.WITHUS.domain.user.service;
 
+import KUSITMS.WITHUS.domain.organization.entity.Organization;
+import KUSITMS.WITHUS.domain.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.user.dto.UserRequestDTO;
+import KUSITMS.WITHUS.domain.user.entity.UserOrganization;
 import KUSITMS.WITHUS.domain.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.entity.User;
 import KUSITMS.WITHUS.domain.user.repository.UserRepository;
@@ -18,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final OrganizationRepository organizationRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
@@ -62,12 +66,17 @@ public class UserServiceImpl implements UserService {
         String phoneNumber = request.phoneNumber();
 
         // 이미 존재하는 사용자인지 확인
-        Boolean isExist = userRepository.existsByEmail(email);
-        if (isExist) {
+        if (userRepository.existsByEmail(email)) {
             throw new CustomException(ErrorCode.USER_ALREADY_EXIST);
         }
 
-        User data = User.builder()
+        // Organization 생성 및 저장
+        Organization organization = organizationRepository.save(
+                Organization.create(organizationName)
+        );
+
+        // User 생성
+        User user = User.builder()
                 .name(name)
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(password))
@@ -76,7 +85,17 @@ public class UserServiceImpl implements UserService {
                 .gender(Gender.NONE)
                 .build();
 
-        userRepository.save(data);
+        // UserOrganization 생성 및 연관관계 설정
+        UserOrganization userOrg = UserOrganization.builder()
+                .user(user)
+                .organization(organization)
+                .build();
+
+        // 연관관계 등록
+        user.addUserOrganization(userOrg);
+        organization.addUserOrganization(userOrg);
+
+        userRepository.save(user);
     }
 
     @Override
