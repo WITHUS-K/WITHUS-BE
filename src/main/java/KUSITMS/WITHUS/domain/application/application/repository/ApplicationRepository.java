@@ -9,4 +9,5 @@ public interface ApplicationRepository {
     Application save(Application application);
     List<Application> findByRecruitmentId(Long recruitmentId);
     void delete(Long id);
+    List<Application> findPassedByRecruitment(Long recruitmentId);
 }

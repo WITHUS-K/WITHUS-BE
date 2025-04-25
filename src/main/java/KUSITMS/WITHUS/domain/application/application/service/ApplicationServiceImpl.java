@@ -4,16 +4,20 @@ import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
+import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
+import KUSITMS.WITHUS.domain.application.availability.repository.ApplicantAvailabilityRepository;
 import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.application.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.application.template.entity.ApplicationTemplate;
 import KUSITMS.WITHUS.domain.application.template.repository.ApplicationTemplateRepository;
-import KUSITMS.WITHUS.domain.user.repository.UserRepository;
+import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
+import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,9 +25,10 @@ import java.util.List;
 public class ApplicationServiceImpl implements ApplicationService {
 
     private final ApplicationRepository applicationRepository;
-    private final UserRepository userRepository;
+    private final ApplicantAvailabilityRepository applicantAvailabilityRepository;
     private final ApplicationTemplateRepository templateRepository;
     private final PositionRepository positionRepository;
+    private final EvaluationRepository evaluationRepository;
 
     /**
      * 지원서 생성
@@ -32,9 +37,11 @@ public class ApplicationServiceImpl implements ApplicationService {
      */
     @Override
     @Transactional
-    public ApplicationResponseDTO.Detail create(ApplicationRequestDTO.Create request) {
+    public ApplicationResponseDTO.Summary create(ApplicationRequestDTO.Create request) {
         ApplicationTemplate template = templateRepository.getById(request.templateId());
-        Position position = positionRepository.getById(request.positionId());
+        Position position = Optional.ofNullable(request.positionId())
+                .flatMap(positionRepository::findById)
+                .orElse(null);
 
         Application application = Application.create(
                 request.name(),
@@ -49,7 +56,15 @@ public class ApplicationServiceImpl implements ApplicationService {
                 position
         );
 
-        return ApplicationResponseDTO.Detail.from(applicationRepository.save(application));
+        Application savedApplication = applicationRepository.save(application);
+
+        List<ApplicantAvailability> availabilities = request.availableTimes().stream()
+                .map(time -> ApplicantAvailability.of(savedApplication, time))
+                .toList();
+
+        applicantAvailabilityRepository.saveAll(availabilities);
+
+        return ApplicationResponseDTO.Summary.from(savedApplication);
     }
 
     /**
@@ -71,7 +86,10 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public ApplicationResponseDTO.Detail getById(Long id) {
         Application application = applicationRepository.getById(id);
-        return ApplicationResponseDTO.Detail.from(application);
+        List<ApplicantAvailability> availabilityList = applicantAvailabilityRepository.findByApplicationId(id);
+        List<Evaluation> evaluationList = evaluationRepository.findEvaluationsForApplication(id);
+
+        return ApplicationResponseDTO.Detail.from(application, availabilityList, evaluationList);
     }
 
     /**
@@ -84,5 +102,19 @@ public class ApplicationServiceImpl implements ApplicationService {
         return applicationRepository.findByRecruitmentId(recruitmentId).stream()
                 .map(ApplicationResponseDTO.Summary::from)
                 .toList();
+    }
+
+    /**
+     * 지원서 ID를 리스트로 받아서 일괄적으로 상태를 변경
+     * @param request 일괄 요청 DTO (ID 리스트, 상태값)
+     */
+    @Override
+    @Transactional
+    public void updateStatus(ApplicationRequestDTO.UpdateStatus request) {
+        List<Application> applications = request.applicationIds().stream()
+                .map(applicationRepository::getById)
+                .toList();
+
+        applications.forEach(app -> app.updateStatus(request.status()));
     }
 }

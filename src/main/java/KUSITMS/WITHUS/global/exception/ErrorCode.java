@@ -57,6 +57,9 @@ public enum ErrorCode {
     USER_NO_PERMISSION("USER403", "권한이 없습니다.", HttpStatus.FORBIDDEN),
     USER_FORBIDDEN("USER403", "유저의 권한이 부족합니다.", HttpStatus.FORBIDDEN),
 
+    // UserOrganization
+    DUPLICATE_USER_ORGANIZATION("USER_ORGANIZATION400", "이미 조직에 가입된 사용자입니다.", HttpStatus.BAD_REQUEST),
+
     // Organization (조직)
     ORGANIZATION_ALREADY_EXIST("ORGANIZATION400", "이미 존재하는 조직입니다.", HttpStatus.BAD_REQUEST),
     ORGANIZATION_NOT_EXIST("ORGANIZATION404", "존재하지 않는 조직입니다.", HttpStatus.NOT_FOUND),
@@ -73,9 +76,25 @@ public enum ErrorCode {
     TEMPLATE_ALREADY_EXIST("TEMPLATE400", "이미 존재하는 지원서 양식입니다.", HttpStatus.BAD_REQUEST),
     TEMPLATE_NOT_EXIST("TEMPLATE404", "존재하지 않는 지원서 양식입니다.", HttpStatus.NOT_FOUND),
 
-     // Application (지원서)
+    // Application (지원서)
     APPLICATION_ALREADY_EXIST("APPLICATION400", "이미 존재하는 지원서입니다.", HttpStatus.BAD_REQUEST),
     APPLICATION_NOT_EXIST("APPLICATION404", "존재하지 않는 지원서입니다.", HttpStatus.NOT_FOUND),
+
+    // Interview (면접)
+    INTERVIEW_ALREADY_EXIST("INTERVIEW400", "이미 존재하는 면접입니다.", HttpStatus.BAD_REQUEST),
+    INTERVIEW_NOT_EXIST("INTERVIEW404", "존재하지 않는 면접입니다.", HttpStatus.NOT_FOUND),
+
+    // TimeSlot (면접)
+    TIME_SLOT_ALREADY_EXIST("TIME_SLOT400", "이미 존재하는 TimeSlot입니다.", HttpStatus.BAD_REQUEST),
+    TIME_SLOT_NOT_EXIST("TIME_SLOT404", "존재하지 않는 TimeSlot입니다.", HttpStatus.NOT_FOUND),
+
+    // EvaluationCriteria (평가 기준)
+    EVALUATION_CRITERIA_ALREADY_EXIST("EVALUATION_CRITERIA400", "이미 존재하는 평가 기준입니다.", HttpStatus.BAD_REQUEST),
+    EVALUATION_CRITERIA_NOT_EXIST("EVALUATION_CRITERIA404", "존재하지 않는 평가 기준입니다.", HttpStatus.NOT_FOUND),
+
+    // Evaluation (평가)
+    EVALUATION_ALREADY_EXIST("EVALUATION400", "이미 존재하는 평가입니다.", HttpStatus.BAD_REQUEST),
+    EVALUATION_NOT_EXIST("EVALUATION404", "존재하지 않는 평가입니다.", HttpStatus.NOT_FOUND),
 
     // Role
     INVALID_ROLE("ROLE400", "잘못된 Role 값입니다.", HttpStatus.BAD_REQUEST),
