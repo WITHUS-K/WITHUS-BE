@@ -10,9 +10,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,8 +23,12 @@ public class UserOrganizationController {
 
     @GetMapping("/{organizationId}/users")
     @Operation(summary = "조직 사용자 목록 조회", description = "조직에 소속된 운영진 목록을 조회합니다.")
-    public SuccessResponse<List<UserResponseDTO.Summary>> getMembers(@PathVariable Long organizationId) {
-        return SuccessResponse.ok(organizationUserService.getAllUsers(organizationId));
+    public SuccessResponse<Page<UserResponseDTO.DetailForOrganization>> getMembers(
+            @PathVariable Long organizationId,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        return SuccessResponse.ok(organizationUserService.getUsers(organizationId, page - 1, size));
     }
 
     @PostMapping("/{organizationId}/users")
