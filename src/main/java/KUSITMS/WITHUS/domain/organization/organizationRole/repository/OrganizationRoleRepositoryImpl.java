@@ -6,6 +6,8 @@ import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
 public class OrganizationRoleRepositoryImpl implements OrganizationRoleRepository {
@@ -25,5 +27,10 @@ public class OrganizationRoleRepositoryImpl implements OrganizationRoleRepositor
     @Override
     public boolean existsByOrganizationIdAndName(Long organizationId, String name) {
         return organizationRoleJpaRepository.existsByOrganizationIdAndName(organizationId, name);
+    }
+
+    @Override
+    public List<OrganizationRole> findAllById(List<Long> roleIds) {
+        return organizationRoleJpaRepository.findAllById(roleIds);
     }
 }

@@ -2,7 +2,9 @@ package KUSITMS.WITHUS.domain.organization.organizationRole.service;
 
 import KUSITMS.WITHUS.domain.organization.organizationRole.dto.OrganizationRoleResponseDTO;
 
+import java.util.List;
+
 public interface OrganizationRoleService {
-    OrganizationRoleResponseDTO.DetailForUser assignRoleToUser(Long organizationId, Long userId, Long roleId);
+    List<OrganizationRoleResponseDTO.DetailForUser> assignRoleToUser(Long organizationId, Long userId, List<Long> roleIds);
     OrganizationRoleResponseDTO.Detail createRole(Long organizationId, String name);
 }

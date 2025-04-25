@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "조직 역할 관리 API")
@@ -20,11 +22,11 @@ public class OrganizationRoleController {
 
     @PostMapping("/{organizationId}/assign-role")
     @Operation(summary = "운영진에게 역할 부여", description = "특정 유저에게 조직 내 역할을 부여합니다.")
-    public SuccessResponse<OrganizationRoleResponseDTO.DetailForUser> assignRoleToUser(
+    public SuccessResponse<List<OrganizationRoleResponseDTO.DetailForUser>> assignRoleToUser(
             @PathVariable Long organizationId,
             @RequestBody @Valid OrganizationRoleRequestDTO.Assign request
     ) {
-        OrganizationRoleResponseDTO.DetailForUser response = organizationRoleService.assignRoleToUser(organizationId, request.userId(), request.roleId());
+        List<OrganizationRoleResponseDTO.DetailForUser> response = organizationRoleService.assignRoleToUser(organizationId, request.userId(), request.roleIds());
         return SuccessResponse.ok(response);
     }
 
