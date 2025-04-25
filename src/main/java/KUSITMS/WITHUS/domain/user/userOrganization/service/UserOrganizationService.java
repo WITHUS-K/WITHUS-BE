@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.domain.user.userOrganization.service;
 
-import KUSITMS.WITHUS.domain.organization.entity.Organization;
-import KUSITMS.WITHUS.domain.organization.repository.OrganizationRepository;
+import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
+import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;

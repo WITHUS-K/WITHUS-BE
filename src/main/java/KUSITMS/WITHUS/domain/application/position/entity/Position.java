@@ -1,6 +1,6 @@
 package KUSITMS.WITHUS.domain.application.position.entity;
 
-import KUSITMS.WITHUS.domain.organization.entity.Organization;
+import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;

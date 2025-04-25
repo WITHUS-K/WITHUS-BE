@@ -1,8 +1,8 @@
-package KUSITMS.WITHUS.domain.organization.controller;
+package KUSITMS.WITHUS.domain.organization.organization.controller;
 
-import KUSITMS.WITHUS.domain.organization.dto.OrganizationRequestDTO;
-import KUSITMS.WITHUS.domain.organization.dto.OrganizationResponseDTO;
-import KUSITMS.WITHUS.domain.organization.service.OrganizationService;
+import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationRequestDTO;
+import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationResponseDTO;
+import KUSITMS.WITHUS.domain.organization.organization.service.OrganizationService;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
