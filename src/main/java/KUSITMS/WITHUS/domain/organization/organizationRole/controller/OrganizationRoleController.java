@@ -39,4 +39,13 @@ public class OrganizationRoleController {
         OrganizationRoleResponseDTO.Detail response = organizationRoleService.createRole(organizationId, request.name());
         return SuccessResponse.ok(response);
     }
+
+    @GetMapping("/{organizationId}/roles")
+    @Operation(summary = "조직 역할 전체 조회", description = "조직의 모든 역할과 역할별 사용자 수를 조회합니다.")
+    public SuccessResponse<OrganizationRoleResponseDTO.DetailForOrganization> getOrganizationRoles(
+            @PathVariable Long organizationId
+    ) {
+        OrganizationRoleResponseDTO.DetailForOrganization response = organizationRoleService.getOrganizationRoles(organizationId);
+        return SuccessResponse.ok(response);
+    }
 }

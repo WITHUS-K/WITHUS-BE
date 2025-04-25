@@ -3,16 +3,21 @@ package KUSITMS.WITHUS.domain.organization.organizationRole.repository;
 import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
+import static KUSITMS.WITHUS.domain.organization.organizationRole.entity.QOrganizationRole.organizationRole;
+import static KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.QUserOrganizationRole.userOrganizationRole;
 
 @Repository
 @RequiredArgsConstructor
 public class OrganizationRoleRepositoryImpl implements OrganizationRoleRepository {
 
     private final OrganizationRoleJpaRepository organizationRoleJpaRepository;
+    private final JPAQueryFactory queryFactory;
 
     @Override
     public OrganizationRole getById(Long id) {
@@ -32,5 +37,15 @@ public class OrganizationRoleRepositoryImpl implements OrganizationRoleRepositor
     @Override
     public List<OrganizationRole> findAllById(List<Long> roleIds) {
         return organizationRoleJpaRepository.findAllById(roleIds);
+    }
+
+    @Override
+    public List<OrganizationRole> findAllByOrganizationIdWithUsers(Long organizationId) {
+        return queryFactory
+                .selectDistinct(organizationRole)
+                .from(organizationRole)
+                .leftJoin(organizationRole.userOrganizationRoles, userOrganizationRole).fetchJoin()
+                .where(organizationRole.organization.id.eq(organizationId))
+                .fetch();
     }
 }
