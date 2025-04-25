@@ -110,6 +110,10 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    public boolean isEmailDuplicated(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
     @Override
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email);

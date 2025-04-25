@@ -7,4 +7,5 @@ public interface UserService {
     User getUserByEmail(String email);
     void adminJoinProcess(UserRequestDTO.AdminJoin request);
     void userJoinProcess(UserRequestDTO.UserJoin request);
+    boolean isEmailDuplicated(String email);
 }
