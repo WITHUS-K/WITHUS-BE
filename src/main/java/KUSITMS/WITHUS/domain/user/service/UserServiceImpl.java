@@ -44,6 +44,9 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(ErrorCode.USER_ALREADY_EXIST);
         }
 
+        // 휴대폰 번호 인증 여부 확인
+        checkPhoneVerifiedBeforeJoin(phoneNumber);
+
         // Organization 생성 및 저장
         Organization organization = organizationRepository.save(
                 Organization.create(organizationName)
