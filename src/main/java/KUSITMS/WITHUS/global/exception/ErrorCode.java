@@ -85,7 +85,11 @@ public enum ErrorCode {
     EMAIL_VERIFICATION_INVALID("EMAIL_VERIFICATION401", "유효하지 않은 인증 코드입니다.", HttpStatus.UNAUTHORIZED),
     EMAIL_SEND_FAIL("EMAIL500", "메일 전송에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     EMAIL_AUTH_FAIL("EMAIL401", "이메일 인증에 실패했습니다.", HttpStatus.UNAUTHORIZED),
-    EMAIL_REQUEST_LIMIT_EXCEEDED("EMAIL429", "5분 후 다시 시도해주세요.", HttpStatus.TOO_MANY_REQUESTS);
+    EMAIL_REQUEST_LIMIT_EXCEEDED("EMAIL429", "5분 후 다시 시도해주세요.", HttpStatus.TOO_MANY_REQUESTS),
+
+    // PHONE (휴대폰 인증)
+    INVALID_PHONE_VERIFICATION_CODE("PHONE401", "인증번호가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    PHONE_NOT_VERIFIED("PHONE403", "휴대폰 인증이 완료되지 않았습니다.", HttpStatus.FORBIDDEN);
 
 
     private final String errorCode;

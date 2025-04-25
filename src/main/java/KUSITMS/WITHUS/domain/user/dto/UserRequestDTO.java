@@ -71,4 +71,22 @@ public class UserRequestDTO {
             @Schema(description = "휴대폰 번호", example = "01012345678")
             @NotBlank String phoneNumber
     ) {}
+
+    @Schema(description = "인증 번호 요청 DTO")
+    public record PhoneRequest(
+            @Schema(description = "휴대폰 번호", example = "01012345678")
+            @NotBlank
+            String phoneNumber
+    ) {}
+
+    @Schema(description = "인증 번호 확인 DTO")
+    public record PhoneConfirmRequest(
+            @Schema(description = "휴대폰 번호", example = "01012345678")
+            @NotBlank
+            String phoneNumber,
+
+            @Schema(description = "인증번호", example = "487593")
+            @NotBlank
+            String code
+    ) {}
 }
