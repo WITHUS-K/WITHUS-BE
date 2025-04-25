@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDate;
 
@@ -30,8 +31,13 @@ public class UserRequestDTO {
             @Schema(description = "이메일", example = "admin@example.com")
             @Email @NotBlank String email,
 
-            @Schema(description = "비밀번호", example = "1234")
-            @NotBlank String password,
+            @Schema(description = "비밀번호", example = "Abc123!@")
+            @NotBlank
+            @Pattern(
+                regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,20}$",
+                message = "비밀번호는 영문, 숫자, 특수문자를 조합하여 8~20자로 입력해야 합니다."
+            )
+            String password,
 
             @Schema(description = "휴대폰 번호", example = "01012345678")
             @NotBlank String phoneNumber
@@ -54,8 +60,13 @@ public class UserRequestDTO {
             @Schema(description = "이메일", example = "admin@example.com")
             @Email @NotBlank String email,
 
-            @Schema(description = "비밀번호", example = "1234")
-            @NotBlank String password,
+            @Schema(description = "비밀번호", example = "Abc123!@")
+            @NotBlank
+            @Pattern(
+                regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,20}$",
+                message = "비밀번호는 영문, 숫자, 특수문자를 조합하여 8~20자로 입력해야 합니다."
+            )
+            String password,
 
             @Schema(description = "휴대폰 번호", example = "01012345678")
             @NotBlank String phoneNumber
