@@ -32,9 +32,10 @@ public class UserController {
 
     @PostMapping("/join/user")
     @Operation(summary = "사용자 회원가입 API")
-    public SuccessResponse<String> userJoinProcess(UserRequestDTO.Join request) {
+    public SuccessResponse<String> userJoinProcess(
+            @RequestBody @Valid UserRequestDTO.UserJoin request) {
 
-        joinService.joinProcess(request);
+        joinService.userJoinProcess(request);
 
         return SuccessResponse.ok("회원가입이 완료되었습니다.");
     }

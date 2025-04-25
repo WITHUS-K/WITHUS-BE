@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDate;
 
 @Service
 @Transactional(readOnly = true)
@@ -23,38 +24,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final OrganizationRepository organizationRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    @Transactional
-    public void joinProcess(UserRequestDTO.Join request) {
-
-        String email = request.email();
-        String password = request.password();
-        Role role = request.role();
-
-        if (email == null || email.trim().isEmpty()) {
-            throw new CustomException(ErrorCode.INVALID_PARAMETER);
-        }
-        if (password == null || password.trim().isEmpty()) {
-            throw new CustomException(ErrorCode.INVALID_PARAMETER);
-        }
-        if (role == null) {
-            throw new CustomException(ErrorCode.INVALID_ROLE);
-        }
-
-        Boolean isExist = userRepository.existsByEmail(email);
-
-        if (isExist) {
-            throw new CustomException(ErrorCode.USER_ALREADY_EXIST);
-        }
-
-        User data = User.builder()
-                .email(email)
-                .password(bCryptPasswordEncoder.encode(password))
-                .role(role)
-                .build();
-
-        userRepository.save(data);
-    }
 
     @Transactional
     public void adminJoinProcess(UserRequestDTO.AdminJoin request) {
@@ -83,6 +52,49 @@ public class UserServiceImpl implements UserService {
                 .phoneNumber(phoneNumber)
                 .role(Role.ADMIN)
                 .gender(Gender.NONE)
+                .build();
+
+        // UserOrganization 생성 및 연관관계 설정
+        UserOrganization userOrg = UserOrganization.builder()
+                .user(user)
+                .organization(organization)
+                .build();
+
+        // 연관관계 등록
+        user.addUserOrganization(userOrg);
+        organization.addUserOrganization(userOrg);
+
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void userJoinProcess(UserRequestDTO.UserJoin request) {
+
+        String name = request.name();
+        LocalDate birthDate = request.birthDate();
+        Gender gender = request.gender();
+        Long organizationId = request.organizationId();
+        String email = request.email();
+        String password = request.password();
+        String phoneNumber = request.phoneNumber();
+
+        // 이미 존재하는 사용자인지 확인
+        if (userRepository.existsByEmail(email)) {
+            throw new CustomException(ErrorCode.USER_ALREADY_EXIST);
+        }
+
+        // 존재하는 조직 Id로 조회
+        Organization organization = organizationRepository.getById(organizationId);
+
+        // User 생성
+        User user = User.builder()
+                .name(name)
+                .birthDate(birthDate)
+                .gender(gender)
+                .email(email)
+                .password(bCryptPasswordEncoder.encode(password))
+                .phoneNumber(phoneNumber)
+                .role(Role.USER)
                 .build();
 
         // UserOrganization 생성 및 연관관계 설정
