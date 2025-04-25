@@ -59,6 +59,7 @@ public enum ErrorCode {
 
     // UserOrganization
     DUPLICATE_USER_ORGANIZATION("USER_ORGANIZATION400", "이미 조직에 가입된 사용자입니다.", HttpStatus.BAD_REQUEST),
+    USER_ORGANIZATION_NOT_FOUND("USER_ORGANIZATION404", "해당 조직에서 사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST),
 
     // Organization (조직)
     ORGANIZATION_ALREADY_EXIST("ORGANIZATION400", "이미 존재하는 조직입니다.", HttpStatus.BAD_REQUEST),

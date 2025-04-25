@@ -41,4 +41,13 @@ public class UserOrganizationController {
         return SuccessResponse.ok(UserOrganizationResponseDTO.Detail.from(userOrganization));
     }
 
+    @DeleteMapping("/{organizationId}/users")
+    @Operation(summary = "조직 사용자 일괄 삭제", description = "조직에서 선택한 사용자들을 일괄 삭제합니다.")
+    public SuccessResponse<String> removeUsersFromOrganization(
+            @PathVariable Long organizationId,
+            @RequestBody @Valid UserOrganizationRequestDTO.DeleteUsers request
+    ) {
+        organizationUserService.removeUsers(organizationId, request.userIds());
+        return SuccessResponse.ok("운영진 삭제에 성공하였습니다.");
+    }
 }

@@ -70,4 +70,20 @@ public class UserOrganizationRepositoryImpl implements UserOrganizationRepositor
 
         return new PageImpl<>(content, pageable, count);
     }
+
+    @Override
+    public List<UserOrganization> findAllByOrganizationIdAndUserIdIn(Long organizationId, List<Long> userIds) {
+        return queryFactory
+                .selectFrom(userOrganization)
+                .where(
+                        userOrganization.organization.id.eq(organizationId),
+                        userOrganization.user.id.in(userIds)
+                )
+                .fetch();
+    }
+
+    @Override
+    public void deleteAllInBatch(List<UserOrganization> userOrganizations) {
+        userOrganizationJpaRepository.deleteAllInBatch(userOrganizations);
+    }
 }
