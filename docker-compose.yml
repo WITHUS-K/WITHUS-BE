@@ -1,0 +1,25 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: withus-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      COOLSMS_API_KEY: ${COOLSMS_API_KEY}
+      COOLSMS_API_SECRET: ${COOLSMS_API_SECRET}
+      COOLSMS_SENDER_NUMBER: ${COOLSMS_SENDER_NUMBER}
+    depends_on:
+      - redis
+
+  redis:
+    image: redis
+    container_name: withus-redis
+    ports:
+      - "6379:6379"
