@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static KUSITMS.WITHUS.domain.application.position.entity.QPosition.position;
 
@@ -20,9 +21,13 @@ public class PositionRepositoryImpl implements PositionRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
+    public Optional<Position> findById(Long id) {
+        return positionJpaRepository.findById(id);
+    }
+
+    @Override
     public Position getById(Long id) {
-        return positionJpaRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.POSITION_NOT_EXIST));
+        return findById(id).orElseThrow(() -> new CustomException(ErrorCode.POSITION_NOT_EXIST));
     }
 
     @Override

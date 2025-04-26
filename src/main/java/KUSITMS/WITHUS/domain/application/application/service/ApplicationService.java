@@ -6,8 +6,9 @@ import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import java.util.List;
 
 public interface ApplicationService {
-    ApplicationResponseDTO.Detail create(ApplicationRequestDTO.Create request);
+    ApplicationResponseDTO.Summary create(ApplicationRequestDTO.Create request);
     void delete(Long id);
     ApplicationResponseDTO.Detail getById(Long id);
     List<ApplicationResponseDTO.Summary> getByRecruitmentId(Long recruitmentId);
+    void updateStatus(ApplicationRequestDTO.UpdateStatus request);
 }

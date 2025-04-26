@@ -1,8 +1,8 @@
 package KUSITMS.WITHUS.global.auth.service;
 
 import KUSITMS.WITHUS.global.auth.dto.CustomUserDetails;
-import KUSITMS.WITHUS.domain.user.entity.User;
-import KUSITMS.WITHUS.domain.user.repository.UserRepository;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

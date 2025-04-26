@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.domain.recruitment.entity;
 
 import KUSITMS.WITHUS.domain.application.template.entity.ApplicationTemplate;
-import KUSITMS.WITHUS.domain.evaluation.entity.EvaluationCriteria;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.organization.entity.Organization;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;
@@ -89,7 +89,7 @@ public class Recruitment extends BaseEntity {
         this.finalResultDate = finalResultDate;
     }
 
-    public void setApplicationTemplate(ApplicationTemplate template) {
+    public void addApplicationTemplate(ApplicationTemplate template) {
         this.applicationTemplate = template;
         template.associateRecruitment(this);
     }
