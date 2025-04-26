@@ -22,7 +22,7 @@ public class CorsConfig {
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
         config.addExposedHeader("Authorization");
-        config.addExposedHeader("refresh-token");
+        config.addExposedHeader("Refresh-Token");
 
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);

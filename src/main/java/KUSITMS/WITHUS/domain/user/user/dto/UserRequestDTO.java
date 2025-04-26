@@ -13,11 +13,10 @@ import java.time.LocalDate;
 @Schema(description = "회원 관련 요청 DTO")
 public class UserRequestDTO {
 
-    @Schema(description = "회원가입 요청 DTO")
-    public record Join (
-            @Schema(description = "이메일", example = "test@gmail.com") String email,
-            @Schema(description = "비밀번호", example = "1234") String password,
-            @Schema(description = "권한", example = "USER") Role role
+    @Schema(description = "로그인 요청 DTO")
+    public record Login (
+            @Schema(description = "이메일", example = "user@example.com") String email,
+            @Schema(description = "비밀번호", example = "Abc123!@") String password
     ) {}
 
     @Schema(description = "관리자 회원가입 요청 DTO")

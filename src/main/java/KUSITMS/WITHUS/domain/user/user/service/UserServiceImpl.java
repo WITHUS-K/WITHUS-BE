@@ -7,12 +7,17 @@ import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
+import KUSITMS.WITHUS.global.auth.dto.CustomUserDetails;
+import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.sms.SmsSender;
+import KUSITMS.WITHUS.global.util.redis.RefreshTokenCacheUtil;
 import KUSITMS.WITHUS.global.util.redis.VerificationCacheUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,9 +36,55 @@ public class UserServiceImpl implements UserService {
     private final VerificationCacheUtil phoneAuthCacheUtil;
     private final SmsSender smsSender;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final JwtUtil jwtUtil;
+    private final RefreshTokenCacheUtil refreshTokenCacheUtil;
 
     /**
-     * 관리자 회원가입 프로세스
+     * 로그아웃
+     * @throws CustomException 인증 정보가 없거나 유효하지 않은 경우 예외를 발생시킵니다.
+     */
+    @Override
+    public void logout() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // 인증 정보가 없거나 인증이 안 된 경우 (토큰이 없을 때 포함)
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        String email = userDetails.getUsername();
+
+        refreshTokenCacheUtil.deleteRefreshToken(email);
+    }
+
+    /**
+     * Refresh Token을 검증하고, 유효한 경우 새로운 Access Token을 발급합니다.
+     * @param refreshToken 클라이언트로부터 전달받은 Refresh Token
+     * @return 새로 발급된 Access Token
+     * @throws CustomException Refresh Token이 만료되었거나 유효하지 않은 경우 예외를 발생시킵니다.
+     */
+    @Override
+    public String reissueAccessToken(String refreshToken) {
+        if (jwtUtil.isExpired(refreshToken)) {
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_INVALID);
+        }
+
+        String email = jwtUtil.getEmail(refreshToken);
+
+        // Redis에 저장된 Refresh Token과 비교
+        String storedRefreshToken = refreshTokenCacheUtil.getRefreshToken(email);
+        if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_INVALID);
+        }
+
+        String role = jwtUtil.getRole(refreshToken);
+
+        return jwtUtil.createAccessToken(email, role);
+    }
+
+    /**
+     * 관리자 회원가입
      * @param request 관리자의 이름, 조직명, 이메일, 비밀번호, 전화번호를 입력받습니다.
      * @throws CustomException 이메일이 이미 존재하거나 전화번호 인증이 완료되지 않은 경우 예외를 발생시킵니다.
      */
@@ -84,7 +135,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 사용자 회원가입 프로세스
+     * 사용자 회원가입
      * @param request 사용자의 이름, 생년월일, 성별, 조직 ID, 이메일, 비밀번호, 전화번호를 입력받습니다.
      * @throws CustomException 이메일이 이미 존재하거나 전화번호 인증이 완료되지 않은 경우 예외를 발생시킵니다.
      */

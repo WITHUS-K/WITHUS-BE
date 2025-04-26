@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,32 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+
+    @PostMapping("/login")
+    @Operation(summary = "로그인 API", description = "이메일과 비밀번호로 로그인 후 JWT 토큰을 헤더에 담아 반환합니다.")
+    public ResponseEntity<Void> login(
+            @RequestBody UserRequestDTO.Login request
+    ) {
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reissue")
+    @Operation(summary = "Access Token 재발급", description = "Refresh Token을 이용해 Access Token을 재발급합니다.")
+    public ResponseEntity<Void> reissue(
+            @RequestHeader("Refresh-Token") String refreshToken
+    ) {
+        String newAccessToken = userService.reissueAccessToken(refreshToken);
+        return ResponseEntity.ok()
+                .header("Authorization", "Bearer " + newAccessToken)
+                .build();
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "로그아웃", description = "사용자의 Refresh Token을 삭제하여 로그아웃합니다.")
+    public ResponseEntity<Void> logout() {
+        userService.logout();
+        return ResponseEntity.ok().build();
+    }
 
     @PostMapping("/join/admin")
     @Operation(summary = "관리자 회원가입 API")
