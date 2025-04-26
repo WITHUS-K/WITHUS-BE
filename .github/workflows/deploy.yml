@@ -47,7 +47,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy on NCP server via SSH
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Pull Docker Image on Server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.NCP_HOST }}
@@ -55,6 +58,23 @@ jobs:
           key: ${{ secrets.NCP_SSH_KEY }}
           script: |
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/withus:latest
+
+      - name: Copy docker-compose.yml to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.NCP_HOST }}
+          username: ${{ secrets.NCP_USER }}
+          key: ${{ secrets.NCP_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "/home/ubuntu/deploy/"
+
+      - name: Run blue-green.sh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.NCP_HOST }}
+          username: ${{ secrets.NCP_USER }}
+          key: ${{ secrets.NCP_SSH_KEY }}
+          script: |
             bash /home/ubuntu/deploy/blue-green.sh \
               "${{ secrets.DB_URL }}" \
               "${{ secrets.DB_USERNAME }}" \
@@ -64,4 +84,3 @@ jobs:
               "${{ secrets.COOLSMS_API_SECRET }}" \
               "${{ secrets.COOLSMS_SENDER_NUMBER }}" \
               "${{ secrets.DOCKERHUB_USERNAME }}/withus:latest"
-      
