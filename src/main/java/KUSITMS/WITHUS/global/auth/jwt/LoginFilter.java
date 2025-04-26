@@ -80,12 +80,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         refreshTokenCacheUtil.saveRefreshToken(email, refreshToken, refreshTokenTTL);
 
         // 응답으로 AccessToken + RefreshToken 내려주기 (JSON Body로)
-        response.setContentType("application/json");
-        response.setCharacterEncoding("utf-8");
-
-        UserResponseDTO.Login tokenResponse = new UserResponseDTO.Login(accessToken, refreshToken);
-        ObjectMapper objectMapper = new ObjectMapper();
-        response.getWriter().write(objectMapper.writeValueAsString(tokenResponse));
+        response.addHeader("Authorization", "Bearer " + accessToken);
+        response.setHeader("Refresh-Token", refreshToken);
 
     }
 
