@@ -11,7 +11,7 @@ import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.sms.SmsSender;
-import KUSITMS.WITHUS.global.util.redis.PhoneAuthCacheUtil;
+import KUSITMS.WITHUS.global.util.redis.VerificationCacheUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final OrganizationRepository organizationRepository;
-    private final PhoneAuthCacheUtil phoneAuthCacheUtil;
+    private final VerificationCacheUtil phoneAuthCacheUtil;
     private final SmsSender smsSender;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
