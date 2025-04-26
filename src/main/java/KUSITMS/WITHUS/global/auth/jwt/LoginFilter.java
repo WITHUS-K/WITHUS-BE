@@ -1,7 +1,9 @@
 package KUSITMS.WITHUS.global.auth.jwt;
 
+import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
 import KUSITMS.WITHUS.global.auth.dto.CustomUserDetails;
 import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,6 +15,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -32,16 +35,24 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        try {
+            // JSON -> Java 객체로 변환
+            ObjectMapper objectMapper = new ObjectMapper();
+            UserRequestDTO.Login loginRequest = objectMapper.readValue(request.getInputStream(), UserRequestDTO.Login.class);
 
-        //클라이언트 요청에서 username, password 추출
-        String username = obtainUsername(request);
-        String password = obtainPassword(request);
+            //클라이언트 요청에서 username, password 추출
+            String email = loginRequest.email();
+            String password = loginRequest.password();
 
-        //스프링 시큐리티에서 username과 password를 검증하기 위해서는 token에 담아야 함
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
+            //스프링 시큐리티에서 username과 password를 검증하기 위해서는 token에 담아야 함
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password);
 
-        //token에 담은 검증을 위한 AuthenticationManager로 전달
-        return authenticationManager.authenticate(authToken);
+            //token에 담은 검증을 위한 AuthenticationManager로 전달
+            return authenticationManager.authenticate(authToken);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     //로그인 성공시 실행하는 메소드 (여기서 JWT를 발급)
