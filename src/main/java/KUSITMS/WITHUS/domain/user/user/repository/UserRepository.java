@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface UserRepository {
     Boolean existsByEmail(String email);
+    Boolean existsByPhoneNumber(String phoneNumber);
     User findByEmail(String email);
     User save(User user);
     User getById(Long id);

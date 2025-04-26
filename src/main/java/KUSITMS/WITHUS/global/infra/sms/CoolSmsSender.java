@@ -32,5 +32,7 @@ public class CoolSmsSender implements SmsSender {
         msg.setText(message);
 
         messageService.sendOne(new SingleMessageSendingRequest(msg));
+
+        System.out.println("📲 SMS 발송: [" + phoneNumber + "] → 메시지: " + message);
     }
 }
