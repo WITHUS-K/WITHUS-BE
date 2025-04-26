@@ -41,11 +41,12 @@ public class OrganizationRoleController {
     }
 
     @GetMapping("/{organizationId}/roles")
-    @Operation(summary = "조직 역할 전체 조회", description = "조직의 모든 역할과 역할별 사용자 수를 조회합니다.")
+    @Operation(summary = "조직 역할 조회 - 검색 포함", description = "조직의 역할과 역할별 사용자 수를 검색하여 조회합니다.")
     public SuccessResponse<OrganizationRoleResponseDTO.DetailForOrganization> getOrganizationRoles(
-            @PathVariable Long organizationId
+            @PathVariable Long organizationId,
+            @RequestParam(value = "keyword", required = false) String keyword
     ) {
-        OrganizationRoleResponseDTO.DetailForOrganization response = organizationRoleService.getOrganizationRoles(organizationId);
+        OrganizationRoleResponseDTO.DetailForOrganization response = organizationRoleService.getOrganizationRoles(organizationId, keyword);
         return SuccessResponse.ok(response);
     }
 }
