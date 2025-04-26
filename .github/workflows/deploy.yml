@@ -83,4 +83,5 @@ jobs:
               "${{ secrets.COOLSMS_API_KEY }}" \
               "${{ secrets.COOLSMS_API_SECRET }}" \
               "${{ secrets.COOLSMS_SENDER_NUMBER }}" \
+              "${{ secrets.DOCKERHUB_USERNAME }}" \
               "${{ secrets.DOCKERHUB_USERNAME }}/withus:latest"
