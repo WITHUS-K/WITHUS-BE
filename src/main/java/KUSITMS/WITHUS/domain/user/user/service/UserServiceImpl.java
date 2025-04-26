@@ -32,6 +32,12 @@ public class UserServiceImpl implements UserService {
     private final SmsSender smsSender;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    /**
+     * 관리자 회원가입 프로세스
+     * @param request 관리자의 이름, 조직명, 이메일, 비밀번호, 전화번호를 입력받습니다.
+     * @throws CustomException 이메일이 이미 존재하거나 전화번호 인증이 완료되지 않은 경우 예외를 발생시킵니다.
+     */
+    @Override
     @Transactional
     public void adminJoinProcess(UserRequestDTO.AdminJoin request) {
 
@@ -77,6 +83,12 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    /**
+     * 사용자 회원가입 프로세스
+     * @param request 사용자의 이름, 생년월일, 성별, 조직 ID, 이메일, 비밀번호, 전화번호를 입력받습니다.
+     * @throws CustomException 이메일이 이미 존재하거나 전화번호 인증이 완료되지 않은 경우 예외를 발생시킵니다.
+     */
+    @Override
     @Transactional
     public void userJoinProcess(UserRequestDTO.UserJoin request) {
 
@@ -123,18 +135,35 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    /**
+     * 이메일 중복 확인
+     * @param email 확인할 이메일 주소
+     * @return 이메일 중복 여부(true/false)
+     */
+    @Override
     public boolean isEmailDuplicated(String email) {
         return userRepository.existsByEmail(email);
     }
 
+    /**
+     * 전화번호 인증 요청
+     * @param phoneNumber 인증 번호를 보낼 전화번호
+     */
+    @Override
     public void requestPhoneVerification(String phoneNumber) {
         String code = generateCode(); // 랜덤 인증번호 생성
         phoneAuthCacheUtil.saveCode(phoneNumber, code, Duration.ofMinutes(3));
 
-        // 실제 SMS 전송 로직 (예: coolSMS, 알리고 등)
         sendSms(phoneNumber, code);
     }
 
+    /**
+     * 전화번호 인증 확인
+     * @param phoneNumber 인증할 전화번호
+     * @param inputCode 사용자가 입력한 인증 코드
+     * @throws CustomException 잘못된 인증 코드인 경우 예외를 발생시킵니다.
+     */
+    @Override
     public void confirmPhoneVerification(String phoneNumber, String inputCode) {
         String savedCode = phoneAuthCacheUtil.getCode(phoneNumber);
 
@@ -145,23 +174,42 @@ public class UserServiceImpl implements UserService {
         phoneAuthCacheUtil.markVerified(phoneNumber, Duration.ofMinutes(5));
     }
 
+    /**
+     * 이메일로 사용자 정보 조회
+     * @param email 검색할 이메일 주소
+     * @return 이메일로 조회된 사용자 정보
+     */
+    @Override
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    /**
+     * 회원가입 전 전화번호 인증 여부 확인
+     * @param phoneNumber 확인할 전화번호
+     * @throws CustomException 전화번호 인증이 완료되지 않은 경우 예외를 발생시킵니다.
+     */
     public void checkPhoneVerifiedBeforeJoin(String phoneNumber) {
         if (!phoneAuthCacheUtil.isVerified(phoneNumber)) {
             throw new CustomException(ErrorCode.PHONE_NOT_VERIFIED);
         }
     }
 
+    /**
+     * 랜덤 인증 코드 생성
+     * @return 6자리 랜덤 인증 코드
+     */
     private String generateCode() {
         return String.valueOf(new Random().nextInt(899999) + 100000); // 6자리 랜덤
     }
 
+    /**
+     * 문자 메시지 전송
+     * @param phoneNumber 메시지를 보낼 전화번호
+     * @param code 인증 코드
+     */
     private void sendSms(String phoneNumber, String code) {
         String message = "[WITHUS] 인증번호 [" + code + "]를 입력해주세요.";
         smsSender.send(phoneNumber, message);
-    }
-
-    @Override
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
     }
 }
