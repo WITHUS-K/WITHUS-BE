@@ -1,8 +1,10 @@
 package KUSITMS.WITHUS.global.auth.jwt;
 
 import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
+import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.global.auth.dto.CustomUserDetails;
 import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
+import KUSITMS.WITHUS.global.util.redis.RefreshTokenCacheUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +18,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -23,9 +26,8 @@ import java.util.Iterator;
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
+    private final RefreshTokenCacheUtil refreshTokenCacheUtil;
     private final JwtUtil jwtUtil;
-
-    private static final long ACCESS_TOKEN_EXPIRE_MS = 1000 * 60 * 60 * 10; // 10시간
 
     @Override
     protected String obtainUsername(HttpServletRequest request) {
@@ -57,7 +59,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     //로그인 성공시 실행하는 메소드 (여기서 JWT를 발급)
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication)  throws IOException {
 
         //UserDetails
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -68,12 +70,23 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
-
         String role = auth.getAuthority();
 
-        String token = jwtUtil.createJwt(email, role, ACCESS_TOKEN_EXPIRE_MS);
+        String accessToken = jwtUtil.createAccessToken(email, role);
+        String refreshToken = jwtUtil.createRefreshToken(email, role);
 
-        response.addHeader("Authorization", "Bearer " + token);
+        // Redis에 Refresh Token 저장
+        Duration refreshTokenTTL = Duration.ofDays(7);
+        refreshTokenCacheUtil.saveRefreshToken(email, refreshToken, refreshTokenTTL);
+
+        // 응답으로 AccessToken + RefreshToken 내려주기 (JSON Body로)
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+
+        UserResponseDTO.Login tokenResponse = new UserResponseDTO.Login(accessToken, refreshToken);
+        ObjectMapper objectMapper = new ObjectMapper();
+        response.getWriter().write(objectMapper.writeValueAsString(tokenResponse));
+
     }
 
     //로그인 실패시 실행하는 메소드
