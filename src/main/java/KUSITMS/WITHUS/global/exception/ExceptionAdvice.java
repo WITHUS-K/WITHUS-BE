@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.global.exception;
 
 import KUSITMS.WITHUS.global.response.ErrorResponse;
 import KUSITMS.WITHUS.global.response.result.ExceptionResult;
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,6 +67,31 @@ public class ExceptionAdvice {
     public ErrorResponse<String> handleHttpMessageParsingExceptions(HttpMessageNotReadableException e) {
         return ErrorResponse.ok(PARAMETER_GRAMMAR_ERROR.getErrorCode(), PARAMETER_GRAMMAR_ERROR.getMessage(), e.getMessage());
     }
+
+    /**
+     * 요청 파라미터(@RequestParam 등) 유효성 검증 실패 예외
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse<List<ExceptionResult.ParameterData>> handleConstraintViolationException(ConstraintViolationException e) {
+        List<ExceptionResult.ParameterData> list = e.getConstraintViolations().stream()
+                .map(violation -> {
+                    String fieldPath = violation.getPropertyPath().toString(); // 예: "checkEmailDuplicate.email"
+                    String field = fieldPath.contains(".") ? fieldPath.substring(fieldPath.lastIndexOf(".") + 1) : fieldPath;
+                    String value = violation.getInvalidValue() == null ? "null" : violation.getInvalidValue().toString();
+                    String reason = violation.getMessage();
+
+                    return ExceptionResult.ParameterData.builder()
+                            .key(field)
+                            .value(value)
+                            .reason(reason)
+                            .build();
+                })
+                .toList();
+
+        return ErrorResponse.ok(PARAMETER_VALIDATION_ERROR.getErrorCode(), PARAMETER_VALIDATION_ERROR.getMessage(), list);
+    }
+
 
     /**
      * 커스텀 예외

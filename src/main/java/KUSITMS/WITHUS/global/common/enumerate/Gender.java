@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum Gender {
 
     MALE("남"),
-    FEMALE("여");
+    FEMALE("여"),
+    NONE("관리자용 기본값");
 
     private final String key;
 }

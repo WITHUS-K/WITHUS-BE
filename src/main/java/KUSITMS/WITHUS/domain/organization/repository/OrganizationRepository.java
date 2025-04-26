@@ -9,4 +9,5 @@ public interface OrganizationRepository {
     List<Organization> findAll();
     Organization save(Organization organization);
     void delete(Long id);
+    List<Organization> findByNameContaining(String keyword);
 }

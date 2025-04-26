@@ -34,4 +34,9 @@ public class OrganizationRepositoryImpl implements OrganizationRepository {
     public void delete(Long id) {
         organizationJpaRepository.deleteById(id);
     }
+
+    @Override
+    public List<Organization> findByNameContaining(String keyword) {
+        return organizationJpaRepository.findByNameContaining(keyword);
+    }
 }

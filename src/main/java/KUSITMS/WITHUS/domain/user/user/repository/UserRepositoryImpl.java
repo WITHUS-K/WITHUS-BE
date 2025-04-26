@@ -20,6 +20,9 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Boolean existsByPhoneNumber(String phoneNumber) { return userJpaRepository.existsByPhoneNumber(phoneNumber); }
+
+    @Override
     public User findByEmail(String email) {
         return userJpaRepository.findByEmail(email);
     }
