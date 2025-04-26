@@ -3,6 +3,7 @@ package KUSITMS.WITHUS.global.config;
 import KUSITMS.WITHUS.global.auth.jwt.JwtFilter;
 import KUSITMS.WITHUS.global.auth.jwt.LoginFilter;
 import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
+import KUSITMS.WITHUS.global.util.redis.RefreshTokenCacheUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +33,7 @@ public class SecurityConfig {
 
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final RefreshTokenCacheUtil refreshTokenCacheUtil;
     //JWTUtil 주입
     private final JwtUtil jwtUtil;
 
@@ -51,7 +53,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil);
+        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), refreshTokenCacheUtil, jwtUtil);
         loginFilter.setFilterProcessesUrl("/api/v1/auth/login");
 
         http

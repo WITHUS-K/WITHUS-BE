@@ -38,6 +38,16 @@ public class JwtUtil {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getExpiration().before(new Date());
     }
 
+    public String createAccessToken(String email, String role) {
+        long accessTokenExpireMs = 1000L * 60 * 10; // 10분
+        return createJwt(email, role, accessTokenExpireMs);
+    }
+
+    public String createRefreshToken(String email, String role) {
+        long refreshTokenExpireMs = 1000L * 60 * 60 * 24 * 7; // 7일
+        return createJwt(email, role, refreshTokenExpireMs);
+    }
+
     public String createJwt(String email, String role, Long expiredMs) {
 
         Claims claims = Jwts.claims();
