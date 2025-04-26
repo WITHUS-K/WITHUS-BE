@@ -1,7 +1,6 @@
 services:
   app:
     image: ${DOCKERHUB_USERNAME}/withus
-    container_name: withus-app
     ports:
       - "8080:8080"
     environment:
