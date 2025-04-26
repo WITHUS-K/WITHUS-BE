@@ -12,5 +12,15 @@ spring:
   jwt:
     secret: ${JWT_SECRET}
 
+  data:
+    redis:
+      host: redis
+      port: 6379
+
 springdoc:
   use-fqn: true
+
+coolsms:
+  api-key: ${COOLSMS_API_KEY}
+  api-secret: ${COOLSMS_API_SECRET}
+  sender-number: ${COOLSMS_SENDER_NUMBER}
