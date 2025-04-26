@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.domain.organization.controller;
 
 import KUSITMS.WITHUS.domain.organization.dto.OrganizationRequestDTO;
 import KUSITMS.WITHUS.domain.organization.dto.OrganizationResponseDTO;
+import KUSITMS.WITHUS.domain.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.service.OrganizationService;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,5 +55,17 @@ public class OrganizationController {
     @Operation(summary = "조직 전체 조회")
     public SuccessResponse<List<OrganizationResponseDTO.Summary>> getAll() {
         return SuccessResponse.ok(organizationService.getAll());
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "동아리 검색 API")
+    public SuccessResponse<List<OrganizationResponseDTO.Search>> searchOrganization(@RequestParam("keyword") String keyword) {
+        List<Organization> organizations = organizationService.search(keyword);
+
+        List<OrganizationResponseDTO.Search> result = organizations.stream()
+                .map(OrganizationResponseDTO.Search::from)
+                .toList();
+
+        return SuccessResponse.ok(result);
     }
 }

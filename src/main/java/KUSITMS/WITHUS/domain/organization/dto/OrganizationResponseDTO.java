@@ -59,4 +59,17 @@ public class OrganizationResponseDTO {
         }
     }
 
+    @Schema(description = "조직 검색 응답 DTO")
+    public record Search(
+            Long id,
+            String name
+    ) {
+        public static Search from(Organization organization) {
+            return new Search(
+                    organization.getId(),
+                    organization.getName()
+            );
+        }
+    }
+
 }

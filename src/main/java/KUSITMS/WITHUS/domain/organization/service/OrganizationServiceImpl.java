@@ -79,4 +79,15 @@ public class OrganizationServiceImpl implements OrganizationService {
                 .map(OrganizationResponseDTO.Summary::from)
                 .toList();
     }
+
+    /**
+     * 주어진 키워드를 포함하는 조직 목록을 조회합니다.
+     * @param keyword 검색할 키워드 (조직 이름 일부)
+     * @return 키워드를 포함하는 조직 리스트
+     */
+    @Override
+    public List<Organization> search(String keyword) {
+        return organizationRepository.findByNameContaining(keyword);
+    }
+
 }
