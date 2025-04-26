@@ -7,21 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "사용자 관련 응답 DTO")
 public class UserResponseDTO {
 
-    @Schema(description = "로그인 성공 시 발급된 토큰 응답 DTO")
-    public record Login(
-            @Schema(description = "Access Token", example = "eyJhbGciOiJIUzI1NiIs...")
-            String accessToken,
-
-            @Schema(description = "Refresh Token", example = "eyJhbGciOiJIUzI1NiIs...")
-            String refreshToken
-    ) {}
-
-    @Schema(description = "Access Token 재발급 응답 DTO")
-    public record ReissueToken(
-            @Schema(description = "새로운 Access Token", example = "eyJhbGciOiJIUzI1...")
-            String accessToken
-    ) {}
-
     @Schema(description = "사용자 요약 정보 응답 DTO")
     public record Summary(
             @Schema(description = "사용자 ID") Long userId,

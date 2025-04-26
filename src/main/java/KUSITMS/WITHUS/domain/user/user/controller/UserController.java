@@ -24,16 +24,21 @@ public class UserController {
 
     @PostMapping("/login")
     @Operation(summary = "로그인 API", description = "이메일과 비밀번호로 로그인 후 JWT 토큰을 헤더에 담아 반환합니다.")
-    public ResponseEntity<Void> login(@RequestBody UserRequestDTO.Login request) {
+    public ResponseEntity<Void> login(
+            @RequestBody UserRequestDTO.Login request
+    ) {
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/reissue")
     @Operation(summary = "Access Token 재발급", description = "Refresh Token을 이용해 Access Token을 재발급합니다.")
-    public ResponseEntity<UserResponseDTO.ReissueToken> reissue(@RequestBody UserRequestDTO.Reissue request) {
-        String newAccessToken = userService.reissueAccessToken(request.refreshToken());
-        UserResponseDTO.ReissueToken reissueToken = new UserResponseDTO.ReissueToken(newAccessToken);
-        return ResponseEntity.ok(reissueToken);
+    public ResponseEntity<Void> reissue(
+            @RequestHeader("Refresh-Token") String refreshToken
+    ) {
+        String newAccessToken = userService.reissueAccessToken(refreshToken);
+        return ResponseEntity.ok()
+                .header("Authorization", "Bearer " + newAccessToken)
+                .build();
     }
 
     @PostMapping("/logout")
