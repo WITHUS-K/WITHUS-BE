@@ -11,6 +11,7 @@ import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.util.redis.PhoneAuthCacheUtil;
+import KUSITMS.WITHUS.global.infra.sms.SmsSender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final OrganizationRepository organizationRepository;
     private final PhoneAuthCacheUtil phoneAuthCacheUtil;
+    private final SmsSender smsSender;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
@@ -154,8 +156,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private void sendSms(String phoneNumber, String code) {
-        // TODO: 문자 발송 API 연동
-        System.out.println("📲 [" + phoneNumber + "]에게 인증번호 [" + code + "] 발송됨!");
+        String message = "[WITHUS] 인증번호 [" + code + "]를 입력해주세요.";
+        smsSender.send(phoneNumber, message);
     }
 
     @Override
