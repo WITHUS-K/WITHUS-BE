@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface OrganizationJpaRepository extends JpaRepository<Organization, Long> {
     List<Organization> findByNameContaining(String keyword);
+    boolean existsByName(String name);
 }

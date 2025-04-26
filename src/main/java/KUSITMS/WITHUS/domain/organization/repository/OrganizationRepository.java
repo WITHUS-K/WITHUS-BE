@@ -10,4 +10,5 @@ public interface OrganizationRepository {
     Organization save(Organization organization);
     void delete(Long id);
     List<Organization> findByNameContaining(String keyword);
+    boolean existsByName(String name);
 }

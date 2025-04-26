@@ -103,6 +103,11 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(ErrorCode.USER_ALREADY_EXIST);
         }
 
+        // 같은 이름의 조직이 존재하는지 확인
+        if (organizationRepository.existsByName(organizationName)) {
+            throw new CustomException(ErrorCode.ORGANIZATION_ALREADY_EXIST);
+        }
+
         // 휴대폰 번호 인증 여부 확인
         checkPhoneVerifiedBeforeJoin(phoneNumber);
 
