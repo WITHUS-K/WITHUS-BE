@@ -36,6 +36,13 @@ public class UserController {
         return ResponseEntity.ok(reissueToken);
     }
 
+    @PostMapping("/logout")
+    @Operation(summary = "로그아웃", description = "사용자의 Refresh Token을 삭제하여 로그아웃합니다.")
+    public ResponseEntity<Void> logout() {
+        userService.logout();
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/join/admin")
     @Operation(summary = "관리자 회원가입 API")
     public SuccessResponse<String> adminJoinProcess(

@@ -12,4 +12,5 @@ public interface UserService {
     void requestPhoneVerification(String phoneNumber);
     void confirmPhoneVerification(String phoneNumber, String inputCode);
     String reissueAccessToken(String refreshToken);
+    void logout();
 }
