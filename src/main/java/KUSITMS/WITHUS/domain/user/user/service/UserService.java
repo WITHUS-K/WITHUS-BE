@@ -11,4 +11,5 @@ public interface UserService {
     boolean isEmailDuplicated(String email);
     void requestPhoneVerification(String phoneNumber);
     void confirmPhoneVerification(String phoneNumber, String inputCode);
+    String reissueAccessToken(String refreshToken);
 }

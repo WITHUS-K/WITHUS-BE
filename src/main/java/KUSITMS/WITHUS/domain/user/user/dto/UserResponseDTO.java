@@ -16,6 +16,12 @@ public class UserResponseDTO {
             String refreshToken
     ) {}
 
+    @Schema(description = "Access Token 재발급 응답 DTO")
+    public record ReissueToken(
+            @Schema(description = "새로운 Access Token", example = "eyJhbGciOiJIUzI1...")
+            String accessToken
+    ) {}
+
     @Schema(description = "사용자 요약 정보 응답 DTO")
     public record Summary(
             @Schema(description = "사용자 ID") Long userId,

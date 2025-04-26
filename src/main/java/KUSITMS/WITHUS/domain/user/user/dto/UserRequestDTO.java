@@ -19,6 +19,12 @@ public class UserRequestDTO {
             @Schema(description = "비밀번호", example = "Abc123!@") String password
     ) {}
 
+    @Schema(description = "Access Token 재발급 요청 DTO")
+    public record Reissue(
+            @Schema(description = "리프레시 토큰", example = "eyJhbGciOiJIUzI1...")
+            String refreshToken
+    ) {}
+
     @Schema(description = "관리자 회원가입 요청 DTO")
     public record AdminJoin(
             @Schema(description = "이름", example = "홍길동")

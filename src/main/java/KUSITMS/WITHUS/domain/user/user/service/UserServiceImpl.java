@@ -7,10 +7,12 @@ import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
+import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.sms.SmsSender;
+import KUSITMS.WITHUS.global.util.redis.RefreshTokenCacheUtil;
 import KUSITMS.WITHUS.global.util.redis.VerificationCacheUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -31,6 +33,32 @@ public class UserServiceImpl implements UserService {
     private final VerificationCacheUtil phoneAuthCacheUtil;
     private final SmsSender smsSender;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final JwtUtil jwtUtil;
+    private final RefreshTokenCacheUtil refreshTokenCacheUtil;
+
+    /**
+     * Refresh Token을 검증하고, 유효한 경우 새로운 Access Token을 발급합니다.
+     * @param refreshToken 클라이언트로부터 전달받은 Refresh Token
+     * @return 새로 발급된 Access Token
+     * @throws CustomException Refresh Token이 만료되었거나 유효하지 않은 경우 예외를 발생시킵니다.
+     */
+    public String reissueAccessToken(String refreshToken) {
+        if (jwtUtil.isExpired(refreshToken)) {
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_INVALID);
+        }
+
+        String email = jwtUtil.getEmail(refreshToken);
+
+        // Redis에 저장된 Refresh Token과 비교
+        String storedRefreshToken = refreshTokenCacheUtil.getRefreshToken(email);
+        if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_INVALID);
+        }
+
+        String role = jwtUtil.getRole(refreshToken);
+
+        return jwtUtil.createAccessToken(email, role);
+    }
 
     /**
      * 관리자 회원가입 프로세스

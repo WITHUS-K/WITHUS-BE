@@ -28,6 +28,14 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/reissue")
+    @Operation(summary = "Access Token 재발급", description = "Refresh Token을 이용해 Access Token을 재발급합니다.")
+    public ResponseEntity<UserResponseDTO.ReissueToken> reissue(@RequestBody UserRequestDTO.Reissue request) {
+        String newAccessToken = userService.reissueAccessToken(request.refreshToken());
+        UserResponseDTO.ReissueToken reissueToken = new UserResponseDTO.ReissueToken(newAccessToken);
+        return ResponseEntity.ok(reissueToken);
+    }
+
     @PostMapping("/join/admin")
     @Operation(summary = "관리자 회원가입 API")
     public SuccessResponse<String> adminJoinProcess(
