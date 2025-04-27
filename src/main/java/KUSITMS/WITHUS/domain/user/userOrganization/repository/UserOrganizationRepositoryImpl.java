@@ -3,6 +3,7 @@ package KUSITMS.WITHUS.domain.user.userOrganization.repository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -85,5 +86,26 @@ public class UserOrganizationRepositoryImpl implements UserOrganizationRepositor
     @Override
     public void deleteAllInBatch(List<UserOrganization> userOrganizations) {
         userOrganizationJpaRepository.deleteAllInBatch(userOrganizations);
+    }
+
+    @Override
+    public List<User> findManagersByOrganizationId(Long organizationId, String keyword) {
+        return queryFactory
+                .select(user)
+                .from(userOrganization)
+                .join(userOrganization.user, user)
+                .where(
+                        userOrganization.organization.id.eq(organizationId),
+                        user.role.eq(Role.USER),
+                        keywordCondition(keyword)
+                )
+                .fetch();
+    }
+
+    private BooleanExpression keywordCondition(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return null;
+        }
+        return user.name.containsIgnoreCase(keyword);
     }
 }

@@ -81,4 +81,9 @@ public class UserOrganizationService {
         userOrganizationRepository.deleteAllInBatch(targets);
     }
 
+    public List<UserResponseDTO.Summary> getAllUsersByOrganization(Long organizationId, String keyword) {
+        return userOrganizationRepository.findManagersByOrganizationId(organizationId, keyword).stream()
+                .map(UserResponseDTO.Summary::from)
+                .toList();
+    }
 }
