@@ -12,6 +12,7 @@ import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import KUSITMS.WITHUS.global.infra.email.MailSender;
 import KUSITMS.WITHUS.global.infra.sms.SmsSender;
 import KUSITMS.WITHUS.global.util.redis.RefreshTokenCacheUtil;
 import KUSITMS.WITHUS.global.util.redis.VerificationCacheUtil;
@@ -35,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final OrganizationRepository organizationRepository;
     private final VerificationCacheUtil verificationCacheUtil;
     private final SmsSender smsSender;
+    private final MailSender mailSender;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtUtil jwtUtil;
     private final RefreshTokenCacheUtil refreshTokenCacheUtil;
@@ -328,6 +330,8 @@ public class UserServiceImpl implements UserService {
      * @param code 인증 코드
      */
     private void sendEmail(String email, String code) {
-        System.out.println("[이메일 인증] " + email + " → 인증코드: " + code);
+        String message = "[WITHUS] 인증번호 [" + code + "]를 입력해주세요.";
+        String subject = "hello";
+        mailSender.send(email, subject, message);
     }
 }
