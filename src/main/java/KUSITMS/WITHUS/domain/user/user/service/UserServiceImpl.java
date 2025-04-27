@@ -33,11 +33,14 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final OrganizationRepository organizationRepository;
-    private final VerificationCacheUtil phoneAuthCacheUtil;
+    private final VerificationCacheUtil verificationCacheUtil;
     private final SmsSender smsSender;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtUtil jwtUtil;
     private final RefreshTokenCacheUtil refreshTokenCacheUtil;
+
+    private static final Duration CODE_TTL = Duration.ofMinutes(5); // 인증코드 유효기간 5분
+    private static final Duration VERIFIED_TTL = Duration.ofMinutes(10); // 인증완료 상태 유지 10분
 
     /**
      * 로그아웃
@@ -201,6 +204,24 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsByEmail(email);
     }
 
+    @Override
+    public void requestEmailVerification(String name, String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new CustomException(ErrorCode.USER_NOT_EXIST);
+        }
+        if (!user.getName().equals(name)) {
+            throw new CustomException(ErrorCode.USER_NOT_EXIST);
+        }
+
+        String code = String.valueOf(new Random().nextInt(900000) + 100000);
+
+        verificationCacheUtil.saveCode(email, code, CODE_TTL);
+
+        sendEmail(email, code);
+
+    }
+
     /**
      * 전화번호 인증 요청
      * @param phoneNumber 인증 번호를 보낼 전화번호
@@ -208,7 +229,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void requestPhoneVerification(String phoneNumber) {
         String code = generateCode(); // 랜덤 인증번호 생성
-        phoneAuthCacheUtil.saveCode(phoneNumber, code, Duration.ofMinutes(3));
+        verificationCacheUtil.saveCode(phoneNumber, code, CODE_TTL);
 
         sendSms(phoneNumber, code);
     }
@@ -221,13 +242,13 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void confirmPhoneVerification(String phoneNumber, String inputCode) {
-        String savedCode = phoneAuthCacheUtil.getCode(phoneNumber);
+        String savedCode = verificationCacheUtil.getCode(phoneNumber);
 
         if (!inputCode.equals(savedCode)) {
             throw new CustomException(ErrorCode.INVALID_PHONE_VERIFICATION_CODE);
         }
 
-        phoneAuthCacheUtil.markVerified(phoneNumber, Duration.ofMinutes(5));
+        verificationCacheUtil.markVerified(phoneNumber, VERIFIED_TTL);
     }
 
     /**
@@ -246,7 +267,7 @@ public class UserServiceImpl implements UserService {
      * @throws CustomException 전화번호 인증이 완료되지 않은 경우 예외를 발생시킵니다.
      */
     public void checkPhoneVerifiedBeforeJoin(String phoneNumber) {
-        if (!phoneAuthCacheUtil.isVerified(phoneNumber)) {
+        if (!verificationCacheUtil.isVerified(phoneNumber)) {
             throw new CustomException(ErrorCode.PHONE_NOT_VERIFIED);
         }
     }
@@ -267,5 +288,14 @@ public class UserServiceImpl implements UserService {
     private void sendSms(String phoneNumber, String code) {
         String message = "[WITHUS] 인증번호 [" + code + "]를 입력해주세요.";
         smsSender.send(phoneNumber, message);
+    }
+
+    /**
+     * 이메일 전송
+     * @param email 메시지를 보낼 이메일 주소
+     * @param code 인증 코드
+     */
+    private void sendEmail(String email, String code) {
+        System.out.println("[이메일 인증] " + email + " → 인증코드: " + code);
     }
 }

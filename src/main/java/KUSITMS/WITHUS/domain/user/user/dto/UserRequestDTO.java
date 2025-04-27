@@ -71,14 +71,25 @@ public class UserRequestDTO {
             @NotBlank String phoneNumber
     ) {}
 
-    @Schema(description = "인증 번호 요청 DTO")
+    @Schema(description = "이메일 인증 번호 요청 DTO")
+    public record EmailRequest (
+            @Schema(description = "이름", example = "홍길동")
+            @NotBlank
+            String name,
+
+            @Schema(description = "이메일 주소", example = "user@example.com")
+            @NotBlank
+            String email
+    ) {}
+
+    @Schema(description = "휴대폰 인증 번호 요청 DTO")
     public record PhoneRequest(
             @Schema(description = "휴대폰 번호", example = "01012345678")
             @NotBlank
             String phoneNumber
     ) {}
 
-    @Schema(description = "인증 번호 확인 DTO")
+    @Schema(description = "휴대폰 인증 번호 확인 DTO")
     public record PhoneConfirmRequest(
             @Schema(description = "휴대폰 번호", example = "01012345678")
             @NotBlank
