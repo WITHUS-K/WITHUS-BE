@@ -15,6 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -27,24 +30,35 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
 
     @Override
     @Transactional
-    public OrganizationRoleResponseDTO.DetailForUser assignRoleToUser(Long organizationId, Long userId, Long roleId) {
+    public List<OrganizationRoleResponseDTO.DetailForUser> assignRoleToUser(Long organizationId, Long userId, List<Long> roleIds) {
         User user = userRepository.getById(userId);
-        OrganizationRole role = organizationRoleRepository.getById(roleId);
+        List<OrganizationRole> roles = organizationRoleRepository.findAllById(roleIds);
 
-        boolean alreadyAssigned = user.getUserOrganizationRoles().stream()
-                .anyMatch(r -> r.getOrganizationRole().getId().equals(roleId));
+        List<OrganizationRoleResponseDTO.DetailForUser> result = new ArrayList<>();
 
-        if (alreadyAssigned) {
-            throw new CustomException(ErrorCode.ORGANIZATION_ROLE_ALREADY_EXIST);
+        for (OrganizationRole role : roles) {
+            if (!role.getOrganization().getId().equals(organizationId)) {
+                continue; // 조직 ID 불일치
+            }
+
+            boolean alreadyAssigned = user.getUserOrganizationRoles().stream()
+                    .anyMatch(r -> r.getOrganizationRole().getId().equals(role.getId()));
+
+            if (alreadyAssigned) {
+                continue; // 중복 역할
+            }
+
+            UserOrganizationRole userOrgRole = UserOrganizationRole.assign(user, role);
+
+            user.addUserOrganizationRole(userOrgRole);
+            role.addUserOrganizationRole(userOrgRole);
+
+            userOrganizationRoleRepository.save(userOrgRole);
+
+            result.add(OrganizationRoleResponseDTO.DetailForUser.from(userOrgRole));
         }
 
-        UserOrganizationRole userOrgRole = UserOrganizationRole.assign(user, role);
-
-        user.addUserOrganizationRole(userOrgRole);
-        role.addUserOrganizationRole(userOrgRole);
-
-        UserOrganizationRole userOrganizationRole = userOrganizationRoleRepository.save(userOrgRole);
-        return OrganizationRoleResponseDTO.DetailForUser.from(userOrganizationRole);
+        return result;
     }
 
     /**
