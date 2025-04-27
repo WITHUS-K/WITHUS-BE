@@ -39,6 +39,11 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
     private final RefreshTokenCacheUtil refreshTokenCacheUtil;
 
+    @Override
+    public User getById(Long id) {
+        return userRepository.getById(id);
+    }
+
     /**
      * 로그아웃
      * @throws CustomException 인증 정보가 없거나 유효하지 않은 경우 예외를 발생시킵니다.

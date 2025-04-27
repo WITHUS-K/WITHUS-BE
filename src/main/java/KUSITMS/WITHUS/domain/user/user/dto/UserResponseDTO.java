@@ -1,11 +1,14 @@
 package KUSITMS.WITHUS.domain.user.user.dto;
 
 import KUSITMS.WITHUS.domain.interview.enumerate.InterviewRole;
+import KUSITMS.WITHUS.domain.organization.organizationRole.dto.OrganizationRoleResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Schema(description = "사용자 관련 응답 DTO")
 public class UserResponseDTO {
@@ -19,6 +22,39 @@ public class UserResponseDTO {
             return new Summary(
                     user.getId(),
                     user.getName()
+            );
+        }
+    }
+
+    @Schema(description = "사용자 상세 정보 응답 DTO")
+    public record DetailProfile(
+            @Schema(description = "사용자 ID") Long userId,
+            @Schema(description = "이름") String name,
+            @Schema(description = "전화번호") String phoneNumber,
+            @Schema(description = "이메일") String email,
+            @Schema(description = "생년월일") LocalDate birthDate,
+            @Schema(description = "성별") String gender,
+            @Schema(description = "역할") List<OrganizationRoleResponseDTO.Detail> roles
+    ) {
+        public static DetailProfile from(User user, Long organizationId) {
+            return new DetailProfile(
+                    user.getId(),
+                    user.getName(),
+                    user.getPhoneNumber(),
+                    user.getEmail(),
+                    user.getBirthDate(),
+                    user.getGender().getKey(),
+                    user.getUserOrganizationRoles().stream()
+                            .filter(userOrganizationRole ->
+                                    userOrganizationRole.getOrganizationRole()
+                                            .getOrganization()
+                                            .getId()
+                                            .equals(organizationId)
+                            )
+                            .map(userOrganizationRole ->
+                                    OrganizationRoleResponseDTO.Detail.from(userOrganizationRole.getOrganizationRole())
+                            )
+                            .toList()
             );
         }
     }
