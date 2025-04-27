@@ -86,4 +86,21 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
 
         return OrganizationRoleResponseDTO.Detail.from(role);
     }
+
+    /**
+     * 조직의 역할 전체 조회
+     * @param organizationId 조회할 조직 ID
+     * @return 조회된 역할 정보
+     */
+    @Override
+    public OrganizationRoleResponseDTO.DetailForOrganization getOrganizationRoles(Long organizationId) {
+        List<OrganizationRole> roles = organizationRoleRepository.findAllByOrganizationIdWithUsers(organizationId);
+
+        List<OrganizationRoleResponseDTO.RoleDetail> roleDetails = roles.stream()
+                .map(OrganizationRoleResponseDTO.RoleDetail::from)
+                .toList();
+
+
+        return OrganizationRoleResponseDTO.DetailForOrganization.from(roleDetails);
+    }
 }
