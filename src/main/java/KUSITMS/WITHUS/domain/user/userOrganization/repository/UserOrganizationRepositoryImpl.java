@@ -1,12 +1,17 @@
 package KUSITMS.WITHUS.domain.user.userOrganization.repository;
 
 import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static KUSITMS.WITHUS.domain.user.user.entity.QUser.user;
 import static KUSITMS.WITHUS.domain.user.userOrganization.entity.QUserOrganization.userOrganization;
@@ -24,16 +29,6 @@ public class UserOrganizationRepositoryImpl implements UserOrganizationRepositor
     }
 
     @Override
-    public List<User> findUsersByOrganizationId(Long organizationId) {
-        return queryFactory
-                .select(user)
-                .from(userOrganization)
-                .join(userOrganization.user, user)
-                .where(userOrganization.organization.id.eq(organizationId))
-                .fetch();
-    }
-
-    @Override
     public boolean existsByUserIdAndOrganizationId(Long userId, Long organizationId) {
         Integer fetchOne = queryFactory
                 .selectOne()
@@ -45,5 +40,34 @@ public class UserOrganizationRepositoryImpl implements UserOrganizationRepositor
                 .fetchFirst();
 
         return fetchOne != null;
+    }
+
+    @Override
+    public Page<User> findByOrganizationId(Long organizationId, Pageable pageable) {
+        List<User> content = queryFactory
+                .select(user)
+                .from(userOrganization)
+                .join(userOrganization.user, user)
+                .where(
+                        userOrganization.organization.id.eq(organizationId),
+                        user.role.eq(Role.USER)
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        Long count = Optional.ofNullable(
+                queryFactory
+                        .select(user.count())
+                        .from(userOrganization)
+                        .join(userOrganization.user, user)
+                        .where(
+                                userOrganization.organization.id.eq(organizationId),
+                                user.role.eq(Role.USER)
+                        )
+                        .fetchOne()
+        ).orElse(0L);
+
+        return new PageImpl<>(content, pageable, count);
     }
 }

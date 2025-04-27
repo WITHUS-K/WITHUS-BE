@@ -10,10 +10,11 @@ import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRe
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -25,16 +26,16 @@ public class UserOrganizationService {
     private final UserRepository userRepository;
 
     /**
-     * 특정 조직의 운영진을 모두 조회
+     * 특정 조직의 운영진을 모두 조회 - 페이지네이션
      * @param organizationId 조회할 조직 ID
      * @return 조회한 사용자들의 정보
      */
-    public List<UserResponseDTO.Summary> getAllUsers(Long organizationId) {
+    public Page<UserResponseDTO.DetailForOrganization> getUsers(Long organizationId, int page, int size) {
         organizationRepository.getById(organizationId);
 
-        return userOrganizationRepository.findUsersByOrganizationId(organizationId).stream()
-                .map(UserResponseDTO.Summary::from)
-                .toList();
+        Pageable pageable = PageRequest.of(page, size);
+        return userOrganizationRepository.findByOrganizationId(organizationId, pageable)
+                .map(UserResponseDTO.DetailForOrganization::from);
     }
 
     /**
