@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.domain.organization.entity;
+package KUSITMS.WITHUS.domain.organization.organization.entity;
 
 import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;

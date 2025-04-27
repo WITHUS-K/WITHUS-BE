@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.domain.recruitment.service;
 
-import KUSITMS.WITHUS.domain.organization.entity.Organization;
-import KUSITMS.WITHUS.domain.organization.repository.OrganizationRepository;
+import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
+import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.recruitment.dto.RecruitmentRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.dto.RecruitmentResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.entity.Recruitment;
