@@ -83,4 +83,8 @@ public class User extends BaseEntity {
         this.timeSlotUsers.add(timeSlotUser);
         timeSlotUser.assignUser(this);
     }
+
+    public void updatePassword(String newEncodedPassword) {
+        this.password = newEncodedPassword;
+    }
 }

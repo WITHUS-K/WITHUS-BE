@@ -195,6 +195,29 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * 사용자 회원가입
+     * @param email 사용자의 이메일
+     * @param newPassword 새로 생성할 비밀번호
+     * @throws CustomException 인증되지 않은 이메일이거나 유저를 찾을 수 없는 경우 예외를 발생시킵니다.
+     */
+    @Override
+    @Transactional
+    public void resetPassword(String email, String newPassword) {
+        if (!verificationCacheUtil.isVerified(email)) {
+            throw new CustomException(ErrorCode.NOT_VERIFIED);
+        }
+
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new CustomException(ErrorCode.USER_NOT_EXIST);
+        }
+
+        String encodedPassword = bCryptPasswordEncoder.encode(newPassword);
+        user.updatePassword(encodedPassword);
+        userRepository.save(user);
+    }
+
+    /**
      * 이메일 중복 확인
      * @param email 확인할 이메일 주소
      * @return 이메일 중복 여부(true/false)
@@ -204,6 +227,12 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsByEmail(email);
     }
 
+    /**
+     * 사용자 회원가입
+     * @param name 사용자의 이름
+     * @param email 사용자의 이메일
+     * @throws CustomException 사용자를 찾을 수 없거나, 사용자의 이름이 일치하지 않은 경우 예외를 발생시킵니다.
+     */
     @Override
     public void requestEmailVerification(String name, String email) {
         User user = userRepository.findByEmail(email);
@@ -271,7 +300,7 @@ public class UserServiceImpl implements UserService {
      */
     public void checkPhoneVerifiedBeforeJoin(String phoneNumber) {
         if (!verificationCacheUtil.isVerified(phoneNumber)) {
-            throw new CustomException(ErrorCode.PHONE_NOT_VERIFIED);
+            throw new CustomException(ErrorCode.NOT_VERIFIED);
         }
     }
 

@@ -68,6 +68,12 @@ public class UserController {
         return SuccessResponse.ok("회원가입이 완료되었습니다.");
     }
 
+    @PostMapping("/reset-password")
+    public SuccessResponse<String> resetPassword(@RequestBody @Valid UserRequestDTO.ResetPassword request) {
+        userService.resetPassword(request.email(), request.newPassword());
+        return SuccessResponse.ok("비밀번호 재설정이 완료되었습니다.");
+    }
+
     @GetMapping("/email/check")
     @Operation(summary = "이메일 중복 확인 API")
     public SuccessResponse<UserResponseDTO.EmailDuplicateCheck> checkEmailDuplicate(

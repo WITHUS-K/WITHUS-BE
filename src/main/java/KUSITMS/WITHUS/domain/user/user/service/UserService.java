@@ -8,6 +8,7 @@ public interface UserService {
     User getUserByEmail(String email);
     void adminJoinProcess(UserRequestDTO.AdminJoin request);
     void userJoinProcess(UserRequestDTO.UserJoin request);
+    void resetPassword(String email, String newPassword);
     boolean isEmailDuplicated(String email);
     void requestEmailVerification(String name, String email);
     void requestPhoneVerification(String phoneNumber);

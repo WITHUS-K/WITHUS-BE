@@ -15,8 +15,8 @@ public class UserRequestDTO {
 
     @Schema(description = "로그인 요청 DTO")
     public record Login (
-            @Schema(description = "이메일", example = "user@example.com") String email,
-            @Schema(description = "비밀번호", example = "Abc123!@") String password
+            @Schema(description = "이메일", example = "user@example.com") @NotBlank String email,
+            @Schema(description = "비밀번호", example = "Abc123!@") @NotBlank String password
     ) {}
 
     @Schema(description = "관리자 회원가입 요청 DTO")
@@ -69,6 +69,20 @@ public class UserRequestDTO {
 
             @Schema(description = "휴대폰 번호", example = "01012345678")
             @NotBlank String phoneNumber
+    ) {}
+
+    @Schema(description = "비밀번호 재설정 요청 DTO")
+    public record ResetPassword(
+            @Schema(description = "이메일", example = "user@example.com")
+            @NotBlank @Email String email,
+
+            @Schema(description = "새로운 비밀번호", example = "Abc123!@")
+            @NotBlank
+            @Pattern(
+                    regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,20}$",
+                    message = "비밀번호는 영문, 숫자, 특수문자를 조합하여 8~20자로 입력해야 합니다."
+            )
+            String newPassword
     ) {}
 
     @Schema(description = "이메일 인증 번호 요청 DTO")
