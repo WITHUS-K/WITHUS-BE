@@ -84,6 +84,13 @@ public class UserController {
         return SuccessResponse.ok("인증번호가 발송되었습니다.");
     }
 
+    @PostMapping("/email/confirm")
+    @Operation(summary = "이메일 인증번호 요청")
+    public SuccessResponse<String> confirmEmailVerification(@RequestBody UserRequestDTO.EmailConfirmRequest request) {
+        userService.confirmVerification(request.email(), request.code());
+        return SuccessResponse.ok("이메일 인증이 완료되었습니다.");
+    }
+
     @PostMapping("/phone/verify")
     @Operation(summary = "휴대폰 인증번호 요청")
     public SuccessResponse<String> requestPhoneVerification(@RequestBody @Valid UserRequestDTO.PhoneRequest request) {
@@ -94,7 +101,7 @@ public class UserController {
     @PostMapping("/phone/confirm")
     @Operation(summary = "휴대폰 인증번호 확인")
     public SuccessResponse<String> confirmPhoneVerification(@RequestBody @Valid UserRequestDTO.PhoneConfirmRequest request) {
-        userService.confirmPhoneVerification(request.phoneNumber(), request.code());
+        userService.confirmVerification(request.phoneNumber(), request.code());
         return SuccessResponse.ok("휴대폰 인증이 완료되었습니다.");
     }
 }

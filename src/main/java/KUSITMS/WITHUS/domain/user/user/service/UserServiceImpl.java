@@ -235,20 +235,23 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 전화번호 인증 확인
-     * @param phoneNumber 인증할 전화번호
+     * 인증 확인
+     * @param identifier 인증할 식별자 (전화번호/이메일)
      * @param inputCode 사용자가 입력한 인증 코드
      * @throws CustomException 잘못된 인증 코드인 경우 예외를 발생시킵니다.
      */
     @Override
-    public void confirmPhoneVerification(String phoneNumber, String inputCode) {
-        String savedCode = verificationCacheUtil.getCode(phoneNumber);
+    public void confirmVerification(String identifier, String inputCode) {
+        String savedCode = verificationCacheUtil.getCode(identifier);
 
+        if (savedCode == null) {
+            throw new CustomException(ErrorCode.VERIFICATION_INVALID);
+        }
         if (!inputCode.equals(savedCode)) {
-            throw new CustomException(ErrorCode.INVALID_PHONE_VERIFICATION_CODE);
+            throw new CustomException(ErrorCode.VERIFICATION_NOT_EQUAL);
         }
 
-        verificationCacheUtil.markVerified(phoneNumber, VERIFIED_TTL);
+        verificationCacheUtil.markVerified(identifier, VERIFIED_TTL);
     }
 
     /**

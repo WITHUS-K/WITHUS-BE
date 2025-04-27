@@ -99,15 +99,13 @@ public enum ErrorCode {
     // Role
     INVALID_ROLE("ROLE400", "잘못된 Role 값입니다.", HttpStatus.BAD_REQUEST),
 
-    // EMAIL
-    EMAIL_VERIFICATION_EXPIRED("EMAIL_VERIFICATION404", "인증 코드가 만료되었습니다.", HttpStatus.NOT_FOUND),
-    EMAIL_VERIFICATION_INVALID("EMAIL_VERIFICATION401", "유효하지 않은 인증 코드입니다.", HttpStatus.UNAUTHORIZED),
+    // Verification
+    VERIFICATION_EXPIRED("EMAIL_VERIFICATION404", "인증 코드가 만료되었습니다.", HttpStatus.NOT_FOUND),
+    VERIFICATION_INVALID("EMAIL_VERIFICATION401", "유효하지 않은 인증 코드입니다.", HttpStatus.UNAUTHORIZED),
+    VERIFICATION_NOT_EQUAL("EMAIL_VERIFICATION401", "인증 코드가 일차하지 않습니다.", HttpStatus.UNAUTHORIZED),
     EMAIL_SEND_FAIL("EMAIL500", "메일 전송에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     EMAIL_AUTH_FAIL("EMAIL401", "이메일 인증에 실패했습니다.", HttpStatus.UNAUTHORIZED),
     EMAIL_REQUEST_LIMIT_EXCEEDED("EMAIL429", "5분 후 다시 시도해주세요.", HttpStatus.TOO_MANY_REQUESTS),
-
-    // PHONE (휴대폰 인증)
-    INVALID_PHONE_VERIFICATION_CODE("PHONE401", "인증번호가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
     PHONE_NOT_VERIFIED("PHONE403", "휴대폰 인증이 완료되지 않았습니다.", HttpStatus.FORBIDDEN);
 
 
