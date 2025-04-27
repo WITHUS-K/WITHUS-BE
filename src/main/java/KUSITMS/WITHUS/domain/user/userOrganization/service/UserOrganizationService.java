@@ -83,4 +83,16 @@ public class UserOrganizationService {
 
         userOrganizationRepository.deleteAllInBatch(targets);
     }
+
+    /**
+     * 조직에 속한 운영진 전체 조회, keyword가 있다면 검색
+     * @param organizationId 조회할 조직의 ID
+     * @param keyword 검색어(이름)
+     * @return 조회된 유저 정보
+     */
+    public List<UserResponseDTO.Summary> getAllUsersByOrganization(Long organizationId, String keyword) {
+        return userOrganizationRepository.findManagersByOrganizationId(organizationId, keyword).stream()
+                .map(UserResponseDTO.Summary::from)
+                .toList();
+    }
 }

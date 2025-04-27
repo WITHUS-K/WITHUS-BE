@@ -13,4 +13,5 @@ public interface UserOrganizationRepository {
     Page<User> findByOrganizationId(Long organizationId, Pageable pageable);
     List<UserOrganization> findAllByOrganizationIdAndUserIdIn(Long organizationId, List<Long> userIds);
     void deleteAllInBatch(List<UserOrganization> userOrganizations);
+    List<User> findManagersByOrganizationId(Long organizationId, String keyword);
 }
