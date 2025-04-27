@@ -1,11 +1,9 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: withus-app
+    container_name: ${APP_NAME}
+    image: ${DOCKERHUB_USERNAME}/withus
     ports:
-      - "8080:8080"
+      - "${APP_PORT}:8080"
     environment:
       SPRING_PROFILES_ACTIVE: prod
       DB_URL: ${DB_URL}
