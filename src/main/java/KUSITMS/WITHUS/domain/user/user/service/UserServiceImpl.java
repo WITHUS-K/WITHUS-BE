@@ -331,7 +331,7 @@ public class UserServiceImpl implements UserService {
      */
     private void sendEmail(String email, String code) {
         String message = "[WITHUS] 인증번호 [" + code + "]를 입력해주세요.";
-        String subject = "hello";
+        String subject = "[WITHUS] 비밀번호 재설정 인증 번호 발송 메일입니다.";
         mailSender.send(email, subject, message);
     }
 }
