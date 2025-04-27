@@ -19,6 +19,11 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Override
+    public User getById(Long id) {
+        return userRepository.getById(id);
+    }
+
     @Transactional
     public void joinProcess(UserRequestDTO.Join request) {
 
