@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -63,5 +65,22 @@ public class UserOrganizationService {
         organization.addUserOrganization(userOrganization);
 
         return userOrganizationRepository.save(userOrganization);
+    }
+
+    /**
+     * 사용자 일괄 삭제
+     * @param organizationId 사용자가 속한 조직 ID
+     * @param userIds 삭제할 사용자 ID 리스트
+     */
+    @Transactional
+    public void removeUsers(Long organizationId, List<Long> userIds) {
+        List<UserOrganization> targets = userOrganizationRepository
+                .findAllByOrganizationIdAndUserIdIn(organizationId, userIds);
+
+        if (targets.size() != userIds.size()) {
+            throw new CustomException(ErrorCode.USER_ORGANIZATION_NOT_FOUND);
+        }
+
+        userOrganizationRepository.deleteAllInBatch(targets);
     }
 }
