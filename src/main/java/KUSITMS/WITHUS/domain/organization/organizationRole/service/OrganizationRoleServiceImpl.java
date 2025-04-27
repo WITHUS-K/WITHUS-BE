@@ -90,11 +90,12 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
     /**
      * 조직의 역할 전체 조회
      * @param organizationId 조회할 조직 ID
+     * @param keyword 필터링할 검색어
      * @return 조회된 역할 정보
      */
     @Override
-    public OrganizationRoleResponseDTO.DetailForOrganization getOrganizationRoles(Long organizationId) {
-        List<OrganizationRole> roles = organizationRoleRepository.findAllByOrganizationIdWithUsers(organizationId);
+    public OrganizationRoleResponseDTO.DetailForOrganization getOrganizationRoles(Long organizationId, String keyword) {
+        List<OrganizationRole> roles = organizationRoleRepository.findByOrganizationIdAndKeyword(organizationId, keyword);
 
         List<OrganizationRoleResponseDTO.RoleDetail> roleDetails = roles.stream()
                 .map(OrganizationRoleResponseDTO.RoleDetail::from)

@@ -3,6 +3,7 @@ package KUSITMS.WITHUS.domain.organization.organizationRole.repository;
 import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -40,12 +41,23 @@ public class OrganizationRoleRepositoryImpl implements OrganizationRoleRepositor
     }
 
     @Override
-    public List<OrganizationRole> findAllByOrganizationIdWithUsers(Long organizationId) {
+    public List<OrganizationRole> findByOrganizationIdAndKeyword(Long organizationId, String keyword) {
         return queryFactory
                 .selectDistinct(organizationRole)
                 .from(organizationRole)
                 .leftJoin(organizationRole.userOrganizationRoles, userOrganizationRole).fetchJoin()
-                .where(organizationRole.organization.id.eq(organizationId))
+                .where(
+                        organizationRole.organization.id.eq(organizationId),
+                        keywordCondition(keyword)
+                )
+                .orderBy(organizationRole.name.asc())
                 .fetch();
+    }
+
+    private BooleanExpression keywordCondition(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return null;
+        }
+        return organizationRole.name.startsWith(keyword);
     }
 }

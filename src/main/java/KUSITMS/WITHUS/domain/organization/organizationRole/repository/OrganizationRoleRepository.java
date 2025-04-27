@@ -9,5 +9,5 @@ public interface OrganizationRoleRepository {
     OrganizationRole save(OrganizationRole organizationRole);
     boolean existsByOrganizationIdAndName(Long organizationId, String name);
     List<OrganizationRole> findAllById(List<Long> roleIds);
-    List<OrganizationRole> findAllByOrganizationIdWithUsers(Long organizationId);
+    List<OrganizationRole> findByOrganizationIdAndKeyword(Long organizationId, String keyword);
 }
