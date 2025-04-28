@@ -1,8 +1,8 @@
-package KUSITMS.WITHUS.domain.organization.service;
+package KUSITMS.WITHUS.domain.organization.organization.service;
 
-import KUSITMS.WITHUS.domain.organization.dto.OrganizationRequestDTO;
-import KUSITMS.WITHUS.domain.organization.dto.OrganizationResponseDTO;
-import KUSITMS.WITHUS.domain.organization.entity.Organization;
+import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationRequestDTO;
+import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationResponseDTO;
+import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 
 import java.util.List;
 

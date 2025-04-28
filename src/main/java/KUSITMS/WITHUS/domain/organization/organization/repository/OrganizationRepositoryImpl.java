@@ -1,6 +1,6 @@
-package KUSITMS.WITHUS.domain.organization.repository;
+package KUSITMS.WITHUS.domain.organization.organization.repository;
 
-import KUSITMS.WITHUS.domain.organization.entity.Organization;
+import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;

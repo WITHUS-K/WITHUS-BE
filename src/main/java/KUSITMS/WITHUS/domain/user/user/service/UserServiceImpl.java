@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.domain.user.user.service;
 
-import KUSITMS.WITHUS.domain.organization.entity.Organization;
-import KUSITMS.WITHUS.domain.organization.repository.OrganizationRepository;
+import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
+import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
@@ -43,6 +43,11 @@ public class UserServiceImpl implements UserService {
 
     private static final Duration CODE_TTL = Duration.ofMinutes(5); // 인증코드 유효기간 5분
     private static final Duration VERIFIED_TTL = Duration.ofMinutes(10); // 인증완료 상태 유지 10분
+
+    @Override
+    public User getById(Long id) {
+        return userRepository.getById(id);
+    }
 
     /**
      * 로그아웃
