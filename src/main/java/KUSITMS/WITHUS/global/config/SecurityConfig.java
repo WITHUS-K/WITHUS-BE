@@ -28,6 +28,7 @@ public class SecurityConfig {
             "/health",
             "/",
             "/api/v1/auth/**",
+            "/api/v1/users/**",
             "/api/v1/organizations/search",
     };
 
