@@ -216,7 +216,6 @@ public class UserServiceImpl implements UserService {
 
         String encodedPassword = bCryptPasswordEncoder.encode(newPassword);
         user.updatePassword(encodedPassword);
-        userRepository.save(user);
     }
 
     /**
