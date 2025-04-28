@@ -209,10 +209,7 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(ErrorCode.NOT_VERIFIED);
         }
 
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new CustomException(ErrorCode.USER_NOT_EXIST);
-        }
+        User user = userRepository.getByEmail(email);
 
         String encodedPassword = bCryptPasswordEncoder.encode(newPassword);
         user.updatePassword(encodedPassword);
@@ -229,17 +226,14 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 사용자 회원가입
+     * 이메일 인증 요청
      * @param name 사용자의 이름
      * @param email 사용자의 이메일
-     * @throws CustomException 사용자를 찾을 수 없거나, 사용자의 이름이 일치하지 않은 경우 예외를 발생시킵니다.
+     * @throws CustomException 사용자를 찾을 수 없거나, 사용자의 이름이 일치하지 않는 경우 예외를 발생시킵니다.
      */
     @Override
     public void requestEmailVerification(String name, String email) {
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new CustomException(ErrorCode.USER_NOT_EXIST);
-        }
+        User user = userRepository.getByEmail(email);
         if (!user.getName().equals(name)) {
             throw new CustomException(ErrorCode.USER_NOT_EXIST);
         }
@@ -291,7 +285,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userRepository.getByEmail(email);
     }
 
     /**
