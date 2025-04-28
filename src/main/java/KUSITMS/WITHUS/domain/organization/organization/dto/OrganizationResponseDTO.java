@@ -1,6 +1,6 @@
-package KUSITMS.WITHUS.domain.organization.dto;
+package KUSITMS.WITHUS.domain.organization.organization.dto;
 
-import KUSITMS.WITHUS.domain.organization.entity.Organization;
+import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "조직(동아리) 관련 응답 DTO")

@@ -1,9 +1,9 @@
-package KUSITMS.WITHUS.domain.organization.service;
+package KUSITMS.WITHUS.domain.organization.organization.service;
 
-import KUSITMS.WITHUS.domain.organization.dto.OrganizationRequestDTO;
-import KUSITMS.WITHUS.domain.organization.dto.OrganizationResponseDTO;
-import KUSITMS.WITHUS.domain.organization.entity.Organization;
-import KUSITMS.WITHUS.domain.organization.repository.OrganizationRepository;
+import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationRequestDTO;
+import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationResponseDTO;
+import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
+import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

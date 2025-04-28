@@ -59,10 +59,12 @@ public enum ErrorCode {
 
     // UserOrganization
     DUPLICATE_USER_ORGANIZATION("USER_ORGANIZATION400", "이미 조직에 가입된 사용자입니다.", HttpStatus.BAD_REQUEST),
+    USER_ORGANIZATION_NOT_FOUND("USER_ORGANIZATION404", "해당 조직에서 사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST),
 
     // Organization (조직)
     ORGANIZATION_ALREADY_EXIST("ORGANIZATION400", "이미 존재하는 조직입니다.", HttpStatus.BAD_REQUEST),
     ORGANIZATION_NOT_EXIST("ORGANIZATION404", "존재하지 않는 조직입니다.", HttpStatus.NOT_FOUND),
+    USER_NOT_IN_ORGANIZATION("ORGANIZATION404", "조직에 속해있지 않은 유저입니다.", HttpStatus.NOT_FOUND),
 
     // Recruitment (공고)
     RECRUITMENT_ALREADY_EXIST("RECRUITMENT400", "이미 존재하는 공고입니다.", HttpStatus.BAD_REQUEST),
@@ -98,6 +100,11 @@ public enum ErrorCode {
 
     // Role
     INVALID_ROLE("ROLE400", "잘못된 Role 값입니다.", HttpStatus.BAD_REQUEST),
+
+    // OrganizationRole (조직 역할)
+    ORGANIZATION_ROLE_ALREADY_EXIST("ORGANIZATION_ROLE400", "이미 추가된 역할입니다.", HttpStatus.BAD_REQUEST),
+    DUPLICATE_ORGANIZATION_ROLE_NAME("ORGANIZATION_ROLE400", "이미 존재하는 역할명입니다.", HttpStatus.BAD_REQUEST),
+    ORGANIZATION_ROLE_NOT_EXIST("ORGANIZATION_ROLE404", "등록되지 않은 조직 역할입니다.", HttpStatus.NOT_FOUND),
 
     // EMAIL
     EMAIL_VERIFICATION_EXPIRED("EMAIL_VERIFICATION404", "인증 코드가 만료되었습니다.", HttpStatus.NOT_FOUND),

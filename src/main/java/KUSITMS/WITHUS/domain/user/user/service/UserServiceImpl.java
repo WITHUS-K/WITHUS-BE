@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.domain.user.user.service;
 
-import KUSITMS.WITHUS.domain.organization.entity.Organization;
-import KUSITMS.WITHUS.domain.organization.repository.OrganizationRepository;
+import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
+import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
@@ -38,6 +38,11 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtUtil jwtUtil;
     private final RefreshTokenCacheUtil refreshTokenCacheUtil;
+
+    @Override
+    public User getById(Long id) {
+        return userRepository.getById(id);
+    }
 
     /**
      * 로그아웃

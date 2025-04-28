@@ -4,6 +4,7 @@ import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
+import KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.UserOrganizationRole;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import jakarta.persistence.*;
@@ -57,16 +58,16 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TimeSlotUser> timeSlotUsers = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserOrganizationRole> userOrganizationRoles = new ArrayList<>();
 
     public void changePassword(String newPassword) {
         this.password = newPassword;
-    }
-
-    public void changeRole(Role role) {
-        this.role = role;
     }
 
     public void addUserOrganization(UserOrganization userOrganization) {
@@ -82,5 +83,10 @@ public class User extends BaseEntity {
     public void addTimeSlotUser(TimeSlotUser timeSlotUser) {
         this.timeSlotUsers.add(timeSlotUser);
         timeSlotUser.assignUser(this);
+    }
+
+    public void addUserOrganizationRole(UserOrganizationRole role) {
+        this.userOrganizationRoles.add(role);
+        role.associateUser(this);
     }
 }
