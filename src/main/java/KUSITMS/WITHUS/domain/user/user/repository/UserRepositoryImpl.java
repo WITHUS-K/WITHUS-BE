@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -36,6 +37,15 @@ public class UserRepositoryImpl implements UserRepository {
     public User getById(Long id) {
         return userJpaRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXIST));
+    }
+
+    @Override
+    public User getByEmail(String email) {
+        User user = userJpaRepository.findByEmail(email);
+        if (user == null) {
+            throw new CustomException(ErrorCode.USER_NOT_EXIST);
+        }
+        return user;
     }
 
     @Override

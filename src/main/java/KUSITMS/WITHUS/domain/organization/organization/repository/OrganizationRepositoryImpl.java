@@ -39,4 +39,9 @@ public class OrganizationRepositoryImpl implements OrganizationRepository {
     public List<Organization> findByNameContaining(String keyword) {
         return organizationJpaRepository.findByNameContaining(keyword);
     }
+
+    @Override
+    public boolean existsByName(String name) {
+        return organizationJpaRepository.existsByName(name);
+    }
 }

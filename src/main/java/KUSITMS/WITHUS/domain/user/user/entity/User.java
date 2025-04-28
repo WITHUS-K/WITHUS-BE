@@ -66,8 +66,8 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserOrganizationRole> userOrganizationRoles = new ArrayList<>();
 
-    public void changePassword(String newPassword) {
-        this.password = newPassword;
+    public void updatePassword(String newEncodedPassword) {
+        this.password = newEncodedPassword;
     }
 
     public void addUserOrganization(UserOrganization userOrganization) {

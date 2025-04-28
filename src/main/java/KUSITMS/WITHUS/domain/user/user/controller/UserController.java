@@ -68,6 +68,12 @@ public class UserController {
         return SuccessResponse.ok("회원가입이 완료되었습니다.");
     }
 
+    @PostMapping("/reset-password")
+    public SuccessResponse<String> resetPassword(@RequestBody @Valid UserRequestDTO.ResetPassword request) {
+        userService.resetPassword(request.email(), request.newPassword());
+        return SuccessResponse.ok("비밀번호 재설정이 완료되었습니다.");
+    }
+
     @GetMapping("/email/check")
     @Operation(summary = "이메일 중복 확인 API")
     public SuccessResponse<UserResponseDTO.EmailDuplicateCheck> checkEmailDuplicate(
@@ -75,6 +81,20 @@ public class UserController {
     ) {
         UserResponseDTO.EmailDuplicateCheck response = new UserResponseDTO.EmailDuplicateCheck(userService.isEmailDuplicated(email));
         return SuccessResponse.ok(response);
+    }
+
+    @PostMapping("/email/verify")
+    @Operation(summary = "이메일 인증번호 요청")
+    public SuccessResponse<String> requestEmailVerification(@RequestBody UserRequestDTO.EmailRequest request) {
+        userService.requestEmailVerification(request.name(), request.email());
+        return SuccessResponse.ok("인증번호가 발송되었습니다.");
+    }
+
+    @PostMapping("/email/confirm")
+    @Operation(summary = "이메일 인증번호 요청")
+    public SuccessResponse<String> confirmEmailVerification(@RequestBody UserRequestDTO.EmailConfirmRequest request) {
+        userService.confirmVerification(request.email(), request.code());
+        return SuccessResponse.ok("이메일 인증이 완료되었습니다.");
     }
 
     @PostMapping("/phone/verify")
@@ -87,7 +107,7 @@ public class UserController {
     @PostMapping("/phone/confirm")
     @Operation(summary = "휴대폰 인증번호 확인")
     public SuccessResponse<String> confirmPhoneVerification(@RequestBody @Valid UserRequestDTO.PhoneConfirmRequest request) {
-        userService.confirmPhoneVerification(request.phoneNumber(), request.code());
+        userService.confirmVerification(request.phoneNumber(), request.code());
         return SuccessResponse.ok("휴대폰 인증이 완료되었습니다.");
     }
 }
