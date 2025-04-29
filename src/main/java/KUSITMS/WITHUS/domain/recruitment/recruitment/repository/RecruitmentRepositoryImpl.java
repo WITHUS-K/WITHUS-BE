@@ -9,7 +9,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static KUSITMS.WITHUS.domain.recruitment.entity.QRecruitment.recruitment;
+import static KUSITMS.WITHUS.domain.recruitment.recruitment.entity.QRecruitment.recruitment;
+
 
 @Repository
 @RequiredArgsConstructor

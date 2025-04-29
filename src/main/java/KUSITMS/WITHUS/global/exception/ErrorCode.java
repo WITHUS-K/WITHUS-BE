@@ -70,6 +70,10 @@ public enum ErrorCode {
     RECRUITMENT_ALREADY_EXIST("RECRUITMENT400", "이미 존재하는 공고입니다.", HttpStatus.BAD_REQUEST),
     RECRUITMENT_NOT_EXIST("RECRUITMENT404", "존재하지 않는 공고입니다.", HttpStatus.NOT_FOUND),
 
+    // DocumentQuestion (지원서 서류 질문)
+    DOCUMENT_QUESTION_ALREADY_EXIST("DOCUMENT_QUESTION400", "이미 존재하는 지원서 질문입니다.", HttpStatus.BAD_REQUEST),
+    DOCUMENT_QUESTION_NOT_EXIST("DOCUMENT_QUESTION404", "존재하지 않는 지원서 질문입니다.", HttpStatus.NOT_FOUND),
+
     // Position (파트)
     POSITION_ALREADY_EXIST("POSITION400", "이미 해당 파트가 존재합니다.", HttpStatus.BAD_REQUEST),
     POSITION_NOT_EXIST("POSITION404", "존재하지 않는 파트입니다.", HttpStatus.NOT_FOUND),
