@@ -33,6 +33,26 @@ public class Recruitment extends BaseEntity {
     @Column(name = "FILE_URL")
     private String fileUrl;
 
+    @Builder.Default
+    @Column(name = "NEED_GENDER", nullable = false)
+    private boolean needGender = false;
+
+    @Builder.Default
+    @Column(name = "NEED_ADDRESS", nullable = false)
+    private boolean needAddress = false;
+
+    @Builder.Default
+    @Column(name = "NEED_SCHOOL", nullable = false)
+    private boolean needSchool = false;
+
+    @Builder.Default
+    @Column(name = "NEED_BIRTH_DATE", nullable = false)
+    private boolean needBirthDate = false;
+
+    @Builder.Default
+    @Column(name = "NEED_ACADEMIC_STATUS", nullable = false)
+    private boolean needAcademicStatus = false;
+
     @Column(name = "DOCUMENT_DEADLINE", nullable = false)
     private LocalDate documentDeadline;
 
@@ -61,7 +81,12 @@ public class Recruitment extends BaseEntity {
             LocalDate documentDeadline,
             LocalDate documentResultDate,
             LocalDate finalResultDate,
-            Organization organization
+            Organization organization,
+            boolean needGender,
+            boolean needAddress,
+            boolean needSchool,
+            boolean needBirthDate,
+            boolean needAcademicStatus
     ) {
         return Recruitment.builder()
                 .title(title)
@@ -71,6 +96,11 @@ public class Recruitment extends BaseEntity {
                 .documentResultDate(documentResultDate)
                 .finalResultDate(finalResultDate)
                 .organization(organization)
+                .needGender(needGender)
+                .needAddress(needAddress)
+                .needSchool(needSchool)
+                .needBirthDate(needBirthDate)
+                .needAcademicStatus(needAcademicStatus)
                 .build();
     }
 

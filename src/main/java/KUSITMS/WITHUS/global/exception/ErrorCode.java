@@ -77,6 +77,7 @@ public enum ErrorCode {
     // Application (지원서)
     APPLICATION_ALREADY_EXIST("APPLICATION400", "이미 존재하는 지원서입니다.", HttpStatus.BAD_REQUEST),
     APPLICATION_NOT_EXIST("APPLICATION404", "존재하지 않는 지원서입니다.", HttpStatus.NOT_FOUND),
+    REQUIRED_FIELD_MISSING("APPLICATION400", "필수 입력값이 누락되었습니다.", HttpStatus.BAD_REQUEST),
 
     // Interview (면접)
     INTERVIEW_ALREADY_EXIST("INTERVIEW400", "이미 존재하는 면접입니다.", HttpStatus.BAD_REQUEST),

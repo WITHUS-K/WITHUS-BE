@@ -12,6 +12,8 @@ import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
 import KUSITMS.WITHUS.domain.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.repository.RecruitmentRepository;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +44,8 @@ public class ApplicationServiceImpl implements ApplicationService {
         Position position = Optional.ofNullable(request.positionId())
                 .flatMap(positionRepository::findById)
                 .orElse(null);
+
+        validateRequiredFields(recruitment, request);
 
         Application application = Application.create(
                 request.name(),
@@ -116,5 +120,21 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .toList();
 
         applications.forEach(app -> app.updateStatus(request.status()));
+    }
+
+
+    private void validateRequiredFields(Recruitment recruitment, ApplicationRequestDTO.Create request) {
+        if (recruitment.isNeedGender() && request.gender() == null) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+        if (recruitment.isNeedSchool() && request.university() == null) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+        if (recruitment.isNeedBirthDate() && request.birthDate() == null) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+        if (recruitment.isNeedAcademicStatus() && request.major() == null) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
     }
 }
