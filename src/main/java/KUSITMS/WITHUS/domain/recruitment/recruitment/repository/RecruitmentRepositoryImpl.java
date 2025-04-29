@@ -1,6 +1,6 @@
-package KUSITMS.WITHUS.domain.recruitment.repository;
+package KUSITMS.WITHUS.domain.recruitment.recruitment.repository;
 
-import KUSITMS.WITHUS.domain.recruitment.entity.Recruitment;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import com.querydsl.jpa.impl.JPAQueryFactory;

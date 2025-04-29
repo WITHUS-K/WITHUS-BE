@@ -1,7 +1,7 @@
-package KUSITMS.WITHUS.domain.recruitment.service;
+package KUSITMS.WITHUS.domain.recruitment.recruitment.service;
 
-import KUSITMS.WITHUS.domain.recruitment.dto.RecruitmentRequestDTO;
-import KUSITMS.WITHUS.domain.recruitment.dto.RecruitmentResponseDTO;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
 
 import java.util.List;
 

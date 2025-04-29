@@ -8,7 +8,7 @@ import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
-import KUSITMS.WITHUS.domain.recruitment.entity.Recruitment;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;

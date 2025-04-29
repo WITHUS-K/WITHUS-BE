@@ -1,9 +1,9 @@
-package KUSITMS.WITHUS.domain.recruitment.dto;
+package KUSITMS.WITHUS.domain.recruitment.recruitment.dto;
 
-import KUSITMS.WITHUS.domain.application.entity.ApplicationQuestion;
+import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
-import KUSITMS.WITHUS.domain.recruitment.entity.Recruitment;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
@@ -49,7 +49,7 @@ public class RecruitmentResponseDTO {
                     .toList();
 
             List<String> questions = recruitment.getQuestions().stream()
-                    .map(ApplicationQuestion::getContent)
+                    .map(DocumentQuestion::getTitle)
                     .toList();
 
             return new Detail(

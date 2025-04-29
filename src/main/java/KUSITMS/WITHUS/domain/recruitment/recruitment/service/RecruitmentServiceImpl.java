@@ -1,11 +1,11 @@
-package KUSITMS.WITHUS.domain.recruitment.service;
+package KUSITMS.WITHUS.domain.recruitment.recruitment.service;
 
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
-import KUSITMS.WITHUS.domain.recruitment.dto.RecruitmentRequestDTO;
-import KUSITMS.WITHUS.domain.recruitment.dto.RecruitmentResponseDTO;
-import KUSITMS.WITHUS.domain.recruitment.entity.Recruitment;
-import KUSITMS.WITHUS.domain.recruitment.repository.RecruitmentRepository;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +37,12 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 request.documentDeadline(),
                 request.documentResultDate(),
                 request.finalResultDate(),
-                organization
+                organization,
+                request.needGender(),
+                request.needAddress(),
+                request.needSchool(),
+                request.needBirthDate(),
+                request.needAcademicStatus()
         );
 
         Recruitment saved = recruitmentRepository.save(recruitment);

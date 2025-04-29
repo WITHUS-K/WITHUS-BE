@@ -1,6 +1,6 @@
-package KUSITMS.WITHUS.domain.recruitment.entity;
+package KUSITMS.WITHUS.domain.recruitment.recruitment.entity;
 
-import KUSITMS.WITHUS.domain.application.entity.ApplicationQuestion;
+import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.global.common.BaseEntity;
@@ -72,7 +72,7 @@ public class Recruitment extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ApplicationQuestion> questions = new ArrayList<>();
+    private List<DocumentQuestion> questions = new ArrayList<>();
 
     public static Recruitment create(
             String title,
@@ -120,7 +120,7 @@ public class Recruitment extends BaseEntity {
         this.finalResultDate = finalResultDate;
     }
 
-    public void addApplicationQuestion(ApplicationQuestion question) {
+    public void addApplicationQuestion(DocumentQuestion question) {
         this.questions.add(question);
         question.associateRecruitment(this);
     }

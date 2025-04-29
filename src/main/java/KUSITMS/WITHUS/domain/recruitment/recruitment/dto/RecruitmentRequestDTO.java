@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.domain.recruitment.dto;
+package KUSITMS.WITHUS.domain.recruitment.recruitment.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Future;
@@ -31,7 +31,22 @@ public class RecruitmentRequestDTO {
             @NotNull @Future LocalDate finalResultDate,
 
             @Schema(description = "조직 ID", example = "1")
-            @NotNull Long organizationId
+            @NotNull Long organizationId,
+
+            @Schema(description = "성별 입력 필요 여부", example = "true")
+            boolean needGender,
+
+            @Schema(description = "주소 입력 필요 여부", example = "false")
+            boolean needAddress,
+
+            @Schema(description = "학교 입력 필요 여부", example = "true")
+            boolean needSchool,
+
+            @Schema(description = "생년월일 입력 필요 여부", example = "true")
+            boolean needBirthDate,
+
+            @Schema(description = "학적 상태 입력 필요 여부", example = "false")
+            boolean needAcademicStatus
     ) {}
 
     @Schema(description = "공고 수정 요청 DTO")

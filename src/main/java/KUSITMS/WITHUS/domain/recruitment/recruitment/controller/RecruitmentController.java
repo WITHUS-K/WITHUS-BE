@@ -1,8 +1,8 @@
-package KUSITMS.WITHUS.domain.recruitment.controller;
+package KUSITMS.WITHUS.domain.recruitment.recruitment.controller;
 
-import KUSITMS.WITHUS.domain.recruitment.dto.RecruitmentRequestDTO;
-import KUSITMS.WITHUS.domain.recruitment.dto.RecruitmentResponseDTO;
-import KUSITMS.WITHUS.domain.recruitment.service.RecruitmentService;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.service.RecruitmentService;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
