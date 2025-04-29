@@ -9,4 +9,5 @@ public interface RecruitmentRepository {
     List<Recruitment> findAll();
     Recruitment save(Recruitment recruitment);
     void delete(Long id);
+    List<Recruitment> findAllByKeyword(String keyword);
 }

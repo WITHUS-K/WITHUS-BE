@@ -92,12 +92,13 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     }
 
     /**
-     * 모집 공고 전체 목록 조회
-     * @return 모집 공고 요약 정보 리스트
+     * keyword 가 없으면 공고 전체 조회, 있으면 검색
+     * @param keyword 공고의 title에서 검색할 내용
+     * @return 검색된 공고의 정보 반환
      */
     @Override
-    public List<RecruitmentResponseDTO.Summary> getAll() {
-        return recruitmentRepository.findAll().stream()
+    public List<RecruitmentResponseDTO.Summary> getAllByKeyword(String keyword) {
+        return recruitmentRepository.findAllByKeyword(keyword).stream()
                 .map(RecruitmentResponseDTO.Summary::from)
                 .toList();
     }

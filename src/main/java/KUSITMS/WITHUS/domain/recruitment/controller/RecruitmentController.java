@@ -54,9 +54,11 @@ public class RecruitmentController {
     }
 
     @GetMapping
-    @Operation(summary = "리크루팅 전체 목록 조회")
-    public SuccessResponse<List<RecruitmentResponseDTO.Summary>> getAll() {
-        List<RecruitmentResponseDTO.Summary> result = recruitmentService.getAll();
+    @Operation(summary = "리크루팅 목록 조회 및 검색", description = "공고의 title을 기준으로 keyword를 검색합니다. keyword가 없으면 전체 조회합니다.")
+    public SuccessResponse<List<RecruitmentResponseDTO.Summary>> getAllByKeyword(
+            @RequestParam(required = false) String keyword
+    ) {
+        List<RecruitmentResponseDTO.Summary> result = recruitmentService.getAllByKeyword(keyword);
         return SuccessResponse.ok(result);
     }
 }

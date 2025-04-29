@@ -10,5 +10,5 @@ public interface RecruitmentService {
     RecruitmentResponseDTO.Detail getById(Long id);
     RecruitmentResponseDTO.Update update(Long id, RecruitmentRequestDTO.Update request);
     void delete(Long id);
-    List<RecruitmentResponseDTO.Summary> getAll();
+    List<RecruitmentResponseDTO.Summary> getAllByKeyword(String keyword);
 }
