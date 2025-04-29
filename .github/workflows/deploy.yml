@@ -80,6 +80,8 @@ jobs:
               "${{ secrets.DB_USERNAME }}" \
               "${{ secrets.DB_PASSWORD }}" \
               "${{ secrets.JWT_SECRET }}" \
+              "${{ secrets.MAIL_USERNAME }}" \
+              "${{ secrets.MAIL_APP_PASSWORD }}" \
               "${{ secrets.COOLSMS_API_KEY }}" \
               "${{ secrets.COOLSMS_API_SECRET }}" \
               "${{ secrets.COOLSMS_SENDER_NUMBER }}" \
