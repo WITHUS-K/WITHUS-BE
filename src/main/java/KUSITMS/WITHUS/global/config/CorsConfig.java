@@ -19,6 +19,11 @@ public class CorsConfig {
         config.addAllowedOriginPattern("http://localhost:8080");
         config.addAllowedOriginPattern("https://jk-project.site");
         config.addAllowedOriginPattern("https://www.jk-project.site");
+        config.addAllowedOriginPattern("https://withus-ten.vercel.app");
+        for (int port = 3000; port <= 3010; port++) {
+            config.addAllowedOriginPattern("http://localhost:" + port);
+        }
+
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
         config.addExposedHeader("Authorization");
