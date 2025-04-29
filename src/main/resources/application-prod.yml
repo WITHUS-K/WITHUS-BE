@@ -37,3 +37,11 @@ coolsms:
   api-key: ${COOLSMS_API_KEY}
   api-secret: ${COOLSMS_API_SECRET}
   sender-number: ${COOLSMS_SENDER_NUMBER}
+
+ncp:
+  storage:
+    bucket-name: ${BUCKET_NAME}
+    region: kr-standard
+    endpoint: https://kr.object.ncloudstorage.com
+    accessKey: ${NCP_OS_ACCESS_KEY}
+    secretKey: ${NCP_OS_SECRET_KEY}
