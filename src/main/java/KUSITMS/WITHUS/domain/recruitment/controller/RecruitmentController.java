@@ -30,7 +30,7 @@ public class RecruitmentController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "리크루팅 단건 조회")
+    @Operation(summary = "리크루팅 단건 상세 조회")
     public SuccessResponse<RecruitmentResponseDTO.Detail> getById(@PathVariable Long id) {
         RecruitmentResponseDTO.Detail result = recruitmentService.getById(id);
         return SuccessResponse.ok(result);

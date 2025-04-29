@@ -1,9 +1,13 @@
 package KUSITMS.WITHUS.domain.recruitment.dto;
 
+import KUSITMS.WITHUS.domain.application.entity.ApplicationQuestion;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.recruitment.entity.Recruitment;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Schema(description = "리크루팅(공고) 관련 응답 DTO")
 public class RecruitmentResponseDTO {
@@ -28,9 +32,26 @@ public class RecruitmentResponseDTO {
             @Schema(description = "서류 마감일") LocalDate documentDeadline,
             @Schema(description = "서류 발표일") LocalDate documentResultDate,
             @Schema(description = "최종 발표일") LocalDate finalResultDate,
-            @Schema(description = "조직명") String organizationName
+            @Schema(description = "조직명") String organizationName,
+            @Schema(description = "서류 평가 기준 목록") List<String> documentEvaluationCriteria,
+            @Schema(description = "면접 평가 기준 목록") List<String> interviewEvaluationCriteria,
+            @Schema(description = "지원서 질문 목록") List<String> applicationQuestions
     ) {
         public static Detail from(Recruitment recruitment) {
+            List<String> documentCriteria = recruitment.getEvaluationCriteriaList().stream()
+                    .filter(c -> c.getEvaluationType() == EvaluationType.DOCUMENT)
+                    .map(EvaluationCriteria::getContent)
+                    .toList();
+
+            List<String> interviewCriteria = recruitment.getEvaluationCriteriaList().stream()
+                    .filter(c -> c.getEvaluationType() == EvaluationType.INTERVIEW)
+                    .map(EvaluationCriteria::getContent)
+                    .toList();
+
+            List<String> questions = recruitment.getQuestions().stream()
+                    .map(ApplicationQuestion::getContent)
+                    .toList();
+
             return new Detail(
                     recruitment.getId(),
                     recruitment.getTitle(),
@@ -39,10 +60,14 @@ public class RecruitmentResponseDTO {
                     recruitment.getDocumentDeadline(),
                     recruitment.getDocumentResultDate(),
                     recruitment.getFinalResultDate(),
-                    recruitment.getOrganization().getName()
+                    recruitment.getOrganization().getName(),
+                    documentCriteria,
+                    interviewCriteria,
+                    questions
             );
         }
     }
+
 
     @Schema(description = "공고 수정 응답 DTO")
     public record Update(

@@ -3,12 +3,12 @@ package KUSITMS.WITHUS.domain.application.application.entity;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
-import KUSITMS.WITHUS.domain.application.position.entity.Position;
-import KUSITMS.WITHUS.domain.application.template.entity.ApplicationTemplate;
 import KUSITMS.WITHUS.domain.application.interviewQuestion.entity.InterviewQuestion;
+import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
+import KUSITMS.WITHUS.domain.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
@@ -63,8 +63,8 @@ public class Application extends BaseEntity {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TEMPLATE_ID", nullable = false)
-    private ApplicationTemplate template;
+    @JoinColumn(name = "RECRUITMENT_ID", nullable = false)
+    private Recruitment recruitment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "POSITION_ID")
@@ -97,7 +97,7 @@ public class Application extends BaseEntity {
 
     public static Application create(
             String name, Gender gender, String email, String phoneNumber, String university, String major,
-            LocalDate birthDate, String imageUrl, ApplicationTemplate template, Position position
+            LocalDate birthDate, String imageUrl, Recruitment recruitment, Position position
     ) {
         return Application.builder()
                 .name(name)
@@ -109,7 +109,7 @@ public class Application extends BaseEntity {
                 .birthDate(birthDate)
                 .imageUrl(imageUrl)
                 .status(ApplicationStatus.PENDING)
-                .template(template)
+                .recruitment(recruitment)
                 .position(position)
                 .build();
     }

@@ -8,10 +8,10 @@ import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailabili
 import KUSITMS.WITHUS.domain.application.availability.repository.ApplicantAvailabilityRepository;
 import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.application.position.repository.PositionRepository;
-import KUSITMS.WITHUS.domain.application.template.entity.ApplicationTemplate;
-import KUSITMS.WITHUS.domain.application.template.repository.ApplicationTemplateRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
+import KUSITMS.WITHUS.domain.recruitment.entity.Recruitment;
+import KUSITMS.WITHUS.domain.recruitment.repository.RecruitmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +26,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     private final ApplicationRepository applicationRepository;
     private final ApplicantAvailabilityRepository applicantAvailabilityRepository;
-    private final ApplicationTemplateRepository templateRepository;
+    private final RecruitmentRepository recruitmentRepository;
     private final PositionRepository positionRepository;
     private final EvaluationRepository evaluationRepository;
 
@@ -38,7 +38,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional
     public ApplicationResponseDTO.Summary create(ApplicationRequestDTO.Create request) {
-        ApplicationTemplate template = templateRepository.getById(request.templateId());
+        Recruitment recruitment = recruitmentRepository.getById(request.recruitmentId());
         Position position = Optional.ofNullable(request.positionId())
                 .flatMap(positionRepository::findById)
                 .orElse(null);
@@ -52,7 +52,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 request.major(),
                 request.birthDate(),
                 request.imageUrl(),
-                template,
+                recruitment,
                 position
         );
 

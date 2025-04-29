@@ -35,7 +35,7 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
     public List<Application> findByRecruitmentId(Long recruitmentId) {
         return queryFactory
                 .selectFrom(application)
-                .where(application.template.recruitment.id.eq(recruitmentId))
+                .where(application.recruitment.id.eq(recruitmentId))
                 .fetch();
     }
 
@@ -49,7 +49,7 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
         return queryFactory
                 .selectFrom(application)
                 .where(
-                        application.template.recruitment.id.eq(recruitmentId),
+                        application.recruitment.id.eq(recruitmentId),
                         application.status.eq(ApplicationStatus.DOX_PASS)
                 )
                 .fetch();

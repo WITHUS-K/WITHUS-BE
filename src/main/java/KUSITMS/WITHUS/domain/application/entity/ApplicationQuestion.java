@@ -1,6 +1,6 @@
 package KUSITMS.WITHUS.domain.application.entity;
 
-import KUSITMS.WITHUS.domain.application.template.entity.ApplicationTemplate;
+import KUSITMS.WITHUS.domain.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,14 +19,14 @@ public class ApplicationQuestion extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TEMPLATE_ID", nullable = false)
-    private ApplicationTemplate template;
+    @JoinColumn(name = "RECRUITMENT_ID", nullable = false)
+    private Recruitment recruitment;
 
     @Column(nullable = false)
     private String Content;
 
-    public void associateTemplate(ApplicationTemplate template) {
-        this.template = template;
+    public void associateRecruitment(Recruitment recruitment) {
+        this.recruitment = recruitment;
     }
 
 }

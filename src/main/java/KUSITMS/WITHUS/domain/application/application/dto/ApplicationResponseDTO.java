@@ -49,7 +49,7 @@ public class ApplicationResponseDTO {
                     .map(EvaluationResponseDTO.Detail::from)
                     .toList();
 
-            List<KUSITMS.WITHUS.domain.application.comment.dto.CommentResponseDTO.Detail> documentComments = application.getComments().stream()
+            List<CommentResponseDTO.Detail> documentComments = application.getComments().stream()
                     .filter(c -> c.getType() == CommentType.DOCUMENT)
                     .map(CommentResponseDTO.Detail::from)
                     .toList();

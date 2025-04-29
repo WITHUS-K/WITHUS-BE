@@ -41,8 +41,8 @@ public class ApplicationRequestDTO {
             @Schema(description = "이미지 URL", example = "https://cdn.withus.com/image.jpg")
             String imageUrl,
 
-            @Schema(description = "양식 ID", example = "1")
-            @NotNull Long templateId,
+            @Schema(description = "공고 ID", example = "1")
+            @NotNull Long recruitmentId,
 
             @Schema(description = "파트 ID", example = "1")
             Long positionId,
