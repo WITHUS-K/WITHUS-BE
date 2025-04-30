@@ -12,6 +12,9 @@ public class RecruitmentRequestDTO {
 
     @Schema(description = "공고 생성 요청 DTO")
     public record Create (
+            @Schema(description = "공고 ID - null이면 생성, 아니면 수정", example = "1")
+            Long recruitmentId,
+
             @Schema(description = "공고 제목", example = "2025-1 큐시즘 모집")
             @NotBlank String title,
 
@@ -67,7 +70,15 @@ public class RecruitmentRequestDTO {
             @NotNull @Future LocalDate documentResultDate,
 
             @Schema(description = "최종 발표일", example = "2025-06-20")
-            @NotNull @Future LocalDate finalResultDate
+            @NotNull @Future LocalDate finalResultDate,
+
+            @Schema(description = "성별 수집 여부") boolean needGender,
+            @Schema(description = "주소 수집 여부") boolean needAddress,
+            @Schema(description = "학교 수집 여부") boolean needSchool,
+            @Schema(description = "생년월일 수집 여부") boolean needBirthDate,
+            @Schema(description = "학적 상태 수집 여부") boolean needAcademicStatus,
+
+            @Schema(description = "임시 저장 여부") boolean isTemporary
     ) {}
 
 }

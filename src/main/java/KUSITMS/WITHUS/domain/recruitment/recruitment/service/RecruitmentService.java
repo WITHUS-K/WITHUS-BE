@@ -6,7 +6,8 @@ import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
 import java.util.List;
 
 public interface RecruitmentService {
-    RecruitmentResponseDTO.Create create(RecruitmentRequestDTO.Create request);
+    RecruitmentResponseDTO.Create saveDraft(RecruitmentRequestDTO.Create request);
+    RecruitmentResponseDTO.Create publish(RecruitmentRequestDTO.Create request);
     RecruitmentResponseDTO.Detail getById(Long id);
     RecruitmentResponseDTO.Update update(Long id, RecruitmentRequestDTO.Update request);
     void delete(Long id);

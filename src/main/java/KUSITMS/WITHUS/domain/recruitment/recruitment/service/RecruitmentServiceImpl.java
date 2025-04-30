@@ -21,33 +21,25 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     private final OrganizationRepository organizationRepository;
 
     /**
-     * 공고 생성
-     * @param request 공고 요청
-     * @return 생성된 공고 응답
+     * 공고 임시 저장
+     * @param request 저장 DTO
+     * @return 저장된 공고 정보
      */
     @Override
     @Transactional
-    public RecruitmentResponseDTO.Create create(RecruitmentRequestDTO.Create request) {
-        Organization organization = organizationRepository.getById(request.organizationId());
+    public RecruitmentResponseDTO.Create saveDraft(RecruitmentRequestDTO.Create request) {
+        return saveRecruitment(request, true);
+    }
 
-        Recruitment recruitment = Recruitment.create(
-                request.title(),
-                request.content(),
-                request.fileUrl(),
-                request.documentDeadline(),
-                request.documentResultDate(),
-                request.finalResultDate(),
-                organization,
-                request.needGender(),
-                request.needAddress(),
-                request.needSchool(),
-                request.needBirthDate(),
-                request.needAcademicStatus()
-        );
-
-        Recruitment saved = recruitmentRepository.save(recruitment);
-
-        return RecruitmentResponseDTO.Create.from(saved);
+    /**
+     * 공고 최종 저장
+     * @param request 저장 DTO
+     * @return 저장된 공고 정보
+     */
+    @Override
+    @Transactional
+    public RecruitmentResponseDTO.Create publish(RecruitmentRequestDTO.Create request) {
+        return saveRecruitment(request, false);
     }
 
     /**
@@ -79,8 +71,19 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 request.fileUrl(),
                 request.documentDeadline(),
                 request.documentResultDate(),
-                request.finalResultDate()
+                request.finalResultDate(),
+                request.needGender(),
+                request.needAddress(),
+                request.needSchool(),
+                request.needBirthDate(),
+                request.needAcademicStatus()
         );
+
+        if (request.isTemporary()) {
+            recruitment.markAsTemporary();
+        } else {
+            recruitment.markAsFinal();
+        }
 
         return RecruitmentResponseDTO.Update.from(recruitment);
     }
@@ -106,5 +109,56 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         return recruitmentRepository.findAllByKeyword(keyword).stream()
                 .map(RecruitmentResponseDTO.Summary::from)
                 .toList();
+    }
+
+
+    private RecruitmentResponseDTO.Create saveRecruitment(RecruitmentRequestDTO.Create request, boolean isTemporary) {
+        Organization organization = organizationRepository.getById(request.organizationId());
+
+        Recruitment recruitment;
+
+        if (request.recruitmentId() != null) {
+            recruitment = recruitmentRepository.getById(request.recruitmentId());
+
+            recruitment.update(
+                    request.title(),
+                    request.content(),
+                    request.fileUrl(),
+                    request.documentDeadline(),
+                    request.documentResultDate(),
+                    request.finalResultDate(),
+                    request.needGender(),
+                    request.needAddress(),
+                    request.needSchool(),
+                    request.needBirthDate(),
+                    request.needAcademicStatus()
+            );
+
+            if (isTemporary) {
+                recruitment.markAsTemporary();
+            } else {
+                recruitment.markAsFinal();
+            }
+
+        } else {
+            recruitment = Recruitment.create(
+                    request.title(),
+                    request.content(),
+                    request.fileUrl(),
+                    request.documentDeadline(),
+                    request.documentResultDate(),
+                    request.finalResultDate(),
+                    organization,
+                    request.needGender(),
+                    request.needAddress(),
+                    request.needSchool(),
+                    request.needBirthDate(),
+                    request.needAcademicStatus(),
+                    isTemporary
+            );
+        }
+
+        Recruitment saved = recruitmentRepository.save(recruitment);
+        return RecruitmentResponseDTO.Create.from(saved);
     }
 }

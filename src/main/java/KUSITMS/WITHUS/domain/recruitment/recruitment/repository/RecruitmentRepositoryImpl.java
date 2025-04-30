@@ -27,7 +27,10 @@ public class RecruitmentRepositoryImpl implements RecruitmentRepository {
 
     @Override
     public List<Recruitment> findAll() {
-        return recruitmentJpaRepository.findAll();
+        return queryFactory.selectFrom(recruitment)
+                .where(recruitment.isTemporary.isFalse())
+                .orderBy(recruitment.createdAt.desc())
+                .fetch();
     }
 
     @Override
@@ -44,6 +47,7 @@ public class RecruitmentRepositoryImpl implements RecruitmentRepository {
     public List<Recruitment> findAllByKeyword(String keyword) {
         return queryFactory.selectFrom(recruitment)
                 .where(
+                        recruitment.isTemporary.isFalse(),
                         keyword != null && !keyword.isBlank() ?
                                 recruitment.title.containsIgnoreCase(keyword) : null
                 )

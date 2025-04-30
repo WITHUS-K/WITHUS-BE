@@ -62,6 +62,10 @@ public class Recruitment extends BaseEntity {
     @Column(name = "FINAL_RESULT_DATE", nullable = false)
     private LocalDate finalResultDate;
 
+    @Builder.Default
+    @Column(name = "IS_TEMPORARY", nullable = false)
+    private boolean isTemporary = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ORGANIZATION_ID", nullable = false)
     private Organization organization;
@@ -86,7 +90,8 @@ public class Recruitment extends BaseEntity {
             boolean needAddress,
             boolean needSchool,
             boolean needBirthDate,
-            boolean needAcademicStatus
+            boolean needAcademicStatus,
+            boolean isTemporary
     ) {
         return Recruitment.builder()
                 .title(title)
@@ -101,6 +106,7 @@ public class Recruitment extends BaseEntity {
                 .needSchool(needSchool)
                 .needBirthDate(needBirthDate)
                 .needAcademicStatus(needAcademicStatus)
+                .isTemporary(isTemporary)
                 .build();
     }
 
@@ -110,7 +116,12 @@ public class Recruitment extends BaseEntity {
             String fileUrl,
             LocalDate documentDeadline,
             LocalDate documentResultDate,
-            LocalDate finalResultDate
+            LocalDate finalResultDate,
+            boolean needGender,
+            boolean needAddress,
+            boolean needSchool,
+            boolean needBirthDate,
+            boolean needAcademicStatus
     ) {
         this.title = title;
         this.content = content;
@@ -118,9 +129,14 @@ public class Recruitment extends BaseEntity {
         this.documentDeadline = documentDeadline;
         this.documentResultDate = documentResultDate;
         this.finalResultDate = finalResultDate;
+        this.needGender = needGender;
+        this.needAddress = needAddress;
+        this.needSchool = needSchool;
+        this.needBirthDate = needBirthDate;
+        this.needAcademicStatus = needAcademicStatus;
     }
 
-    public void addApplicationQuestion(DocumentQuestion question) {
+    public void addDocumentQuestion(DocumentQuestion question) {
         this.questions.add(question);
         question.associateRecruitment(this);
     }
@@ -128,5 +144,13 @@ public class Recruitment extends BaseEntity {
     public void addEvaluationCriteria(EvaluationCriteria criteria) {
         this.evaluationCriteriaList.add(criteria);
         criteria.associateRecruitment(this);
+    }
+
+    public void markAsFinal() {
+        this.isTemporary = false;
+    }
+
+    public void markAsTemporary() {
+        this.isTemporary = true;
     }
 }
