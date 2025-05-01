@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.dto;
 
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
@@ -33,6 +34,7 @@ public class RecruitmentResponseDTO {
             @Schema(description = "서류 발표일") LocalDate documentResultDate,
             @Schema(description = "최종 발표일") LocalDate finalResultDate,
             @Schema(description = "조직명") String organizationName,
+            @Schema(description = "평가 방식") EvaluationScaleType scaleType,
             @Schema(description = "서류 평가 기준 목록") List<String> documentEvaluationCriteria,
             @Schema(description = "면접 평가 기준 목록") List<String> interviewEvaluationCriteria,
             @Schema(description = "지원서 질문 목록") List<String> applicationQuestions
@@ -61,6 +63,7 @@ public class RecruitmentResponseDTO {
                     recruitment.getDocumentResultDate(),
                     recruitment.getFinalResultDate(),
                     recruitment.getOrganization().getName(),
+                    recruitment.getScaleType(),
                     documentCriteria,
                     interviewCriteria,
                     questions

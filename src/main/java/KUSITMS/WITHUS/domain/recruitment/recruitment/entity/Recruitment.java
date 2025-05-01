@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.entity;
 
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
@@ -24,10 +25,10 @@ public class Recruitment extends BaseEntity {
     @Column(name = "RECRUITMENT_ID")
     private Long id;
 
-    @Column(name = "TITLE", nullable = false)
+    @Column(name = "TITLE")
     private String title;
 
-    @Column(name = "CONTENT", nullable = false, length = 1000)
+    @Column(name = "CONTENT", length = 1000)
     private String content;
 
     @Column(name = "FILE_URL")
@@ -53,18 +54,22 @@ public class Recruitment extends BaseEntity {
     @Column(name = "NEED_ACADEMIC_STATUS", nullable = false)
     private boolean needAcademicStatus = false;
 
-    @Column(name = "DOCUMENT_DEADLINE", nullable = false)
+    @Column(name = "DOCUMENT_DEADLINE")
     private LocalDate documentDeadline;
 
-    @Column(name = "DOCUMENT_RESULT_DATE", nullable = false)
+    @Column(name = "DOCUMENT_RESULT_DATE")
     private LocalDate documentResultDate;
 
-    @Column(name = "FINAL_RESULT_DATE", nullable = false)
+    @Column(name = "FINAL_RESULT_DATE")
     private LocalDate finalResultDate;
 
     @Builder.Default
     @Column(name = "IS_TEMPORARY", nullable = false)
     private boolean isTemporary = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "SCALE_TYPE")
+    private EvaluationScaleType scaleType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ORGANIZATION_ID", nullable = false)
@@ -91,7 +96,8 @@ public class Recruitment extends BaseEntity {
             boolean needSchool,
             boolean needBirthDate,
             boolean needAcademicStatus,
-            boolean isTemporary
+            boolean isTemporary,
+            EvaluationScaleType scaleType
     ) {
         return Recruitment.builder()
                 .title(title)
@@ -107,6 +113,7 @@ public class Recruitment extends BaseEntity {
                 .needBirthDate(needBirthDate)
                 .needAcademicStatus(needAcademicStatus)
                 .isTemporary(isTemporary)
+                .scaleType(scaleType)
                 .build();
     }
 
@@ -121,7 +128,8 @@ public class Recruitment extends BaseEntity {
             boolean needAddress,
             boolean needSchool,
             boolean needBirthDate,
-            boolean needAcademicStatus
+            boolean needAcademicStatus,
+            EvaluationScaleType scaleType
     ) {
         this.title = title;
         this.content = content;
@@ -134,6 +142,7 @@ public class Recruitment extends BaseEntity {
         this.needSchool = needSchool;
         this.needBirthDate = needBirthDate;
         this.needAcademicStatus = needAcademicStatus;
+        this.scaleType = scaleType;
     }
 
     public void addDocumentQuestion(DocumentQuestion question) {

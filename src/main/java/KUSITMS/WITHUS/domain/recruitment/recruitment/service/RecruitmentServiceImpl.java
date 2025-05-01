@@ -76,7 +76,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 request.needAddress(),
                 request.needSchool(),
                 request.needBirthDate(),
-                request.needAcademicStatus()
+                request.needAcademicStatus(),
+                request.scaleType()
         );
 
         if (request.isTemporary()) {
@@ -131,7 +132,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                     request.needAddress(),
                     request.needSchool(),
                     request.needBirthDate(),
-                    request.needAcademicStatus()
+                    request.needAcademicStatus(),
+                    request.scaleType()
             );
 
             if (isTemporary) {
@@ -154,7 +156,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                     request.needSchool(),
                     request.needBirthDate(),
                     request.needAcademicStatus(),
-                    isTemporary
+                    isTemporary,
+                    request.scaleType()
             );
         }
 

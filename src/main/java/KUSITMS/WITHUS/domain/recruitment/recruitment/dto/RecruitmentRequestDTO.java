@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.dto;
 
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
@@ -49,7 +50,10 @@ public class RecruitmentRequestDTO {
             boolean needBirthDate,
 
             @Schema(description = "학적 상태 입력 필요 여부", example = "false")
-            boolean needAcademicStatus
+            boolean needAcademicStatus,
+
+            @Schema(description = "평가 방식", example = "SCORE")
+            EvaluationScaleType scaleType
     ) {}
 
     @Schema(description = "공고 수정 요청 DTO")
@@ -78,7 +82,9 @@ public class RecruitmentRequestDTO {
             @Schema(description = "생년월일 수집 여부") boolean needBirthDate,
             @Schema(description = "학적 상태 수집 여부") boolean needAcademicStatus,
 
-            @Schema(description = "임시 저장 여부") boolean isTemporary
+            @Schema(description = "임시 저장 여부") boolean isTemporary,
+
+            @Schema(description = "평가 방식", example = "FIVE_LEVEL") EvaluationScaleType scaleType
     ) {}
 
 }
