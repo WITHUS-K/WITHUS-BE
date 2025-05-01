@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.domain.recruitment.recruitment.service;
 
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
+import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
@@ -159,6 +160,19 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                     isTemporary,
                     request.scaleType()
             );
+        }
+
+        if (request.availableTimeRanges() != null) {
+            List<AvailableTimeRange> ranges = request.availableTimeRanges().stream()
+                    .map(dto -> AvailableTimeRange.builder()
+                            .date(dto.date())
+                            .startTime(dto.startTime())
+                            .endTime(dto.endTime())
+                            .recruitment(recruitment)
+                            .build())
+                    .toList();
+
+            ranges.forEach(recruitment::addAvailableTimeRange);
         }
 
         Recruitment saved = recruitmentRepository.save(recruitment);

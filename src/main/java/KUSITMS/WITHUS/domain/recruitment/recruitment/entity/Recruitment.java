@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.entity;
 
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
+import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
@@ -75,13 +76,18 @@ public class Recruitment extends BaseEntity {
     @JoinColumn(name = "ORGANIZATION_ID", nullable = false)
     private Organization organization;
 
-    @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EvaluationCriteria> evaluationCriteriaList = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DocumentQuestion> questions = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AvailableTimeRange> availableTimeRanges = new ArrayList<>();
+
 
     public static Recruitment create(
             String title,
@@ -153,6 +159,11 @@ public class Recruitment extends BaseEntity {
     public void addEvaluationCriteria(EvaluationCriteria criteria) {
         this.evaluationCriteriaList.add(criteria);
         criteria.associateRecruitment(this);
+    }
+
+    public void addAvailableTimeRange(AvailableTimeRange range) {
+        this.availableTimeRanges.add(range);
+        range.associateRecruitment(this);
     }
 
     public void markAsFinal() {

@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.dto;
 
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
+import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.dto.AvailableTimeRangeResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
@@ -37,7 +38,8 @@ public class RecruitmentResponseDTO {
             @Schema(description = "평가 방식") EvaluationScaleType scaleType,
             @Schema(description = "서류 평가 기준 목록") List<String> documentEvaluationCriteria,
             @Schema(description = "면접 평가 기준 목록") List<String> interviewEvaluationCriteria,
-            @Schema(description = "지원서 질문 목록") List<String> applicationQuestions
+            @Schema(description = "지원서 질문 목록") List<String> applicationQuestions,
+            @Schema(description = "면접 가능 시간 목록") List<AvailableTimeRangeResponseDTO> availableTimeRanges
     ) {
         public static Detail from(Recruitment recruitment) {
             List<String> documentCriteria = recruitment.getEvaluationCriteriaList().stream()
@@ -54,6 +56,10 @@ public class RecruitmentResponseDTO {
                     .map(DocumentQuestion::getTitle)
                     .toList();
 
+            List<AvailableTimeRangeResponseDTO> timeRanges = recruitment.getAvailableTimeRanges().stream()
+                    .map(AvailableTimeRangeResponseDTO::from)
+                    .toList();
+
             return new Detail(
                     recruitment.getId(),
                     recruitment.getTitle(),
@@ -66,7 +72,8 @@ public class RecruitmentResponseDTO {
                     recruitment.getScaleType(),
                     documentCriteria,
                     interviewCriteria,
-                    questions
+                    questions,
+                    timeRanges
             );
         }
     }

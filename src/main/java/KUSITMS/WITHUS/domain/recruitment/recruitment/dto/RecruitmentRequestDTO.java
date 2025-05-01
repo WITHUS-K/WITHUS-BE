@@ -1,12 +1,14 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.dto;
 
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
+import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.dto.AvailableTimeRangeRequestDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Schema(description = "리크루팅(공고) 관련 요청 DTO")
 public class RecruitmentRequestDTO {
@@ -53,7 +55,10 @@ public class RecruitmentRequestDTO {
             boolean needAcademicStatus,
 
             @Schema(description = "평가 방식", example = "SCORE")
-            EvaluationScaleType scaleType
+            EvaluationScaleType scaleType,
+
+            @Schema(description = "면접 가능 시간 목록")
+            List<AvailableTimeRangeRequestDTO> availableTimeRanges
     ) {}
 
     @Schema(description = "공고 수정 요청 DTO")
@@ -84,7 +89,10 @@ public class RecruitmentRequestDTO {
 
             @Schema(description = "임시 저장 여부") boolean isTemporary,
 
-            @Schema(description = "평가 방식", example = "FIVE_LEVEL") EvaluationScaleType scaleType
+            @Schema(description = "평가 방식", example = "FIVE_LEVEL") EvaluationScaleType scaleType,
+
+            @Schema(description = "면접 가능 시간 목록")
+            List<AvailableTimeRangeRequestDTO> availableTimeRanges
     ) {}
 
 }
