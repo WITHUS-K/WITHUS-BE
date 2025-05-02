@@ -43,6 +43,7 @@ public class UserController {
     }
 
     @PostMapping("/reset-password")
+    @Operation(summary = "비밀번호 재설정 API")
     public SuccessResponse<String> resetPassword(@RequestBody @Valid UserRequestDTO.ResetPassword request) {
         userService.resetPassword(request.email(), request.newPassword());
         return SuccessResponse.ok("비밀번호 재설정이 완료되었습니다.");
