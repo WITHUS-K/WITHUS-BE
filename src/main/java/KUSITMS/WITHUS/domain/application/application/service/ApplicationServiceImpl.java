@@ -8,10 +8,12 @@ import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailabili
 import KUSITMS.WITHUS.domain.application.availability.repository.ApplicantAvailabilityRepository;
 import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.application.position.repository.PositionRepository;
-import KUSITMS.WITHUS.domain.application.template.entity.ApplicationTemplate;
-import KUSITMS.WITHUS.domain.application.template.repository.ApplicationTemplateRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +28,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     private final ApplicationRepository applicationRepository;
     private final ApplicantAvailabilityRepository applicantAvailabilityRepository;
-    private final ApplicationTemplateRepository templateRepository;
+    private final RecruitmentRepository recruitmentRepository;
     private final PositionRepository positionRepository;
     private final EvaluationRepository evaluationRepository;
 
@@ -38,10 +40,12 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional
     public ApplicationResponseDTO.Summary create(ApplicationRequestDTO.Create request) {
-        ApplicationTemplate template = templateRepository.getById(request.templateId());
+        Recruitment recruitment = recruitmentRepository.getById(request.recruitmentId());
         Position position = Optional.ofNullable(request.positionId())
                 .flatMap(positionRepository::findById)
                 .orElse(null);
+
+        validateRequiredFields(recruitment, request);
 
         Application application = Application.create(
                 request.name(),
@@ -52,7 +56,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 request.major(),
                 request.birthDate(),
                 request.imageUrl(),
-                template,
+                recruitment,
                 position
         );
 
@@ -116,5 +120,21 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .toList();
 
         applications.forEach(app -> app.updateStatus(request.status()));
+    }
+
+
+    private void validateRequiredFields(Recruitment recruitment, ApplicationRequestDTO.Create request) {
+        if (recruitment.isNeedGender() && request.gender() == null) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+        if (recruitment.isNeedSchool() && request.university() == null) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+        if (recruitment.isNeedBirthDate() && request.birthDate() == null) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+        if (recruitment.isNeedAcademicStatus() && request.major() == null) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
     }
 }

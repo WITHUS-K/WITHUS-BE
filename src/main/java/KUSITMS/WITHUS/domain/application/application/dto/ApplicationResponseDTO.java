@@ -8,6 +8,8 @@ import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.application.interviewQuestion.dto.InterviewQuestionResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.dto.EvaluationResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
+import KUSITMS.WITHUS.global.common.annotation.DateFormat;
+import KUSITMS.WITHUS.global.common.annotation.TimeFormat;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -27,10 +29,10 @@ public class ApplicationResponseDTO {
             @Schema(description = "전화번호") String phoneNumber,
             @Schema(description = "대학명") String university,
             @Schema(description = "전공") String major,
-            @Schema(description = "생년월일") LocalDate birthDate,
+            @Schema(description = "생년월일") @DateFormat LocalDate birthDate,
             @Schema(description = "이미지 URL") String imageUrl,
             @Schema(description = "상태") ApplicationStatus status,
-            @Schema(description = "면접 가능 시간") List<LocalDateTime> availableTimes,
+            @Schema(description = "면접 가능 시간") @TimeFormat List<LocalDateTime> availableTimes,
             @Schema(description = "면접 질문 목록") List<InterviewQuestionResponseDTO.Detail> interviewQuestions,
             @Schema(description = "면접 평가 목록") List<EvaluationResponseDTO.Detail> evaluations,
             @Schema(description = "서류 코맨트 목록") List<CommentResponseDTO.Detail> documentComments,
@@ -49,7 +51,7 @@ public class ApplicationResponseDTO {
                     .map(EvaluationResponseDTO.Detail::from)
                     .toList();
 
-            List<KUSITMS.WITHUS.domain.application.comment.dto.CommentResponseDTO.Detail> documentComments = application.getComments().stream()
+            List<CommentResponseDTO.Detail> documentComments = application.getComments().stream()
                     .filter(c -> c.getType() == CommentType.DOCUMENT)
                     .map(CommentResponseDTO.Detail::from)
                     .toList();

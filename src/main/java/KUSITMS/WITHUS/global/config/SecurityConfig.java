@@ -30,6 +30,7 @@ public class SecurityConfig {
             "/api/v1/auth/**",
             "/api/v1/users/**",
             "/api/v1/organizations/search",
+            "/api/v1/**",
     };
 
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
