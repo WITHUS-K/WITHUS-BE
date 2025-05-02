@@ -11,6 +11,6 @@ public record ApplicationAnswerRequestDTO(
         @Schema(description = "답변 내용", example = "저는 ~한 이유로 큐시즘에 지원했습니다.")
         String answerText,
 
-        @Schema(description = "파일 URL", example = "https://cdn.withus.com/profile.pdf")
-        String fileUrl
+        @Schema(description = "파일명", example = "profile.pdf")
+        String fileName
 ) {}
