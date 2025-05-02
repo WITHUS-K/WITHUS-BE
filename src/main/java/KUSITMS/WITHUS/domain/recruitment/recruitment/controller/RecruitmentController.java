@@ -23,7 +23,7 @@ public class RecruitmentController {
     @PostMapping("/draft")
     @Operation(summary = "리크루팅 임시 저장", description = "임시 저장 상태의 공고를 생성하거나 수정합니다. recruitmentId가 존재하면 수정, null이면 생성합니다.")
     public SuccessResponse<RecruitmentResponseDTO.Create> saveDraft(
-            @Valid @RequestBody RecruitmentRequestDTO.Create request
+            @Valid @RequestBody RecruitmentRequestDTO.Upsert request
     ) {
         RecruitmentResponseDTO.Create result = recruitmentService.saveDraft(request);
         return SuccessResponse.ok(result);
@@ -32,7 +32,7 @@ public class RecruitmentController {
     @PostMapping("/publish")
     @Operation(summary = "리크루팅 최종 저장", description = "최종 저장 상태의 공고를 생성하거나 임시 저장된 공고를 최종 저장 상태로 저장합니다. recruitmentId가 존재하면 수정, null이면 생성합니다.")
     public SuccessResponse<RecruitmentResponseDTO.Create> publish(
-            @Valid @RequestBody RecruitmentRequestDTO.Create request
+            @Valid @RequestBody RecruitmentRequestDTO.Upsert request
     ) {
         RecruitmentResponseDTO.Create result = recruitmentService.publish(request);
         return SuccessResponse.ok(result);
