@@ -5,6 +5,8 @@ import KUSITMS.WITHUS.domain.interview.enumerate.InterviewRole;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
+import KUSITMS.WITHUS.global.common.annotation.DateFormat;
+import KUSITMS.WITHUS.global.common.annotation.TimeFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
@@ -14,9 +16,9 @@ import java.util.stream.Collectors;
 
 @Schema(description = "면접 타임슬롯 및 배정된 지원자 정보")
 public record InterviewScheduleDTO(
-        @Schema(description = "면접 일자") LocalDate date,
-        @Schema(description = "시작 시간") LocalTime startTime,
-        @Schema(description = "종료 시간") LocalTime endTime,
+        @Schema(description = "면접 일자") @DateFormat LocalDate date,
+        @Schema(description = "시작 시간") @TimeFormat LocalTime startTime,
+        @Schema(description = "종료 시간") @TimeFormat LocalTime endTime,
         @Schema(description = "지원자 목록") List<ApplicantInfo> applicants,
         @Schema(description = "면접관 목록") List<UserResponseDTO.SummaryForTimeSlot> interviewers,
         @Schema(description = "안내자 목록") List<UserResponseDTO.SummaryForTimeSlot> assistants
@@ -68,9 +70,9 @@ public record InterviewScheduleDTO(
     @Schema(description = "내 면접 시간 응답 DTO")
     public record MyInterviewTimeDTO(
             @Schema(description = "면접 ID") Long interviewId,
-            @Schema(description = "면접 날짜") LocalDate date,
-            @Schema(description = "시작 시간") LocalTime startTime,
-            @Schema(description = "종료 시간") LocalTime endTime
+            @Schema(description = "면접 날짜") @DateFormat LocalDate date,
+            @Schema(description = "시작 시간") @TimeFormat LocalTime startTime,
+            @Schema(description = "종료 시간") @TimeFormat LocalTime endTime
     ) {
         public static MyInterviewTimeDTO from(TimeSlot timeSlot) {
             return new MyInterviewTimeDTO(
