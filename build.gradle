@@ -59,6 +59,9 @@ dependencies {
 	// Coolsms
 	implementation 'net.nurigo:sdk:4.3.0'
 
+	// AWS SDK
+	implementation 'software.amazon.awssdk:s3:2.20.40'
+
 }
 
 tasks.named('test') {

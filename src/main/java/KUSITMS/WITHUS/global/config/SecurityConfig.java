@@ -12,6 +12,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -29,7 +30,7 @@ public class SecurityConfig {
             "/",
             "/api/v1/auth/**",
             "/api/v1/users/**",
-            "/api/v1/organizations/search",
+            "/api/v1/organizations/search"
     };
 
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
@@ -57,34 +58,26 @@ public class SecurityConfig {
         LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), refreshTokenCacheUtil, jwtUtil);
         loginFilter.setFilterProcessesUrl("/api/v1/auth/login");
 
-        http
-                .cors(Customizer.withDefaults());
+        http.cors(Customizer.withDefaults());
 
-        http
-                .csrf((auth) -> auth.disable());
+        http.csrf(AbstractHttpConfigurer::disable);
 
-        http
-                .formLogin((auth) -> auth.disable());
+        http.formLogin(AbstractHttpConfigurer::disable);
 
-        http
-                .httpBasic((auth) -> auth.disable());
+        http.httpBasic(AbstractHttpConfigurer::disable);
 
-        http
-                .authorizeHttpRequests((auth) -> auth
+        http.authorizeHttpRequests((auth) -> auth
                         .requestMatchers(allowedUrls).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated());
 
         //JWTFilter 등록
-        http
-                .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class);
+        http.addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class);
 
         //필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager() 메소드에 authenticationConfiguration 객체를 넣어야 함) 따라서 등록 필요
-        http
-                .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
 
-        http
-                .sessionManagement((session) -> session
+        http.sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();

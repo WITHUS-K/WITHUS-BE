@@ -1,12 +1,11 @@
 package KUSITMS.WITHUS.domain.interview.interviewAvailabiliy.service;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
-import KUSITMS.WITHUS.domain.application.template.entity.ApplicationTemplate;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.interview.repository.InterviewRepository;
 import KUSITMS.WITHUS.domain.interview.interviewAvailabiliy.entity.InterviewerAvailability;
 import KUSITMS.WITHUS.domain.interview.interviewAvailabiliy.repository.InterviewerAvailabilityRepository;
-import KUSITMS.WITHUS.domain.recruitment.entity.Recruitment;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
@@ -37,11 +36,10 @@ public class InterviewerAvailabilityServiceImpl implements InterviewerAvailabili
     public List<InterviewerAvailability> registerAvailability(Long interviewId, User user, List<LocalDateTime> times) {
         Interview interview = interviewRepository.getById(interviewId);
 
-        ApplicationTemplate template = interview.getApplications().stream()
+        Recruitment recruitment = interview.getApplications().stream()
                 .findFirst()
-                .map(Application::getTemplate)
-                .orElseThrow(() -> new CustomException(ErrorCode.TEMPLATE_NOT_EXIST));
-        Recruitment recruitment = template.getRecruitment();
+                .map(Application::getRecruitment)
+                .orElseThrow(() -> new CustomException(ErrorCode.RECRUITMENT_NOT_EXIST));
 
         boolean isManager = recruitment.getOrganization().getUserOrganizations().stream()
                 .anyMatch(uo -> uo.getUser().getId().equals(user.getId()));

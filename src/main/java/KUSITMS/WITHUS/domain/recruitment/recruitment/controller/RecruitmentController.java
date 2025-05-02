@@ -1,0 +1,73 @@
+package KUSITMS.WITHUS.domain.recruitment.recruitment.controller;
+
+import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.service.RecruitmentService;
+import KUSITMS.WITHUS.global.response.SuccessResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@Tag(name = "공고(리크루팅) Controller")
+@RequestMapping("/api/v1/recruitments")
+public class RecruitmentController {
+
+    private final RecruitmentService recruitmentService;
+
+    @PostMapping("/draft")
+    @Operation(summary = "리크루팅 임시 저장", description = "임시 저장 상태의 공고를 생성하거나 수정합니다. recruitmentId가 존재하면 수정, null이면 생성합니다.")
+    public SuccessResponse<RecruitmentResponseDTO.Create> saveDraft(
+            @Valid @RequestBody RecruitmentRequestDTO.Upsert request
+    ) {
+        RecruitmentResponseDTO.Create result = recruitmentService.saveDraft(request);
+        return SuccessResponse.ok(result);
+    }
+
+    @PostMapping("/publish")
+    @Operation(summary = "리크루팅 최종 저장", description = "최종 저장 상태의 공고를 생성하거나 임시 저장된 공고를 최종 저장 상태로 저장합니다. recruitmentId가 존재하면 수정, null이면 생성합니다.")
+    public SuccessResponse<RecruitmentResponseDTO.Create> publish(
+            @Valid @RequestBody RecruitmentRequestDTO.Upsert request
+    ) {
+        RecruitmentResponseDTO.Create result = recruitmentService.publish(request);
+        return SuccessResponse.ok(result);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "리크루팅 단건 상세 조회")
+    public SuccessResponse<RecruitmentResponseDTO.Detail> getById(@PathVariable Long id) {
+        RecruitmentResponseDTO.Detail result = recruitmentService.getById(id);
+        return SuccessResponse.ok(result);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "리크루팅 수정")
+    public SuccessResponse<RecruitmentResponseDTO.Update> update(
+            @PathVariable Long id,
+            @Valid @RequestBody RecruitmentRequestDTO.Update request
+    ) {
+        RecruitmentResponseDTO.Update result = recruitmentService.update(id, request);
+        return SuccessResponse.ok(result);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "리크루팅 삭제")
+    public SuccessResponse<String> delete(@PathVariable Long id) {
+        recruitmentService.delete(id);
+        return SuccessResponse.ok("리크루팅 삭제에 성공하였습니다.");
+    }
+
+    @GetMapping
+    @Operation(summary = "리크루팅 목록 조회 및 검색", description = "공고의 title을 기준으로 keyword를 검색합니다. keyword가 없으면 전체 조회합니다.")
+    public SuccessResponse<List<RecruitmentResponseDTO.Summary>> getAllByKeyword(
+            @RequestParam(required = false) String keyword
+    ) {
+        List<RecruitmentResponseDTO.Summary> result = recruitmentService.getAllByKeyword(keyword);
+        return SuccessResponse.ok(result);
+    }
+}

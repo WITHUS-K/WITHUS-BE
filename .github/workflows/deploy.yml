@@ -86,4 +86,7 @@ jobs:
               "${{ secrets.COOLSMS_API_SECRET }}" \
               "${{ secrets.COOLSMS_SENDER_NUMBER }}" \
               "${{ secrets.DOCKERHUB_USERNAME }}" \
+              "${{ secrets.BUCKET_NAME }}" \
+              "${{ secrets.NCP_OS_ACCESS_KEY }}" \
+              "${{ secrets.NCP_OS_SECRET_KEY }}" \
               "${{ secrets.DOCKERHUB_USERNAME }}/withus:latest"

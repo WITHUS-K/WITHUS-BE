@@ -70,17 +70,18 @@ public enum ErrorCode {
     RECRUITMENT_ALREADY_EXIST("RECRUITMENT400", "이미 존재하는 공고입니다.", HttpStatus.BAD_REQUEST),
     RECRUITMENT_NOT_EXIST("RECRUITMENT404", "존재하지 않는 공고입니다.", HttpStatus.NOT_FOUND),
 
+    // DocumentQuestion (지원서 서류 질문)
+    DOCUMENT_QUESTION_ALREADY_EXIST("DOCUMENT_QUESTION400", "이미 존재하는 지원서 질문입니다.", HttpStatus.BAD_REQUEST),
+    DOCUMENT_QUESTION_NOT_EXIST("DOCUMENT_QUESTION404", "존재하지 않는 지원서 질문입니다.", HttpStatus.NOT_FOUND),
+
     // Position (파트)
     POSITION_ALREADY_EXIST("POSITION400", "이미 해당 파트가 존재합니다.", HttpStatus.BAD_REQUEST),
     POSITION_NOT_EXIST("POSITION404", "존재하지 않는 파트입니다.", HttpStatus.NOT_FOUND),
 
-    // Application Template (지원서 양식)
-    TEMPLATE_ALREADY_EXIST("TEMPLATE400", "이미 존재하는 지원서 양식입니다.", HttpStatus.BAD_REQUEST),
-    TEMPLATE_NOT_EXIST("TEMPLATE404", "존재하지 않는 지원서 양식입니다.", HttpStatus.NOT_FOUND),
-
     // Application (지원서)
     APPLICATION_ALREADY_EXIST("APPLICATION400", "이미 존재하는 지원서입니다.", HttpStatus.BAD_REQUEST),
     APPLICATION_NOT_EXIST("APPLICATION404", "존재하지 않는 지원서입니다.", HttpStatus.NOT_FOUND),
+    REQUIRED_FIELD_MISSING("APPLICATION400", "필수 입력값이 누락되었습니다.", HttpStatus.BAD_REQUEST),
 
     // Interview (면접)
     INTERVIEW_ALREADY_EXIST("INTERVIEW400", "이미 존재하는 면접입니다.", HttpStatus.BAD_REQUEST),
@@ -113,8 +114,11 @@ public enum ErrorCode {
     NOT_VERIFIED("VERIFICATION403", "인증이 완료되지 않았습니다.", HttpStatus.FORBIDDEN),
     EMAIL_SEND_FAIL("EMAIL500", "메일 전송에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     EMAIL_AUTH_FAIL("EMAIL401", "이메일 인증에 실패했습니다.", HttpStatus.UNAUTHORIZED),
-    EMAIL_REQUEST_LIMIT_EXCEEDED("EMAIL429", "5분 후 다시 시도해주세요.", HttpStatus.TOO_MANY_REQUESTS);
+    EMAIL_REQUEST_LIMIT_EXCEEDED("EMAIL429", "5분 후 다시 시도해주세요.", HttpStatus.TOO_MANY_REQUESTS),
 
+    // File Upload
+    FILE_UPLOAD_FAIL("FILE500", "파일 업로드에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_IO_ERROR("FILE500", "파일 처리 중 I/O 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String errorCode;
     private final String message;

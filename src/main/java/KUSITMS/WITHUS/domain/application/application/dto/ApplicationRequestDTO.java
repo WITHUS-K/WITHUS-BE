@@ -20,14 +20,14 @@ public class ApplicationRequestDTO {
             @Schema(description = "지원자 이름", example = "김김김")
             @NotBlank String name,
 
-            @Schema(description = "성별", example = "MALE")
-            @NotNull Gender gender,
-
             @Schema(description = "이메일", example = "test@example.com")
             @NotBlank @Email String email,
 
             @Schema(description = "전화번호", example = "01012341234")
             @NotBlank String phoneNumber,
+
+            @Schema(description = "성별", example = "MALE")
+            @NotNull Gender gender,
 
             @Schema(description = "대학명", example = "상명대학교")
             String university,
@@ -36,13 +36,14 @@ public class ApplicationRequestDTO {
             String major,
 
             @Schema(description = "생년월일", example = "2000-01-01")
+            @NotBlank
             LocalDate birthDate,
 
             @Schema(description = "이미지 URL", example = "https://cdn.withus.com/image.jpg")
             String imageUrl,
 
-            @Schema(description = "양식 ID", example = "1")
-            @NotNull Long templateId,
+            @Schema(description = "공고 ID", example = "1")
+            @NotNull Long recruitmentId,
 
             @Schema(description = "파트 ID", example = "1")
             Long positionId,
