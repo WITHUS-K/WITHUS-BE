@@ -28,7 +28,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     @Transactional
-    public RecruitmentResponseDTO.Create saveDraft(RecruitmentRequestDTO.Create request) {
+    public RecruitmentResponseDTO.Create saveDraft(RecruitmentRequestDTO.Upsert request) {
         return saveRecruitment(request, true);
     }
 
@@ -39,7 +39,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     @Transactional
-    public RecruitmentResponseDTO.Create publish(RecruitmentRequestDTO.Create request) {
+    public RecruitmentResponseDTO.Create publish(RecruitmentRequestDTO.Upsert request) {
         return saveRecruitment(request, false);
     }
 
@@ -114,7 +114,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     }
 
 
-    private RecruitmentResponseDTO.Create saveRecruitment(RecruitmentRequestDTO.Create request, boolean isTemporary) {
+    private RecruitmentResponseDTO.Create saveRecruitment(RecruitmentRequestDTO.Upsert request, boolean isTemporary) {
         Organization organization = organizationRepository.getById(request.organizationId());
 
         Recruitment recruitment;

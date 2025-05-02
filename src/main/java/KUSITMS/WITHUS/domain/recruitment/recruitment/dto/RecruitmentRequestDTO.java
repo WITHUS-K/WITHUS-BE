@@ -14,7 +14,7 @@ import java.util.List;
 public class RecruitmentRequestDTO {
 
     @Schema(description = "공고 생성 요청 DTO")
-    public record Create (
+    public record Upsert (
             @Schema(description = "공고 ID - null이면 생성, 아니면 수정", example = "1")
             Long recruitmentId,
 
