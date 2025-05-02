@@ -4,12 +4,16 @@ import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
+import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
+import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.ApplicationAnswerRepository;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.availability.repository.ApplicantAvailabilityRepository;
 import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.application.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
+import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
+import KUSITMS.WITHUS.domain.recruitment.documentQuestion.repository.DocumentQuestionRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
@@ -19,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,6 +37,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final RecruitmentRepository recruitmentRepository;
     private final PositionRepository positionRepository;
     private final EvaluationRepository evaluationRepository;
+    private final DocumentQuestionRepository documentQuestionRepository;
+    private final ApplicationAnswerRepository applicationAnswerRepository;
 
     /**
      * 지원서 생성
@@ -62,11 +70,25 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         Application savedApplication = applicationRepository.save(application);
 
+        // 면접 가능 시간 저장
         List<ApplicantAvailability> availabilities = request.availableTimes().stream()
                 .map(time -> ApplicantAvailability.of(savedApplication, time))
                 .toList();
 
         applicantAvailabilityRepository.saveAll(availabilities);
+
+        // 질문 답변 저장
+        List<DocumentQuestion> questions = documentQuestionRepository.findByRecruitment(recruitment);
+        Map<Long, DocumentQuestion> questionMap = questions.stream()
+                .collect(Collectors.toMap(DocumentQuestion::getId, q -> q));
+
+        List<ApplicationAnswer> answers = request.answers().stream()
+                .map(dto -> {
+                    DocumentQuestion question = questionMap.get(dto.questionId());
+                    return ApplicationAnswer.create(savedApplication, question, dto.answerText(), dto.fileUrl());
+                }).toList();
+
+        applicationAnswerRepository.saveAll(answers);
 
         return ApplicationResponseDTO.Summary.from(savedApplication);
     }

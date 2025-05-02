@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.application.application.dto;
 
+import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerRequestDTO;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,7 +37,6 @@ public class ApplicationRequestDTO {
             String major,
 
             @Schema(description = "생년월일", example = "2000-01-01")
-            @NotBlank
             LocalDate birthDate,
 
             @Schema(description = "이미지 URL", example = "https://cdn.withus.com/image.jpg")
@@ -47,6 +47,9 @@ public class ApplicationRequestDTO {
 
             @Schema(description = "파트 ID", example = "1")
             Long positionId,
+
+            @Schema(description = "지원서 질문 답변 목록")
+            List<ApplicationAnswerRequestDTO> answers,
 
             @Schema(description = "면접 가능 시간", example = "[\"2025-04-22T10:00:00\", \"2025-04-23T14:30:00\"]")
             @NotNull List<LocalDateTime> availableTimes
