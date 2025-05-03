@@ -5,5 +5,5 @@ import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import java.util.List;
 
 public interface TimeSlotService {
-    List<ApplicationResponseDTO.Detail> getApplicationsByTimeSlot(Long timeSlotId);
+    List<ApplicationResponseDTO.DetailForTimeSlot> getApplicationsByTimeSlotFilteredByUser(Long timeSlotId, Long currentUserId);
 }

@@ -4,6 +4,7 @@ import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerResponseDTO;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.comment.dto.CommentResponseDTO;
+import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.application.comment.enumerate.CommentType;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.application.interviewQuestion.dto.InterviewQuestionResponseDTO;
@@ -106,4 +107,55 @@ public class ApplicationResponseDTO {
             );
         }
     }
+
+    @Schema(description = "간단한 지원서 응답 DTO")
+    public record DetailForTimeSlot(
+            @Schema(description = "지원서 ID") Long id,
+            @Schema(description = "지원자 이름") String name,
+            @Schema(description = "상태") ApplicationStatus status,
+            @Schema(description = "지원서 항목 질문 및 답변 목록") List<ApplicationAnswerResponseDTO> documentAnswers,
+            @Schema(description = "면접 질문 목록") List<InterviewQuestionResponseDTO.Detail> interviewQuestions,
+            @Schema(description = "면접 평가 목록") List<EvaluationResponseDTO.Detail> evaluations,
+            @Schema(description = "서류 코맨트 목록") List<CommentResponseDTO.Detail> documentComments,
+            @Schema(description = "면접 코맨트 목록") List<CommentResponseDTO.Detail> interviewComments
+    ) {
+        public static DetailForTimeSlot from(
+                Application application,
+                List<Evaluation> evaluationList,
+                List<Comment> documentComments,
+                List<Comment> interviewComments
+        ) {
+            List<ApplicationAnswerResponseDTO> documentAnswers = application.getAnswers().stream()
+                    .map(ApplicationAnswerResponseDTO::from)
+                    .toList();
+
+            List<InterviewQuestionResponseDTO.Detail> questions = application.getInterviewQuestions().stream()
+                    .map(InterviewQuestionResponseDTO.Detail::from)
+                    .toList();
+
+            List<EvaluationResponseDTO.Detail> evaluations = evaluationList.stream()
+                    .map(EvaluationResponseDTO.Detail::from)
+                    .toList();
+
+            List<CommentResponseDTO.Detail> documentCommentDTOs = documentComments.stream()
+                    .map(CommentResponseDTO.Detail::from)
+                    .toList();
+
+            List<CommentResponseDTO.Detail> interviewCommentDTOs = interviewComments.stream()
+                    .map(CommentResponseDTO.Detail::from)
+                    .toList();
+
+            return new DetailForTimeSlot(
+                    application.getId(),
+                    application.getName(),
+                    application.getStatus(),
+                    documentAnswers,
+                    questions,
+                    evaluations,
+                    documentCommentDTOs,
+                    interviewCommentDTOs
+            );
+        }
+    }
+
 }
