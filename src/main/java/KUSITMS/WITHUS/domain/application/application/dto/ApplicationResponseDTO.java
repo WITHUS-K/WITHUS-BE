@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.application.application.dto;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
+import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerResponseDTO;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.comment.dto.CommentResponseDTO;
 import KUSITMS.WITHUS.domain.application.comment.enumerate.CommentType;
@@ -32,6 +33,7 @@ public class ApplicationResponseDTO {
             @Schema(description = "생년월일") @DateFormat LocalDate birthDate,
             @Schema(description = "이미지 URL") String imageUrl,
             @Schema(description = "상태") ApplicationStatus status,
+            @Schema(description = "지원서 항목 질문 및 답변 목록") List<ApplicationAnswerResponseDTO> documentAnswers,
             @Schema(description = "면접 가능 시간") @TimeFormat List<LocalDateTime> availableTimes,
             @Schema(description = "면접 질문 목록") List<InterviewQuestionResponseDTO.Detail> interviewQuestions,
             @Schema(description = "면접 평가 목록") List<EvaluationResponseDTO.Detail> evaluations,
@@ -39,6 +41,10 @@ public class ApplicationResponseDTO {
             @Schema(description = "면접 코맨트 목록") List<CommentResponseDTO.Detail> interviewComments
     ) {
         public static Detail from(Application application, List<ApplicantAvailability> availabilityList, List<Evaluation> evaluationList) {
+            List<ApplicationAnswerResponseDTO> documentAnswers = application.getAnswers().stream()
+                    .map(ApplicationAnswerResponseDTO::from)
+                    .toList();
+
             List<LocalDateTime> times = availabilityList.stream()
                     .map(ApplicantAvailability::getAvailableTime)
                     .toList();
@@ -72,6 +78,7 @@ public class ApplicationResponseDTO {
                     application.getBirthDate(),
                     application.getImageUrl(),
                     application.getStatus(),
+                    documentAnswers,
                     times,
                     questions,
                     evaluations,

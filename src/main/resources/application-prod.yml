@@ -9,6 +9,11 @@ spring:
     hibernate:
       ddl-auto: create
 
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
+
   jwt:
     secret: ${JWT_SECRET}
 

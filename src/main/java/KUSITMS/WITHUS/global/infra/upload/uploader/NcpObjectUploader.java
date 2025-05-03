@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.global.infra.upload;
+package KUSITMS.WITHUS.global.infra.upload.uploader;
 
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.sync.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
@@ -27,20 +28,22 @@ public class NcpObjectUploader implements Uploader {
     private String endpoint;
 
     @Override
-    public String upload(MultipartFile file) {
+    public String upload(MultipartFile file, String pathPrefix) {
         try {
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            String key = (pathPrefix != null ? pathPrefix : "") + fileName;
 
             PutObjectRequest request = PutObjectRequest.builder()
                     .bucket(bucketName)
-                    .key(fileName)
+                    .key(key)
                     .contentType(file.getContentType())
+                    .acl(ObjectCannedACL.PUBLIC_READ)
                     .build();
 
             PutObjectResponse response = s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
 
             if (response.sdkHttpResponse().isSuccessful()) {
-                return endpoint + "/" + bucketName + "/" + fileName;
+                return String.format("%s/%s/%s", endpoint, bucketName, key);
             } else {
                 throw new CustomException(ErrorCode.FILE_UPLOAD_FAIL);
             }

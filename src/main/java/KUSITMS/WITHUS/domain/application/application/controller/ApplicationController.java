@@ -5,10 +5,15 @@ import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.service.ApplicationService;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,12 +25,16 @@ public class ApplicationController {
 
     private final ApplicationService applicationService;
 
-    @PostMapping
+    @RequestBody(content = @Content(
+            encoding = @Encoding(name = "request", contentType = MediaType.APPLICATION_JSON_VALUE)))
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "지원서 생성", description = "사용자로부터 받은 정보를 바탕으로 지원서를 생성합니다.")
     public SuccessResponse<ApplicationResponseDTO.Summary> create(
-            @Valid @RequestBody ApplicationRequestDTO.Create request
+            @RequestPart(value = "request") @Valid ApplicationRequestDTO.Create request,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
-        return SuccessResponse.ok(applicationService.create(request));
+        return SuccessResponse.ok(applicationService.create(request, profileImage, files));
     }
 
     @PostMapping("/bulk")
@@ -34,7 +43,7 @@ public class ApplicationController {
             @Valid @RequestBody List<ApplicationRequestDTO.Create> requests
     ) {
         List<ApplicationResponseDTO.Summary> responses = requests.stream()
-                .map(applicationService::create)
+                .map(req -> applicationService.create(req, null, null))
                 .toList();
 
         return SuccessResponse.ok(responses);
