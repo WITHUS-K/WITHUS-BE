@@ -19,14 +19,13 @@ import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
-import KUSITMS.WITHUS.global.infra.upload.NcpObjectUploader;
+import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,7 +43,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final EvaluationRepository evaluationRepository;
     private final DocumentQuestionRepository documentQuestionRepository;
     private final ApplicationAnswerRepository applicationAnswerRepository;
-    private final NcpObjectUploader uploader;
+    private final FileUploadService fileUploadService;
 
     /**
      * 지원서 생성
@@ -61,14 +60,15 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         validateRequiredFields(recruitment, request);
 
-        String imageUrl = uploadProfileImage(profileImage);
-
-        Application application = createApplication(request, imageUrl, recruitment, position);
+        Application application = createApplication(request, recruitment, position);
         Application savedApplication = applicationRepository.save(application);
+
+        String imageUrl = fileUploadService.uploadProfileImage(profileImage, recruitment.getOrganization().getId(), recruitment.getId(), savedApplication.getId());
+        savedApplication.updateImageUrl(imageUrl);
 
         saveApplicantAvailabilities(savedApplication, request.availableTimes());
 
-        Map<String, String> uploadedFileUrls = uploadFiles(files);
+        Map<String, String> uploadedFileUrls = fileUploadService.uploadAnswerFiles(files, recruitment.getOrganization().getId(), recruitment.getId(), savedApplication.getId());
 
         saveApplicationAnswers(savedApplication, recruitment, request, uploadedFileUrls);
 
@@ -142,25 +142,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
     }
 
-    private Map<String, String> uploadFiles(List<MultipartFile> files) {
-        Map<String, String> uploadedFileUrls = new HashMap<>();
-        if (files != null) {
-            for (MultipartFile file : files) {
-                String url = uploader.upload(file);
-                uploadedFileUrls.put(file.getOriginalFilename(), url);
-            }
-        }
-        return uploadedFileUrls;
-    }
-
-    private String uploadProfileImage(MultipartFile profileImage) {
-        if (profileImage != null && !profileImage.isEmpty()) {
-            return uploader.upload(profileImage);
-        }
-        return null;
-    }
-
-    private Application createApplication(ApplicationRequestDTO.Create request, String imageUrl, Recruitment recruitment, Position position) {
+    private Application createApplication(ApplicationRequestDTO.Create request, Recruitment recruitment, Position position) {
         return Application.create(
                 request.name(),
                 request.gender(),
@@ -169,7 +151,6 @@ public class ApplicationServiceImpl implements ApplicationService {
                 request.university(),
                 request.major(),
                 request.birthDate(),
-                imageUrl,
                 recruitment,
                 position
         );

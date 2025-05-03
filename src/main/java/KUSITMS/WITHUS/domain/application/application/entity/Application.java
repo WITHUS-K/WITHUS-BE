@@ -101,7 +101,7 @@ public class Application extends BaseEntity {
 
     public static Application create(
             String name, Gender gender, String email, String phoneNumber, String university, String major,
-            LocalDate birthDate, String imageUrl, Recruitment recruitment, Position position
+            LocalDate birthDate, Recruitment recruitment, Position position
     ) {
         return Application.builder()
                 .name(name)
@@ -111,11 +111,14 @@ public class Application extends BaseEntity {
                 .university(university)
                 .major(major)
                 .birthDate(birthDate)
-                .imageUrl(imageUrl)
                 .status(ApplicationStatus.PENDING)
                 .recruitment(recruitment)
                 .position(position)
                 .build();
+    }
+
+    public void updateImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public void updateStatus(ApplicationStatus status) {
