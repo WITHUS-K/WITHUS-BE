@@ -4,22 +4,32 @@ import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
+import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
+import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.ApplicationAnswerRepository;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.availability.repository.ApplicantAvailabilityRepository;
 import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.application.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
+import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
+import KUSITMS.WITHUS.domain.recruitment.documentQuestion.enumerate.QuestionType;
+import KUSITMS.WITHUS.domain.recruitment.documentQuestion.repository.DocumentQuestionRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,6 +41,9 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final RecruitmentRepository recruitmentRepository;
     private final PositionRepository positionRepository;
     private final EvaluationRepository evaluationRepository;
+    private final DocumentQuestionRepository documentQuestionRepository;
+    private final ApplicationAnswerRepository applicationAnswerRepository;
+    private final FileUploadService fileUploadService;
 
     /**
      * 지원서 생성
@@ -39,7 +52,7 @@ public class ApplicationServiceImpl implements ApplicationService {
      */
     @Override
     @Transactional
-    public ApplicationResponseDTO.Summary create(ApplicationRequestDTO.Create request) {
+    public ApplicationResponseDTO.Summary create(ApplicationRequestDTO.Create request, MultipartFile profileImage, List<MultipartFile> files) {
         Recruitment recruitment = recruitmentRepository.getById(request.recruitmentId());
         Position position = Optional.ofNullable(request.positionId())
                 .flatMap(positionRepository::findById)
@@ -47,26 +60,17 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         validateRequiredFields(recruitment, request);
 
-        Application application = Application.create(
-                request.name(),
-                request.gender(),
-                request.email(),
-                request.phoneNumber(),
-                request.university(),
-                request.major(),
-                request.birthDate(),
-                request.imageUrl(),
-                recruitment,
-                position
-        );
-
+        Application application = createApplication(request, recruitment, position);
         Application savedApplication = applicationRepository.save(application);
 
-        List<ApplicantAvailability> availabilities = request.availableTimes().stream()
-                .map(time -> ApplicantAvailability.of(savedApplication, time))
-                .toList();
+        String imageUrl = fileUploadService.uploadProfileImage(profileImage, recruitment.getOrganization().getId(), recruitment.getId(), savedApplication.getId());
+        savedApplication.updateImageUrl(imageUrl);
 
-        applicantAvailabilityRepository.saveAll(availabilities);
+        saveApplicantAvailabilities(savedApplication, request.availableTimes());
+
+        Map<String, String> uploadedFileUrls = fileUploadService.uploadAnswerFiles(files, recruitment.getOrganization().getId(), recruitment.getId(), savedApplication.getId());
+
+        saveApplicationAnswers(savedApplication, recruitment, request, uploadedFileUrls);
 
         return ApplicationResponseDTO.Summary.from(savedApplication);
     }
@@ -136,5 +140,52 @@ public class ApplicationServiceImpl implements ApplicationService {
         if (recruitment.isNeedAcademicStatus() && request.major() == null) {
             throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
         }
+    }
+
+    private Application createApplication(ApplicationRequestDTO.Create request, Recruitment recruitment, Position position) {
+        return Application.create(
+                request.name(),
+                request.gender(),
+                request.email(),
+                request.phoneNumber(),
+                request.university(),
+                request.major(),
+                request.birthDate(),
+                recruitment,
+                position
+        );
+    }
+
+    private void saveApplicationAnswers(
+            Application application,
+            Recruitment recruitment,
+            ApplicationRequestDTO.Create request,
+            Map<String, String> uploadedFileUrls
+    ) {
+        List<DocumentQuestion> questions = documentQuestionRepository.findByRecruitment(recruitment);
+        Map<Long, DocumentQuestion> questionMap = questions.stream()
+                .collect(Collectors.toMap(DocumentQuestion::getId, q -> q));
+
+        List<ApplicationAnswer> answers = request.answers().stream()
+                .map(dto -> {
+                    DocumentQuestion question = questionMap.get(dto.questionId());
+                    String fileUrl = null;
+
+                    if (question.getType() == QuestionType.FILE && dto.fileName() != null) {
+                        fileUrl = uploadedFileUrls.get(dto.fileName());
+                    }
+
+                    return ApplicationAnswer.create(application, question, dto.answerText(), fileUrl);
+                })
+                .toList();
+
+        applicationAnswerRepository.saveAll(answers);
+    }
+
+    private void saveApplicantAvailabilities(Application application, List<LocalDateTime> availableTimes) {
+        List<ApplicantAvailability> availabilities = availableTimes.stream()
+                .map(time -> ApplicantAvailability.of(application, time))
+                .toList();
+        applicantAvailabilityRepository.saveAll(availabilities);
     }
 }
