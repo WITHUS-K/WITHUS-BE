@@ -36,7 +36,6 @@ public class ApplicationRequestDTO {
             String major,
 
             @Schema(description = "생년월일", example = "2000-01-01")
-            @NotBlank
             LocalDate birthDate,
 
             @Schema(description = "이미지 URL", example = "https://cdn.withus.com/image.jpg")
