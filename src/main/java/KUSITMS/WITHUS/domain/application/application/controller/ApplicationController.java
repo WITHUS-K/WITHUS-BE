@@ -31,9 +31,10 @@ public class ApplicationController {
     @Operation(summary = "지원서 생성", description = "사용자로부터 받은 정보를 바탕으로 지원서를 생성합니다.")
     public SuccessResponse<ApplicationResponseDTO.Summary> create(
             @RequestPart(value = "request") @Valid ApplicationRequestDTO.Create request,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
-        return SuccessResponse.ok(applicationService.create(request, files));
+        return SuccessResponse.ok(applicationService.create(request, profileImage, files));
     }
 
     @PostMapping("/bulk")
@@ -42,7 +43,7 @@ public class ApplicationController {
             @Valid @RequestBody List<ApplicationRequestDTO.Create> requests
     ) {
         List<ApplicationResponseDTO.Summary> responses = requests.stream()
-                .map(req -> applicationService.create(req, null))
+                .map(req -> applicationService.create(req, null, null))
                 .toList();
 
         return SuccessResponse.ok(responses);

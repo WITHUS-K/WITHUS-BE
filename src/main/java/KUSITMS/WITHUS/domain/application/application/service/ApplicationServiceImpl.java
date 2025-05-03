@@ -53,7 +53,7 @@ public class ApplicationServiceImpl implements ApplicationService {
      */
     @Override
     @Transactional
-    public ApplicationResponseDTO.Summary create(ApplicationRequestDTO.Create request, List<MultipartFile> files) {
+    public ApplicationResponseDTO.Summary create(ApplicationRequestDTO.Create request, MultipartFile profileImage, List<MultipartFile> files) {
         Recruitment recruitment = recruitmentRepository.getById(request.recruitmentId());
         Position position = Optional.ofNullable(request.positionId())
                 .flatMap(positionRepository::findById)
@@ -61,7 +61,9 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         validateRequiredFields(recruitment, request);
 
-        Application application = createApplication(request, recruitment, position);
+        String imageUrl = uploadProfileImage(profileImage);
+
+        Application application = createApplication(request, imageUrl, recruitment, position);
         Application savedApplication = applicationRepository.save(application);
 
         saveApplicantAvailabilities(savedApplication, request.availableTimes());
@@ -151,7 +153,14 @@ public class ApplicationServiceImpl implements ApplicationService {
         return uploadedFileUrls;
     }
 
-    private Application createApplication(ApplicationRequestDTO.Create request, Recruitment recruitment, Position position) {
+    private String uploadProfileImage(MultipartFile profileImage) {
+        if (profileImage != null && !profileImage.isEmpty()) {
+            return uploader.upload(profileImage);
+        }
+        return null;
+    }
+
+    private Application createApplication(ApplicationRequestDTO.Create request, String imageUrl, Recruitment recruitment, Position position) {
         return Application.create(
                 request.name(),
                 request.gender(),
@@ -160,7 +169,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 request.university(),
                 request.major(),
                 request.birthDate(),
-                request.imageUrl(),
+                imageUrl,
                 recruitment,
                 position
         );

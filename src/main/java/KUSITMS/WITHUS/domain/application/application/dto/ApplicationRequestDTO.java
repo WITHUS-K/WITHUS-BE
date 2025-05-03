@@ -39,9 +39,6 @@ public class ApplicationRequestDTO {
             @Schema(description = "생년월일", example = "2000-01-01")
             LocalDate birthDate,
 
-            @Schema(description = "이미지 URL", example = "https://cdn.withus.com/image.jpg")
-            String imageUrl,
-
             @Schema(description = "공고 ID", example = "1")
             @NotNull Long recruitmentId,
 

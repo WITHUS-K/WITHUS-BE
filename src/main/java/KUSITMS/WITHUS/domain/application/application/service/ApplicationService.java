@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface ApplicationService {
-    ApplicationResponseDTO.Summary create(ApplicationRequestDTO.Create request, List<MultipartFile> files);
+    ApplicationResponseDTO.Summary create(ApplicationRequestDTO.Create request, MultipartFile profileImage, List<MultipartFile> files);
     void delete(Long id);
     ApplicationResponseDTO.Detail getById(Long id);
     List<ApplicationResponseDTO.Summary> getByRecruitmentId(Long recruitmentId);
