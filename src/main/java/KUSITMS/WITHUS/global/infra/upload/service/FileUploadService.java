@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,14 +55,20 @@ public class FileUploadService {
         if (imageUrl == null || imageUrl.isBlank()) return;
 
         try {
-            URI uri = URI.create(imageUrl);
-            String fullPath = uri.getPath();
+            URL url = new URL(imageUrl);
+            String fullPath = url.getPath();
             String prefix = "/" + bucketName + "/";
+
+            if (!fullPath.startsWith(prefix)) {
+                throw new CustomException(ErrorCode.INVALID_URL);
+            }
 
             String key = fullPath.substring(prefix.length());
             uploader.delete(key);
+
         } catch (Exception e) {
             throw new CustomException(ErrorCode.INVALID_URL);
         }
     }
+
 }
