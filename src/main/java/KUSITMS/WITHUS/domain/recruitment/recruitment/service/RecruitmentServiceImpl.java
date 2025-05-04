@@ -118,6 +118,12 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 .toList();
     }
 
+    @Override
+    public RecruitmentResponseDTO.Detail getBySlug(String slug) {
+        Recruitment recruitment = recruitmentRepository.findByUrlSlug(slug)
+                .orElseThrow(() -> new CustomException(ErrorCode.RECRUITMENT_NOT_EXIST));
+        return RecruitmentResponseDTO.Detail.from(recruitment);
+    }
 
     private RecruitmentResponseDTO.Create saveRecruitment(RecruitmentRequestDTO.Upsert request, boolean isTemporary) {
         Organization organization = organizationRepository.getById(request.organizationId());

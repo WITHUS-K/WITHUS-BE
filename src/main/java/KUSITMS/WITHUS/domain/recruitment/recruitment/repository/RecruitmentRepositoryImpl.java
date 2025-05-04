@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static KUSITMS.WITHUS.domain.recruitment.recruitment.entity.QRecruitment.recruitment;
 
@@ -61,5 +62,14 @@ public class RecruitmentRepositoryImpl implements RecruitmentRepository {
                 .from(recruitment)
                 .where(recruitment.urlSlug.eq(urlSlug))
                 .fetchFirst() != null;
+    }
+
+    @Override
+    public Optional<Recruitment> findByUrlSlug(String slug) {
+        Recruitment result = queryFactory.selectFrom(recruitment)
+                .where(recruitment.urlSlug.eq(slug))
+                .fetchOne();
+
+        return Optional.ofNullable(result);
     }
 }
