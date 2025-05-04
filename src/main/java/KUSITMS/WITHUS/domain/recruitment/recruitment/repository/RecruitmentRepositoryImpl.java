@@ -54,4 +54,12 @@ public class RecruitmentRepositoryImpl implements RecruitmentRepository {
                 .orderBy(recruitment.createdAt.desc())
                 .fetch();
     }
+
+    @Override
+    public boolean existsByUrlSlug(String urlSlug) {
+        return queryFactory.selectOne()
+                .from(recruitment)
+                .where(recruitment.urlSlug.eq(urlSlug))
+                .fetchFirst() != null;
+    }
 }

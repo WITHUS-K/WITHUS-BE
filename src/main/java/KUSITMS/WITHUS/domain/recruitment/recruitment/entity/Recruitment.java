@@ -64,6 +64,9 @@ public class Recruitment extends BaseEntity {
     @Column(name = "FINAL_RESULT_DATE")
     private LocalDate finalResultDate;
 
+    @Column(name = "URL_SLUG", unique = true, nullable = false, length = 6)
+    private String urlSlug;
+
     @Builder.Default
     @Column(name = "IS_TEMPORARY", nullable = false)
     private boolean isTemporary = false;
@@ -103,7 +106,8 @@ public class Recruitment extends BaseEntity {
             boolean needBirthDate,
             boolean needAcademicStatus,
             boolean isTemporary,
-            EvaluationScaleType scaleType
+            EvaluationScaleType scaleType,
+            String urlSlug
     ) {
         return Recruitment.builder()
                 .title(title)
@@ -120,6 +124,7 @@ public class Recruitment extends BaseEntity {
                 .needAcademicStatus(needAcademicStatus)
                 .isTemporary(isTemporary)
                 .scaleType(scaleType)
+                .urlSlug(urlSlug)
                 .build();
     }
 

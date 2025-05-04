@@ -10,4 +10,5 @@ public interface RecruitmentRepository {
     Recruitment save(Recruitment recruitment);
     void delete(Long id);
     List<Recruitment> findAllByKeyword(String keyword);
+    boolean existsByUrlSlug(String urlSlug);
 }
