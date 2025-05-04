@@ -50,6 +50,9 @@ public class User extends BaseEntity {
     @Column(name = "PHONE_NUMBER", nullable = false)
     private String phoneNumber;
 
+    @Column(name = "PROFILE_IMAGE_URL")
+    private String profileImageUrl;
+
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserOrganization> userOrganizations = new ArrayList<>();
@@ -68,6 +71,16 @@ public class User extends BaseEntity {
 
     public void updatePassword(String newEncodedPassword) {
         this.password = newEncodedPassword;
+    }
+
+    public void update(String name, String phoneNumber, String encodedNewPassword, String profileImageUrl) {
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.password = encodedNewPassword;
+
+        if (profileImageUrl != null && !profileImageUrl.isBlank()) {
+            this.profileImageUrl = profileImageUrl;
+        }
     }
 
     public void addUserOrganization(UserOrganization userOrganization) {

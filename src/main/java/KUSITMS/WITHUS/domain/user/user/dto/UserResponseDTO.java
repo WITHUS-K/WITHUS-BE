@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.user.user.dto;
 
 import KUSITMS.WITHUS.domain.interview.enumerate.InterviewRole;
+import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationResponseDTO;
 import KUSITMS.WITHUS.domain.organization.organizationRole.dto.OrganizationRoleResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
@@ -100,4 +101,27 @@ public class UserResponseDTO {
     public record EmailDuplicateCheck (
             @Schema(description = "이메일 중복 여부", example = "false") boolean isDuplicated
     ) {}
+
+    @Schema(description = "마이페이지 DTO")
+    public record MyPage(
+            @Schema(description = "사용자 ID") Long userId,
+            @Schema(description = "이름") String name,
+            @Schema(description = "전화번호") String phoneNumber,
+            @Schema(description = "이메일") String email,
+            @Schema(description = "프로필 이미지 URL") String imageUrl,
+            @Schema(description = "가입 동아리") List<OrganizationResponseDTO.Summary> organizations
+    ) {
+        public static MyPage from(User user) {
+            return new MyPage(
+                    user.getId(),
+                    user.getName(),
+                    user.getPhoneNumber(),
+                    user.getEmail(),
+                    user.getProfileImageUrl(),
+                    user.getUserOrganizations().stream()
+                            .map(userOrg -> OrganizationResponseDTO.Summary.from(userOrg.getOrganization()))
+                            .toList()
+            );
+        }
+    }
 }

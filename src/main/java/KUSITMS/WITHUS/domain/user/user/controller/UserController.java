@@ -2,16 +2,21 @@ package KUSITMS.WITHUS.domain.user.user.controller;
 
 import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.service.UserService;
+import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Validated
 @RestController
@@ -35,7 +40,7 @@ public class UserController {
     @PostMapping("/join/user")
     @Operation(summary = "사용자 회원가입 API")
     public SuccessResponse<String> userJoinProcess(
-            @RequestBody @Valid UserRequestDTO.UserJoin request) {
+            @org.springframework.web.bind.annotation.RequestBody @Valid UserRequestDTO.UserJoin request) {
 
         userService.userJoinProcess(request);
 
@@ -57,4 +62,23 @@ public class UserController {
         return SuccessResponse.ok(response);
     }
 
+    @GetMapping("/my-page")
+    @Operation(summary = "마이페이지 조회")
+    public SuccessResponse<UserResponseDTO.MyPage> getMyPage(@CurrentUser User user) {
+        UserResponseDTO.MyPage response = userService.getMyPage(user.getId());
+        return SuccessResponse.ok(response);
+    }
+
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            encoding = @Encoding(name = "request", contentType = MediaType.APPLICATION_JSON_VALUE)))
+    @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "회원 정보 수정", description = "이름, 전화번호, 비밀번호, 프로필 이미지를 수정합니다.")
+    public SuccessResponse<UserResponseDTO.MyPage> updateUser(
+            @RequestPart(value = "request") @Valid UserRequestDTO.Update request,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+            @CurrentUser User user
+    ) {
+        UserResponseDTO.MyPage response = userService.updateUser(request, profileImage, user);
+        return SuccessResponse.ok(response);
+    }
 }

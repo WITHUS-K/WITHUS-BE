@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,10 +18,17 @@ public class FileUploadService {
     private final Uploader uploader;
     private final FilePathBuilder pathBuilder;
 
+    public String uploadUserProfileImage(MultipartFile file, Long userId) {
+        if (file == null || file.isEmpty()) return null;
+
+        String path = pathBuilder.buildUploadPath("users", String.valueOf(userId), "profile", file.getOriginalFilename());
+        return uploader.upload(file, path);
+    }
+
     public String uploadProfileImage(MultipartFile file, Long orgId, Long recruitmentId, Long appId) {
         if (file == null || file.isEmpty()) return null;
 
-        String path = pathBuilder.buildUploadPath("applications", orgId, recruitmentId, appId, "profile", file.getOriginalFilename());
+        String path = pathBuilder.buildUploadPath("applications", String.valueOf(orgId), String.valueOf(recruitmentId), String.valueOf(appId), "profile", file.getOriginalFilename());
         return uploader.upload(file, path);
     }
 
@@ -29,11 +37,25 @@ public class FileUploadService {
         if (files == null) return result;
 
         for (MultipartFile file : files) {
-            String path = pathBuilder.buildUploadPath("applications", orgId, recruitmentId, appId, "answer", file.getOriginalFilename());
+            String path = pathBuilder.buildUploadPath("applications", String.valueOf(orgId), String.valueOf(recruitmentId), String.valueOf(appId), "answer", file.getOriginalFilename());
             String url = uploader.upload(file, path);
             result.put(file.getOriginalFilename(), url);
         }
 
         return result;
+    }
+
+    public void delete(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) return;
+
+        try {
+            URI uri = URI.create(imageUrl);
+            String fullPath = uri.getPath();
+            String key = fullPath.startsWith("/") ? fullPath.substring(1) : fullPath;
+
+            uploader.delete(key);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("잘못된 이미지 URL 형식입니다: " + imageUrl, e);
+        }
     }
 }
