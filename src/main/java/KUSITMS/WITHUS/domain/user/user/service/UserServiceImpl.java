@@ -231,8 +231,8 @@ public class UserServiceImpl implements UserService {
 
         String imageUrl = null;
         if (profileImage != null && !profileImage.isEmpty()) {
-            if (user.getProfileImageUrl() != null && !user.getProfileImageUrl().isBlank()) {
-                uploadService.delete(imageUrl);
+            if (user.getProfileImageUrl() != null) {
+                uploadService.delete(user.getProfileImageUrl());
             }
 
             imageUrl = uploadService.uploadUserProfileImage(profileImage, user.getId());

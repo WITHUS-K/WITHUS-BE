@@ -1,8 +1,11 @@
 package KUSITMS.WITHUS.global.infra.upload.service;
 
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.upload.uploader.Uploader;
 import KUSITMS.WITHUS.global.infra.upload.util.FilePathBuilder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +20,9 @@ public class FileUploadService {
 
     private final Uploader uploader;
     private final FilePathBuilder pathBuilder;
+
+    @Value("${ncp.storage.bucket-name}")
+    private String bucketName;
 
     public String uploadUserProfileImage(MultipartFile file, Long userId) {
         if (file == null || file.isEmpty()) return null;
@@ -51,11 +57,12 @@ public class FileUploadService {
         try {
             URI uri = URI.create(imageUrl);
             String fullPath = uri.getPath();
-            String key = fullPath.startsWith("/") ? fullPath.substring(1) : fullPath;
+            String prefix = "/" + bucketName + "/";
 
+            String key = fullPath.substring(prefix.length());
             uploader.delete(key);
         } catch (Exception e) {
-            throw new IllegalArgumentException("잘못된 이미지 URL 형식입니다: " + imageUrl, e);
+            throw new CustomException(ErrorCode.INVALID_URL);
         }
     }
 }
