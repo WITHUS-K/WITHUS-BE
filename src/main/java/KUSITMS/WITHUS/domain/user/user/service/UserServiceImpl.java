@@ -217,16 +217,28 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDTO.MyPage updateUser(UserRequestDTO.Update request, MultipartFile profileImage, User user) {
-        if (!bCryptPasswordEncoder.matches(request.currentPassword(), user.getPassword())) {
-            throw new CustomException(ErrorCode.USER_WRONG_PASSWORD);
-        }
+        boolean shouldUpdatePassword =
+                request.currentPassword() != null && !request.currentPassword().isBlank() &&
+                        request.newPassword1() != null && !request.newPassword1().isBlank() &&
+                        request.newPassword2() != null && !request.newPassword2().isBlank();
 
-        if (!request.newPassword1().equals(request.newPassword2())) {
-            throw new CustomException(ErrorCode.PASSWORDS_NOT_MATCH);
-        }
+        String encodedPassword = user.getPassword();
 
-        if (bCryptPasswordEncoder.matches(request.newPassword1(), user.getPassword())) {
-            throw new CustomException(ErrorCode.USER_SAME_PASSWORD);
+        // request에 비밀번호 값이 다 들어있을 때만 검증
+        if (shouldUpdatePassword) {
+            if (!bCryptPasswordEncoder.matches(request.currentPassword(), user.getPassword())) {
+                throw new CustomException(ErrorCode.USER_WRONG_PASSWORD);
+            }
+
+            if (!request.newPassword1().equals(request.newPassword2())) {
+                throw new CustomException(ErrorCode.PASSWORDS_NOT_MATCH);
+            }
+
+            if (bCryptPasswordEncoder.matches(request.newPassword1(), user.getPassword())) {
+                throw new CustomException(ErrorCode.USER_SAME_PASSWORD);
+            }
+
+            encodedPassword = bCryptPasswordEncoder.encode(request.newPassword1());
         }
 
         String imageUrl = null;
@@ -238,7 +250,7 @@ public class UserServiceImpl implements UserService {
             imageUrl = uploadService.uploadUserProfileImage(profileImage, user.getId());
         }
 
-        user.update(request.name(), request.phoneNumber(), bCryptPasswordEncoder.encode(request.newPassword1()), imageUrl);
+        user.update(request.name(), request.phoneNumber(), encodedPassword, imageUrl);
 
         return UserResponseDTO.MyPage.from(user);
     }
