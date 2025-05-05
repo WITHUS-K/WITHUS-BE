@@ -62,6 +62,10 @@ dependencies {
 	// AWS SDK
 	implementation 'software.amazon.awssdk:s3:2.20.40'
 
+	// 부하 테스트, 시각화
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
 }
 
 tasks.named('test') {
