@@ -73,8 +73,13 @@ public class Recruitment extends BaseEntity {
     private boolean isTemporary = false;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "SCALE_TYPE")
-    private EvaluationScaleType scaleType;
+    @Column(name = "DOCUMENT_SCALE_TYPE")
+    private EvaluationScaleType documentScaleType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "INTERVIEW_SCALE_TYPE")
+    private EvaluationScaleType interviewScaleType;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ORGANIZATION_ID", nullable = false)
@@ -111,7 +116,8 @@ public class Recruitment extends BaseEntity {
             boolean needBirthDate,
             boolean needAcademicStatus,
             boolean isTemporary,
-            EvaluationScaleType scaleType
+            EvaluationScaleType documentScaleType,
+            EvaluationScaleType interviewScaleType
     ) {
         return Recruitment.builder()
                 .title(title)
@@ -128,7 +134,8 @@ public class Recruitment extends BaseEntity {
                 .needBirthDate(needBirthDate)
                 .needAcademicStatus(needAcademicStatus)
                 .isTemporary(isTemporary)
-                .scaleType(scaleType)
+                .documentScaleType(documentScaleType)
+                .interviewScaleType(interviewScaleType)
                 .build();
     }
 
@@ -145,7 +152,8 @@ public class Recruitment extends BaseEntity {
             boolean needSchool,
             boolean needBirthDate,
             boolean needAcademicStatus,
-            EvaluationScaleType scaleType
+            EvaluationScaleType documentScaleType,
+            EvaluationScaleType interviewScaleType
     ) {
         this.title = title;
         this.content = content;
@@ -159,7 +167,8 @@ public class Recruitment extends BaseEntity {
         this.needSchool = needSchool;
         this.needBirthDate = needBirthDate;
         this.needAcademicStatus = needAcademicStatus;
-        this.scaleType = scaleType;
+        this.documentScaleType = documentScaleType;
+        this.interviewScaleType = interviewScaleType;
     }
 
     public void addDocumentQuestion(DocumentQuestion question) {

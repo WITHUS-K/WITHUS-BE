@@ -64,8 +64,11 @@ public class RecruitmentRequestDTO {
             @Schema(description = "학적 상태 입력 필요 여부", example = "false")
             boolean needAcademicStatus,
 
-            @Schema(description = "평가 방식", example = "SCORE")
-            EvaluationScaleType scaleType,
+            @Schema(description = "서류 평가 방식", example = "SCORE")
+            @NotNull EvaluationScaleType documentScaleType,
+
+            @Schema(description = "면접 평가 방식", example = "SCORE")
+            @NotNull EvaluationScaleType interviewScaleType,
 
             @Schema(description = "면접 가능 시간 목록")
             List<AvailableTimeRangeRequestDTO> availableTimeRanges
@@ -105,7 +108,8 @@ public class RecruitmentRequestDTO {
 
             @Schema(description = "임시 저장 여부") boolean isTemporary,
 
-            @Schema(description = "평가 방식", example = "FIVE_LEVEL") EvaluationScaleType scaleType,
+            @Schema(description = "서류 평가 방식", example = "SCORE") EvaluationScaleType documentScaleType,
+            @Schema(description = "면접 평가 방식", example = "SCORE") EvaluationScaleType interviewScaleType,
 
             @Schema(description = "면접 가능 시간 목록")
             List<AvailableTimeRangeRequestDTO> availableTimeRanges
