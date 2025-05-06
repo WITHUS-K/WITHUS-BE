@@ -6,6 +6,7 @@ import KUSITMS.WITHUS.domain.organization.organizationRole.dto.OrganizationRoleR
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.global.common.annotation.DateFormat;
+import KUSITMS.WITHUS.global.common.annotation.DateTimeFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
@@ -24,6 +25,23 @@ public class UserResponseDTO {
             return new Summary(
                     user.getId(),
                     user.getName()
+            );
+        }
+    }
+
+    @Schema(description = "검색 결과에 대한 사용자 요약 정보 응답 DTO")
+    public record SummaryForSearch(
+            @Schema(description = "사용자 ID") Long userId,
+            @Schema(description = "이름") String name,
+            @Schema(description = "이메일") String email,
+            @Schema(description = "프로필 사진 URL") String imageUrl
+    ) {
+        public static SummaryForSearch from(User user) {
+            return new SummaryForSearch(
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    user.getProfileImageUrl()
             );
         }
     }
@@ -83,7 +101,7 @@ public class UserResponseDTO {
             @Schema(description = "역할") Role role,
             @Schema(description = "이메일") String email,
             @Schema(description = "전화번호") String phoneNumber,
-            @Schema(description = "생성일시") LocalDateTime createdAt
+            @Schema(description = "생성일시") @DateTimeFormat LocalDateTime createdAt
     ) {
         public static DetailForOrganization from(User user) {
             return new DetailForOrganization(

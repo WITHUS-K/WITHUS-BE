@@ -40,7 +40,7 @@ public class UserController {
     @PostMapping("/join/user")
     @Operation(summary = "사용자 회원가입 API")
     public SuccessResponse<String> userJoinProcess(
-            @org.springframework.web.bind.annotation.RequestBody @Valid UserRequestDTO.UserJoin request) {
+            @RequestBody @Valid UserRequestDTO.UserJoin request) {
 
         userService.userJoinProcess(request);
 
@@ -60,6 +60,15 @@ public class UserController {
     ) {
         UserResponseDTO.EmailDuplicateCheck response = new UserResponseDTO.EmailDuplicateCheck(userService.isEmailDuplicated(email));
         return SuccessResponse.ok(response);
+    }
+
+    @GetMapping("/email")
+    @Operation(summary = "이메일로 사용자 단건 조회 API", description = "이메일이 정확히 일치하는 사용자를 조회합니다.")
+    public SuccessResponse<UserResponseDTO.SummaryForSearch> getUserByEmail(
+            @RequestParam("email") @Email String email
+    ) {
+        User user = userService.getUserByEmail(email);
+        return SuccessResponse.ok(UserResponseDTO.SummaryForSearch.from(user));
     }
 
     @GetMapping("/my-page")
