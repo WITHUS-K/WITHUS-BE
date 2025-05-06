@@ -61,4 +61,14 @@ public class OrganizationRoleController {
         return SuccessResponse.ok(response);
     }
 
+    @PatchMapping("/{organizationId}/roles/{roleId}")
+    @Operation(summary = "조직 역할 수정", description = "조직 내 특정 역할의 이름과 색상을 수정합니다.")
+    public SuccessResponse<String> updateRole(
+            @PathVariable Long organizationId,
+            @PathVariable Long roleId,
+            @RequestBody @Valid OrganizationRoleRequestDTO.Update request
+    ) {
+        organizationRoleService.updateRole(organizationId, roleId, request.name(), request.color());
+        return SuccessResponse.ok("조직 내 역할 수정에 성공했습니다.");
+    }
 }

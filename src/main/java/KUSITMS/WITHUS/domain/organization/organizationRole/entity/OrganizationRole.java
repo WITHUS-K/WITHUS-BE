@@ -35,6 +35,11 @@ public class OrganizationRole {
     @OneToMany(mappedBy = "organizationRole", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserOrganizationRole> userOrganizationRoles = new ArrayList<>();
 
+    public void update(String name, String color) {
+        this.name = name;
+        this.color = color;
+    }
+
     public void associateOrganization(Organization organization) {
         this.organization = organization;
     }

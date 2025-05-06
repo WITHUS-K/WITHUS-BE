@@ -9,4 +9,5 @@ public interface OrganizationRoleService {
     OrganizationRoleResponseDTO.Detail createRole(Long organizationId, String name, String color);
     OrganizationRoleResponseDTO.DetailForOrganization getOrganizationRoles(Long organizationId, String keyword);
     List<OrganizationRoleResponseDTO.DetailForUser> assignUsersToRole(Long organizationId, Long roleId, List<Long> userIds);
+    void updateRole(Long organizationId, Long roleId, String name, String color);
 }

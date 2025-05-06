@@ -139,4 +139,22 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
 
         return result;
     }
+
+    @Override
+    @Transactional
+    public void updateRole(Long organizationId, Long roleId, String name, String color) {
+        OrganizationRole role = organizationRoleRepository.getById(roleId);
+
+        if (!role.getOrganization().getId().equals(organizationId)) {
+            throw new CustomException(ErrorCode.ORGANIZATION_ROLE_ORG_MISMATCH);
+        }
+
+        boolean nameConflict = organizationRoleRepository.existsByOrganizationIdAndNameExceptId(organizationId, name, roleId);
+        if (nameConflict) {
+            throw new CustomException(ErrorCode.DUPLICATE_ORGANIZATION_ROLE_NAME);
+        }
+
+        role.update(name, color);
+    }
+
 }

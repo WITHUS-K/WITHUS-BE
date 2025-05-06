@@ -54,6 +54,19 @@ public class OrganizationRoleRepositoryImpl implements OrganizationRoleRepositor
                 .fetch();
     }
 
+    @Override
+    public boolean existsByOrganizationIdAndNameExceptId(Long organizationId, String name, Long excludedId) {
+        return queryFactory
+                .selectOne()
+                .from(organizationRole)
+                .where(
+                        organizationRole.organization.id.eq(organizationId),
+                        organizationRole.name.eq(name),
+                        organizationRole.id.ne(excludedId)
+                )
+                .fetchFirst() != null;
+    }
+
     private BooleanExpression keywordCondition(String keyword) {
         if (keyword == null || keyword.isBlank()) {
             return null;
