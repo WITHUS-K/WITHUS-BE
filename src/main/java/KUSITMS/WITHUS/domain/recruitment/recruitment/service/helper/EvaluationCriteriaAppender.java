@@ -23,6 +23,7 @@ public class EvaluationCriteriaAppender {
             EvaluationType type
     ) {
         if (criteriaList == null) return;
+        recruitment.clearEvaluationCriteria();
 
         for (EvaluationCriteriaRequestDTO.Create dto : criteriaList) {
             Position position = getPositionIfExists(dto.positionId());

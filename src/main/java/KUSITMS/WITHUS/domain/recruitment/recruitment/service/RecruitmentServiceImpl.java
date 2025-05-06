@@ -122,6 +122,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 ? updateRecruitment(request, isTemporary)
                 : createRecruitment(request, organization, isTemporary);
 
+        recruitment.clearEvaluationCriteria();
         criteriaAppender.appendWithPositions(recruitment, request.documentEvaluationCriteria(), EvaluationType.DOCUMENT);
         criteriaAppender.appendWithPositions(recruitment, request.interviewEvaluationCriteria(), EvaluationType.INTERVIEW);
 

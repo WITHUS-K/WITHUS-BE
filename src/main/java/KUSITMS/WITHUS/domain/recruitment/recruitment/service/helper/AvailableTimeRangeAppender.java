@@ -12,6 +12,7 @@ public class AvailableTimeRangeAppender {
 
     public void append(Recruitment recruitment, List<AvailableTimeRangeRequestDTO> ranges) {
         if (ranges == null) return;
+        recruitment.clearAvailableTimeRanges();
 
         ranges.stream()
                 .map(dto -> AvailableTimeRange.builder()

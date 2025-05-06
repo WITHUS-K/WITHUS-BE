@@ -191,6 +191,23 @@ public class Recruitment extends BaseEntity {
         position.associateRecruitment(this);
     }
 
+    public void clearEvaluationCriteria() {
+        this.evaluationCriteriaList.clear();
+    }
+
+    public void clearDocumentQuestions() {
+        this.questions.clear();
+    }
+
+    public void clearAvailableTimeRanges() {
+        this.availableTimeRanges.clear();
+    }
+
+    public void clearPositions() {
+        this.positions.clear();
+    }
+
+
     public void markAsFinal() {
         this.isTemporary = false;
     }

@@ -13,6 +13,7 @@ public class PositionAppender {
 
     public void append(Recruitment recruitment, List<String> positionNames) {
         if (positionNames == null) return;
+        recruitment.clearPositions();
 
         Set<String> existing = recruitment.getPositions().stream()
                 .map(Position::getName)

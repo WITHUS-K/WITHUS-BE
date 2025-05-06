@@ -12,6 +12,7 @@ public class DocumentQuestionAppender {
 
     public void append(Recruitment recruitment, List<DocumentQuestionRequestDTO.Create> questions) {
         if (questions == null) return;
+        recruitment.clearDocumentQuestions();
 
         questions.forEach(q -> {
             DocumentQuestion question = DocumentQuestion.builder()
