@@ -12,12 +12,14 @@ public class OrganizationRoleResponseDTO {
     @Schema(description = "역할 추가 응답 DTO")
     public record Detail(
             @Schema(description = "ID") Long id,
-            @Schema(description = "역할 이름") String roleName
+            @Schema(description = "역할 이름") String roleName,
+            @Schema(description = "역할 색상") String color
     ) {
         public static Detail from(OrganizationRole organizationRole) {
             return new Detail(
                     organizationRole.getId(),
-                    organizationRole.getName()
+                    organizationRole.getName(),
+                    organizationRole.getColor()
             );
         }
     }
@@ -26,12 +28,14 @@ public class OrganizationRoleResponseDTO {
     public record RoleDetail(
             @Schema(description = "ID") Long id,
             @Schema(description = "역할 이름") String roleName,
+            @Schema(description = "역할 색상") String color,
             @Schema(description = "소속된 운영진 수") int assignedUserCount
     ) {
         public static RoleDetail from(OrganizationRole role) {
             return new RoleDetail(
                     role.getId(),
                     role.getName(),
+                    role.getColor(),
                     role.getUserOrganizationRoles().size()
             );
         }

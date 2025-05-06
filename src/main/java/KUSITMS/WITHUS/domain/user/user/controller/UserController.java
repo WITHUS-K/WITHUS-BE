@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.domain.user.user.controller;
 
 import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.service.UserService;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,7 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,6 +55,15 @@ public class UserController {
     ) {
         UserResponseDTO.EmailDuplicateCheck response = new UserResponseDTO.EmailDuplicateCheck(userService.isEmailDuplicated(email));
         return SuccessResponse.ok(response);
+    }
+
+    @GetMapping("/email")
+    @Operation(summary = "이메일로 사용자 단건 조회 API", description = "이메일이 정확히 일치하는 사용자를 조회합니다.")
+    public SuccessResponse<UserResponseDTO.SummaryForSearch> getUserByEmail(
+            @RequestParam("email") @Email String email
+    ) {
+        User user = userService.getUserByEmail(email);
+        return SuccessResponse.ok(UserResponseDTO.SummaryForSearch.from(user));
     }
 
 }

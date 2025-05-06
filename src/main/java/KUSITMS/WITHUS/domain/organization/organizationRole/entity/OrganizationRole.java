@@ -24,6 +24,9 @@ public class OrganizationRole {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private String color;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ORGANIZATION_ID", nullable = false)
     private Organization organization;

@@ -29,7 +29,7 @@ public class TimeSlotRepositoryImpl implements TimeSlotRepository {
     @Override
     public TimeSlot getById(Long id) {
         return timeSlotJpaRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.TIME_SLOT_ALREADY_EXIST));
+                .orElseThrow(() -> new CustomException(ErrorCode.TIME_SLOT_NOT_EXIST));
     }
 
     @Override
