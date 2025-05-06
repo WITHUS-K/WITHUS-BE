@@ -28,6 +28,23 @@ public class UserResponseDTO {
         }
     }
 
+    @Schema(description = "검색 결과에 대한 사용자 요약 정보 응답 DTO")
+    public record SummaryForSearch(
+            @Schema(description = "사용자 ID") Long userId,
+            @Schema(description = "이름") String name,
+            @Schema(description = "이메일") String email,
+            @Schema(description = "프로필 사진 URL") String imageUrl
+    ) {
+        public static SummaryForSearch from(User user) {
+            return new SummaryForSearch(
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    user.getProfileImageUrl()
+            );
+        }
+    }
+
     @Schema(description = "사용자 상세 정보 응답 DTO")
     public record DetailProfile(
             @Schema(description = "사용자 ID") Long userId,
