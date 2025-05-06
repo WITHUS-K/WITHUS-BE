@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.dto;
 
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteriaRequestDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.dto.AvailableTimeRangeRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.dto.DocumentQuestionRequestDTO;
@@ -64,11 +65,11 @@ public class RecruitmentRequestDTO {
             @Schema(description = "학적 상태 입력 필요 여부", example = "false")
             boolean needAcademicStatus,
 
-            @Schema(description = "서류 평가 방식", example = "SCORE")
-            @NotNull EvaluationScaleType documentScaleType,
+            @Schema(description = "서류 평가 방식", example = "SCORE")EvaluationScaleType documentScaleType,
+            @Schema(description = "면접 평가 방식", example = "SCORE") EvaluationScaleType interviewScaleType,
 
-            @Schema(description = "면접 평가 방식", example = "SCORE")
-            @NotNull EvaluationScaleType interviewScaleType,
+            @Schema(description = "서류 평가 기준 목록") List<EvaluationCriteriaRequestDTO.Create> documentEvaluationCriteria,
+            @Schema(description = "면접 평가 기준 목록") List<EvaluationCriteriaRequestDTO.Create> interviewEvaluationCriteria,
 
             @Schema(description = "면접 가능 시간 목록")
             List<AvailableTimeRangeRequestDTO> availableTimeRanges
@@ -110,6 +111,9 @@ public class RecruitmentRequestDTO {
 
             @Schema(description = "서류 평가 방식", example = "SCORE") EvaluationScaleType documentScaleType,
             @Schema(description = "면접 평가 방식", example = "SCORE") EvaluationScaleType interviewScaleType,
+
+            @Schema(description = "서류 평가 기준 목록") List<EvaluationCriteriaRequestDTO.Create> documentEvaluationCriteria,
+            @Schema(description = "면접 평가 기준 목록") List<EvaluationCriteriaRequestDTO.Create> interviewEvaluationCriteria,
 
             @Schema(description = "면접 가능 시간 목록")
             List<AvailableTimeRangeRequestDTO> availableTimeRanges

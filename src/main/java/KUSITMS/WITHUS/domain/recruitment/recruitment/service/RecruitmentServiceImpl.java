@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.service;
 
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
@@ -8,6 +9,7 @@ import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.AvailableTimeRangeAppender;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.DocumentQuestionAppender;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.EvaluationCriteriaAppender;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.PositionAppender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     private final AvailableTimeRangeAppender availableTimeRangeAppender;
     private final PositionAppender positionAppender;
     private final DocumentQuestionAppender documentQuestionAppender;
+    private final EvaluationCriteriaAppender criteriaAppender;
 
     /**
      * 공고 임시 저장
@@ -118,6 +121,9 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         Recruitment recruitment = (request.recruitmentId() != null)
                 ? updateRecruitment(request, isTemporary)
                 : createRecruitment(request, organization, isTemporary);
+
+        criteriaAppender.appendWithPositions(recruitment, request.documentEvaluationCriteria(), EvaluationType.DOCUMENT);
+        criteriaAppender.appendWithPositions(recruitment, request.interviewEvaluationCriteria(), EvaluationType.INTERVIEW);
 
         availableTimeRangeAppender.append(recruitment, request.availableTimeRanges());
         positionAppender.append(recruitment, request.positions());
