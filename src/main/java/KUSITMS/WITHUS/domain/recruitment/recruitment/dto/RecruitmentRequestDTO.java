@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.domain.recruitment.recruitment.dto;
 
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.dto.AvailableTimeRangeRequestDTO;
+import KUSITMS.WITHUS.domain.recruitment.documentQuestion.dto.DocumentQuestionRequestDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
@@ -29,6 +30,9 @@ public class RecruitmentRequestDTO {
 
             @Schema(description = "등록할 포지션 이름 목록", example = "[\"백엔드\", \"디자인\"]")
             List<String> positions,
+
+            @Schema(description = "지원서 문항 목록")
+            List<DocumentQuestionRequestDTO.Create> applicationQuestions,
 
             @Schema(description = "서류 마감일", example = "2025-06-01")
             @NotNull @Future LocalDate documentDeadline,
