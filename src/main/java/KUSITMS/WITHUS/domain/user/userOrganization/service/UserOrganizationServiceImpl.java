@@ -103,9 +103,9 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
      * @return 조회된 유저 정보
      */
     @Override
-    public List<UserResponseDTO.Summary> getAllUsersByOrganization(Long organizationId, String keyword) {
+    public List<UserResponseDTO.SummaryForSearch> getAllUsersByOrganization(Long organizationId, String keyword) {
         return userOrganizationRepository.findManagersByOrganizationId(organizationId, keyword).stream()
-                .map(UserResponseDTO.Summary::from)
+                .map(UserResponseDTO.SummaryForSearch::from)
                 .toList();
     }
 }
