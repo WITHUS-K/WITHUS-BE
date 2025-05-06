@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.application.application.dto;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
+import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerResponseDTO;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.comment.dto.CommentResponseDTO;
@@ -31,9 +32,11 @@ public class ApplicationResponseDTO {
             @Schema(description = "전화번호") String phoneNumber,
             @Schema(description = "대학명") String university,
             @Schema(description = "전공") String major,
+            @Schema(description = "학적 상태") AcademicStatus academicStatus,
             @Schema(description = "생년월일") @DateFormat LocalDate birthDate,
             @Schema(description = "이미지 URL") String imageUrl,
-            @Schema(description = "상태") ApplicationStatus status,
+            @Schema(description = "주소") String address,
+            @Schema(description = "합불 상태") ApplicationStatus status,
             @Schema(description = "지원서 항목 질문 및 답변 목록") List<ApplicationAnswerResponseDTO> documentAnswers,
             @Schema(description = "면접 가능 시간") @TimeFormat List<LocalDateTime> availableTimes,
             @Schema(description = "면접 질문 목록") List<InterviewQuestionResponseDTO.Detail> interviewQuestions,
@@ -76,8 +79,10 @@ public class ApplicationResponseDTO {
                     application.getPhoneNumber(),
                     application.getUniversity(),
                     application.getMajor(),
+                    application.getAcademicStatus(),
                     application.getBirthDate(),
                     application.getImageUrl(),
+                    application.getAddress(),
                     application.getStatus(),
                     documentAnswers,
                     times,

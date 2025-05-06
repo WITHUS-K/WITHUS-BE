@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.application.application.entity;
 
+import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
@@ -47,13 +48,20 @@ public class Application extends BaseEntity {
     private String phoneNumber;
 
     private String university;
+
     private String major;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ACADEMIC_STATUS")
+    private AcademicStatus academicStatus;
 
     @Column(name = "BIRTH_DATE")
     private LocalDate birthDate;
 
     @Column(name = "IMAGE_URL")
     private String imageUrl;
+
+    private String address;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
