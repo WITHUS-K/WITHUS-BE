@@ -20,7 +20,7 @@ public class DocumentQuestion extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "RECRUITMENT_ID", nullable = false)
+    @JoinColumn(name = "RECRUITMENT_ID")
     private Recruitment recruitment;
 
     @Column(name = "TITLE", nullable = false)

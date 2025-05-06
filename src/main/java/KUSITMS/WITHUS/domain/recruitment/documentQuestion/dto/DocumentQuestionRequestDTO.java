@@ -9,9 +9,6 @@ public class DocumentQuestionRequestDTO {
 
     @Schema(description = "서류 질문 생성 요청 DTO")
     public record Create(
-            @Schema(description = "리크루팅 ID", example = "1")
-            @NotNull Long recruitmentId,
-
             @Schema(description = "질문 제목", example = "자기소개를 해주세요")
             String title,
 

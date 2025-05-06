@@ -1,10 +1,11 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.dto;
 
-import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteriaResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.dto.AvailableTimeRangeResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.dto.DocumentQuestionResponseDTO;
+import KUSITMS.WITHUS.domain.recruitment.position.dto.PositionResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.common.annotation.DateFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -32,25 +33,28 @@ public class RecruitmentResponseDTO {
             @Schema(description = "공고 제목") String title,
             @Schema(description = "공고 내용") String content,
             @Schema(description = "첨부 파일 URL") String fileUrl,
+            @Schema(description = "포지션 목록") List<PositionResponseDTO.Detail> positions,
             @Schema(description = "서류 마감일") @DateFormat LocalDate documentDeadline,
             @Schema(description = "서류 발표일") @DateFormat LocalDate documentResultDate,
             @Schema(description = "최종 발표일") @DateFormat LocalDate finalResultDate,
+            @Schema(description = "면접 소요시간") Short interviewDuration,
             @Schema(description = "조직명") String organizationName,
-            @Schema(description = "평가 방식") EvaluationScaleType scaleType,
-            @Schema(description = "서류 평가 기준 목록") List<String> documentEvaluationCriteria,
-            @Schema(description = "면접 평가 기준 목록") List<String> interviewEvaluationCriteria,
+            @Schema(description = "서류 평가 방식") EvaluationScaleType documentScaleType,
+            @Schema(description = "면접 평가 방식") EvaluationScaleType interviewScaleType,
+            @Schema(description = "서류 평가 기준 상세 목록") List<EvaluationCriteriaResponseDTO.Detail> documentEvaluationCriteria,
+            @Schema(description = "면접 평가 기준 상세 목록") List<EvaluationCriteriaResponseDTO.Detail> interviewEvaluationCriteria,
             @Schema(description = "지원서 질문 목록") List<DocumentQuestionResponseDTO.Summary> applicationQuestions,
             @Schema(description = "면접 가능 시간 목록") List<AvailableTimeRangeResponseDTO> availableTimeRanges
     ) {
         public static Detail from(Recruitment recruitment) {
-            List<String> documentCriteria = recruitment.getEvaluationCriteriaList().stream()
+            List<EvaluationCriteriaResponseDTO.Detail> documentCriteria = recruitment.getEvaluationCriteriaList().stream()
                     .filter(c -> c.getEvaluationType() == EvaluationType.DOCUMENT)
-                    .map(EvaluationCriteria::getContent)
+                    .map(EvaluationCriteriaResponseDTO.Detail::from)
                     .toList();
 
-            List<String> interviewCriteria = recruitment.getEvaluationCriteriaList().stream()
+            List<EvaluationCriteriaResponseDTO.Detail> interviewCriteria = recruitment.getEvaluationCriteriaList().stream()
                     .filter(c -> c.getEvaluationType() == EvaluationType.INTERVIEW)
-                    .map(EvaluationCriteria::getContent)
+                    .map(EvaluationCriteriaResponseDTO.Detail::from)
                     .toList();
 
             List<DocumentQuestionResponseDTO.Summary> questions = recruitment.getQuestions().stream()
@@ -61,16 +65,23 @@ public class RecruitmentResponseDTO {
                     .map(AvailableTimeRangeResponseDTO::from)
                     .toList();
 
+            List<PositionResponseDTO.Detail> positions = recruitment.getPositions().stream()
+                    .map(PositionResponseDTO.Detail::from)
+                    .toList();
+
             return new Detail(
                     recruitment.getId(),
                     recruitment.getTitle(),
                     recruitment.getContent(),
                     recruitment.getFileUrl(),
+                    positions,
                     recruitment.getDocumentDeadline(),
                     recruitment.getDocumentResultDate(),
                     recruitment.getFinalResultDate(),
+                    recruitment.getInterviewDuration(),
                     recruitment.getOrganization().getName(),
-                    recruitment.getScaleType(),
+                    recruitment.getDocumentScaleType(),
+                    recruitment.getInterviewScaleType(),
                     documentCriteria,
                     interviewCriteria,
                     questions,

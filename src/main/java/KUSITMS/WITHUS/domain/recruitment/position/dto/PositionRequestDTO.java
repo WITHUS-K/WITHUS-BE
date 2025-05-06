@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.domain.application.position.dto;
+package KUSITMS.WITHUS.domain.recruitment.position.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -12,7 +12,7 @@ public class PositionRequestDTO {
             @Schema(description = "파트 이름", example = "백엔드")
             @NotBlank String name,
 
-            @Schema(description = "조직 ID", example = "1")
-            @NotNull Long organizationId
+            @Schema(description = "공고 ID", example = "1")
+            @NotNull Long recruitmentId
     ) {}
 }

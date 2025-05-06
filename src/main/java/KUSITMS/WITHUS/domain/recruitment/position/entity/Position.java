@@ -1,6 +1,6 @@
-package KUSITMS.WITHUS.domain.application.position.entity;
+package KUSITMS.WITHUS.domain.recruitment.position.entity;
 
-import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,13 +19,13 @@ public class Position extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ORGANIZATION_ID", nullable = false)
-    private Organization organization;
+    @JoinColumn(name = "RECRUITMENT_ID", nullable = false)
+    private Recruitment recruitment;
 
     @Column(nullable = false)
     private String name;
 
-    public void associateOrganization(Organization organization) {
-        this.organization = organization;
+    public void associateRecruitment(Recruitment recruitment) {
+        this.recruitment = recruitment;
     }
 }
