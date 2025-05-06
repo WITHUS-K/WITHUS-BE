@@ -49,4 +49,16 @@ public class OrganizationRoleController {
         OrganizationRoleResponseDTO.DetailForOrganization response = organizationRoleService.getOrganizationRoles(organizationId, keyword);
         return SuccessResponse.ok(response);
     }
+
+    @PostMapping("/{organizationId}/roles/{roleId}/assign-users")
+    @Operation(summary = "역할에 사용자 일괄 추가", description = "특정 역할에 여러 명의 운영진을 한 번에 추가합니다.")
+    public SuccessResponse<List<OrganizationRoleResponseDTO.DetailForUser>> assignUsersToRole(
+            @PathVariable Long organizationId,
+            @PathVariable Long roleId,
+            @RequestBody @Valid OrganizationRoleRequestDTO.AssignUsersToRole request
+    ) {
+        List<OrganizationRoleResponseDTO.DetailForUser> response = organizationRoleService.assignUsersToRole(organizationId, roleId, request.userIds());
+        return SuccessResponse.ok(response);
+    }
+
 }

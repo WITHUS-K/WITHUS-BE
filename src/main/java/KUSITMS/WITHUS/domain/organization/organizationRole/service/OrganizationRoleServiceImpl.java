@@ -105,4 +105,38 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
 
         return OrganizationRoleResponseDTO.DetailForOrganization.from(roleDetails);
     }
+
+    /**
+     * 특정 역할에 운영진 일괄 추가
+     * @param organizationId 역할이 속한 조직 ID
+     * @param roleId 추가할 역할 ID
+     * @param userIds 추가될 사용자 ID 리스트
+     * @return 추가된 정보 반환
+     */
+    @Override
+    @Transactional
+    public List<OrganizationRoleResponseDTO.DetailForUser> assignUsersToRole(Long organizationId, Long roleId, List<Long> userIds) {
+        OrganizationRole role = organizationRoleRepository.getById(roleId);
+
+        List<User> users = userRepository.findAllById(userIds);
+        List<OrganizationRoleResponseDTO.DetailForUser> result = new ArrayList<>();
+
+        for (User user : users) {
+            boolean alreadyAssigned = user.getUserOrganizationRoles().stream()
+                    .anyMatch(r -> r.getOrganizationRole().getId().equals(roleId));
+
+            if (alreadyAssigned) continue;
+
+            UserOrganizationRole userOrgRole = UserOrganizationRole.assign(user, role);
+
+            user.addUserOrganizationRole(userOrgRole);
+            role.addUserOrganizationRole(userOrgRole);
+
+            userOrganizationRoleRepository.save(userOrgRole);
+
+            result.add(OrganizationRoleResponseDTO.DetailForUser.from(userOrgRole));
+        }
+
+        return result;
+    }
 }

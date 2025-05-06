@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.domain.organization.organizationRole.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -26,4 +27,11 @@ public class OrganizationRoleRequestDTO {
             @Schema(description = "색상", example = "blue")
             @NotBlank String color
     ) {}
+
+    @Schema(description = "특정 역할에 여러 사용자 할당 요청 DTO")
+    public record AssignUsersToRole(
+            @Schema(description = "추가할 사용자 ID 리스트", example = "[1, 2, 3]")
+            @NotEmpty List<Long> userIds
+    ) {}
+
 }
