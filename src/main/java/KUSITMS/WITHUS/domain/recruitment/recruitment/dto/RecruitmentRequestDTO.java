@@ -36,6 +36,9 @@ public class RecruitmentRequestDTO {
             @Schema(description = "최종 발표일", example = "2025-05-20")
             @NotNull @Future LocalDate finalResultDate,
 
+            @Schema(description = "면접 소요시간", example = "30")
+            Short interviewDuration,
+
             @Schema(description = "조직 ID", example = "1")
             @NotNull Long organizationId,
 
@@ -80,6 +83,9 @@ public class RecruitmentRequestDTO {
 
             @Schema(description = "최종 발표일", example = "2025-06-20")
             @NotNull @Future LocalDate finalResultDate,
+
+            @Schema(description = "면접 소요시간")
+            Short interviewDuration,
 
             @Schema(description = "성별 수집 여부") boolean needGender,
             @Schema(description = "주소 수집 여부") boolean needAddress,

@@ -64,6 +64,9 @@ public class Recruitment extends BaseEntity {
     @Column(name = "FINAL_RESULT_DATE")
     private LocalDate finalResultDate;
 
+    @Column(name = "INTERVIEW_DURATION")
+    private Short interviewDuration;
+
     @Builder.Default
     @Column(name = "IS_TEMPORARY", nullable = false)
     private boolean isTemporary = false;
@@ -96,6 +99,7 @@ public class Recruitment extends BaseEntity {
             LocalDate documentDeadline,
             LocalDate documentResultDate,
             LocalDate finalResultDate,
+            Short interviewDuration,
             Organization organization,
             boolean needGender,
             boolean needAddress,
@@ -112,6 +116,7 @@ public class Recruitment extends BaseEntity {
                 .documentDeadline(documentDeadline)
                 .documentResultDate(documentResultDate)
                 .finalResultDate(finalResultDate)
+                .interviewDuration(interviewDuration)
                 .organization(organization)
                 .needGender(needGender)
                 .needAddress(needAddress)
@@ -130,6 +135,7 @@ public class Recruitment extends BaseEntity {
             LocalDate documentDeadline,
             LocalDate documentResultDate,
             LocalDate finalResultDate,
+            Short interviewDuration,
             boolean needGender,
             boolean needAddress,
             boolean needSchool,
@@ -143,6 +149,7 @@ public class Recruitment extends BaseEntity {
         this.documentDeadline = documentDeadline;
         this.documentResultDate = documentResultDate;
         this.finalResultDate = finalResultDate;
+        this.interviewDuration = interviewDuration;
         this.needGender = needGender;
         this.needAddress = needAddress;
         this.needSchool = needSchool;
