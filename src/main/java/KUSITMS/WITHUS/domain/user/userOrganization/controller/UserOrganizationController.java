@@ -3,7 +3,6 @@ package KUSITMS.WITHUS.domain.user.userOrganization.controller;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.userOrganization.dto.UserOrganizationRequestDTO;
 import KUSITMS.WITHUS.domain.user.userOrganization.dto.UserOrganizationResponseDTO;
-import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.domain.user.userOrganization.service.UserOrganizationService;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,13 +33,13 @@ public class UserOrganizationController {
     }
 
     @PostMapping("/{organizationId}/users")
-    @Operation(summary = "조직에 사용자 추가", description = "조직에 사용자를 추가합니다.")
-    public SuccessResponse<UserOrganizationResponseDTO.Detail> addUserToOrganization(
+    @Operation(summary = "조직에 사용자 일괄 추가", description = "조직에 여러 명의 사용자를 한 번에 추가합니다.")
+    public SuccessResponse<List<UserOrganizationResponseDTO.Detail>> addUserToOrganization(
             @PathVariable Long organizationId,
-            @RequestBody @Valid UserOrganizationRequestDTO.AddUser request
+            @RequestBody @Valid UserOrganizationRequestDTO.AddUsers request
     ) {
-        UserOrganization userOrganization = organizationUserService.addUserToOrganization(organizationId, request.userId());
-        return SuccessResponse.ok(UserOrganizationResponseDTO.Detail.from(userOrganization));
+        List<UserOrganizationResponseDTO.Detail> response = organizationUserService.addUserToOrganization(organizationId, request.userIds());
+        return SuccessResponse.ok(response);
     }
 
     @DeleteMapping("/{organizationId}/users")

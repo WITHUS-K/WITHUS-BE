@@ -2,7 +2,6 @@ package KUSITMS.WITHUS.domain.user.userOrganization.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -10,9 +9,9 @@ import java.util.List;
 public class UserOrganizationRequestDTO {
 
     @Schema(description = "조직에 사용자 추가 요청 DTO")
-    public record AddUser(
-            @Schema(description = "추가할 사용자 ID", example = "1")
-            @NotNull Long userId
+    public record AddUsers(
+            @Schema(description = "추가할 사용자 ID 목록", example = "[1, 2]")
+            @NotEmpty List<Long> userIds
     ) {}
 
     @Schema(description = "조직 사용자 일괄 삭제 요청 DTO")

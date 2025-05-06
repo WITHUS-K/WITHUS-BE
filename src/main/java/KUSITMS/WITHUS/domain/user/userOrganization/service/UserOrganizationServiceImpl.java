@@ -5,6 +5,7 @@ import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRe
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
+import KUSITMS.WITHUS.domain.user.userOrganization.dto.UserOrganizationResponseDTO;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -44,29 +46,36 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
     /**
      * 특정 조직에 특정 사용자를 추가
      * @param organizationId 추가할 조직 ID
-     * @param userId 추가할 사용자 ID
+     * @param userIds 추가할 사용자 ID 리스트
      * @return 매핑 정보 반환
      */
     @Override
     @Transactional
-    public UserOrganization addUserToOrganization(Long organizationId, Long userId) {
+    public List<UserOrganizationResponseDTO.Detail> addUserToOrganization(Long organizationId, List<Long> userIds) {
         Organization organization = organizationRepository.getById(organizationId);
-        User user = userRepository.getById(userId);
 
-        boolean alreadyExists = userOrganizationRepository.existsByUserIdAndOrganizationId(userId, organizationId);
-        if (alreadyExists) {
-            throw new CustomException(ErrorCode.DUPLICATE_USER_ORGANIZATION);
+        List<UserOrganizationResponseDTO.Detail> result = new ArrayList<>();
+
+        for (Long userId : userIds) {
+            if (userOrganizationRepository.existsByUserIdAndOrganizationId(userId, organizationId)) {
+                continue;
+            }
+
+            User user = userRepository.getById(userId);
+
+            UserOrganization userOrganization = UserOrganization.builder()
+                    .user(user)
+                    .organization(organization)
+                    .build();
+
+            user.addUserOrganization(userOrganization);
+            organization.addUserOrganization(userOrganization);
+
+            UserOrganization saved = userOrganizationRepository.save(userOrganization);
+            result.add(UserOrganizationResponseDTO.Detail.from(saved));
         }
 
-        UserOrganization userOrganization = UserOrganization.builder()
-                .user(user)
-                .organization(organization)
-                .build();
-
-        user.addUserOrganization(userOrganization);
-        organization.addUserOrganization(userOrganization);
-
-        return userOrganizationRepository.save(userOrganization);
+        return result;
     }
 
     /**
