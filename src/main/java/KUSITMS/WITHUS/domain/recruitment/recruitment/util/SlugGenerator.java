@@ -1,20 +1,23 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.util;
 
-import java.security.SecureRandom;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class SlugGenerator {
-    private static final String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    private static final SecureRandom RANDOM = new SecureRandom();
-
-    public static String generateRandomSlug(int length) {
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            sb.append(CHARS.charAt(RANDOM.nextInt(CHARS.length())));
-        }
-        return sb.toString();
-    }
+    private static final String BASE62 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     public static String generateRandomSlug() {
-        return generateRandomSlug(6);
+        long timestamp = System.currentTimeMillis();
+        long random = ThreadLocalRandom.current().nextLong(1000, 9999);
+        return encodeBase62(timestamp) + encodeBase62(random);
+    }
+
+    private static String encodeBase62(long value) {
+        StringBuilder sb = new StringBuilder();
+        while (value > 0) {
+            sb.append(BASE62.charAt((int)(value % 62)));
+            value /= 62;
+        }
+        return sb.reverse().toString();
     }
 }
+
