@@ -1,6 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.dto;
 
-import KUSITMS.WITHUS.domain.application.position.dto.PositionResponseDTO;
+import KUSITMS.WITHUS.domain.recruitment.position.dto.PositionResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;

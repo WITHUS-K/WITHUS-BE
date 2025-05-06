@@ -1,7 +1,7 @@
-package KUSITMS.WITHUS.domain.application.position.repository;
+package KUSITMS.WITHUS.domain.recruitment.position.repository;
 
 
-import KUSITMS.WITHUS.domain.application.position.entity.Position;
+import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;

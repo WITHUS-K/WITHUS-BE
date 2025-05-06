@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.domain.application.position.entity;
+package KUSITMS.WITHUS.domain.recruitment.position.entity;
 
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.common.BaseEntity;

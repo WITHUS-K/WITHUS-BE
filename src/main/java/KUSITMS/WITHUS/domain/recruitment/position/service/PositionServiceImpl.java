@@ -1,9 +1,9 @@
-package KUSITMS.WITHUS.domain.application.position.service;
+package KUSITMS.WITHUS.domain.recruitment.position.service;
 
-import KUSITMS.WITHUS.domain.application.position.dto.PositionRequestDTO;
-import KUSITMS.WITHUS.domain.application.position.dto.PositionResponseDTO;
-import KUSITMS.WITHUS.domain.application.position.entity.Position;
-import KUSITMS.WITHUS.domain.application.position.repository.PositionRepository;
+import KUSITMS.WITHUS.domain.recruitment.position.dto.PositionRequestDTO;
+import KUSITMS.WITHUS.domain.recruitment.position.dto.PositionResponseDTO;
+import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import lombok.RequiredArgsConstructor;

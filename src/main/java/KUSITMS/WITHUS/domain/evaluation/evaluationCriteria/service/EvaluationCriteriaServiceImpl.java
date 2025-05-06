@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.service;
 
-import KUSITMS.WITHUS.domain.application.position.entity.Position;
-import KUSITMS.WITHUS.domain.application.position.repository.PositionRepository;
+import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteriaRequestDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteriaResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
