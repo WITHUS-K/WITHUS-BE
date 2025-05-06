@@ -7,6 +7,9 @@ import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.util.SlugGenerator;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +23,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     private final RecruitmentRepository recruitmentRepository;
     private final OrganizationRepository organizationRepository;
+
+    private static final int MAX_ATTEMPTS = 10;
 
     /**
      * 공고 임시 저장
@@ -113,6 +118,12 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 .toList();
     }
 
+    @Override
+    public RecruitmentResponseDTO.Detail getBySlug(String slug) {
+        Recruitment recruitment = recruitmentRepository.findByUrlSlug(slug)
+                .orElseThrow(() -> new CustomException(ErrorCode.RECRUITMENT_NOT_EXIST));
+        return RecruitmentResponseDTO.Detail.from(recruitment);
+    }
 
     private RecruitmentResponseDTO.Create saveRecruitment(RecruitmentRequestDTO.Upsert request, boolean isTemporary) {
         Organization organization = organizationRepository.getById(request.organizationId());
@@ -158,7 +169,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                     request.needBirthDate(),
                     request.needAcademicStatus(),
                     isTemporary,
-                    request.scaleType()
+                    request.scaleType(),
+                    generateUniqueSlug()
             );
         }
 
@@ -177,5 +189,15 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
         Recruitment saved = recruitmentRepository.save(recruitment);
         return RecruitmentResponseDTO.Create.from(saved);
+    }
+
+    private String generateUniqueSlug() {
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            String slug = SlugGenerator.generateRandomSlug();
+            if (!recruitmentRepository.existsByUrlSlug(slug)) {
+                return slug;
+            }
+        }
+        throw new CustomException(ErrorCode.SLUG_GENERATION_FAILED);
     }
 }

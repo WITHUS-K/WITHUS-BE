@@ -69,6 +69,7 @@ public enum ErrorCode {
     // Recruitment (공고)
     RECRUITMENT_ALREADY_EXIST("RECRUITMENT400", "이미 존재하는 공고입니다.", HttpStatus.BAD_REQUEST),
     RECRUITMENT_NOT_EXIST("RECRUITMENT404", "존재하지 않는 공고입니다.", HttpStatus.NOT_FOUND),
+    SLUG_GENERATION_FAILED("RECRUITMENT500", "슬러그 생성에 실패하였습니다. 슬러그 자릿수를 늘리세요.", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // DocumentQuestion (지원서 서류 질문)
     DOCUMENT_QUESTION_ALREADY_EXIST("DOCUMENT_QUESTION400", "이미 존재하는 지원서 질문입니다.", HttpStatus.BAD_REQUEST),
