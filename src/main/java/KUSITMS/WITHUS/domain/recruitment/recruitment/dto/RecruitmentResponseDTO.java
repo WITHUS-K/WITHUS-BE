@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.dto;
 
+import KUSITMS.WITHUS.domain.application.position.dto.PositionResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
@@ -32,6 +33,7 @@ public class RecruitmentResponseDTO {
             @Schema(description = "공고 제목") String title,
             @Schema(description = "공고 내용") String content,
             @Schema(description = "첨부 파일 URL") String fileUrl,
+            @Schema(description = "포지션 목록") List<PositionResponseDTO.Detail> positions,
             @Schema(description = "서류 마감일") @DateFormat LocalDate documentDeadline,
             @Schema(description = "서류 발표일") @DateFormat LocalDate documentResultDate,
             @Schema(description = "최종 발표일") @DateFormat LocalDate finalResultDate,
@@ -62,11 +64,16 @@ public class RecruitmentResponseDTO {
                     .map(AvailableTimeRangeResponseDTO::from)
                     .toList();
 
+            List<PositionResponseDTO.Detail> positions = recruitment.getPositions().stream()
+                    .map(PositionResponseDTO.Detail::from)
+                    .toList();
+
             return new Detail(
                     recruitment.getId(),
                     recruitment.getTitle(),
                     recruitment.getContent(),
                     recruitment.getFileUrl(),
+                    positions,
                     recruitment.getDocumentDeadline(),
                     recruitment.getDocumentResultDate(),
                     recruitment.getFinalResultDate(),

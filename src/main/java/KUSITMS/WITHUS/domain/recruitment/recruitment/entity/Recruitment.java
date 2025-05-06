@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.entity;
 
+import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
@@ -91,6 +92,9 @@ public class Recruitment extends BaseEntity {
     @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AvailableTimeRange> availableTimeRanges = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Position> positions = new ArrayList<>();
 
     public static Recruitment create(
             String title,
@@ -171,6 +175,11 @@ public class Recruitment extends BaseEntity {
     public void addAvailableTimeRange(AvailableTimeRange range) {
         this.availableTimeRanges.add(range);
         range.associateRecruitment(this);
+    }
+
+    public void addPosition(Position position) {
+        this.positions.add(position);
+        position.associateRecruitment(this);
     }
 
     public void markAsFinal() {

@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.service;
 
+import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -124,19 +127,10 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             recruitment = recruitmentRepository.getById(request.recruitmentId());
 
             recruitment.update(
-                    request.title(),
-                    request.content(),
-                    request.fileUrl(),
-                    request.documentDeadline(),
-                    request.documentResultDate(),
-                    request.finalResultDate(),
-                    request.interviewDuration(),
-                    request.needGender(),
-                    request.needAddress(),
-                    request.needSchool(),
-                    request.needBirthDate(),
-                    request.needAcademicStatus(),
-                    request.scaleType()
+                    request.title(), request.content(), request.fileUrl(), request.documentDeadline(),
+                    request.documentResultDate(), request.finalResultDate(), request.interviewDuration(),
+                    request.needGender(), request.needAddress(), request.needSchool(),
+                    request.needBirthDate(), request.needAcademicStatus(), request.scaleType()
             );
 
             if (isTemporary) {
@@ -147,24 +141,14 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
         } else {
             recruitment = Recruitment.create(
-                    request.title(),
-                    request.content(),
-                    request.fileUrl(),
-                    request.documentDeadline(),
-                    request.documentResultDate(),
-                    request.finalResultDate(),
-                    request.interviewDuration(),
-                    organization,
-                    request.needGender(),
-                    request.needAddress(),
-                    request.needSchool(),
-                    request.needBirthDate(),
-                    request.needAcademicStatus(),
-                    isTemporary,
-                    request.scaleType()
+                    request.title(), request.content(), request.fileUrl(), request.documentDeadline(),
+                    request.documentResultDate(), request.finalResultDate(), request.interviewDuration(),
+                    organization, request.needGender(), request.needAddress(), request.needSchool(),
+                    request.needBirthDate(), request.needAcademicStatus(), isTemporary, request.scaleType()
             );
         }
 
+        // 면접 가능 시간 추가
         if (request.availableTimeRanges() != null) {
             List<AvailableTimeRange> ranges = request.availableTimeRanges().stream()
                     .map(dto -> AvailableTimeRange.builder()
@@ -178,7 +162,24 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             ranges.forEach(recruitment::addAvailableTimeRange);
         }
 
-        Recruitment saved = recruitmentRepository.save(recruitment);
-        return RecruitmentResponseDTO.Create.from(saved);
+        // 파트 추가
+        if (request.positions() != null) {
+            Set<String> existingPositionNames = recruitment.getPositions().stream()
+                    .map(Position::getName)
+                    .collect(Collectors.toSet());
+
+            List<Position> newPositions = request.positions().stream()
+                    .filter(name -> !existingPositionNames.contains(name))
+                    .map(name -> Position.builder()
+                            .name(name)
+                            .recruitment(recruitment)
+                            .build())
+                    .toList();
+
+            newPositions.forEach(recruitment::addPosition);
+        }
+
+        Recruitment savedRecruitment = recruitmentRepository.save(recruitment);
+        return RecruitmentResponseDTO.Create.from(savedRecruitment);
     }
 }

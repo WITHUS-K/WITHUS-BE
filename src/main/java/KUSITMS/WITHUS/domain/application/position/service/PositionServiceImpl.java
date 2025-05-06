@@ -4,13 +4,11 @@ import KUSITMS.WITHUS.domain.application.position.dto.PositionRequestDTO;
 import KUSITMS.WITHUS.domain.application.position.dto.PositionResponseDTO;
 import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.application.position.repository.PositionRepository;
-import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
-import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -18,7 +16,7 @@ import java.util.List;
 public class PositionServiceImpl implements PositionService {
 
     private final PositionRepository positionRepository;
-    private final OrganizationRepository organizationRepository;
+    private final RecruitmentRepository recruitmentRepository;
 
     /**
      * 파트 생성
@@ -28,11 +26,11 @@ public class PositionServiceImpl implements PositionService {
     @Override
     @Transactional
     public PositionResponseDTO.Detail create(PositionRequestDTO.Create request) {
-        Organization organization = organizationRepository.getById(request.organizationId());
+        Recruitment recruitment = recruitmentRepository.getById(request.recruitmentId());
 
         Position position = Position.builder()
                 .name(request.name())
-                .organization(organization)
+                .recruitment(recruitment)
                 .build();
 
         return PositionResponseDTO.Detail.from(positionRepository.save(position));
@@ -47,17 +45,5 @@ public class PositionServiceImpl implements PositionService {
     public void delete(Long id) {
         positionRepository.getById(id);
         positionRepository.delete(id);
-    }
-
-    /**
-     * 조직 ID로 파트 목록 조회
-     * @param organizationId 조직 ID
-     * @return 해당 조직에 소속된 파트 목록
-     */
-    @Override
-    public List<PositionResponseDTO.Detail> getByOrganization(Long organizationId) {
-        return positionRepository.findByOrganizationId(organizationId).stream()
-                .map(PositionResponseDTO.Detail::from)
-                .toList();
     }
 }

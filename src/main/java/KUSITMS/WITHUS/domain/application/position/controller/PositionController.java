@@ -10,8 +10,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "파트 Controller")
@@ -34,11 +32,4 @@ public class PositionController {
         positionService.delete(id);
         return SuccessResponse.ok("파트 생성에 성공하였습니다.");
     }
-
-    @GetMapping("/organization/{organizationId}")
-    @Operation(summary = "조직별 파트 조회", description = "조직 ID를 기준으로 파트 목록을 조회합니다.")
-    public SuccessResponse<List<PositionResponseDTO.Detail>> getByOrganization(@PathVariable Long organizationId) {
-        return SuccessResponse.ok(positionService.getByOrganization(organizationId));
-    }
-
 }

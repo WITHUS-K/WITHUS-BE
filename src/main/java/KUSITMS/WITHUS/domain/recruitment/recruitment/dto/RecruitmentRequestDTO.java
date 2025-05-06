@@ -27,13 +27,16 @@ public class RecruitmentRequestDTO {
             @Schema(description = "첨부 파일 URL", example = "https://withus.com/files/recruit.pdf")
             String fileUrl,
 
-            @Schema(description = "서류 마감일", example = "2025-05-01")
+            @Schema(description = "등록할 포지션 이름 목록", example = "[\"백엔드\", \"디자인\"]")
+            List<String> positions,
+
+            @Schema(description = "서류 마감일", example = "2025-06-01")
             @NotNull @Future LocalDate documentDeadline,
 
-            @Schema(description = "서류 발표일", example = "2025-05-10")
+            @Schema(description = "서류 발표일", example = "2025-06-10")
             @NotNull @Future LocalDate documentResultDate,
 
-            @Schema(description = "최종 발표일", example = "2025-05-20")
+            @Schema(description = "최종 발표일", example = "2025-06-20")
             @NotNull @Future LocalDate finalResultDate,
 
             @Schema(description = "면접 소요시간", example = "30")
@@ -74,6 +77,9 @@ public class RecruitmentRequestDTO {
 
             @Schema(description = "첨부 파일 URL", example = "https://withus.com/files/recruit_v2.pdf")
             String fileUrl,
+
+            @Schema(description = "등록할 포지션 이름 목록", example = "[백엔드, 디자인]")
+            List<String> positions,
 
             @Schema(description = "서류 마감일", example = "2025-06-01")
             @NotNull @Future LocalDate documentDeadline,
