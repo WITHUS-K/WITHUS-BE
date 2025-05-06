@@ -21,6 +21,9 @@ public class OrganizationRoleRequestDTO {
     @Schema(description = "조직의 역할 추가 요청 DTO")
     public record Create(
             @Schema(description = "역할 이름", example = "학회장")
-            @NotBlank String name
+            @NotBlank String name,
+
+            @Schema(description = "색상", example = "blue")
+            @NotBlank String color
     ) {}
 }

@@ -69,7 +69,7 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
      */
     @Override
     @Transactional
-    public OrganizationRoleResponseDTO.Detail createRole(Long organizationId, String name) {
+    public OrganizationRoleResponseDTO.Detail createRole(Long organizationId, String name, String color) {
         Organization organization = organizationRepository.getById(organizationId);
 
         boolean exists = organizationRoleRepository.existsByOrganizationIdAndName(organizationId, name);
@@ -79,6 +79,7 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
 
         OrganizationRole role = OrganizationRole.builder()
                 .name(name)
+                .color(color)
                 .build();
 
         organization.addOrganizationRole(role);

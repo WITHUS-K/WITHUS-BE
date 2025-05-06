@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface OrganizationRoleService {
     List<OrganizationRoleResponseDTO.DetailForUser> assignRoleToUser(Long organizationId, Long userId, List<Long> roleIds);
-    OrganizationRoleResponseDTO.Detail createRole(Long organizationId, String name);
+    OrganizationRoleResponseDTO.Detail createRole(Long organizationId, String name, String color);
     OrganizationRoleResponseDTO.DetailForOrganization getOrganizationRoles(Long organizationId, String keyword);
 }

@@ -36,7 +36,7 @@ public class OrganizationRoleController {
             @PathVariable Long organizationId,
             @RequestBody @Valid OrganizationRoleRequestDTO.Create request
     ) {
-        OrganizationRoleResponseDTO.Detail response = organizationRoleService.createRole(organizationId, request.name());
+        OrganizationRoleResponseDTO.Detail response = organizationRoleService.createRole(organizationId, request.name(), request.color());
         return SuccessResponse.ok(response);
     }
 
