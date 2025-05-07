@@ -1,17 +1,17 @@
-package KUSITMS.WITHUS.domain.application.position.repository;
+package KUSITMS.WITHUS.domain.recruitment.position.repository;
 
 
-import KUSITMS.WITHUS.domain.application.position.entity.Position;
+import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
-import static KUSITMS.WITHUS.domain.application.position.entity.QPosition.position;
+import static KUSITMS.WITHUS.domain.recruitment.position.entity.QPosition.position;
 
 @Repository
 @RequiredArgsConstructor
@@ -41,9 +41,15 @@ public class PositionRepositoryImpl implements PositionRepository {
     }
 
     @Override
-    public List<Position> findByOrganizationId(Long organizationId) {
-        return queryFactory.selectFrom(position)
-                .where(position.organization.id.eq(organizationId))
-                .fetch();
+    public Optional<Position> findByRecruitmentAndName(Recruitment recruitment, String name) {
+        return Optional.ofNullable(
+                queryFactory
+                        .selectFrom(position)
+                        .where(
+                                position.recruitment.eq(recruitment),
+                                position.name.eq(name)
+                        )
+                        .fetchOne()
+        );
     }
 }

@@ -10,13 +10,13 @@ public class EvaluationCriteriaRequestDTO {
 
     @Schema(description = "평가 기준 추가 요청 DTO")
     public record Create(
-            @Schema(description = "평가 기준", example = "열심히 참여할 것 같은지")
+            @Schema(description = "평가 기준", example = "성실성")
             @NotBlank String content,
 
-            @Schema(description = "평가 타입", example = "INTERVIEW")
-            @NotNull EvaluationType type,
+            @Schema(description = "상세 설명", example = "열심히 참여할 것 같은지")
+            String description,
 
-            @Schema(description = "적용할 파트 ID - null이면 공통", example = "1")
-            Long positionId
+            @Schema(description = "평가 타입", example = "INTERVIEW")
+            @NotNull EvaluationType type
     ) {}
 }
