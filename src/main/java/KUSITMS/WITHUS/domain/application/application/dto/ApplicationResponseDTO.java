@@ -30,6 +30,11 @@ public class ApplicationResponseDTO {
 
     @Schema(description = "지원서 상세 조회 응답 DTO")
     public record Detail(
+            @Schema(description = "공고 제목") @JsonFormat(pattern = "2025-2 큐시즘 모집") String title,
+            @Schema(description = "지원 마감일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate documentDeadline,
+            @Schema(description = "서류 발표일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate documentResultDate,
+            @Schema(description = "최종 발표일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate finalResultDate,
+
             @Schema(description = "지원서 ID") Long id,
             @Schema(description = "지원자 이름") String name,
             @Schema(description = "성별") Gender gender,
@@ -48,10 +53,6 @@ public class ApplicationResponseDTO {
             @Schema(description = "면접 평가 목록") List<EvaluationResponseDTO.Detail> evaluations,
             @Schema(description = "서류 코맨트 목록") List<CommentResponseDTO.Detail> documentComments,
             @Schema(description = "면접 코맨트 목록") List<CommentResponseDTO.Detail> interviewComments,
-
-            @Schema(description = "지원 마감일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate documentDeadline,
-            @Schema(description = "서류 발표일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate documentResultDate,
-            @Schema(description = "최종 발표일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate finalResultDate,
 
             @Schema(description = "서류 평가 기준 목록")
                     List<EvaluationCriteriaResponseDTO.Detail> documentEvaluationCriterias
@@ -91,6 +92,10 @@ public class ApplicationResponseDTO {
             Recruitment recruitment = application.getRecruitment();
 
             return new Detail(
+                    recruitment.getTitle(),
+                    recruitment.getDocumentDeadline(),
+                    recruitment.getDocumentResultDate(),
+                    recruitment.getFinalResultDate(),
                     application.getId(),
                     application.getName(),
                     application.getGender(),
@@ -109,9 +114,6 @@ public class ApplicationResponseDTO {
                     evaluations,
                     documentComments,
                     interviewComments,
-                    recruitment.getDocumentDeadline(),
-                    recruitment.getDocumentResultDate(),
-                    recruitment.getFinalResultDate(),
                     documentEvaluationCriterias
             );
         }
