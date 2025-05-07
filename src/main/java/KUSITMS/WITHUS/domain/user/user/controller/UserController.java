@@ -59,11 +59,11 @@ public class UserController {
 
     @GetMapping("/email")
     @Operation(summary = "이메일로 사용자 단건 조회 API", description = "이메일이 정확히 일치하는 사용자를 조회합니다.")
-    public SuccessResponse<UserResponseDTO.SummaryForSearch> getUserByEmail(
+    public SuccessResponse<UserResponseDTO.SummaryForEmailSearch> getUserByEmail(
             @RequestParam("email") @Email String email
     ) {
         User user = userService.getUserByEmail(email);
-        return SuccessResponse.ok(UserResponseDTO.SummaryForSearch.from(user));
+        return SuccessResponse.ok(UserResponseDTO.SummaryForEmailSearch.from(user));
     }
 
 }

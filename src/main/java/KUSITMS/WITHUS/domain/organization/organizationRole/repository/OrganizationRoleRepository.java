@@ -10,4 +10,5 @@ public interface OrganizationRoleRepository {
     boolean existsByOrganizationIdAndName(Long organizationId, String name);
     List<OrganizationRole> findAllById(List<Long> roleIds);
     List<OrganizationRole> findByOrganizationIdAndKeyword(Long organizationId, String keyword);
+    boolean existsByOrganizationIdAndNameExceptId(Long organizationId, String name, Long excludedId);
 }

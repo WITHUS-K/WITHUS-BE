@@ -34,4 +34,12 @@ public class OrganizationRoleRequestDTO {
             @NotEmpty List<Long> userIds
     ) {}
 
+    @Schema(description = "조직의 역할 수정 요청 DTO")
+    public record Update(
+            @Schema(description = "수정할 역할 이름", example = "부학회장")
+            @NotBlank String name,
+
+            @Schema(description = "수정할 색상", example = "green")
+            @NotBlank String color
+    ) {}
 }

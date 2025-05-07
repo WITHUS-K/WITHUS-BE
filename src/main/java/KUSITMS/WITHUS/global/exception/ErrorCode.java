@@ -107,6 +107,7 @@ public enum ErrorCode {
     ORGANIZATION_ROLE_ALREADY_EXIST("ORGANIZATION_ROLE400", "이미 추가된 역할입니다.", HttpStatus.BAD_REQUEST),
     DUPLICATE_ORGANIZATION_ROLE_NAME("ORGANIZATION_ROLE400", "이미 존재하는 역할명입니다.", HttpStatus.BAD_REQUEST),
     ORGANIZATION_ROLE_NOT_EXIST("ORGANIZATION_ROLE404", "등록되지 않은 조직 역할입니다.", HttpStatus.NOT_FOUND),
+    ORGANIZATION_ROLE_ORG_MISMATCH("ORGANIZATION_ROLE403", "해당 역할은 해당 조직에 속해 있지 않습니다.", HttpStatus.FORBIDDEN),
 
     // Verification
     VERIFICATION_EXPIRED("VERIFICATION404", "인증 코드가 만료되었습니다.", HttpStatus.NOT_FOUND),

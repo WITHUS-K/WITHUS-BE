@@ -35,12 +35,12 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
      * @return 조회한 사용자들의 정보
      */
     @Override
-    public Page<UserResponseDTO.DetailForOrganization> getUsers(Long organizationId, int page, int size) {
+    public Page<UserResponseDTO.DetailProfile> getUsers(Long organizationId, int page, int size) {
         organizationRepository.getById(organizationId);
 
         Pageable pageable = PageRequest.of(page, size);
         return userOrganizationRepository.findByOrganizationId(organizationId, pageable)
-                .map(UserResponseDTO.DetailForOrganization::from);
+                .map(user -> UserResponseDTO.DetailProfile.from(user, organizationId));
     }
 
     /**
@@ -97,15 +97,22 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
     }
 
     /**
-     * 조직에 속한 운영진 전체 조회, keyword가 있다면 검색
+     * 조직에 속한 운영진 전체 조회,  keyword, roleId가 있다면 검색
      * @param organizationId 조회할 조직의 ID
      * @param keyword 검색어(이름)
      * @return 조회된 유저 정보
      */
     @Override
-    public List<UserResponseDTO.SummaryForSearch> getAllUsersByOrganization(Long organizationId, String keyword) {
-        return userOrganizationRepository.findManagersByOrganizationId(organizationId, keyword).stream()
-                .map(UserResponseDTO.SummaryForSearch::from)
+    public List<UserResponseDTO.SummaryForSearch> getUsersWithAssignment(Long organizationId, String keyword, Long roleId) {
+        List<User> users = userOrganizationRepository.findUsersByOrganizationAndKeyword(organizationId, keyword);
+
+        return users.stream()
+                .map(user -> {
+                    boolean assigned = user.getUserOrganizationRoles().stream()
+                            .anyMatch(r -> r.getOrganizationRole().getId().equals(roleId));
+                    return UserResponseDTO.SummaryForSearch.from(user, assigned);
+                })
                 .toList();
     }
+
 }
