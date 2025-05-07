@@ -136,6 +136,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         Recruitment savedRecruitment = recruitmentRepository.save(recruitment);
 
         recruitment.clearEvaluationCriteria();
+        Recruitment savedRecruitment = recruitmentRepository.save(recruitment);
+
         positionAppender.append(recruitment, request.positions());
         criteriaAppender.appendWithPositions(recruitment, request.documentEvaluationCriteria(), EvaluationType.DOCUMENT);
         criteriaAppender.appendWithPositions(recruitment, request.interviewEvaluationCriteria(), EvaluationType.INTERVIEW);
