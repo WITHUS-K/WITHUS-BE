@@ -26,7 +26,7 @@ public class EvaluationCriteria extends BaseEntity {
     @Column(name = "CONTENT", nullable = false)
     private String content;
 
-    @Column(name = "DESCRIPTION", nullable = false)
+    @Column(name = "DESCRIPTION")
     private String description;
 
     @Enumerated(EnumType.STRING)
