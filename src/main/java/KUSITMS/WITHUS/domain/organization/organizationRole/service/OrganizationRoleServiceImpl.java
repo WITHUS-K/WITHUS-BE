@@ -140,6 +140,13 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
         return result;
     }
 
+    /**
+     * 역할 수정
+     * @param organizationId 수정할 역할이 속한 조직 ID
+     * @param roleId 수정할 역할 ID
+     * @param name 수정할 이름
+     * @param color 수정할 색상
+     */
     @Override
     @Transactional
     public void updateRole(Long organizationId, Long roleId, String name, String color) {
