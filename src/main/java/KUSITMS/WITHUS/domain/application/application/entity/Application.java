@@ -6,10 +6,10 @@ import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailabili
 import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.application.interviewQuestion.entity.InterviewQuestion;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
+import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.common.BaseEntity;
@@ -109,7 +109,7 @@ public class Application extends BaseEntity {
 
     public static Application create(
             String name, Gender gender, String email, String phoneNumber, String university, String major,
-            LocalDate birthDate, Recruitment recruitment, Position position
+            AcademicStatus academicStatus, LocalDate birthDate, String address, Recruitment recruitment, Position position
     ) {
         return Application.builder()
                 .name(name)
@@ -118,7 +118,9 @@ public class Application extends BaseEntity {
                 .phoneNumber(phoneNumber)
                 .university(university)
                 .major(major)
+                .academicStatus(academicStatus)
                 .birthDate(birthDate)
+                .address(address)
                 .status(ApplicationStatus.PENDING)
                 .recruitment(recruitment)
                 .position(position)

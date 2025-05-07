@@ -11,9 +11,14 @@ import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.application.interviewQuestion.dto.InterviewQuestionResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.dto.EvaluationResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteriaResponseDTO;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.common.annotation.DateFormat;
 import KUSITMS.WITHUS.global.common.annotation.TimeFormat;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
@@ -42,9 +47,17 @@ public class ApplicationResponseDTO {
             @Schema(description = "면접 질문 목록") List<InterviewQuestionResponseDTO.Detail> interviewQuestions,
             @Schema(description = "면접 평가 목록") List<EvaluationResponseDTO.Detail> evaluations,
             @Schema(description = "서류 코맨트 목록") List<CommentResponseDTO.Detail> documentComments,
-            @Schema(description = "면접 코맨트 목록") List<CommentResponseDTO.Detail> interviewComments
-    ) {
-        public static Detail from(Application application, List<ApplicantAvailability> availabilityList, List<Evaluation> evaluationList) {
+            @Schema(description = "면접 코맨트 목록") List<CommentResponseDTO.Detail> interviewComments,
+
+            @Schema(description = "지원 마감일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate documentDeadline,
+            @Schema(description = "서류 발표일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate documentResultDate,
+            @Schema(description = "최종 발표일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate finalResultDate,
+
+            @Schema(description = "서류 평가 기준 목록")
+                    List<EvaluationCriteriaResponseDTO.Detail> documentEvaluationCriterias
+
+            ) {
+        public static Detail from(Application application, List<ApplicantAvailability> availabilityList, List<Evaluation> evaluationList, List<EvaluationCriteria> evaluationCriteriaList) {
             List<ApplicationAnswerResponseDTO> documentAnswers = application.getAnswers().stream()
                     .map(ApplicationAnswerResponseDTO::from)
                     .toList();
@@ -71,6 +84,14 @@ public class ApplicationResponseDTO {
                     .map(CommentResponseDTO.Detail::from)
                     .toList();
 
+            List<EvaluationCriteriaResponseDTO.Detail> documentEvaluationCriterias = evaluationCriteriaList.stream()
+                    .filter(c -> c.getEvaluationType() == EvaluationType.DOCUMENT &&
+                            (c.getPosition() == null || c.getPosition().getId().equals(application.getPosition().getId())))
+                    .map(EvaluationCriteriaResponseDTO.Detail::from)
+                    .toList();
+
+            Recruitment recruitment = application.getRecruitment();
+
             return new Detail(
                     application.getId(),
                     application.getName(),
@@ -89,7 +110,11 @@ public class ApplicationResponseDTO {
                     questions,
                     evaluations,
                     documentComments,
-                    interviewComments
+                    interviewComments,
+                    recruitment.getDocumentDeadline(),
+                    recruitment.getDocumentResultDate(),
+                    recruitment.getFinalResultDate(),
+                    documentEvaluationCriterias
             );
         }
     }

@@ -8,13 +8,16 @@ import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAns
 import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.ApplicationAnswerRepository;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.availability.repository.ApplicantAvailabilityRepository;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
-import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.repository.EvaluationCriteriaRepository;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.enumerate.QuestionType;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.repository.DocumentQuestionRepository;
+import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
@@ -41,6 +44,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final RecruitmentRepository recruitmentRepository;
     private final PositionRepository positionRepository;
     private final EvaluationRepository evaluationRepository;
+    private final EvaluationCriteriaRepository evaluationCriteriaRepository;
     private final DocumentQuestionRepository documentQuestionRepository;
     private final ApplicationAnswerRepository applicationAnswerRepository;
     private final FileUploadService fileUploadService;
@@ -97,7 +101,14 @@ public class ApplicationServiceImpl implements ApplicationService {
         List<ApplicantAvailability> availabilityList = applicantAvailabilityRepository.findByApplicationId(id);
         List<Evaluation> evaluationList = evaluationRepository.findEvaluationsForApplication(id);
 
-        return ApplicationResponseDTO.Detail.from(application, availabilityList, evaluationList);
+        // 📌 positionId가 null일 수 있으므로 방어적 처리
+        Long positionId = application.getPosition() != null ? application.getPosition().getId() : null;
+
+        // 📌 DOCUMENT 타입 + position 일치 or 공통(null)인 평가 기준 조회
+        List<EvaluationCriteria> evaluationCriteriaList = evaluationCriteriaRepository
+                .findByTypeAndPositionIdOrCommon(EvaluationType.DOCUMENT, positionId);
+
+        return ApplicationResponseDTO.Detail.from(application, availabilityList, evaluationList, evaluationCriteriaList);
     }
 
     /**
@@ -126,7 +137,6 @@ public class ApplicationServiceImpl implements ApplicationService {
         applications.forEach(app -> app.updateStatus(request.status()));
     }
 
-
     private void validateRequiredFields(Recruitment recruitment, ApplicationRequestDTO.Create request) {
         if (recruitment.isNeedGender() && request.gender() == null) {
             throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
@@ -140,6 +150,12 @@ public class ApplicationServiceImpl implements ApplicationService {
         if (recruitment.isNeedAcademicStatus() && request.major() == null) {
             throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
         }
+        if (recruitment.isNeedAcademicStatus() && request.academicStatus() == null) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+        if (recruitment.isNeedAddress() && request.address() == null) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
     }
 
     private Application createApplication(ApplicationRequestDTO.Create request, Recruitment recruitment, Position position) {
@@ -150,7 +166,9 @@ public class ApplicationServiceImpl implements ApplicationService {
                 request.phoneNumber(),
                 request.university(),
                 request.major(),
+                request.academicStatus(),
                 request.birthDate(),
+                request.address(),
                 recruitment,
                 position
         );
