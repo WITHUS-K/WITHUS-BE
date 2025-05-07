@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity;
 
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.enumerate.QuestionType;
+import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;
@@ -20,7 +21,7 @@ public class DocumentQuestion extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "RECRUITMENT_ID", nullable = false)
+    @JoinColumn(name = "RECRUITMENT_ID")
     private Recruitment recruitment;
 
     @Column(name = "TITLE", nullable = false)
@@ -44,8 +45,11 @@ public class DocumentQuestion extends BaseEntity {
     private Integer maxFileCount;
     private Integer maxFileSizeMb;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "POSITION_ID")
+    private Position position;
+
     public void associateRecruitment(Recruitment recruitment) {
         this.recruitment = recruitment;
     }
-
 }

@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface ApplicationAnswerRepository {
     void saveAll(List<ApplicationAnswer> answers);
+    void deleteAllByQuestionId(Long id);
 }

@@ -1,6 +1,5 @@
 package KUSITMS.WITHUS.domain.organization.organization.entity;
 
-import KUSITMS.WITHUS.domain.application.position.entity.Position;
 import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.global.common.BaseEntity;
@@ -28,10 +27,6 @@ public class Organization extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Position> positions = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserOrganization> userOrganizations = new ArrayList<>();
 
     @Builder.Default
@@ -45,11 +40,6 @@ public class Organization extends BaseEntity {
     }
     public void updateName(String name) {
         this.name = name;
-    }
-
-    public void addPosition(Position position) {
-        this.positions.add(position);
-        position.associateOrganization(this);
     }
 
     public void addUserOrganization(UserOrganization userOrganization) {
