@@ -3,6 +3,7 @@ package KUSITMS.WITHUS.domain.user.user.service;
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
+import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
@@ -10,11 +11,13 @@ import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
 import KUSITMS.WITHUS.global.util.redis.VerificationCacheUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
@@ -27,6 +30,7 @@ public class UserServiceImpl implements UserService {
     private final OrganizationRepository organizationRepository;
     private final VerificationCacheUtil verificationCacheUtil;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final FileUploadService uploadService;
 
 
     @Override
@@ -194,5 +198,65 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /**
+     * 내 정보 조회
+     * @param userId 현재 로그인 유저
+     * @return 현재 유저 정보 반환
+     */
+    @Override
+    public UserResponseDTO.MyPage getMyPage(Long userId) {
+        User user = userRepository.getById(userId);
+        return UserResponseDTO.MyPage.from(user);
+    }
 
+    /**
+     * 내 정보 수정
+     * @param request 수정할 정보를 담은 DTO
+     * @param profileImage 수정할 프로필 이미지
+     * @param user 현재 로그인 유저 정보
+     * @return 수정된 정보 반환
+     */
+    @Override
+    @Transactional
+    public UserResponseDTO.MyPage updateUser(UserRequestDTO.Update request, MultipartFile profileImage, User user) {
+        String encodedPassword = shouldUpdatePassword(request)
+                ? processPasswordUpdate(request, user)
+                : user.getPassword();
+
+        // request에 비밀번호 값이 다 들어있을 때만 검증
+        String imageUrl = user.getProfileImageUrl();
+        if (profileImage != null && !profileImage.isEmpty()) {
+            if (imageUrl != null) {
+                uploadService.delete(imageUrl);
+            }
+            imageUrl = uploadService.uploadUserProfileImage(profileImage, user.getId());
+        }
+
+        user.update(request.name(), request.phoneNumber(), encodedPassword, imageUrl);
+
+        return UserResponseDTO.MyPage.from(user);
+    }
+
+    private boolean shouldUpdatePassword(UserRequestDTO.Update request) {
+        return isNotBlank(request.currentPassword()) &&
+                isNotBlank(request.newPassword1()) &&
+                isNotBlank(request.newPassword2());
+    }
+
+    private String processPasswordUpdate(UserRequestDTO.Update request, User user) {
+        if (!bCryptPasswordEncoder.matches(request.currentPassword(), user.getPassword())) {
+            throw new CustomException(ErrorCode.USER_WRONG_PASSWORD);
+        }
+        if (!request.newPassword1().equals(request.newPassword2())) {
+            throw new CustomException(ErrorCode.PASSWORDS_NOT_MATCH);
+        }
+        if (bCryptPasswordEncoder.matches(request.newPassword1(), user.getPassword())) {
+            throw new CustomException(ErrorCode.USER_SAME_PASSWORD);
+        }
+        return bCryptPasswordEncoder.encode(request.newPassword1());
+    }
+
+    private boolean isNotBlank(String value) {
+        return value != null && !value.isBlank();
+    }
 }
