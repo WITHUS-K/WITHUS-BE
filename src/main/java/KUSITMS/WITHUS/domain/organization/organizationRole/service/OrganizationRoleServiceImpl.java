@@ -15,8 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -102,7 +102,6 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
                 .map(OrganizationRoleResponseDTO.RoleDetail::from)
                 .toList();
 
-
         return OrganizationRoleResponseDTO.DetailForOrganization.from(roleDetails);
     }
 
@@ -110,34 +109,74 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
      * 특정 역할에 운영진 일괄 추가
      * @param organizationId 역할이 속한 조직 ID
      * @param roleId 추가할 역할 ID
-     * @param userIds 추가될 사용자 ID 리스트
+     * @param newUserIds 추가될 사용자 ID 리스트
      * @return 추가된 정보 반환
      */
     @Override
     @Transactional
-    public List<OrganizationRoleResponseDTO.DetailForUser> assignUsersToRole(Long organizationId, Long roleId, List<Long> userIds) {
+    public List<OrganizationRoleResponseDTO.DetailForUser> updateUsersOfRole(Long organizationId, Long roleId, List<Long> newUserIds) {
         OrganizationRole role = organizationRoleRepository.getById(roleId);
 
-        List<User> users = userRepository.findAllById(userIds);
-        List<OrganizationRoleResponseDTO.DetailForUser> result = new ArrayList<>();
-
-        for (User user : users) {
-            boolean alreadyAssigned = user.getUserOrganizationRoles().stream()
-                    .anyMatch(r -> r.getOrganizationRole().getId().equals(roleId));
-
-            if (alreadyAssigned) continue;
-
-            UserOrganizationRole userOrgRole = UserOrganizationRole.assign(user, role);
-
-            user.addUserOrganizationRole(userOrgRole);
-            role.addUserOrganizationRole(userOrgRole);
-
-            userOrganizationRoleRepository.save(userOrgRole);
-
-            result.add(OrganizationRoleResponseDTO.DetailForUser.from(userOrgRole));
+        if (!role.getOrganization().getId().equals(organizationId)) {
+            throw new CustomException(ErrorCode.ORGANIZATION_ROLE_ORG_MISMATCH);
         }
 
-        return result;
+        Set<Long> newUserIdSet = new HashSet<>(newUserIds);
+        List<UserOrganizationRole> currentAssignments = role.getUserOrganizationRoles();
+
+        // 삭제할 사용자 역할 매핑 제거
+        List<UserOrganizationRole> toRemove = currentAssignments.stream()
+                .filter(assignment -> !newUserIdSet.contains(assignment.getUser().getId()))
+                .toList();
+        userOrganizationRoleRepository.deleteAll(toRemove);
+
+        Set<Long> removedUserIds = toRemove.stream()
+                .map(assignment -> assignment.getUser().getId())
+                .collect(Collectors.toSet());
+        role.getUserOrganizationRoles().removeIf(
+                assignment -> removedUserIds.contains(assignment.getUser().getId())
+        );
+
+        // 기존 유지되는 사용자 ID 추출
+        Set<Long> existingUserIds = currentAssignments.stream()
+                .map(assignment -> assignment.getUser().getId())
+                .collect(Collectors.toSet());
+
+        // 새롭게 추가할 사용자 ID 필터링
+        List<Long> toAddUserIds = newUserIds.stream()
+                .filter(id -> !existingUserIds.contains(id))
+                .toList();
+        List<User> toAddUsers = userRepository.findAllById(toAddUserIds);
+
+        // 새로운 사용자 역할 매핑 생성
+        List<UserOrganizationRole> newAssignments = new ArrayList<>();
+        for (User user : toAddUsers) {
+            UserOrganizationRole userOrgRole = UserOrganizationRole.assign(user, role);
+            user.addUserOrganizationRole(userOrgRole);
+            role.addUserOrganizationRole(userOrgRole);
+            newAssignments.add(userOrgRole);
+        }
+
+        userOrganizationRoleRepository.saveAll(newAssignments);
+
+        // 최종 응답
+        Map<Long, OrganizationRoleResponseDTO.DetailForUser> resultMap = new LinkedHashMap<>();
+
+        currentAssignments.stream()
+                .filter(assignment -> newUserIdSet.contains(assignment.getUser().getId()))
+                .forEach(assignment -> resultMap.put(
+                        assignment.getUser().getId(),
+                        OrganizationRoleResponseDTO.DetailForUser.from(assignment)
+                ));
+
+        newAssignments.forEach(assignment ->
+                resultMap.put(
+                        assignment.getUser().getId(),
+                        OrganizationRoleResponseDTO.DetailForUser.from(assignment)
+                )
+        );
+
+        return new ArrayList<>(resultMap.values());
     }
 
     /**

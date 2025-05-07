@@ -6,8 +6,8 @@ import java.util.List;
 
 public interface OrganizationRoleService {
     List<OrganizationRoleResponseDTO.DetailForUser> assignRoleToUser(Long organizationId, Long userId, List<Long> roleIds);
+    List<OrganizationRoleResponseDTO.DetailForUser> updateUsersOfRole(Long organizationId, Long roleId, List<Long> newUserIds);
     OrganizationRoleResponseDTO.Detail createRole(Long organizationId, String name, String color);
     OrganizationRoleResponseDTO.DetailForOrganization getOrganizationRoles(Long organizationId, String keyword);
-    List<OrganizationRoleResponseDTO.DetailForUser> assignUsersToRole(Long organizationId, Long roleId, List<Long> userIds);
     void updateRole(Long organizationId, Long roleId, String name, String color);
 }
