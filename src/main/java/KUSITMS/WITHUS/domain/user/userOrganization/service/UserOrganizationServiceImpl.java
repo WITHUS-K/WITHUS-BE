@@ -35,12 +35,12 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
      * @return 조회한 사용자들의 정보
      */
     @Override
-    public Page<UserResponseDTO.DetailForOrganization> getUsers(Long organizationId, int page, int size) {
+    public Page<UserResponseDTO.DetailProfile> getUsers(Long organizationId, int page, int size) {
         organizationRepository.getById(organizationId);
 
         Pageable pageable = PageRequest.of(page, size);
         return userOrganizationRepository.findByOrganizationId(organizationId, pageable)
-                .map(UserResponseDTO.DetailForOrganization::from);
+                .map(user -> UserResponseDTO.DetailProfile.from(user, organizationId));
     }
 
     /**

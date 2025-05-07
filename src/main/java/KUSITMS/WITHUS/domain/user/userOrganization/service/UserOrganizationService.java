@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface UserOrganizationService {
-    Page<UserResponseDTO.DetailForOrganization> getUsers(Long organizationId, int page, int size);
+    Page<UserResponseDTO.DetailProfile> getUsers(Long organizationId, int page, int size);
     List<UserOrganizationResponseDTO.Detail> addUserToOrganization(Long organizationId, List<Long> userIds);
     void removeUsers(Long organizationId, List<Long> userIds);
     List<UserResponseDTO.SummaryForSearch> getAllUsersByOrganization(Long organizationId, String keyword);

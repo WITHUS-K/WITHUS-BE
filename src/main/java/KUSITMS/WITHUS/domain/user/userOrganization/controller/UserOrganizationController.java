@@ -24,7 +24,7 @@ public class UserOrganizationController {
 
     @GetMapping("/{organizationId}/users")
     @Operation(summary = "조직 사용자 목록 조회", description = "조직에 소속된 운영진 목록을 조회합니다.")
-    public SuccessResponse<Page<UserResponseDTO.DetailForOrganization>> getMembers(
+    public SuccessResponse<Page<UserResponseDTO.DetailProfile>> getMembers(
             @PathVariable Long organizationId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
