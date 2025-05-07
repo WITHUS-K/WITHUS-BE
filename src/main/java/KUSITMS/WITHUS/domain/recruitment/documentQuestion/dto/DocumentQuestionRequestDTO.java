@@ -18,22 +18,17 @@ public class DocumentQuestionRequestDTO {
             @Schema(description = "질문 형식(TEXT 또는 FILE)", example = "TEXT")
             @NotNull QuestionType type,
 
-            @Schema(description = "필수 여부", example = "true")
-            boolean required,
+            @Schema(description = "필수 여부", example = "true") boolean required,
 
             // TEXT형 전용
-            @Schema(description = "글자수 제한", example = "1000")
-            Integer textLimit,
-
-            @Schema(description = "공백 포함 여부", example = "true")
-            Boolean includeWhitespace,
+            @Schema(description = "글자수 제한", example = "1000") Integer textLimit,
+            @Schema(description = "공백 포함 여부", example = "true") Boolean includeWhitespace,
 
             // FILE형 전용
-            @Schema(description = "최대 파일 수", example = "1")
-            Integer maxFileCount,
+            @Schema(description = "최대 파일 수", example = "1") Integer maxFileCount,
+            @Schema(description = "최대 파일 크기(MB)", example = "10") Integer maxFileSizeMb,
 
-            @Schema(description = "최대 파일 크기(MB)", example = "10")
-            Integer maxFileSizeMb
+            @Schema(description = "적용할 파트 ID - null이면 공통", example = "백엔드") String positionName
     ) {}
 
 }

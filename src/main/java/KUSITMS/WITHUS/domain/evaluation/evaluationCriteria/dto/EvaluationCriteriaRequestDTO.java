@@ -14,9 +14,6 @@ public class EvaluationCriteriaRequestDTO {
             @NotBlank String content,
 
             @Schema(description = "평가 타입", example = "INTERVIEW")
-            @NotNull EvaluationType type,
-
-            @Schema(description = "적용할 파트 ID - null이면 공통", example = "1")
-            Long positionId
+            @NotNull EvaluationType type
     ) {}
 }
