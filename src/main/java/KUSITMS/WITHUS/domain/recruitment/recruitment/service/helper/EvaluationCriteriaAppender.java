@@ -23,6 +23,7 @@ public class EvaluationCriteriaAppender {
 
             EvaluationCriteria criteria = EvaluationCriteria.builder()
                     .content(dto.content())
+                    .description(dto.description())
                     .evaluationType(type)
                     .build();
 

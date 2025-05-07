@@ -24,12 +24,14 @@ public class EvaluationCriteriaResponseDTO {
     public record Detail(
             @Schema(description = "평가 기준 ID") Long id,
             @Schema(description = "평가 기준") String content,
+            @Schema(description = "상세 내용") String description,
             @Schema(description = "평가 타입") EvaluationType type
     ) {
         public static Detail from(EvaluationCriteria evaluationCriteria) {
             return new Detail(
                     evaluationCriteria.getId(),
                     evaluationCriteria.getContent(),
+                    evaluationCriteria.getDescription(),
                     evaluationCriteria.getEvaluationType()
             );
         }
