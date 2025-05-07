@@ -30,6 +30,7 @@ public class RecruitmentResponseDTO {
     @Schema(description = "공고 상세 정보 응답 DTO")
     public record Detail(
             @Schema(description = "공고 Id") Long recruitmentId,
+            @Schema(description = "고유 슬러그 값") String UrlSlug,
             @Schema(description = "공고 제목") String title,
             @Schema(description = "공고 내용") String content,
             @Schema(description = "첨부 파일 URL") String fileUrl,
@@ -71,6 +72,7 @@ public class RecruitmentResponseDTO {
 
             return new Detail(
                     recruitment.getId(),
+                    recruitment.getUrlSlug(),
                     recruitment.getTitle(),
                     recruitment.getContent(),
                     recruitment.getFileUrl(),

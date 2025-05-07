@@ -23,7 +23,8 @@ public class DocumentQuestionResponseDTO {
             @Schema(description = "질문 제목") String title,
             @Schema(description = "질문 설명") String description,
             @Schema(description = "질문 형식") QuestionType type,
-            @Schema(description = "필수 여부") boolean required
+            @Schema(description = "필수 여부") boolean required,
+            @Schema(description = "적용 파트 이름") String positionName
     ) {
         public static Summary from(DocumentQuestion question) {
             return new Summary(
@@ -31,7 +32,8 @@ public class DocumentQuestionResponseDTO {
                     question.getTitle(),
                     question.getDescription(),
                     question.getType(),
-                    question.isRequired()
+                    question.isRequired(),
+                    question.getPosition() != null ? question.getPosition().getName() : "공통"
             );
         }
     }
