@@ -52,4 +52,16 @@ public class NcpObjectUploader implements Uploader {
             throw new CustomException(ErrorCode.FILE_IO_ERROR);
         }
     }
+
+    @Override
+    public void delete(String key) {
+        try {
+            s3Client.deleteObject(builder -> builder
+                    .bucket(bucketName)
+                    .key(key)
+                    .build());
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.FILE_DELETE_FAIL);
+        }
+    }
 }

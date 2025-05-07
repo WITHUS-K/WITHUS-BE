@@ -134,13 +134,14 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 : createRecruitment(request, organization, isTemporary);
 
         recruitment.clearEvaluationCriteria();
+        Recruitment savedRecruitment = recruitmentRepository.save(recruitment);
+
         positionAppender.append(recruitment, request.positions());
         criteriaAppender.appendWithPositions(recruitment, request.documentEvaluationCriteria(), EvaluationType.DOCUMENT);
         criteriaAppender.appendWithPositions(recruitment, request.interviewEvaluationCriteria(), EvaluationType.INTERVIEW);
         availableTimeRangeAppender.append(recruitment, request.availableTimeRanges());
         documentQuestionAppender.append(recruitment, request.applicationQuestions());
 
-        Recruitment savedRecruitment = recruitmentRepository.save(recruitment);
         return RecruitmentResponseDTO.Create.from(savedRecruitment);
     }
 
