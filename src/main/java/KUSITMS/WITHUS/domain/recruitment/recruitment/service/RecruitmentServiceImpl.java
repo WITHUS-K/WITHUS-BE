@@ -123,11 +123,10 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 : createRecruitment(request, organization, isTemporary);
 
         recruitment.clearEvaluationCriteria();
+        positionAppender.append(recruitment, request.positions());
         criteriaAppender.appendWithPositions(recruitment, request.documentEvaluationCriteria(), EvaluationType.DOCUMENT);
         criteriaAppender.appendWithPositions(recruitment, request.interviewEvaluationCriteria(), EvaluationType.INTERVIEW);
-
         availableTimeRangeAppender.append(recruitment, request.availableTimeRanges());
-        positionAppender.append(recruitment, request.positions());
         documentQuestionAppender.append(recruitment, request.applicationQuestions());
 
         Recruitment savedRecruitment = recruitmentRepository.save(recruitment);
