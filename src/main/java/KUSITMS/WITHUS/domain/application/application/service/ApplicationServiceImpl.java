@@ -101,12 +101,8 @@ public class ApplicationServiceImpl implements ApplicationService {
         List<ApplicantAvailability> availabilityList = applicantAvailabilityRepository.findByApplicationId(id);
         List<Evaluation> evaluationList = evaluationRepository.findEvaluationsForApplication(id);
 
-        // 📌 positionId가 null일 수 있으므로 방어적 처리
-        Long positionId = application.getPosition() != null ? application.getPosition().getId() : null;
-
-        // 📌 DOCUMENT 타입 + position 일치 or 공통(null)인 평가 기준 조회
-        List<EvaluationCriteria> evaluationCriteriaList = evaluationCriteriaRepository
-                .findByTypeAndPositionIdOrCommon(EvaluationType.DOCUMENT, positionId);
+        Long recruitmentId = application.getRecruitment().getId();
+        List<EvaluationCriteria> evaluationCriteriaList = evaluationCriteriaRepository.findByTypeAndRecruitment(EvaluationType.DOCUMENT, recruitmentId);
 
         return ApplicationResponseDTO.Detail.from(application, availabilityList, evaluationList, evaluationCriteriaList);
     }

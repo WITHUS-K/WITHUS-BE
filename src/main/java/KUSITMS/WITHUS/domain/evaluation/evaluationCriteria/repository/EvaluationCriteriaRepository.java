@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface EvaluationCriteriaRepository {
     EvaluationCriteria getById(Long id);
-    List<EvaluationCriteria> findByTypeAndPositionIdOrCommon(EvaluationType evaluationType, Long positionId);
+    List<EvaluationCriteria> findByTypeAndRecruitment(EvaluationType type, Long recruitmentId);
 }

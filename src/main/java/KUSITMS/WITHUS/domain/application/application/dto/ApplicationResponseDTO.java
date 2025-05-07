@@ -85,8 +85,6 @@ public class ApplicationResponseDTO {
                     .toList();
 
             List<EvaluationCriteriaResponseDTO.Detail> documentEvaluationCriterias = evaluationCriteriaList.stream()
-                    .filter(c -> c.getEvaluationType() == EvaluationType.DOCUMENT &&
-                            (c.getPosition() == null || c.getPosition().getId().equals(application.getPosition().getId())))
                     .map(EvaluationCriteriaResponseDTO.Detail::from)
                     .toList();
 

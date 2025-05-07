@@ -26,15 +26,9 @@ public class EvaluationCriteriaRepositoryImpl implements EvaluationCriteriaRepos
     }
 
     @Override
-    public List<EvaluationCriteria> findByTypeAndPositionIdOrCommon(EvaluationType evaluationType, Long positionId) {
-        return queryFactory
-                .selectFrom(evaluationCriteria)
-                .where(
-                        evaluationCriteria.evaluationType.eq(evaluationType)
-                                .and(evaluationCriteria.position.isNull()
-                                        .or(evaluationCriteria.position.id.eq(positionId)))
-                )
-                .fetch();
+    public List<EvaluationCriteria> findByTypeAndRecruitment(EvaluationType type, Long recruitmentId) {
+        return evaluationCriteriaJpaRepository.findByEvaluationTypeAndRecruitmentId(type, recruitmentId);
     }
+
 
 }
