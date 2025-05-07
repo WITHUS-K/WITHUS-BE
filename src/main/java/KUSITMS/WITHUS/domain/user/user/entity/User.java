@@ -73,6 +73,16 @@ public class User extends BaseEntity {
         this.password = newEncodedPassword;
     }
 
+    public void update(String name, String phoneNumber, String encodedNewPassword, String profileImageUrl) {
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.password = encodedNewPassword;
+
+        if (profileImageUrl != null && !profileImageUrl.isBlank()) {
+            this.profileImageUrl = profileImageUrl;
+        }
+    }
+
     public void addUserOrganization(UserOrganization userOrganization) {
         this.userOrganizations.add(userOrganization);
         userOrganization.associateUser(this);
