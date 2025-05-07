@@ -28,19 +28,38 @@ public class UserResponseDTO {
         }
     }
 
-    @Schema(description = "검색 결과에 대한 사용자 요약 정보 응답 DTO")
-    public record SummaryForSearch(
+    @Schema(description = "이메일 검색 결과에 대한 사용자 요약 정보 응답 DTO")
+    public record SummaryForEmailSearch(
             @Schema(description = "사용자 ID") Long userId,
             @Schema(description = "이름") String name,
             @Schema(description = "이메일") String email,
             @Schema(description = "프로필 사진 URL") String imageUrl
     ) {
-        public static SummaryForSearch from(User user) {
-            return new SummaryForSearch(
+        public static SummaryForEmailSearch from(User user) {
+            return new SummaryForEmailSearch(
                     user.getId(),
                     user.getName(),
                     user.getEmail(),
                     user.getProfileImageUrl()
+            );
+        }
+    }
+
+    @Schema(description = "검색 결과에 대한 사용자 요약 정보 응답 DTO")
+    public record SummaryForSearch(
+            @Schema(description = "사용자 ID") Long userId,
+            @Schema(description = "이름") String name,
+            @Schema(description = "이메일") String email,
+            @Schema(description = "프로필 사진 URL") String imageUrl,
+            @Schema(description = "역할에 속해있는지 여부") boolean isAssigned
+    ) {
+        public static SummaryForSearch from(User user, boolean isAssigned) {
+            return new SummaryForSearch(
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    user.getProfileImageUrl(),
+                    isAssigned
             );
         }
     }

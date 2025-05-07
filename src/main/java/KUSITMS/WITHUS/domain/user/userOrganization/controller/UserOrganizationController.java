@@ -53,12 +53,13 @@ public class UserOrganizationController {
     }
 
     @GetMapping("/{organizationId}/users/search")
-    @Operation(summary = "조직 운영진 전체 조회 및 검색", description = "조직 ID를 기준으로 운영진 목록을 전부 조회하고 keyword가 존재하면 검색합니다.")
+    @Operation(summary = "조직 운영진 전체 조회 및 검색", description = "조직 ID를 기준으로 운영진 목록을 전부 조회하고 keyword, 역할ID가 존재하면 검색합니다.")
     public SuccessResponse<List<UserResponseDTO.SummaryForSearch>> getAllUsersByOrganization(
             @PathVariable Long organizationId,
-            @RequestParam(required = false) String keyword
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long roleId
     ) {
-        List<UserResponseDTO.SummaryForSearch> response = organizationUserService.getAllUsersByOrganization(organizationId, keyword);
+        List<UserResponseDTO.SummaryForSearch> response = organizationUserService.getUsersWithAssignment(organizationId, keyword, roleId);
         return SuccessResponse.ok(response);
     }
 }
