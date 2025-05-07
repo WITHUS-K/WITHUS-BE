@@ -171,6 +171,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsByEmail(email);
     }
 
+
     /**
      * 이메일로 사용자 정보 조회
      * @param email 검색할 이메일 주소
@@ -180,6 +181,7 @@ public class UserServiceImpl implements UserService {
     public User getUserByEmail(String email) {
         return userRepository.getByEmail(email);
     }
+
 
     /**
      * 회원가입 전 전화번호 인증 여부 확인
@@ -191,4 +193,6 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(ErrorCode.NOT_VERIFIED);
         }
     }
+
+
 }

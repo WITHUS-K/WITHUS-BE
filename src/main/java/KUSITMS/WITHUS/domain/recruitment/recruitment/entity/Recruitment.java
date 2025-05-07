@@ -68,6 +68,9 @@ public class Recruitment extends BaseEntity {
     @Column(name = "INTERVIEW_DURATION")
     private Short interviewDuration;
 
+    @Column(name = "URL_SLUG", unique = true, nullable = false)
+    private String urlSlug;
+
     @Builder.Default
     @Column(name = "IS_TEMPORARY", nullable = false)
     private boolean isTemporary = false;
@@ -117,7 +120,8 @@ public class Recruitment extends BaseEntity {
             boolean needAcademicStatus,
             boolean isTemporary,
             EvaluationScaleType documentScaleType,
-            EvaluationScaleType interviewScaleType
+            EvaluationScaleType interviewScaleType,
+            String urlSlug
     ) {
         return Recruitment.builder()
                 .title(title)
@@ -136,6 +140,7 @@ public class Recruitment extends BaseEntity {
                 .isTemporary(isTemporary)
                 .documentScaleType(documentScaleType)
                 .interviewScaleType(interviewScaleType)
+                .urlSlug(urlSlug)
                 .build();
     }
 
@@ -202,11 +207,6 @@ public class Recruitment extends BaseEntity {
     public void clearAvailableTimeRanges() {
         this.availableTimeRanges.clear();
     }
-
-    public void clearPositions() {
-        this.positions.clear();
-    }
-
 
     public void markAsFinal() {
         this.isTemporary = false;

@@ -5,6 +5,7 @@ import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRe
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
+import KUSITMS.WITHUS.domain.user.userOrganization.dto.UserOrganizationResponseDTO;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -33,40 +35,47 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
      * @return 조회한 사용자들의 정보
      */
     @Override
-    public Page<UserResponseDTO.DetailForOrganization> getUsers(Long organizationId, int page, int size) {
+    public Page<UserResponseDTO.DetailProfile> getUsers(Long organizationId, int page, int size) {
         organizationRepository.getById(organizationId);
 
         Pageable pageable = PageRequest.of(page, size);
         return userOrganizationRepository.findByOrganizationId(organizationId, pageable)
-                .map(UserResponseDTO.DetailForOrganization::from);
+                .map(user -> UserResponseDTO.DetailProfile.from(user, organizationId));
     }
 
     /**
      * 특정 조직에 특정 사용자를 추가
      * @param organizationId 추가할 조직 ID
-     * @param userId 추가할 사용자 ID
+     * @param userIds 추가할 사용자 ID 리스트
      * @return 매핑 정보 반환
      */
     @Override
     @Transactional
-    public UserOrganization addUserToOrganization(Long organizationId, Long userId) {
+    public List<UserOrganizationResponseDTO.Detail> addUserToOrganization(Long organizationId, List<Long> userIds) {
         Organization organization = organizationRepository.getById(organizationId);
-        User user = userRepository.getById(userId);
 
-        boolean alreadyExists = userOrganizationRepository.existsByUserIdAndOrganizationId(userId, organizationId);
-        if (alreadyExists) {
-            throw new CustomException(ErrorCode.DUPLICATE_USER_ORGANIZATION);
+        List<UserOrganizationResponseDTO.Detail> result = new ArrayList<>();
+
+        for (Long userId : userIds) {
+            if (userOrganizationRepository.existsByUserIdAndOrganizationId(userId, organizationId)) {
+                continue;
+            }
+
+            User user = userRepository.getById(userId);
+
+            UserOrganization userOrganization = UserOrganization.builder()
+                    .user(user)
+                    .organization(organization)
+                    .build();
+
+            user.addUserOrganization(userOrganization);
+            organization.addUserOrganization(userOrganization);
+
+            UserOrganization saved = userOrganizationRepository.save(userOrganization);
+            result.add(UserOrganizationResponseDTO.Detail.from(saved));
         }
 
-        UserOrganization userOrganization = UserOrganization.builder()
-                .user(user)
-                .organization(organization)
-                .build();
-
-        user.addUserOrganization(userOrganization);
-        organization.addUserOrganization(userOrganization);
-
-        return userOrganizationRepository.save(userOrganization);
+        return result;
     }
 
     /**
@@ -88,15 +97,22 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
     }
 
     /**
-     * 조직에 속한 운영진 전체 조회, keyword가 있다면 검색
+     * 조직에 속한 운영진 전체 조회,  keyword, roleId가 있다면 검색
      * @param organizationId 조회할 조직의 ID
      * @param keyword 검색어(이름)
      * @return 조회된 유저 정보
      */
     @Override
-    public List<UserResponseDTO.Summary> getAllUsersByOrganization(Long organizationId, String keyword) {
-        return userOrganizationRepository.findManagersByOrganizationId(organizationId, keyword).stream()
-                .map(UserResponseDTO.Summary::from)
+    public List<UserResponseDTO.SummaryForSearch> getUsersWithAssignment(Long organizationId, String keyword, Long roleId) {
+        List<User> users = userOrganizationRepository.findUsersByOrganizationAndKeyword(organizationId, keyword);
+
+        return users.stream()
+                .map(user -> {
+                    boolean assigned = user.getUserOrganizationRoles().stream()
+                            .anyMatch(r -> r.getOrganizationRole().getId().equals(roleId));
+                    return UserResponseDTO.SummaryForSearch.from(user, assigned);
+                })
                 .toList();
     }
+
 }

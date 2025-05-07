@@ -11,6 +11,9 @@ import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.AvailableTim
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.DocumentQuestionAppender;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.EvaluationCriteriaAppender;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.PositionAppender;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.util.SlugGenerator;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +32,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     private final PositionAppender positionAppender;
     private final DocumentQuestionAppender documentQuestionAppender;
     private final EvaluationCriteriaAppender criteriaAppender;
+
+    private static final int MAX_ATTEMPTS = 10;
 
     /**
      * 공고 임시 저장
@@ -114,6 +119,12 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 .toList();
     }
 
+    @Override
+    public RecruitmentResponseDTO.Detail getBySlug(String slug) {
+        Recruitment recruitment = recruitmentRepository.findByUrlSlug(slug)
+                .orElseThrow(() -> new CustomException(ErrorCode.RECRUITMENT_NOT_EXIST));
+        return RecruitmentResponseDTO.Detail.from(recruitment);
+    }
 
     private RecruitmentResponseDTO.Create saveRecruitment(RecruitmentRequestDTO.Upsert request, boolean isTemporary) {
         Organization organization = organizationRepository.getById(request.organizationId());
@@ -138,7 +149,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 request.title(), request.content(), request.fileUrl(), request.documentDeadline(),
                 request.documentResultDate(), request.finalResultDate(), request.interviewDuration(), organization,
                 request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
-                request.needAcademicStatus(), isTemporary, request.documentScaleType(), request.interviewScaleType()
+                request.needAcademicStatus(), isTemporary, request.documentScaleType(), request.interviewScaleType(), generateUniqueSlug()
         );
     }
 
@@ -156,5 +167,15 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         else recruitment.markAsFinal();
 
         return recruitment;
+    }
+
+    private String generateUniqueSlug() {
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            String slug = SlugGenerator.generateRandomSlug();
+            if (!recruitmentRepository.existsByUrlSlug(slug)) {
+                return slug;
+            }
+        }
+        throw new CustomException(ErrorCode.SLUG_GENERATION_FAILED);
     }
 }

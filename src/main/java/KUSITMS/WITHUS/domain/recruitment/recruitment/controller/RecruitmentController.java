@@ -70,4 +70,12 @@ public class RecruitmentController {
         List<RecruitmentResponseDTO.Summary> result = recruitmentService.getAllByKeyword(keyword);
         return SuccessResponse.ok(result);
     }
+
+    @GetMapping("/slug/{slug}")
+    @Operation(summary = "슬러그 기반 리크루팅 상세 조회", description = "slug를 통해 공고 상세 정보를 조회합니다.")
+    public SuccessResponse<RecruitmentResponseDTO.Detail> getBySlug(@PathVariable String slug) {
+        RecruitmentResponseDTO.Detail result = recruitmentService.getBySlug(slug);
+        return SuccessResponse.ok(result);
+    }
+
 }

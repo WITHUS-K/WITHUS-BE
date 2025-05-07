@@ -3,7 +3,6 @@ package KUSITMS.WITHUS.domain.user.userOrganization.controller;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.userOrganization.dto.UserOrganizationRequestDTO;
 import KUSITMS.WITHUS.domain.user.userOrganization.dto.UserOrganizationResponseDTO;
-import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.domain.user.userOrganization.service.UserOrganizationService;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,7 +24,7 @@ public class UserOrganizationController {
 
     @GetMapping("/{organizationId}/users")
     @Operation(summary = "조직 사용자 목록 조회", description = "조직에 소속된 운영진 목록을 조회합니다.")
-    public SuccessResponse<Page<UserResponseDTO.DetailForOrganization>> getMembers(
+    public SuccessResponse<Page<UserResponseDTO.DetailProfile>> getMembers(
             @PathVariable Long organizationId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
@@ -34,13 +33,13 @@ public class UserOrganizationController {
     }
 
     @PostMapping("/{organizationId}/users")
-    @Operation(summary = "조직에 사용자 추가", description = "조직에 사용자를 추가합니다.")
-    public SuccessResponse<UserOrganizationResponseDTO.Detail> addUserToOrganization(
+    @Operation(summary = "조직에 사용자 일괄 추가", description = "조직에 여러 명의 사용자를 한 번에 추가합니다.")
+    public SuccessResponse<List<UserOrganizationResponseDTO.Detail>> addUserToOrganization(
             @PathVariable Long organizationId,
-            @RequestBody @Valid UserOrganizationRequestDTO.AddUser request
+            @RequestBody @Valid UserOrganizationRequestDTO.AddUsers request
     ) {
-        UserOrganization userOrganization = organizationUserService.addUserToOrganization(organizationId, request.userId());
-        return SuccessResponse.ok(UserOrganizationResponseDTO.Detail.from(userOrganization));
+        List<UserOrganizationResponseDTO.Detail> response = organizationUserService.addUserToOrganization(organizationId, request.userIds());
+        return SuccessResponse.ok(response);
     }
 
     @DeleteMapping("/{organizationId}/users")
@@ -54,12 +53,13 @@ public class UserOrganizationController {
     }
 
     @GetMapping("/{organizationId}/users/search")
-    @Operation(summary = "조직 운영진 전체 조회 및 검색", description = "조직 ID를 기준으로 운영진 목록을 전부 조회하고 keyword가 존재하면 검색합니다.")
-    public SuccessResponse<List<UserResponseDTO.Summary>> getAllUsersByOrganization(
+    @Operation(summary = "조직 운영진 전체 조회 및 검색", description = "조직 ID를 기준으로 운영진 목록을 전부 조회하고 keyword, 역할ID가 존재하면 검색합니다.")
+    public SuccessResponse<List<UserResponseDTO.SummaryForSearch>> getAllUsersByOrganization(
             @PathVariable Long organizationId,
-            @RequestParam(required = false) String keyword
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long roleId
     ) {
-        List<UserResponseDTO.Summary> response = organizationUserService.getAllUsersByOrganization(organizationId, keyword);
+        List<UserResponseDTO.SummaryForSearch> response = organizationUserService.getUsersWithAssignment(organizationId, keyword, roleId);
         return SuccessResponse.ok(response);
     }
 }

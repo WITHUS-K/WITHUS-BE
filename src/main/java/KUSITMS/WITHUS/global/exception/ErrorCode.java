@@ -69,6 +69,7 @@ public enum ErrorCode {
     // Recruitment (공고)
     RECRUITMENT_ALREADY_EXIST("RECRUITMENT400", "이미 존재하는 공고입니다.", HttpStatus.BAD_REQUEST),
     RECRUITMENT_NOT_EXIST("RECRUITMENT404", "존재하지 않는 공고입니다.", HttpStatus.NOT_FOUND),
+    SLUG_GENERATION_FAILED("RECRUITMENT500", "슬러그 생성에 실패하였습니다. 슬러그 자릿수를 늘리세요.", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // DocumentQuestion (지원서 서류 질문)
     DOCUMENT_QUESTION_ALREADY_EXIST("DOCUMENT_QUESTION400", "이미 존재하는 지원서 질문입니다.", HttpStatus.BAD_REQUEST),
@@ -106,6 +107,7 @@ public enum ErrorCode {
     ORGANIZATION_ROLE_ALREADY_EXIST("ORGANIZATION_ROLE400", "이미 추가된 역할입니다.", HttpStatus.BAD_REQUEST),
     DUPLICATE_ORGANIZATION_ROLE_NAME("ORGANIZATION_ROLE400", "이미 존재하는 역할명입니다.", HttpStatus.BAD_REQUEST),
     ORGANIZATION_ROLE_NOT_EXIST("ORGANIZATION_ROLE404", "등록되지 않은 조직 역할입니다.", HttpStatus.NOT_FOUND),
+    ORGANIZATION_ROLE_ORG_MISMATCH("ORGANIZATION_ROLE403", "해당 역할은 해당 조직에 속해 있지 않습니다.", HttpStatus.FORBIDDEN),
 
     // Verification
     VERIFICATION_EXPIRED("VERIFICATION404", "인증 코드가 만료되었습니다.", HttpStatus.NOT_FOUND),

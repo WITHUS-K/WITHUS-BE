@@ -3,7 +3,6 @@ package KUSITMS.WITHUS.domain.user.userOrganization.repository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +15,7 @@ import java.util.Optional;
 
 import static KUSITMS.WITHUS.domain.user.user.entity.QUser.user;
 import static KUSITMS.WITHUS.domain.user.userOrganization.entity.QUserOrganization.userOrganization;
+import static KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.QUserOrganizationRole.userOrganizationRole;
 
 @Repository
 @RequiredArgsConstructor
@@ -89,23 +89,18 @@ public class UserOrganizationRepositoryImpl implements UserOrganizationRepositor
     }
 
     @Override
-    public List<User> findManagersByOrganizationId(Long organizationId, String keyword) {
+    public List<User> findUsersByOrganizationAndKeyword(Long orgId, String keyword) {
         return queryFactory
                 .select(user)
-                .from(userOrganization)
-                .join(userOrganization.user, user)
+                .from(userOrganizationRole)
+                .join(userOrganizationRole.user, user)
                 .where(
-                        userOrganization.organization.id.eq(organizationId),
-                        user.role.eq(Role.USER),
-                        keywordCondition(keyword)
+                        userOrganizationRole.organizationRole.organization.id.eq(orgId),
+                        keyword != null ? user.name.containsIgnoreCase(keyword).or(user.email.containsIgnoreCase(keyword)) : null
                 )
+                .distinct()
                 .fetch();
     }
 
-    private BooleanExpression keywordCondition(String keyword) {
-        if (keyword == null || keyword.isBlank()) {
-            return null;
-        }
-        return user.name.containsIgnoreCase(keyword);
-    }
+
 }

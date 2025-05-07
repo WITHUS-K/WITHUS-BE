@@ -36,7 +36,7 @@ public class OrganizationRoleController {
             @PathVariable Long organizationId,
             @RequestBody @Valid OrganizationRoleRequestDTO.Create request
     ) {
-        OrganizationRoleResponseDTO.Detail response = organizationRoleService.createRole(organizationId, request.name());
+        OrganizationRoleResponseDTO.Detail response = organizationRoleService.createRole(organizationId, request.name(), request.color());
         return SuccessResponse.ok(response);
     }
 
@@ -48,5 +48,27 @@ public class OrganizationRoleController {
     ) {
         OrganizationRoleResponseDTO.DetailForOrganization response = organizationRoleService.getOrganizationRoles(organizationId, keyword);
         return SuccessResponse.ok(response);
+    }
+
+    @PutMapping("/{organizationId}/roles/{roleId}/assign-users")
+    @Operation(summary = "역할에 사용자 일괄 추가", description = "특정 역할에 여러 명의 운영진을 한 번에 추가합니다.")
+    public SuccessResponse<List<OrganizationRoleResponseDTO.DetailForUser>> assignUsersToRole(
+            @PathVariable Long organizationId,
+            @PathVariable Long roleId,
+            @RequestBody @Valid OrganizationRoleRequestDTO.AssignUsersToRole request
+    ) {
+        List<OrganizationRoleResponseDTO.DetailForUser> response = organizationRoleService.updateUsersOfRole(organizationId, roleId, request.userIds());
+        return SuccessResponse.ok(response);
+    }
+
+    @PatchMapping("/{organizationId}/roles/{roleId}")
+    @Operation(summary = "조직 역할 수정", description = "조직 내 특정 역할의 이름과 색상을 수정합니다.")
+    public SuccessResponse<String> updateRole(
+            @PathVariable Long organizationId,
+            @PathVariable Long roleId,
+            @RequestBody @Valid OrganizationRoleRequestDTO.Update request
+    ) {
+        organizationRoleService.updateRole(organizationId, roleId, request.name(), request.color());
+        return SuccessResponse.ok("조직 내 역할 수정에 성공했습니다.");
     }
 }
