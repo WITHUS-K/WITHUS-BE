@@ -3,6 +3,7 @@ package KUSITMS.WITHUS.domain.application.application.service;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
+import KUSITMS.WITHUS.domain.application.application.repository.ApplicationJpaRepository;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.ApplicationAnswerRepository;
@@ -24,6 +25,8 @@ import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,6 +51,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final DocumentQuestionRepository documentQuestionRepository;
     private final ApplicationAnswerRepository applicationAnswerRepository;
     private final FileUploadService fileUploadService;
+    private final ApplicationJpaRepository applicationJpaRepository;
 
     /**
      * 지원서 생성
@@ -113,10 +117,9 @@ public class ApplicationServiceImpl implements ApplicationService {
      * @return 조회한 공고의 지원서 전제의 정보
      */
     @Override
-    public List<ApplicationResponseDTO.Summary> getByRecruitmentId(Long recruitmentId) {
-        return applicationRepository.findByRecruitmentId(recruitmentId).stream()
-                .map(ApplicationResponseDTO.Summary::from)
-                .toList();
+    public Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(Long recruitmentId, Long currentUserId, Pageable pageable) {
+        return applicationJpaRepository.findByRecruitmentId(recruitmentId, pageable)
+                .map(application -> ApplicationResponseDTO.SummaryForUser.from(application, currentUserId));
     }
 
     /**

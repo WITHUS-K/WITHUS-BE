@@ -5,6 +5,7 @@ import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.service.ApplicationService;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
+import KUSITMS.WITHUS.global.response.PagedResponse;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,6 +14,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -69,8 +74,13 @@ public class ApplicationController {
 
     @GetMapping("/recruitment/{recruitmentId}")
     @Operation(summary = "공고별 지원서 목록 조회", description = "공고 ID를 기준으로 전체 지원서 목록을 조회합니다.")
-    public SuccessResponse<List<ApplicationResponseDTO.Summary>> getByRecruitment(@PathVariable Long recruitmentId) {
-        return SuccessResponse.ok(applicationService.getByRecruitmentId(recruitmentId));
+    public SuccessResponse<PagedResponse<ApplicationResponseDTO.SummaryForUser>> getByRecruitment(
+            @PathVariable Long recruitmentId,
+            @CurrentUser User currentUser,
+            @PageableDefault(size = 9, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<ApplicationResponseDTO.SummaryForUser> page = applicationService.getByRecruitmentId(recruitmentId, currentUser.getId(), pageable);
+        return SuccessResponse.ok(PagedResponse.from(page));
     }
 
     @PatchMapping("/status")

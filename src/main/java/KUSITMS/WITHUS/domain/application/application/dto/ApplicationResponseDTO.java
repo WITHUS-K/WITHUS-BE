@@ -20,6 +20,7 @@ import KUSITMS.WITHUS.global.common.annotation.TimeFormat;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.lang.Nullable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -92,7 +93,7 @@ public class ApplicationResponseDTO {
                     .toList();
 
             Map<Long, Integer> userScoreMap = evaluationList.stream()
-                    .filter(e -> e.getUser().getId().equals(currentUserId)) // 로그인한 사용자
+                    .filter(e -> e.getUser().getId().equals(currentUserId))
                     .collect(Collectors.toMap(
                             e -> e.getCriteria().getId(),
                             Evaluation::getScore
@@ -165,6 +166,47 @@ public class ApplicationResponseDTO {
             );
         }
     }
+
+    @Schema(description = "지원서 요약 응답 DTO")
+    public record SummaryForUser(
+            @Schema(description = "서류 발표 여부", example = "true") boolean documentResultAnnounced,
+            @Schema(description = "지원서 ID") Long id,
+            @Schema(description = "지원자 이름") String name,
+            @Schema(description = "파트명") String positionName,
+            @Schema(description = "합불 상태") ApplicationStatus status,
+            @Schema(description = "해당 평가자가 이 지원서를 평가했는지 여부") boolean evaluated,
+            @Schema(description = "이 사용자가 준 총 점수", example = "20", nullable = true) @Nullable Integer myScoreTotal
+    ) {
+
+        public static SummaryForUser from(Application application, Long currentUserId) {
+            List<Evaluation> userEvaluations = application.getEvaluations().stream()
+                    .filter(e -> e.getUser().getId().equals(currentUserId))
+                    .toList();
+
+            boolean evaluated = !userEvaluations.isEmpty();
+
+            Integer totalScore = evaluated
+                    ? userEvaluations.stream()
+                    .mapToInt(Evaluation::getScore)
+                    .sum()
+                    : null;
+
+            Recruitment recruitment = application.getRecruitment();
+            boolean isDocumentResultAnnounced = LocalDate.now().isAfter(recruitment.getDocumentResultDate())
+                    || LocalDate.now().isEqual(recruitment.getDocumentResultDate());
+
+            return new SummaryForUser(
+                    isDocumentResultAnnounced,
+                    application.getId(),
+                    application.getName(),
+                    application.getPosition() != null ? application.getPosition().getName() : null,
+                    application.getStatus(),
+                    evaluated,
+                    totalScore
+            );
+        }
+    }
+
 
     @Schema(description = "간단한 지원서 응답 DTO")
     public record DetailForTimeSlot(
