@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 @Schema(description = "코맨트 관련 요청 DTO")
 public class CommentRequestDTO {
 
-    @Schema(description = "코맨트 생성 요청 DTO")
+    @Schema(name = "CommentRequestDTO.Create", description = "코맨트 생성 요청 DTO")
     public record Create(
             @Schema(description = "코맨트 내용", example = "큐시즘 경험 있음")
             @NotBlank String content,

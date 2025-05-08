@@ -19,12 +19,14 @@ public class UserResponseDTO {
     @Schema(description = "사용자 요약 정보 응답 DTO")
     public record Summary(
             @Schema(description = "사용자 ID") Long userId,
-            @Schema(description = "이름") String name
+            @Schema(description = "이름") String name,
+            @Schema(description = "프로필 이미지 url") String profileImageUrl
     ) {
         public static Summary from(User user) {
             return new Summary(
                     user.getId(),
-                    user.getName()
+                    user.getName(),
+                    user.getProfileImageUrl()
             );
         }
     }
