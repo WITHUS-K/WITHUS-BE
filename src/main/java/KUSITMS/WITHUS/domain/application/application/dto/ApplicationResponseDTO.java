@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Schema(description = "지원서 응답 DTO")
@@ -63,7 +64,7 @@ public class ApplicationResponseDTO {
                     List<EvaluationCriteriaResponseDTO.Detail> documentEvaluationCriterias
 
             ) {
-        public static Detail from(Application application, List<ApplicantAvailability> availabilityList, List<Evaluation> evaluationList, List<EvaluationCriteria> evaluationCriteriaList) {
+        public static Detail from(Application application, List<ApplicantAvailability> availabilityList, List<Evaluation> evaluationList, List<EvaluationCriteria> evaluationCriteriaList, Long currentUserId) {
             List<ApplicationAnswerResponseDTO> documentAnswers = application.getAnswers().stream()
                     .map(ApplicationAnswerResponseDTO::from)
                     .toList();
@@ -90,8 +91,22 @@ public class ApplicationResponseDTO {
                     .map(CommentResponseDTO.Detail::from)
                     .toList();
 
+//            List<EvaluationCriteriaResponseDTO.Detail> documentEvaluationCriterias = evaluationCriteriaList.stream()
+//                    .map(EvaluationCriteriaResponseDTO.Detail::from)
+//                    .toList();
+
+            Map<Long, Integer> userScoreMap = evaluationList.stream()
+                    .filter(e -> e.getUser().getId().equals(currentUserId)) // 로그인한 사용자
+                    .collect(Collectors.toMap(
+                            e -> e.getCriteria().getId(),
+                            Evaluation::getScore
+                    ));
+
             List<EvaluationCriteriaResponseDTO.Detail> documentEvaluationCriterias = evaluationCriteriaList.stream()
-                    .map(EvaluationCriteriaResponseDTO.Detail::from)
+                    .map(criteria -> {
+                        Integer score = userScoreMap.get(criteria.getId()); // 사용자 점수 (null 가능)
+                        return EvaluationCriteriaResponseDTO.Detail.from(criteria, score);
+                    })
                     .toList();
 
             Recruitment recruitment = application.getRecruitment();

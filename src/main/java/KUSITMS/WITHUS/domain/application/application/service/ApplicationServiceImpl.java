@@ -96,7 +96,7 @@ public class ApplicationServiceImpl implements ApplicationService {
      * @return 조회한 지원서 정보
      */
     @Override
-    public ApplicationResponseDTO.Detail getById(Long id) {
+    public ApplicationResponseDTO.Detail getById(Long id, Long currentUserId) {
         Application application = applicationRepository.getById(id);
         List<ApplicantAvailability> availabilityList = applicantAvailabilityRepository.findByApplicationId(id);
         List<Evaluation> evaluationList = evaluationRepository.findEvaluationsForApplication(id);
@@ -104,7 +104,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         Long recruitmentId = application.getRecruitment().getId();
         List<EvaluationCriteria> evaluationCriteriaList = evaluationCriteriaRepository.findByTypeAndRecruitment(EvaluationType.DOCUMENT, recruitmentId);
 
-        return ApplicationResponseDTO.Detail.from(application, availabilityList, evaluationList, evaluationCriteriaList);
+        return ApplicationResponseDTO.Detail.from(application, availabilityList, evaluationList, evaluationCriteriaList, currentUserId);
     }
 
     /**

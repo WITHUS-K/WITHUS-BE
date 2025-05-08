@@ -3,6 +3,8 @@ package KUSITMS.WITHUS.domain.application.application.controller;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.service.ApplicationService;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -58,8 +60,11 @@ public class ApplicationController {
 
     @GetMapping("/{id}")
     @Operation(summary = "지원서 단건 조회", description = "지원서 ID를 기준으로 상세 정보를 조회합니다.")
-    public SuccessResponse<ApplicationResponseDTO.Detail> getById(@PathVariable Long id) {
-        return SuccessResponse.ok(applicationService.getById(id));
+    public SuccessResponse<ApplicationResponseDTO.Detail> getById(
+            @PathVariable Long id,
+            @CurrentUser User currentUser
+    ) {
+        return SuccessResponse.ok(applicationService.getById(id, currentUser.getId()));
     }
 
     @GetMapping("/recruitment/{recruitmentId}")

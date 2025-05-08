@@ -9,7 +9,7 @@ import java.util.List;
 public interface ApplicationService {
     ApplicationResponseDTO.Summary create(ApplicationRequestDTO.Create request, MultipartFile profileImage, List<MultipartFile> files);
     void delete(Long id);
-    ApplicationResponseDTO.Detail getById(Long id);
+    ApplicationResponseDTO.Detail getById(Long id, Long currentUserId);
     List<ApplicationResponseDTO.Summary> getByRecruitmentId(Long recruitmentId);
     void updateStatus(ApplicationRequestDTO.UpdateStatus request);
 }
