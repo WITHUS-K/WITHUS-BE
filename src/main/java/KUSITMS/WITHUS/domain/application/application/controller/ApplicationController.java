@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.domain.application.application.controller;
 
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
+import KUSITMS.WITHUS.domain.application.application.enumerate.EvaluationStatus;
 import KUSITMS.WITHUS.domain.application.application.service.ApplicationService;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
@@ -77,9 +78,10 @@ public class ApplicationController {
     public SuccessResponse<PagedResponse<ApplicationResponseDTO.SummaryForUser>> getByRecruitment(
             @PathVariable Long recruitmentId,
             @CurrentUser User currentUser,
-            @PageableDefault(size = 9, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+            @RequestParam(defaultValue = "ALL") EvaluationStatus evaluationStatus,
+            @PageableDefault(size = 9) Pageable pageable
     ) {
-        Page<ApplicationResponseDTO.SummaryForUser> page = applicationService.getByRecruitmentId(recruitmentId, currentUser.getId(), pageable);
+        Page<ApplicationResponseDTO.SummaryForUser> page = applicationService.getByRecruitmentId(recruitmentId, currentUser.getId(), evaluationStatus, pageable);
         return SuccessResponse.ok(PagedResponse.from(page));
     }
 

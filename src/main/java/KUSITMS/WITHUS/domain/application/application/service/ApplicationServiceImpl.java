@@ -3,6 +3,7 @@ package KUSITMS.WITHUS.domain.application.application.service;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
+import KUSITMS.WITHUS.domain.application.application.enumerate.EvaluationStatus;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationJpaRepository;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
@@ -26,6 +27,7 @@ import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -117,9 +119,24 @@ public class ApplicationServiceImpl implements ApplicationService {
      * @return 조회한 공고의 지원서 전제의 정보
      */
     @Override
-    public Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(Long recruitmentId, Long currentUserId, Pageable pageable) {
-        return applicationJpaRepository.findByRecruitmentId(recruitmentId, pageable)
-                .map(application -> ApplicationResponseDTO.SummaryForUser.from(application, currentUserId));
+    public Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(Long recruitmentId, Long currentUserId, EvaluationStatus evaluationStatus, Pageable pageable) {
+        List<Application> allApplications = applicationJpaRepository.findByRecruitmentId(recruitmentId); // 전체 가져오기
+
+        List<ApplicationResponseDTO.SummaryForUser> filtered = allApplications.stream()
+                .map(app -> ApplicationResponseDTO.SummaryForUser.from(app, currentUserId))
+                .filter(dto -> switch (evaluationStatus) {
+                    case EVALUATED -> dto.evaluated();
+                    case NOT_EVALUATED -> !dto.evaluated();
+                    case ALL -> true;
+                })
+                .toList();
+
+        // 페이징 적용
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), filtered.size());
+        List<ApplicationResponseDTO.SummaryForUser> paged = start > end ? List.of() : filtered.subList(start, end);
+
+        return new PageImpl<>(paged, pageable, filtered.size());
     }
 
     /**
