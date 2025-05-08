@@ -12,7 +12,7 @@ public record PagedResponse<T>(
         return new PagedResponse<>(
                 page.getContent(),
                 new PaginationMeta(
-                        page.getNumber(),
+                        page.getNumber() + 1,
                         page.getSize(),
                         page.getTotalPages(),
                         page.getTotalElements(),
