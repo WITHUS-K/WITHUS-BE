@@ -91,10 +91,6 @@ public class ApplicationResponseDTO {
                     .map(CommentResponseDTO.Detail::from)
                     .toList();
 
-//            List<EvaluationCriteriaResponseDTO.Detail> documentEvaluationCriterias = evaluationCriteriaList.stream()
-//                    .map(EvaluationCriteriaResponseDTO.Detail::from)
-//                    .toList();
-
             Map<Long, Integer> userScoreMap = evaluationList.stream()
                     .filter(e -> e.getUser().getId().equals(currentUserId)) // 로그인한 사용자
                     .collect(Collectors.toMap(
