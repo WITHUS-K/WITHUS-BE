@@ -13,6 +13,6 @@ public interface ApplicationService {
     ApplicationResponseDTO.Summary create(ApplicationRequestDTO.Create request, MultipartFile profileImage, List<MultipartFile> files);
     void delete(Long id);
     ApplicationResponseDTO.Detail getById(Long id, Long currentUserId);
-    Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(Long recruitmentId, Long currentUserId, EvaluationStatus evaluationStatus, Pageable pageable);
+    Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(Long recruitmentId, Long currentUserId, EvaluationStatus evaluationStatus, String keyword, Pageable pageable);
     void updateStatus(ApplicationRequestDTO.UpdateStatus request);
 }

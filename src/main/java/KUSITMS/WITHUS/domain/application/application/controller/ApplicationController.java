@@ -79,9 +79,10 @@ public class ApplicationController {
             @PathVariable Long recruitmentId,
             @CurrentUser User currentUser,
             @RequestParam(defaultValue = "ALL") EvaluationStatus evaluationStatus,
+            @RequestParam(required = false) String keyword,
             @PageableDefault(size = 9) Pageable pageable
     ) {
-        Page<ApplicationResponseDTO.SummaryForUser> page = applicationService.getByRecruitmentId(recruitmentId, currentUser.getId(), evaluationStatus, pageable);
+        Page<ApplicationResponseDTO.SummaryForUser> page = applicationService.getByRecruitmentId(recruitmentId, currentUser.getId(), evaluationStatus, keyword, pageable);
         return SuccessResponse.ok(PagedResponse.from(page));
     }
 

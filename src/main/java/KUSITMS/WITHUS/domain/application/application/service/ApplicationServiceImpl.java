@@ -119,15 +119,28 @@ public class ApplicationServiceImpl implements ApplicationService {
      * @return 조회한 공고의 지원서 전제의 정보
      */
     @Override
-    public Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(Long recruitmentId, Long currentUserId, EvaluationStatus evaluationStatus, Pageable pageable) {
+    public Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(
+            Long recruitmentId,
+            Long currentUserId,
+            EvaluationStatus evaluationStatus,
+            String keyword,
+            Pageable pageable)
+    {
         List<Application> allApplications = applicationJpaRepository.findByRecruitmentId(recruitmentId); // 전체 가져오기
 
         List<ApplicationResponseDTO.SummaryForUser> filtered = allApplications.stream()
                 .map(app -> ApplicationResponseDTO.SummaryForUser.from(app, currentUserId))
-                .filter(dto -> switch (evaluationStatus) {
-                    case EVALUATED -> dto.evaluated();
-                    case NOT_EVALUATED -> !dto.evaluated();
-                    case ALL -> true;
+                .filter(dto -> {
+                    boolean statusMatch = switch (evaluationStatus) {
+                        case EVALUATED -> dto.evaluated();
+                        case NOT_EVALUATED -> !dto.evaluated();
+                        case ALL -> true;
+                    };
+
+                    boolean keywordMatch = (keyword == null || keyword.isBlank()) ||
+                            dto.name().toLowerCase().contains(keyword.toLowerCase());
+
+                    return statusMatch && keywordMatch;
                 })
                 .toList();
 
