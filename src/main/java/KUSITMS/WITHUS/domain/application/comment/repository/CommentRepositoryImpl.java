@@ -2,6 +2,8 @@ package KUSITMS.WITHUS.domain.application.comment.repository;
 
 import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.application.comment.enumerate.CommentType;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -32,5 +34,11 @@ public class CommentRepositoryImpl implements CommentRepository {
                         comment.user.id.eq(userId)
                 )
                 .fetch();
+    }
+
+    @Override
+    public Comment getById(Long commentId) {
+        return commentJpaRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_EXIST));
     }
 }

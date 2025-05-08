@@ -8,6 +8,8 @@ import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.application.comment.repository.CommentRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,4 +41,18 @@ public class CommentServiceImpl implements CommentService {
 
         return CommentResponseDTO.Summary.from(commentRepository.save(comment));
     }
+
+    @Override
+    @Transactional
+    public CommentResponseDTO.Summary updateComment(Long commentId, Long userId, CommentRequestDTO.Update request) {
+        Comment comment = commentRepository.getById(commentId);
+
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+
+        comment.updateContent(request.content());
+        return CommentResponseDTO.Summary.from(comment);
+    }
+
 }

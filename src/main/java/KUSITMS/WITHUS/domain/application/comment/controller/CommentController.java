@@ -29,4 +29,16 @@ public class CommentController {
     ) {
         return SuccessResponse.ok(commentService.addComment(applicationId, currentUser.getId(), request));
     }
+
+    @PutMapping("/{commentId}")
+    @Operation(summary = "코멘트 수정", description = "운영진이 기존 코멘트를 수정합니다.")
+    public SuccessResponse<CommentResponseDTO.Summary> updateComment(
+            @PathVariable Long commentId,
+            @RequestBody @Valid CommentRequestDTO.Update request,
+            @CurrentUser User currentUser
+    ) {
+        return SuccessResponse.ok(commentService.updateComment(commentId, currentUser.getId(), request));
+    }
+
+
 }
