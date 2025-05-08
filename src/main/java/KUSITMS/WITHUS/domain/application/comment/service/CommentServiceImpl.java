@@ -25,7 +25,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public CommentResponseDTO.Summary addComment(Long applicationId, Long userId, CommentRequestDTO.Create request) {
+    public CommentResponseDTO.Detail addComment(Long applicationId, Long userId, CommentRequestDTO.Create request) {
         Application application = applicationRepository.getById(applicationId);
         User user = userRepository.getById(userId);
 
@@ -39,7 +39,7 @@ public class CommentServiceImpl implements CommentService {
         application.addComment(comment);
         user.addComment(comment);
 
-        return CommentResponseDTO.Summary.from(commentRepository.save(comment));
+        return CommentResponseDTO.Detail.from(commentRepository.save(comment));
     }
 
     @Override
@@ -54,5 +54,18 @@ public class CommentServiceImpl implements CommentService {
         comment.updateContent(request.content());
         return CommentResponseDTO.Summary.from(comment);
     }
+
+    @Override
+    @Transactional
+    public void deleteComment(Long commentId, Long userId) {
+        Comment comment = commentRepository.getById(commentId);
+
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+
+        commentRepository.delete(comment);
+    }
+
 
 }

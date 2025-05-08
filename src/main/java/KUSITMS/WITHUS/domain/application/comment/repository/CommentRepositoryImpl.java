@@ -41,4 +41,10 @@ public class CommentRepositoryImpl implements CommentRepository {
         return commentJpaRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_EXIST));
     }
+
+    @Override
+    public void delete(Comment comment) {
+        commentJpaRepository.delete(comment);
+    }
+
 }

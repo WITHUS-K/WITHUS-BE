@@ -9,4 +9,5 @@ public interface CommentRepository {
     Comment save(Comment comment);
     List<Comment> findByApplicationIdAndTypeAndCreatedBy(Long applicationId, CommentType type, Long userId);
     Comment getById(Long commentId);
+    void delete(Comment comment);
 }
