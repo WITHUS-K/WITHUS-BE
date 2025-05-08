@@ -133,8 +133,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 ? updateRecruitment(request, isTemporary)
                 : createRecruitment(request, organization, isTemporary);
 
-        Recruitment savedRecruitment = recruitmentRepository.save(recruitment);
-
         recruitment.clearEvaluationCriteria();
         Recruitment savedRecruitment = recruitmentRepository.save(recruitment);
 

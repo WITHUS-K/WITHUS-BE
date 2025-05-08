@@ -13,7 +13,6 @@ import KUSITMS.WITHUS.domain.evaluation.evaluation.dto.EvaluationResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteriaResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
-import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.common.annotation.DateFormat;
 import KUSITMS.WITHUS.global.common.annotation.TimeFormat;
@@ -36,6 +35,7 @@ public class ApplicationResponseDTO {
             @Schema(description = "최종 발표일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate finalResultDate,
 
             @Schema(description = "지원서 ID") Long id,
+            @Schema(description = "지원 분야명") String appliedPosition,
             @Schema(description = "지원자 이름") String name,
             @Schema(description = "성별") Gender gender,
             @Schema(description = "이메일") String email,
@@ -54,6 +54,7 @@ public class ApplicationResponseDTO {
             @Schema(description = "서류 코맨트 목록") List<CommentResponseDTO.Detail> documentComments,
             @Schema(description = "면접 코맨트 목록") List<CommentResponseDTO.Detail> interviewComments,
 
+            @Schema(description = "서류 평가 방식") String documentScaleTypeKey,
             @Schema(description = "서류 평가 기준 목록")
                     List<EvaluationCriteriaResponseDTO.Detail> documentEvaluationCriterias
 
@@ -90,6 +91,7 @@ public class ApplicationResponseDTO {
                     .toList();
 
             Recruitment recruitment = application.getRecruitment();
+            String documentScaleTypeKey = recruitment.getDocumentScaleType().getKey();
 
             return new Detail(
                     recruitment.getTitle(),
@@ -97,6 +99,7 @@ public class ApplicationResponseDTO {
                     recruitment.getDocumentResultDate(),
                     recruitment.getFinalResultDate(),
                     application.getId(),
+                    application.getPosition().getName(),
                     application.getName(),
                     application.getGender(),
                     application.getEmail(),
@@ -114,6 +117,7 @@ public class ApplicationResponseDTO {
                     evaluations,
                     documentComments,
                     interviewComments,
+                    documentScaleTypeKey,
                     documentEvaluationCriterias
             );
         }
