@@ -13,6 +13,7 @@ import KUSITMS.WITHUS.domain.evaluation.evaluation.dto.EvaluationResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteriaResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
+import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.common.annotation.DateFormat;
 import KUSITMS.WITHUS.global.common.annotation.TimeFormat;
@@ -22,7 +23,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Schema(description = "지원서 응답 DTO")
 public class ApplicationResponseDTO {
@@ -33,6 +36,7 @@ public class ApplicationResponseDTO {
             @Schema(description = "지원 마감일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate documentDeadline,
             @Schema(description = "서류 발표일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate documentResultDate,
             @Schema(description = "최종 발표일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate finalResultDate,
+            @Schema(description = "면접 일자") List<String> interviewDates,
 
             @Schema(description = "지원서 ID") Long id,
             @Schema(description = "지원 분야명") String appliedPosition,
@@ -93,11 +97,20 @@ public class ApplicationResponseDTO {
             Recruitment recruitment = application.getRecruitment();
             String documentScaleTypeKey = recruitment.getDocumentScaleType().getKey();
 
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            List<String> interviewDates = recruitment.getAvailableTimeRanges().stream()
+                    .map(AvailableTimeRange::getDate)
+                    .distinct()
+                    .sorted()
+                    .map(outputFormatter::format)
+                    .toList();
+
             return new Detail(
                     recruitment.getTitle(),
                     recruitment.getDocumentDeadline(),
                     recruitment.getDocumentResultDate(),
                     recruitment.getFinalResultDate(),
+                    interviewDates,
                     application.getId(),
                     application.getPosition().getName(),
                     application.getName(),
