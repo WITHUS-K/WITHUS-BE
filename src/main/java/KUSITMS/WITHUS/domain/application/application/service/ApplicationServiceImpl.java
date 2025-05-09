@@ -6,6 +6,7 @@ import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.enumerate.EvaluationStatus;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationJpaRepository;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
+import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerRequestDTO;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.ApplicationAnswerRepository;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
@@ -37,6 +38,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -78,9 +80,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         saveApplicantAvailabilities(savedApplication, request.availableTimes());
 
+        validateFileAnswers(recruitment, request.answers(), files);
+
         Map<String, String> uploadedFileUrls = fileUploadService.uploadAnswerFiles(files, recruitment.getOrganization().getId(), recruitment.getId(), savedApplication.getId());
 
-        saveApplicationAnswers(savedApplication, recruitment, request, uploadedFileUrls);
+        saveApplicationAnswers(savedApplication, recruitment, request, uploadedFileUrls, files);
 
         return ApplicationResponseDTO.Summary.from(savedApplication);
     }
@@ -207,11 +211,39 @@ public class ApplicationServiceImpl implements ApplicationService {
             Application application,
             Recruitment recruitment,
             ApplicationRequestDTO.Create request,
-            Map<String, String> uploadedFileUrls
+            Map<String, String> uploadedFileUrls,
+            List<MultipartFile> files
     ) {
         List<DocumentQuestion> questions = documentQuestionRepository.findByRecruitment(recruitment);
         Map<Long, DocumentQuestion> questionMap = questions.stream()
                 .collect(Collectors.toMap(DocumentQuestion::getId, q -> q));
+
+        Set<String> providedFileNames = files.stream()
+                .map(MultipartFile::getOriginalFilename)
+                .collect(Collectors.toSet());
+
+        // 파일명이 DTO에 존재하는지 검증
+        for (ApplicationAnswerRequestDTO answer : request.answers()) {
+            DocumentQuestion question = questionMap.get(answer.questionId());
+
+            if (question.getType() == QuestionType.FILE) {
+                if (answer.fileName() == null || !providedFileNames.contains(answer.fileName())) {
+                    throw new CustomException(ErrorCode.FILE_NAME_NOT_MATCH);
+                }
+            }
+        }
+
+        // 파일 개수가 정확한지 검증
+        long expectedFileCount = request.answers().stream()
+                .filter(a -> {
+                    DocumentQuestion question = questionMap.get(a.questionId());
+                    return question.getType() == QuestionType.FILE;
+                })
+                .count();
+
+        if (files.size() != expectedFileCount) {
+            throw new CustomException(ErrorCode.FILE_COUNT_MISMATCH);
+        }
 
         List<ApplicationAnswer> answers = request.answers().stream()
                 .map(dto -> {
@@ -235,4 +267,41 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .toList();
         applicantAvailabilityRepository.saveAll(availabilities);
     }
+
+    // 요청과 실제 입력 파일 간의 검증 (이름, 갯수)
+    private void validateFileAnswers(
+            Recruitment recruitment,
+            List<ApplicationAnswerRequestDTO> answers,
+            List<MultipartFile> files
+    ) {
+        List<DocumentQuestion> questions = documentQuestionRepository.findByRecruitment(recruitment);
+        Map<Long, DocumentQuestion> questionMap = questions.stream()
+                .collect(Collectors.toMap(DocumentQuestion::getId, q -> q));
+
+        Set<String> providedFileNames = files.stream()
+                .map(MultipartFile::getOriginalFilename)
+                .collect(Collectors.toSet());
+
+        for (ApplicationAnswerRequestDTO answer : answers) {
+            DocumentQuestion question = questionMap.get(answer.questionId());
+
+            if (question.getType() == QuestionType.FILE) {
+                if (answer.fileName() == null || !providedFileNames.contains(answer.fileName())) {
+                    throw new CustomException(ErrorCode.FILE_NAME_NOT_MATCH);
+                }
+            }
+        }
+
+        long expectedFileCount = answers.stream()
+                .filter(a -> {
+                    DocumentQuestion question = questionMap.get(a.questionId());
+                    return question.getType() == QuestionType.FILE;
+                })
+                .count();
+
+        if (files.size() != expectedFileCount) {
+            throw new CustomException(ErrorCode.FILE_COUNT_MISMATCH);
+        }
+    }
+
 }

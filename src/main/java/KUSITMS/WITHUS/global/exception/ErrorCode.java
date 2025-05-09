@@ -123,6 +123,8 @@ public enum ErrorCode {
     FILE_IO_ERROR("FILE500", "파일 처리 중 I/O 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_URL("FILE400", "잘못된 이미지 URL 형식입니다", HttpStatus.BAD_REQUEST),
     FILE_DELETE_FAIL("FILE500", "파일 삭제에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_NAME_NOT_MATCH("FILE400", "요청한 파일명이 업로드된 파일과 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
+    FILE_COUNT_MISMATCH("FILE400", "요청한 파일 수와 실제 업로드된 파일 수가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
 
     // Comment
     COMMENT_NOT_EXIST("COMMENT404", "존재하지 않는 코멘트입니다.", HttpStatus.NOT_FOUND);
