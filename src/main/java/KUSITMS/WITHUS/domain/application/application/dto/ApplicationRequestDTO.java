@@ -37,7 +37,7 @@ public class ApplicationRequestDTO {
             @Schema(description = "전공명", example = "컴퓨터공학과")
             String major,
 
-            @Schema(description = "학적 상태", example = "ENROLLED | GRADUATED | LEAVE_OF_ABSENCE")
+            @Schema(description = "학적 상태", example = "ENROLLED | GRADUATED | LEAVE_OF_ABSENCE | DEFERRED")
             AcademicStatus academicStatus,
 
             @Schema(description = "생년월일", example = "2000-01-01")
