@@ -7,7 +7,7 @@ import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.dto.AvailableTimeRan
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.dto.DocumentQuestionResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.position.dto.PositionResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
-import KUSITMS.WITHUS.global.common.annotation.DateFormat;
+import KUSITMS.WITHUS.global.common.annotation.DateFormatDot;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
@@ -35,9 +35,9 @@ public class RecruitmentResponseDTO {
             @Schema(description = "공고 내용") String content,
             @Schema(description = "첨부 파일 URL") String fileUrl,
             @Schema(description = "포지션 목록") List<PositionResponseDTO.Detail> positions,
-            @Schema(description = "서류 마감일") @DateFormat LocalDate documentDeadline,
-            @Schema(description = "서류 발표일") @DateFormat LocalDate documentResultDate,
-            @Schema(description = "최종 발표일") @DateFormat LocalDate finalResultDate,
+            @Schema(description = "서류 마감일") @DateFormatDot LocalDate documentDeadline,
+            @Schema(description = "서류 발표일") @DateFormatDot LocalDate documentResultDate,
+            @Schema(description = "최종 발표일") @DateFormatDot LocalDate finalResultDate,
             @Schema(description = "면접 소요시간") Short interviewDuration,
             @Schema(description = "조직명") String organizationName,
             @Schema(description = "서류 평가 방식") EvaluationScaleType documentScaleType,
@@ -108,9 +108,9 @@ public class RecruitmentResponseDTO {
     public record Summary(
             @Schema(description = "공고 Id") Long recruitmentId,
             @Schema(description = "공고 제목") String title,
-            @Schema(description = "서류 마감일") @DateFormat LocalDate documentDeadline,
-            @Schema(description = "서류 발표일") @DateFormat LocalDate documentResultDate,
-            @Schema(description = "최종 발표일") @DateFormat LocalDate finalResultDate,
+            @Schema(description = "서류 마감일") @DateFormatDot LocalDate documentDeadline,
+            @Schema(description = "서류 발표일") @DateFormatDot LocalDate documentResultDate,
+            @Schema(description = "최종 발표일") @DateFormatDot LocalDate finalResultDate,
             @Schema(description = "조직명") String organizationName
     ) {
         public static Summary from(Recruitment recruitment) {

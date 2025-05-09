@@ -109,6 +109,9 @@ public enum ErrorCode {
     ORGANIZATION_ROLE_NOT_EXIST("ORGANIZATION_ROLE404", "등록되지 않은 조직 역할입니다.", HttpStatus.NOT_FOUND),
     ORGANIZATION_ROLE_ORG_MISMATCH("ORGANIZATION_ROLE403", "해당 역할은 해당 조직에 속해 있지 않습니다.", HttpStatus.FORBIDDEN),
 
+    // Comment
+    COMMENT_NOT_EXIST("COMMENT404", "존재하지 않는 코멘트입니다.", HttpStatus.NOT_FOUND),
+
     // Verification
     VERIFICATION_EXPIRED("VERIFICATION404", "인증 코드가 만료되었습니다.", HttpStatus.NOT_FOUND),
     VERIFICATION_INVALID("VERIFICATION401", "유효하지 않은 인증 코드입니다.", HttpStatus.UNAUTHORIZED),

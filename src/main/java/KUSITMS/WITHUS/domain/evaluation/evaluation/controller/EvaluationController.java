@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "평가 Controller")
@@ -32,4 +34,15 @@ public class EvaluationController {
         EvaluationResponseDTO.Detail response = evaluationService.evaluate(request, currentUser.getId());
         return SuccessResponse.ok(response);
     }
+
+    @PostMapping("/bulk")
+    @Operation(summary = "여러 평가 기준에 대해 한 번에 평가 등록", description = "지원서에 대해 여러 개의 평가 기준을 기반으로 평가 점수를 한 번에 등록합니다.")
+    public SuccessResponse<List<EvaluationResponseDTO.Detail>> bulkEvaluate(
+            @Valid @RequestBody EvaluationRequestDTO.BulkCreate request,
+            @CurrentUser User currentUser
+    ) {
+        List<EvaluationResponseDTO.Detail> response = evaluationService.bulkEvaluate(request, currentUser.getId());
+        return SuccessResponse.ok(response);
+    }
+
 }

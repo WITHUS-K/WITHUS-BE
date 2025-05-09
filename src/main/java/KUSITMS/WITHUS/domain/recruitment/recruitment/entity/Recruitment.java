@@ -83,7 +83,6 @@ public class Recruitment extends BaseEntity {
     @Column(name = "INTERVIEW_SCALE_TYPE")
     private EvaluationScaleType interviewScaleType;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ORGANIZATION_ID", nullable = false)
     private Organization organization;
