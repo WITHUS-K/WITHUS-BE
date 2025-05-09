@@ -5,9 +5,9 @@ import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRe
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRepository;
 import KUSITMS.WITHUS.global.infra.email.MailProperties;
-import KUSITMS.WITHUS.global.infra.email.MailSender;
-import KUSITMS.WITHUS.global.infra.email.MailTemplateProvider;
-import KUSITMS.WITHUS.global.infra.email.MailTemplateType;
+import KUSITMS.WITHUS.global.infra.email.sender.MailSender;
+import KUSITMS.WITHUS.global.infra.email.template.MailTemplateProvider;
+import KUSITMS.WITHUS.global.infra.email.template.MailTemplateType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

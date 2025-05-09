@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.global.infra.email;
+package KUSITMS.WITHUS.global.infra.email.template;
 
 import lombok.Getter;
 

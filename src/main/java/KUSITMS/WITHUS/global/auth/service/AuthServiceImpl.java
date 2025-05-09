@@ -6,7 +6,7 @@ import KUSITMS.WITHUS.global.auth.dto.CustomUserDetails;
 import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
-import KUSITMS.WITHUS.global.infra.email.MailSender;
+import KUSITMS.WITHUS.global.infra.email.sender.MailSender;
 import KUSITMS.WITHUS.global.infra.sms.SmsSender;
 import KUSITMS.WITHUS.global.util.redis.RefreshTokenCacheUtil;
 import KUSITMS.WITHUS.global.util.redis.VerificationCacheUtil;
