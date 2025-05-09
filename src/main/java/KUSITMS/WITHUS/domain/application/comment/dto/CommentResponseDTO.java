@@ -3,6 +3,7 @@ package KUSITMS.WITHUS.domain.application.comment.dto;
 import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.application.comment.enumerate.CommentType;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
+import KUSITMS.WITHUS.global.common.annotation.DateFormat;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -32,7 +33,7 @@ public class CommentResponseDTO {
             @Schema(description = "코맨트 ID") Long id,
             @Schema(description = "코맨트 내용") String content,
             @Schema(description = "코멘트 유형") CommentType type,
-            @Schema(description = "작성 일자") @JsonFormat(pattern = "yyyy.MM.dd") LocalDateTime createdAt,
+            @Schema(description = "작성 일자") @DateFormat LocalDateTime createdAt,
             @Schema(description = "작성자") UserResponseDTO.Summary user
             ) {
         public static Detail from(Comment comment) {
