@@ -9,4 +9,4 @@ import java.lang.annotation.RetentionPolicy;
 @JacksonAnnotationsInside
 @Retention(RetentionPolicy.RUNTIME)
 @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
-public @interface DateFormat {}
+public @interface DateFormatDot {}

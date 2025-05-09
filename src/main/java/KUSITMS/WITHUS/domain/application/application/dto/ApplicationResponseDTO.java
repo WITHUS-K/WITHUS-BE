@@ -15,7 +15,8 @@ import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteri
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
-import KUSITMS.WITHUS.global.common.annotation.DateFormat;
+import KUSITMS.WITHUS.global.common.annotation.DateFormatDot;
+import KUSITMS.WITHUS.global.common.annotation.DateFormatSlash;
 import KUSITMS.WITHUS.global.common.annotation.TimeFormat;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -35,9 +36,9 @@ public class ApplicationResponseDTO {
     @Schema(description = "지원서 상세 조회 응답 DTO")
     public record Detail(
             @Schema(description = "공고 제목") @JsonFormat(pattern = "2025-2 큐시즘 모집") String title,
-            @Schema(description = "지원 마감일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate documentDeadline,
-            @Schema(description = "서류 발표일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate documentResultDate,
-            @Schema(description = "최종 발표일") @JsonFormat(pattern = "yyyy/MM/dd") LocalDate finalResultDate,
+            @Schema(description = "지원 마감일") @DateFormatSlash LocalDate documentDeadline,
+            @Schema(description = "서류 발표일") @DateFormatSlash LocalDate documentResultDate,
+            @Schema(description = "최종 발표일") @DateFormatSlash LocalDate finalResultDate,
             @Schema(description = "면접 일자") List<String> interviewDates,
 
             @Schema(description = "지원서 ID") Long id,
@@ -49,7 +50,7 @@ public class ApplicationResponseDTO {
             @Schema(description = "대학명") String university,
             @Schema(description = "전공") String major,
             @Schema(description = "학적 상태") AcademicStatus academicStatus,
-            @Schema(description = "생년월일") @DateFormat LocalDate birthDate,
+            @Schema(description = "생년월일") @DateFormatDot LocalDate birthDate,
             @Schema(description = "이미지 URL") String imageUrl,
             @Schema(description = "주소") String address,
             @Schema(description = "합불 상태") ApplicationStatus status,

@@ -5,7 +5,7 @@ import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationResponseD
 import KUSITMS.WITHUS.domain.organization.organizationRole.dto.OrganizationRoleResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
-import KUSITMS.WITHUS.global.common.annotation.DateFormat;
+import KUSITMS.WITHUS.global.common.annotation.DateFormatDot;
 import KUSITMS.WITHUS.global.common.annotation.DateTimeFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -75,7 +75,7 @@ public class UserResponseDTO {
             @Schema(description = "이메일") String email,
             @Schema(description = "역할") List<OrganizationRoleResponseDTO.Detail> roles,
             @Schema(description = "성별") String gender,
-            @Schema(description = "생년월일") @DateFormat LocalDate birthDate,
+            @Schema(description = "생년월일") @DateFormatDot LocalDate birthDate,
             @Schema(description = "전화번호") String phoneNumber,
             @Schema(description = "가입일자") @DateTimeFormat LocalDateTime createdAt
     ) {
