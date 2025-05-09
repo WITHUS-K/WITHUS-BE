@@ -4,7 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum MailTemplateType {
-    INTERVIEW_REQUEST("interview-request.html");
+    INTERVIEW_REQUEST("interview-request.html"),
+    EVALUATION_REMINDER("evaluation-reminder.html");
 
     private final String fileName;
 
