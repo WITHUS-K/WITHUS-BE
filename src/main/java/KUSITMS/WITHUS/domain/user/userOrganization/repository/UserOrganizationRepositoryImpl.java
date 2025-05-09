@@ -72,6 +72,20 @@ public class UserOrganizationRepositoryImpl implements UserOrganizationRepositor
     }
 
     @Override
+    public List<User> findListByOrganizationId(Long organizationId) {
+        return queryFactory
+                .select(user)
+                .from(userOrganization)
+                .join(userOrganization.user, user)
+                .where(
+                        userOrganization.organization.id.eq(organizationId),
+                        user.role.eq(Role.USER)
+                )
+                .fetch();
+
+    }
+
+    @Override
     public List<UserOrganization> findAllByOrganizationIdAndUserIdIn(Long organizationId, List<Long> userIds) {
         return queryFactory
                 .selectFrom(userOrganization)

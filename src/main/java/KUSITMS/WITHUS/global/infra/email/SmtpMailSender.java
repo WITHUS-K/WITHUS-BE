@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Primary
@@ -20,6 +21,7 @@ public class SmtpMailSender implements MailSender {
     private final JavaMailSender javaMailSender;
 
     @Override
+    @Async("taskExecutor")
     public void send(String to, String subject, String text) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
