@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>평가 미완료 리마인드</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f1f3f5; padding: 40px;">
+<div style="max-width: 520px; margin: auto; background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+    <div style="text-align: center; margin-bottom: 24px;">
+        <img src="{{logoUrl}}" alt="WITHUS Logo" style="height: 100px;">
+    </div>
+
+    <h2 style="color: #3366FF; font-weight: bold; text-align: left;">평가 미완료 리마인드</h2>
+
+    <div style="color: #444; font-size: 14px; text-align: left; line-height: 1.6; margin-bottom: 32px;">
+        평가 마감일은 <strong>{{dueDate}}</strong> 입니다.<br>
+        마감일 이전에 평가를 완료해주시길 바랍니다.<br>
+        감사합니다.
+    </div>
+
+    <a href="{{link}}" style="
+        display: block;
+        text-align: center;
+        padding: 14px 0;
+        background-color: #3366FF;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 14px;
+        width: 100%;
+        max-width: 100%;
+    ">
+        평가하기
+    </a>
+</div>
+</body>
+</html>

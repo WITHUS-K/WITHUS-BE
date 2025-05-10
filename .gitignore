@@ -1,3 +1,6 @@
+**/application-dev.yml
+.env
+
 HELP.md
 .gradle
 build/

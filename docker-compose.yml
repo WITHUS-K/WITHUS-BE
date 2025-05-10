@@ -1,0 +1,32 @@
+services:
+  app:
+    container_name: ${APP_NAME}
+    image: ${DOCKERHUB_USERNAME}/withus
+    ports:
+      - "${APP_PORT}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_APP_PASSWORD: ${MAIL_APP_PASSWORD}
+      COOLSMS_API_KEY: ${COOLSMS_API_KEY}
+      COOLSMS_API_SECRET: ${COOLSMS_API_SECRET}
+      COOLSMS_SENDER_NUMBER: ${COOLSMS_SENDER_NUMBER}
+      BUCKET_NAME: ${BUCKET_NAME}
+      NCP_OS_ACCESS_KEY: ${NCP_OS_ACCESS_KEY}
+      NCP_OS_SECRET_KEY: ${NCP_OS_SECRET_KEY}
+      MAIL_LOGO_URL: ${MAIL_LOGO_URL}
+      MAIL_INTERVIEWER_AVAILABILITY_URL: ${MAIL_INTERVIEWER_AVAILABILITY_URL}
+      MAIL_EVALUATION_REMINDER_URL: ${MAIL_EVALUATION_REMINDER_URL}
+      MAIL_INVITE_USER_URL: ${MAIL_INVITE_USER_URL}
+    depends_on:
+      - redis
+
+  redis:
+    image: redis
+    container_name: withus-redis
+    ports:
+      - "6379:6379"
