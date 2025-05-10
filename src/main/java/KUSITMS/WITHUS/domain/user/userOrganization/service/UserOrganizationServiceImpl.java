@@ -123,6 +123,12 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
                 .toList();
     }
 
+    /**
+     * 초대 메일 전송
+     * @param organizationId 대상 조직 ID
+     * @param userIds 초대를 보낼 운영진 ID 리스트
+     * @param inviterName 초대자(로그인 유저) 이름
+     */
     @Override
     public void sendInvitationEmails(Long organizationId, List<Long> userIds, String inviterName) {
         Organization org = organizationRepository.getById(organizationId);
