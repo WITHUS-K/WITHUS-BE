@@ -42,4 +42,8 @@ public class Comment extends BaseEntity {
     public void associateApplication(Application application) {
         this.application = application;
     }
+
+    public void updateContent(String newContent) {
+        this.content = newContent;
+    }
 }

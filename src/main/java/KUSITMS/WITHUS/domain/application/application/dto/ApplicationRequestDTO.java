@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.application.application.dto;
 
+import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerRequestDTO;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
@@ -36,8 +37,14 @@ public class ApplicationRequestDTO {
             @Schema(description = "전공명", example = "컴퓨터공학과")
             String major,
 
+            @Schema(description = "학적 상태", example = "ENROLLED | GRADUATED | LEAVE_OF_ABSENCE | DEFERRED")
+            AcademicStatus academicStatus,
+
             @Schema(description = "생년월일", example = "2000-01-01")
             LocalDate birthDate,
+
+            @Schema(description = "주소", example = "서울시 도봉구 56로 501")
+            String address,
 
             @Schema(description = "공고 ID", example = "1")
             @NotNull Long recruitmentId,

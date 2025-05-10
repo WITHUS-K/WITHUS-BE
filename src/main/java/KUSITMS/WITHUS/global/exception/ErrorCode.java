@@ -109,6 +109,9 @@ public enum ErrorCode {
     ORGANIZATION_ROLE_NOT_EXIST("ORGANIZATION_ROLE404", "등록되지 않은 조직 역할입니다.", HttpStatus.NOT_FOUND),
     ORGANIZATION_ROLE_ORG_MISMATCH("ORGANIZATION_ROLE403", "해당 역할은 해당 조직에 속해 있지 않습니다.", HttpStatus.FORBIDDEN),
 
+    // Comment
+    COMMENT_NOT_EXIST("COMMENT404", "존재하지 않는 코멘트입니다.", HttpStatus.NOT_FOUND),
+
     // Verification
     VERIFICATION_EXPIRED("VERIFICATION404", "인증 코드가 만료되었습니다.", HttpStatus.NOT_FOUND),
     VERIFICATION_INVALID("VERIFICATION401", "유효하지 않은 인증 코드입니다.", HttpStatus.UNAUTHORIZED),
@@ -125,7 +128,9 @@ public enum ErrorCode {
     FILE_UPLOAD_FAIL("FILE500", "파일 업로드에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_IO_ERROR("FILE500", "파일 처리 중 I/O 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_URL("FILE400", "잘못된 이미지 URL 형식입니다", HttpStatus.BAD_REQUEST),
-    FILE_DELETE_FAIL("FILE500", "파일 삭제에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+    FILE_DELETE_FAIL("FILE500", "파일 삭제에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_NAME_NOT_MATCH("FILE400", "요청한 파일명이 업로드된 파일과 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
+    FILE_COUNT_MISMATCH("FILE400", "요청한 파일 수와 실제 업로드된 파일 수가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
 
     private final String errorCode;
     private final String message;
