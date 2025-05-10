@@ -26,7 +26,7 @@ public class EvaluationRequestDTO {
             @Schema(description = "지원서 ID", example = "1")
             @NotNull Long applicationId,
 
-            @Schema(description = "평가 항목 리스트", required = true)
+            @Schema(description = "평가 항목 리스트")
             @NotEmpty List<EvaluationItem> evaluations
 
     ) {
@@ -40,4 +40,10 @@ public class EvaluationRequestDTO {
 
         ) {}
     }
+
+    @Schema(description = "평가 미완료자 리마인드 메일 전송 요청 DTO")
+    public record Reminder(
+            @Schema(description = "미완료 사용자 ID 리스트", example = "[1, 2, 3]")
+            @NotEmpty List<Long> userIds
+    ) {}
 }

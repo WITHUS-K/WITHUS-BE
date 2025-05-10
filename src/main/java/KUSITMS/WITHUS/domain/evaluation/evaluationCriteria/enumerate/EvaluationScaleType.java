@@ -11,8 +11,4 @@ public enum EvaluationScaleType {
     FIVE_LEVEL("5단계 평가");
 
     private final String key;
-
-    public String getKey() {
-        return this.key;
-    }
 }

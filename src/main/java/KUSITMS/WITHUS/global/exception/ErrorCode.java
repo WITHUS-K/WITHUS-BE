@@ -117,9 +117,12 @@ public enum ErrorCode {
     VERIFICATION_INVALID("VERIFICATION401", "유효하지 않은 인증 코드입니다.", HttpStatus.UNAUTHORIZED),
     VERIFICATION_NOT_EQUAL("VERIFICATION401", "인증 코드가 일차하지 않습니다.", HttpStatus.UNAUTHORIZED),
     NOT_VERIFIED("VERIFICATION403", "인증이 완료되지 않았습니다.", HttpStatus.FORBIDDEN),
-    EMAIL_SEND_FAIL("EMAIL500", "메일 전송에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     EMAIL_AUTH_FAIL("EMAIL401", "이메일 인증에 실패했습니다.", HttpStatus.UNAUTHORIZED),
     EMAIL_REQUEST_LIMIT_EXCEEDED("EMAIL429", "5분 후 다시 시도해주세요.", HttpStatus.TOO_MANY_REQUESTS),
+
+    // EMAIL
+    EMAIL_SEND_FAIL("EMAIL500", "메일 전송에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    TEMPLATE_NOT_LOAD("EMAIL500", "이메일 템플릿을 로드할 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // File Upload
     FILE_UPLOAD_FAIL("FILE500", "파일 업로드에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),

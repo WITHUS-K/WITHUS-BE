@@ -5,7 +5,6 @@ import KUSITMS.WITHUS.domain.application.comment.enumerate.CommentType;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Entity
