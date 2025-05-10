@@ -52,5 +52,7 @@ ncp:
     secretKey: ${NCP_OS_SECRET_KEY}
 
 mail:
-  logo-url: https://kr.object.ncloudstorage.com/withus-file/icon/WITHUS.png
-  interviewer-availability-url: https://withus-ten.vercel.app/login #FIXME 수정 필요
+  logo-url: ${MAIL_LOGO_URL}
+  interviewer-availability-url: ${MAIL_INTERVIEWER_AVAILABILITY_URL}
+  evaluation-reminder-url: ${MAIL_EVALUATION_REMINDER_URL}
+  invite-user-url: ${MAIL_INVITE_USER_URL}
