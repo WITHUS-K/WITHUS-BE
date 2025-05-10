@@ -19,4 +19,11 @@ public class UserOrganizationRequestDTO {
             @Schema(description = "삭제할 사용자 ID 목록", example = "[1, 2, 3]")
             @NotEmpty List<Long> userIds
     ) {}
+
+    @Schema(description = "조직 사용자 초대 메일 요청 DTO")
+    public record InviteUsers(
+            @Schema(description = "초대할 사용자 ID 리스트", example = "[1, 2, 3]")
+            @NotEmpty List<Long> userIds
+    ) {}
+
 }

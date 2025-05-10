@@ -1,9 +1,11 @@
 package KUSITMS.WITHUS.domain.user.userOrganization.controller;
 
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.userOrganization.dto.UserOrganizationRequestDTO;
 import KUSITMS.WITHUS.domain.user.userOrganization.dto.UserOrganizationResponseDTO;
 import KUSITMS.WITHUS.domain.user.userOrganization.service.UserOrganizationService;
+import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -62,4 +64,16 @@ public class UserOrganizationController {
         List<UserResponseDTO.SummaryForSearch> response = organizationUserService.getUsersWithAssignment(organizationId, keyword, roleId);
         return SuccessResponse.ok(response);
     }
+
+    @PostMapping("/{organizationId}/users/invite")
+    @Operation(summary = "조직 사용자 초대 메일 전송", description = "조직에 사용자를 초대하는 메일을 발송합니다.")
+    public SuccessResponse<String> sendInvitationEmails(
+            @PathVariable Long organizationId,
+            @RequestBody @Valid UserOrganizationRequestDTO.InviteUsers request,
+            @CurrentUser User user
+    ) {
+        organizationUserService.sendInvitationEmails(organizationId, request.userIds(), user.getName());
+        return SuccessResponse.ok("초대 메일을 전송했습니다.");
+    }
+
 }

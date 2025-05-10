@@ -10,6 +10,10 @@ import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import KUSITMS.WITHUS.global.infra.email.MailProperties;
+import KUSITMS.WITHUS.global.infra.email.sender.MailSender;
+import KUSITMS.WITHUS.global.infra.email.template.MailTemplateProvider;
+import KUSITMS.WITHUS.global.infra.email.template.MailTemplateType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
@@ -28,6 +33,9 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
     private final OrganizationRepository organizationRepository;
     private final UserOrganizationRepository userOrganizationRepository;
     private final UserRepository userRepository;
+    private final MailProperties mailProperties;
+    private final MailTemplateProvider templateProvider;
+    private final MailSender mailSender;
 
     /**
      * 특정 조직의 운영진을 모두 조회 - 페이지네이션
@@ -115,4 +123,21 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
                 .toList();
     }
 
+    @Override
+    public void sendInvitationEmails(Long organizationId, List<Long> userIds, String inviterName) {
+        Organization org = organizationRepository.getById(organizationId);
+        List<User> users = userRepository.findAllById(userIds);
+
+        for (User user : users) {
+            Map<String, String> variables = Map.of(
+                    "logoUrl", mailProperties.getLogoUrl(),
+                    "organizationName", org.getName(),
+                    "inviterName", inviterName,
+                    "link", mailProperties.getInterviewerAvailabilityUrl()
+            );
+
+            String html = templateProvider.loadTemplate(MailTemplateType.INVITATION, variables);
+            mailSender.send(user.getEmail(), "[WITHUS] 조직 초대 메일", html);
+        }
+    }
 }
