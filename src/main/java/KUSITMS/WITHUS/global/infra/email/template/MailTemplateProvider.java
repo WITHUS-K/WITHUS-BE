@@ -8,7 +8,8 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @Component
@@ -20,13 +21,15 @@ public class MailTemplateProvider {
     public String loadTemplate(MailTemplateType templateType, Map<String, String> variables) {
         try {
             Resource resource = resourceLoader.getResource("classpath:templates/" + templateType.getFileName());
-            String content = Files.readString(resource.getFile().toPath());
+            try (InputStream is = resource.getInputStream()) {
+                String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
-            for (Map.Entry<String, String> entry : variables.entrySet()) {
-                content = content.replace("{{" + entry.getKey() + "}}", entry.getValue());
+                for (Map.Entry<String, String> entry : variables.entrySet()) {
+                    content = content.replace("{{" + entry.getKey() + "}}", entry.getValue());
+                }
+
+                return content;
             }
-
-            return content;
         } catch (IOException e) {
             throw new CustomException(ErrorCode.TEMPLATE_NOT_LOAD);
         }
