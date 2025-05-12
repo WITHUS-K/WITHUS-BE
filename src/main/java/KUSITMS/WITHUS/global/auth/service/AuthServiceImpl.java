@@ -6,7 +6,10 @@ import KUSITMS.WITHUS.global.auth.dto.CustomUserDetails;
 import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import KUSITMS.WITHUS.global.infra.email.MailProperties;
 import KUSITMS.WITHUS.global.infra.email.sender.MailSender;
+import KUSITMS.WITHUS.global.infra.email.template.MailTemplateProvider;
+import KUSITMS.WITHUS.global.infra.email.template.MailTemplateType;
 import KUSITMS.WITHUS.global.infra.sms.SmsSender;
 import KUSITMS.WITHUS.global.util.redis.RefreshTokenCacheUtil;
 import KUSITMS.WITHUS.global.util.redis.VerificationCacheUtil;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.Random;
 
 @Service
@@ -30,6 +34,8 @@ public class AuthServiceImpl implements AuthService {
     private final VerificationCacheUtil verificationCacheUtil;
     private final SmsSender smsSender;
     private final MailSender mailSender;
+    private final MailTemplateProvider templateProvider;
+    private final MailProperties mailProperties;
 
     private static final Duration CODE_TTL = Duration.ofMinutes(5); // 인증코드 유효기간 5분
     private static final Duration VERIFIED_TTL = Duration.ofMinutes(10); // 인증완료 상태 유지 10분
@@ -155,8 +161,15 @@ public class AuthServiceImpl implements AuthService {
      * @param code 인증 코드
      */
     private void sendEmail(String email, String code) {
-        String message = "[WITHUS] 인증번호 [" + code + "]를 입력해주세요.";
+        Map<String, String> variables = Map.of(
+                "logoUrl", mailProperties.getLogoUrl(),
+                "code", code
+        );
+
+        String html = templateProvider.loadTemplate(MailTemplateType.VERIFICATION, variables);
         String subject = "[WITHUS] 비밀번호 재설정 인증 번호 발송 메일입니다.";
-        mailSender.send(email, subject, message);
+
+        mailSender.send(email, subject, html);
     }
+
 }
