@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.application.application.entity;
 
 import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
+import KUSITMS.WITHUS.domain.application.applicationAcquaintance.entity.ApplicationAcquaintance;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
@@ -106,6 +107,10 @@ public class Application extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ApplicationAnswer> answers = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ApplicationAcquaintance> acquaintances = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TIME_SLOT_ID")

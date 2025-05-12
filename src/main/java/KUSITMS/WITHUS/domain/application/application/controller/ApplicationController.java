@@ -11,13 +11,12 @@ import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Encoding;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -84,6 +83,24 @@ public class ApplicationController {
     ) {
         Page<ApplicationResponseDTO.SummaryForUser> page = applicationService.getByRecruitmentId(recruitmentId, currentUser.getId(), evaluationStatus, keyword, pageable);
         return SuccessResponse.ok(PagedResponse.from(page));
+    }
+
+    @PostMapping("/{applicationId}/acquaintance")
+    public SuccessResponse<String> markAcquaintance(
+            @PathVariable("applicationId") Long applicationId,
+            @CurrentUser User currentUser
+    ) {
+        applicationService.markAcquaintance(applicationId, currentUser.getId());
+        return SuccessResponse.ok("지인으로 표시되었습니다.");
+    }
+
+    @DeleteMapping("/{applicationId}/acquaintance")
+    public SuccessResponse<String> unmarkAcquaintance(
+            @PathVariable("applicationId") Long applicationId,
+            @CurrentUser User currentUser
+    ) {
+        applicationService.unmarkAcquaintance(applicationId, currentUser.getId());
+        return SuccessResponse.ok("지인 표시가 취소되었습니다.");
     }
 }
 

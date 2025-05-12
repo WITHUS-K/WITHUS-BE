@@ -8,6 +8,9 @@ import KUSITMS.WITHUS.domain.application.application.enumerate.EvaluationStatus;
 import KUSITMS.WITHUS.domain.application.application.enumerate.SimpleApplicationStatus;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationJpaRepository;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
+import KUSITMS.WITHUS.domain.application.applicationAcquaintance.entity.ApplicationAcquaintance;
+import KUSITMS.WITHUS.domain.application.applicationAcquaintance.repository.ApplicationAcquaintanceJpaRepository;
+import KUSITMS.WITHUS.domain.application.applicationAcquaintance.repository.ApplicationAcquaintanceRepository;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerRequestDTO;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.ApplicationAnswerRepository;
@@ -69,6 +72,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final UserOrganizationRoleJpaRepository userOrganizationRoleJpaRepository;
     private final ApplicationEvaluatorJpaRepository applicationEvaluatorJpaRepository;
     private final UserRepository userRepository;
+    private final ApplicationAcquaintanceJpaRepository applicationAcquaintanceJpaRepository;
+    private final ApplicationAcquaintanceRepository applicationAcquaintanceRepository;
 
     /**
      * 지원서 생성
@@ -320,6 +325,33 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .map(u -> new ApplicationEvaluator(application, u))
                 .toList();
         applicationEvaluatorJpaRepository.saveAll(assigns);
+    }
+
+    /**
+     * 지원서를 지인으로 표시 (이미 표시된 경우엔 무시)
+     * @param applicationId 지인 표시할 지원서 id
+     * @param currentUserId 현재 유저의 id
+     */
+    @Transactional
+    public void markAcquaintance(Long applicationId, Long currentUserId) {
+        if (applicationAcquaintanceJpaRepository.existsByApplication_IdAndUser_Id(applicationId, currentUserId)) {
+            return;
+        }
+
+        Application application = applicationRepository.getById(applicationId);
+        User user = userRepository.getById(currentUserId);
+
+        applicationAcquaintanceJpaRepository.save(new ApplicationAcquaintance(application, user));
+    }
+
+    /**
+     * 지인 표시 취소
+     * @param applicationId 지인 표시 취소할 지원서 id
+     * @param currentUserId 현재 유저의 id
+     */
+    @Transactional
+    public void unmarkAcquaintance(Long applicationId, Long currentUserId) {
+        applicationAcquaintanceJpaRepository.deleteByApplication_IdAndUser_Id(applicationId, currentUserId);
     }
 
     /**
