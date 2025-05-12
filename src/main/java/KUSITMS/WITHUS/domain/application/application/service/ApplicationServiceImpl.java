@@ -47,6 +47,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @Transactional(readOnly = true)
@@ -184,7 +185,20 @@ public class ApplicationServiceImpl implements ApplicationService {
                         recruitmentId, statuses, pageable
                 );
 
-        return applications.map(ApplicationResponseDTO.SummaryForAdmin::from);
+        long offset = pageable.getOffset();
+        List<ApplicationResponseDTO.SummaryForAdmin> dtos = IntStream.range(0, applications.getContent().size())
+                .mapToObj(i -> {
+                    Application app = applications.getContent().get(i);
+                    long sequenceNumber = offset + i + 1;  // 1부터 시작
+                    return ApplicationResponseDTO.SummaryForAdmin.from(app, sequenceNumber);
+                })
+                .toList();
+
+        return new PageImpl<>(
+                dtos,
+                pageable,
+                applications.getTotalElements()
+        );
     }
 
     /**

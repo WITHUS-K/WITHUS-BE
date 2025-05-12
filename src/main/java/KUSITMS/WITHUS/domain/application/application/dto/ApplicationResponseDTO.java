@@ -212,6 +212,7 @@ public class ApplicationResponseDTO {
 
     @Schema(description = "관리자용 지원서 요약 응답 DTO")
     public record SummaryForAdmin(
+            @Schema(description = "목록 내 순번", example = "001") String sequence,
             @Schema(description = "지원서 ID") Long id,
             @Schema(description = "지원자 이름") String name,
             @Schema(description = "파트명") String positionName,
@@ -220,7 +221,9 @@ public class ApplicationResponseDTO {
             @Schema(description = "배정된 담당자 수") int assignedCount,
             @Schema(description = "평가 담당자 리스트") List<UserResponseDTO.Summary> evaluators
     ) {
-        public static SummaryForAdmin from(Application application) {
+        public static SummaryForAdmin from(Application application, long sequenceNumber) {
+            String seq = String.format("%03d", sequenceNumber);
+
             List<UserResponseDTO.Summary> assignedEvaluators = application.getEvaluators().stream()
                     .map(ApplicationEvaluator::getEvaluator)
                     .distinct()
@@ -237,6 +240,7 @@ public class ApplicationResponseDTO {
                     .count();
 
             return new SummaryForAdmin(
+                    seq,
                     application.getId(),
                     application.getName(),
                     application.getPosition() != null ? application.getPosition().getName() : null,
