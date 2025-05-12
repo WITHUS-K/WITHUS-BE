@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.lang.Nullable;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -219,6 +220,7 @@ public class ApplicationResponseDTO {
             @Schema(description = "합불 상태") ApplicationStatus status,
             @Schema(description = "평가 완료한 담당자 수") int evaluatedCount,
             @Schema(description = "배정된 담당자 수") int assignedCount,
+            @Schema(description = "서류 평균 점수", example = "85.5") String averageScore,
             @Schema(description = "평가 담당자 리스트") List<UserResponseDTO.Summary> evaluators
     ) {
         public static SummaryForAdmin from(Application application, long sequenceNumber) {
@@ -239,6 +241,21 @@ public class ApplicationResponseDTO {
                     .filter(doneIds::contains)
                     .count();
 
+            // 사용자 별 총점 계산
+            Map<Long, Integer> sumByUser = application.getEvaluations().stream()
+                    .collect(Collectors.groupingBy(
+                            e -> e.getUser().getId(),
+                            Collectors.summingInt(Evaluation::getScore)
+                    ));
+
+            double avg = sumByUser.values().stream()
+                    .mapToInt(Integer::intValue)
+                    .average()
+                    .orElse(0.0);
+            String averageScore = BigDecimal.valueOf(avg)
+                    .stripTrailingZeros()
+                    .toPlainString();
+
             return new SummaryForAdmin(
                     seq,
                     application.getId(),
@@ -247,6 +264,7 @@ public class ApplicationResponseDTO {
                     application.getStatus(),
                     evaluatedCount,
                     assignedEvaluators.size(),
+                    averageScore,
                     assignedEvaluators
             );
         }
