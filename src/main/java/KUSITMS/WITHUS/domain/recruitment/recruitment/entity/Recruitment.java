@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.entity;
 
+import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
@@ -64,13 +65,23 @@ public class Recruitment extends BaseEntity {
     @Column(name = "FINAL_RESULT_DATE")
     private LocalDate finalResultDate;
 
+    @Column(name = "INTERVIEW_DURATION")
+    private Short interviewDuration;
+
+    @Column(name = "URL_SLUG", unique = true, nullable = false)
+    private String urlSlug;
+
     @Builder.Default
     @Column(name = "IS_TEMPORARY", nullable = false)
     private boolean isTemporary = false;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "SCALE_TYPE")
-    private EvaluationScaleType scaleType;
+    @Column(name = "DOCUMENT_SCALE_TYPE")
+    private EvaluationScaleType documentScaleType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "INTERVIEW_SCALE_TYPE")
+    private EvaluationScaleType interviewScaleType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ORGANIZATION_ID", nullable = false)
@@ -88,6 +99,9 @@ public class Recruitment extends BaseEntity {
     @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AvailableTimeRange> availableTimeRanges = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Position> positions = new ArrayList<>();
 
     public static Recruitment create(
             String title,
@@ -96,6 +110,7 @@ public class Recruitment extends BaseEntity {
             LocalDate documentDeadline,
             LocalDate documentResultDate,
             LocalDate finalResultDate,
+            Short interviewDuration,
             Organization organization,
             boolean needGender,
             boolean needAddress,
@@ -103,7 +118,9 @@ public class Recruitment extends BaseEntity {
             boolean needBirthDate,
             boolean needAcademicStatus,
             boolean isTemporary,
-            EvaluationScaleType scaleType
+            EvaluationScaleType documentScaleType,
+            EvaluationScaleType interviewScaleType,
+            String urlSlug
     ) {
         return Recruitment.builder()
                 .title(title)
@@ -112,6 +129,7 @@ public class Recruitment extends BaseEntity {
                 .documentDeadline(documentDeadline)
                 .documentResultDate(documentResultDate)
                 .finalResultDate(finalResultDate)
+                .interviewDuration(interviewDuration)
                 .organization(organization)
                 .needGender(needGender)
                 .needAddress(needAddress)
@@ -119,7 +137,9 @@ public class Recruitment extends BaseEntity {
                 .needBirthDate(needBirthDate)
                 .needAcademicStatus(needAcademicStatus)
                 .isTemporary(isTemporary)
-                .scaleType(scaleType)
+                .documentScaleType(documentScaleType)
+                .interviewScaleType(interviewScaleType)
+                .urlSlug(urlSlug)
                 .build();
     }
 
@@ -130,12 +150,14 @@ public class Recruitment extends BaseEntity {
             LocalDate documentDeadline,
             LocalDate documentResultDate,
             LocalDate finalResultDate,
+            Short interviewDuration,
             boolean needGender,
             boolean needAddress,
             boolean needSchool,
             boolean needBirthDate,
             boolean needAcademicStatus,
-            EvaluationScaleType scaleType
+            EvaluationScaleType documentScaleType,
+            EvaluationScaleType interviewScaleType
     ) {
         this.title = title;
         this.content = content;
@@ -143,12 +165,14 @@ public class Recruitment extends BaseEntity {
         this.documentDeadline = documentDeadline;
         this.documentResultDate = documentResultDate;
         this.finalResultDate = finalResultDate;
+        this.interviewDuration = interviewDuration;
         this.needGender = needGender;
         this.needAddress = needAddress;
         this.needSchool = needSchool;
         this.needBirthDate = needBirthDate;
         this.needAcademicStatus = needAcademicStatus;
-        this.scaleType = scaleType;
+        this.documentScaleType = documentScaleType;
+        this.interviewScaleType = interviewScaleType;
     }
 
     public void addDocumentQuestion(DocumentQuestion question) {
@@ -164,6 +188,23 @@ public class Recruitment extends BaseEntity {
     public void addAvailableTimeRange(AvailableTimeRange range) {
         this.availableTimeRanges.add(range);
         range.associateRecruitment(this);
+    }
+
+    public void addPosition(Position position) {
+        this.positions.add(position);
+        position.associateRecruitment(this);
+    }
+
+    public void clearEvaluationCriteria() {
+        this.evaluationCriteriaList.clear();
+    }
+
+    public void clearDocumentQuestions() {
+        this.questions.clear();
+    }
+
+    public void clearAvailableTimeRanges() {
+        this.availableTimeRanges.clear();
     }
 
     public void markAsFinal() {

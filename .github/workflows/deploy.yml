@@ -89,4 +89,8 @@ jobs:
               "${{ secrets.BUCKET_NAME }}" \
               "${{ secrets.NCP_OS_ACCESS_KEY }}" \
               "${{ secrets.NCP_OS_SECRET_KEY }}" \
+              "${{ secrets.MAIL_LOGO_URL }}" \
+              "${{ secrets.MAIL_INTERVIEWER_AVAILABILITY_URL }}" \
+              "${{ secrets.MAIL_EVALUATION_REMINDER_URL }}" \
+              "${{ secrets.MAIL_INVITE_USER_URL }}" \
               "${{ secrets.DOCKERHUB_USERNAME }}/withus:latest"

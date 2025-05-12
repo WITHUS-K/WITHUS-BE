@@ -1,12 +1,19 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.service;
 
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
-import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.AvailableTimeRangeAppender;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.DocumentQuestionAppender;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.EvaluationCriteriaAppender;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.PositionAppender;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.util.SlugGenerator;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +27,13 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     private final RecruitmentRepository recruitmentRepository;
     private final OrganizationRepository organizationRepository;
+
+    private final AvailableTimeRangeAppender availableTimeRangeAppender;
+    private final PositionAppender positionAppender;
+    private final DocumentQuestionAppender documentQuestionAppender;
+    private final EvaluationCriteriaAppender criteriaAppender;
+
+    private static final int MAX_ATTEMPTS = 10;
 
     /**
      * 공고 임시 저장
@@ -67,18 +81,10 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         Recruitment recruitment = recruitmentRepository.getById(id);
 
         recruitment.update(
-                request.title(),
-                request.content(),
-                request.fileUrl(),
-                request.documentDeadline(),
-                request.documentResultDate(),
-                request.finalResultDate(),
-                request.needGender(),
-                request.needAddress(),
-                request.needSchool(),
-                request.needBirthDate(),
-                request.needAcademicStatus(),
-                request.scaleType()
+                request.title(), request.content(), request.fileUrl(), request.documentDeadline(),
+                request.documentResultDate(), request.finalResultDate(), request.interviewDuration(),
+                request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
+                request.needAcademicStatus(), request.documentScaleType(), request.interviewScaleType()
         );
 
         if (request.isTemporary()) {
@@ -113,69 +119,64 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 .toList();
     }
 
+    @Override
+    public RecruitmentResponseDTO.Detail getBySlug(String slug) {
+        Recruitment recruitment = recruitmentRepository.findByUrlSlug(slug)
+                .orElseThrow(() -> new CustomException(ErrorCode.RECRUITMENT_NOT_EXIST));
+        return RecruitmentResponseDTO.Detail.from(recruitment);
+    }
 
     private RecruitmentResponseDTO.Create saveRecruitment(RecruitmentRequestDTO.Upsert request, boolean isTemporary) {
         Organization organization = organizationRepository.getById(request.organizationId());
 
-        Recruitment recruitment;
+        Recruitment recruitment = (request.recruitmentId() != null)
+                ? updateRecruitment(request, isTemporary)
+                : createRecruitment(request, organization, isTemporary);
 
-        if (request.recruitmentId() != null) {
-            recruitment = recruitmentRepository.getById(request.recruitmentId());
+        recruitment.clearEvaluationCriteria();
+        Recruitment savedRecruitment = recruitmentRepository.save(recruitment);
 
-            recruitment.update(
-                    request.title(),
-                    request.content(),
-                    request.fileUrl(),
-                    request.documentDeadline(),
-                    request.documentResultDate(),
-                    request.finalResultDate(),
-                    request.needGender(),
-                    request.needAddress(),
-                    request.needSchool(),
-                    request.needBirthDate(),
-                    request.needAcademicStatus(),
-                    request.scaleType()
-            );
+        positionAppender.append(recruitment, request.positions());
+        criteriaAppender.appendWithPositions(recruitment, request.documentEvaluationCriteria(), EvaluationType.DOCUMENT);
+        criteriaAppender.appendWithPositions(recruitment, request.interviewEvaluationCriteria(), EvaluationType.INTERVIEW);
+        availableTimeRangeAppender.append(recruitment, request.availableTimeRanges());
+        documentQuestionAppender.append(recruitment, request.applicationQuestions());
 
-            if (isTemporary) {
-                recruitment.markAsTemporary();
-            } else {
-                recruitment.markAsFinal();
+        return RecruitmentResponseDTO.Create.from(savedRecruitment);
+    }
+
+    private Recruitment createRecruitment(RecruitmentRequestDTO.Upsert request, Organization organization, boolean isTemporary) {
+        return Recruitment.create(
+                request.title(), request.content(), request.fileUrl(), request.documentDeadline(),
+                request.documentResultDate(), request.finalResultDate(), request.interviewDuration(), organization,
+                request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
+                request.needAcademicStatus(), isTemporary, request.documentScaleType(), request.interviewScaleType(), generateUniqueSlug()
+        );
+    }
+
+    private Recruitment updateRecruitment(RecruitmentRequestDTO.Upsert request, boolean isTemporary) {
+        Recruitment recruitment = recruitmentRepository.getById(request.recruitmentId());
+
+        recruitment.update(
+                request.title(), request.content(), request.fileUrl(), request.documentDeadline(),
+                request.documentResultDate(), request.finalResultDate(), request.interviewDuration(),
+                request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
+                request.needAcademicStatus(), request.documentScaleType(), request.interviewScaleType()
+        );
+
+        if (isTemporary) recruitment.markAsTemporary();
+        else recruitment.markAsFinal();
+
+        return recruitment;
+    }
+
+    private String generateUniqueSlug() {
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            String slug = SlugGenerator.generateRandomSlug();
+            if (!recruitmentRepository.existsByUrlSlug(slug)) {
+                return slug;
             }
-
-        } else {
-            recruitment = Recruitment.create(
-                    request.title(),
-                    request.content(),
-                    request.fileUrl(),
-                    request.documentDeadline(),
-                    request.documentResultDate(),
-                    request.finalResultDate(),
-                    organization,
-                    request.needGender(),
-                    request.needAddress(),
-                    request.needSchool(),
-                    request.needBirthDate(),
-                    request.needAcademicStatus(),
-                    isTemporary,
-                    request.scaleType()
-            );
         }
-
-        if (request.availableTimeRanges() != null) {
-            List<AvailableTimeRange> ranges = request.availableTimeRanges().stream()
-                    .map(dto -> AvailableTimeRange.builder()
-                            .date(dto.date())
-                            .startTime(dto.startTime())
-                            .endTime(dto.endTime())
-                            .recruitment(recruitment)
-                            .build())
-                    .toList();
-
-            ranges.forEach(recruitment::addAvailableTimeRange);
-        }
-
-        Recruitment saved = recruitmentRepository.save(recruitment);
-        return RecruitmentResponseDTO.Create.from(saved);
+        throw new CustomException(ErrorCode.SLUG_GENERATION_FAILED);
     }
 }

@@ -1,6 +1,5 @@
 package KUSITMS.WITHUS.domain.user.user.dto;
 
-import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -123,5 +122,25 @@ public class UserRequestDTO {
             @Schema(description = "인증번호", example = "487593")
             @NotBlank
             String code
+    ) {}
+
+    @Schema(description = "회원 정보 수정 요청 DTO")
+    public record Update(
+            @Schema(description = "이름", example = "홍길동")
+            @NotBlank
+            String name,
+
+            @Schema(description = "전화번호", example = "01099999999")
+            @NotBlank
+            String phoneNumber,
+
+            @Schema(description = "현재 비밀번호", example = "currentPassword")
+            String currentPassword,
+
+            @Schema(description = "새 비밀번호", example = "newPassword")
+            String newPassword1,
+
+            @Schema(description = "새 비밀번호 확인", example = "newPassword")
+            String newPassword2
     ) {}
 }

@@ -20,11 +20,6 @@ public class DocumentQuestionRepositoryImpl implements DocumentQuestionRepositor
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public DocumentQuestion save(DocumentQuestion question) {
-        return documentQuestionJpaRepository.save(question);
-    }
-
-    @Override
     public DocumentQuestion getById(Long questionId) {
         return documentQuestionJpaRepository.findById(questionId).orElseThrow(() -> new CustomException(ErrorCode.DOCUMENT_QUESTION_NOT_EXIST));
     }

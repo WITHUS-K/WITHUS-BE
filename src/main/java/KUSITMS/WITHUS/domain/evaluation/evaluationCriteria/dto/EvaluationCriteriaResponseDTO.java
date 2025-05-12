@@ -3,6 +3,7 @@ package KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.lang.Nullable;
 
 @Schema(description = "평가 기준 관련 응답 DTO")
 public class EvaluationCriteriaResponseDTO {
@@ -24,15 +25,27 @@ public class EvaluationCriteriaResponseDTO {
     public record Detail(
             @Schema(description = "평가 기준 ID") Long id,
             @Schema(description = "평가 기준") String content,
+            @Schema(description = "상세 내용") String description,
             @Schema(description = "평가 타입") EvaluationType type,
-            @Schema(description = "적용 파트 이름") String positionName
+            @Schema(description = "평가 점수 - 평가한 게 없다면 null") @Nullable Integer score
     ) {
         public static Detail from(EvaluationCriteria evaluationCriteria) {
             return new Detail(
                     evaluationCriteria.getId(),
                     evaluationCriteria.getContent(),
+                    evaluationCriteria.getDescription(),
                     evaluationCriteria.getEvaluationType(),
-                    evaluationCriteria.getPosition() != null ? evaluationCriteria.getPosition().getName() : "공통"
+                    null
+            );
+        }
+
+        public static Detail from(EvaluationCriteria evaluationCriteria, @Nullable Integer score) {
+            return new Detail(
+                    evaluationCriteria.getId(),
+                    evaluationCriteria.getContent(),
+                    evaluationCriteria.getDescription(),
+                    evaluationCriteria.getEvaluationType(),
+                    score
             );
         }
     }

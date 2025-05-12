@@ -1,6 +1,6 @@
 package KUSITMS.WITHUS.domain.interview.timeslot.repository;
 
-import KUSITMS.WITHUS.domain.application.position.entity.Position;
+import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
@@ -29,7 +29,7 @@ public class TimeSlotRepositoryImpl implements TimeSlotRepository {
     @Override
     public TimeSlot getById(Long id) {
         return timeSlotJpaRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.TIME_SLOT_ALREADY_EXIST));
+                .orElseThrow(() -> new CustomException(ErrorCode.TIME_SLOT_NOT_EXIST));
     }
 
     @Override

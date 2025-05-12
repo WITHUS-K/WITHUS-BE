@@ -32,14 +32,6 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
     }
 
     @Override
-    public List<Application> findByRecruitmentId(Long recruitmentId) {
-        return queryFactory
-                .selectFrom(application)
-                .where(application.recruitment.id.eq(recruitmentId))
-                .fetch();
-    }
-
-    @Override
     public void delete(Long id) {
         applicationJpaRepository.deleteById(id);
     }

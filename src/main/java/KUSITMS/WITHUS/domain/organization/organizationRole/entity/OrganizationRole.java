@@ -24,6 +24,9 @@ public class OrganizationRole {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private String color;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ORGANIZATION_ID", nullable = false)
     private Organization organization;
@@ -31,6 +34,11 @@ public class OrganizationRole {
     @Builder.Default
     @OneToMany(mappedBy = "organizationRole", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserOrganizationRole> userOrganizationRoles = new ArrayList<>();
+
+    public void update(String name, String color) {
+        this.name = name;
+        this.color = color;
+    }
 
     public void associateOrganization(Organization organization) {
         this.organization = organization;
