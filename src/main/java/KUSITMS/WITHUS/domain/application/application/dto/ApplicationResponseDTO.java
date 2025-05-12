@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.domain.application.application.dto;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
+import KUSITMS.WITHUS.domain.application.applicationAcquaintance.entity.ApplicationAcquaintance;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerResponseDTO;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
@@ -66,8 +67,10 @@ public class ApplicationResponseDTO {
             @Schema(description = "면접 코맨트 목록") List<CommentResponseDTO.Detail> interviewComments,
 
             @Schema(description = "서류 평가 방식") String documentScaleTypeKey,
-            @Schema(description = "서류 평가 기준 목록")
-                    List<EvaluationCriteriaResponseDTO.Detail> documentEvaluationCriterias
+            @Schema(description = "서류 평가 기준 목록") List<EvaluationCriteriaResponseDTO.Detail> documentEvaluationCriterias,
+
+            @Schema(description = "표시된 지인 목록") List<UserResponseDTO.Summary> acquaintances,
+            @Schema(description = "지인 수", example = "2") int acquaintanceCount
 
             ) {
         public static Detail from(Application application, List<ApplicantAvailability> availabilityList, List<Evaluation> evaluationList, List<EvaluationCriteria> evaluationCriteriaList, Long currentUserId) {
@@ -122,6 +125,11 @@ public class ApplicationResponseDTO {
                     .map(outputFormatter::format)
                     .toList();
 
+            List<UserResponseDTO.Summary> acquaintances = application.getAcquaintances().stream()
+                    .map(ApplicationAcquaintance::getUser)
+                    .map(UserResponseDTO.Summary::from)
+                    .toList();
+
             return new Detail(
                     recruitment.getTitle(),
                     recruitment.getDocumentDeadline(),
@@ -148,7 +156,9 @@ public class ApplicationResponseDTO {
                     documentComments,
                     interviewComments,
                     documentScaleTypeKey,
-                    documentEvaluationCriterias
+                    documentEvaluationCriterias,
+                    acquaintances,
+                    acquaintances.size()
             );
         }
     }
