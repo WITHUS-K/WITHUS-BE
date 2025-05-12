@@ -30,12 +30,12 @@ import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.UserOrganizationRole;
 import KUSITMS.WITHUS.domain.user.userOrganizationRole.repository.UserOrganizationRoleJpaRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -65,6 +65,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationJpaRepository applicationJpaRepository;
     private final UserOrganizationRoleJpaRepository userOrganizationRoleJpaRepository;
     private final ApplicationEvaluatorJpaRepository applicationEvaluatorJpaRepository;
+    private final UserRepository userRepository;
 
     /**
      * 지원서 생성
@@ -259,6 +260,26 @@ public class ApplicationServiceImpl implements ApplicationService {
                 applicationEvaluatorJpaRepository.saveAll(assigns);
             }
         }
+    }
+
+    @Override
+    @Transactional
+    public void updateEvaluators(ApplicationEvaluatorRequestDTO.Update request) {
+        Long applicationId = request.applicationId();
+
+        Application application = applicationRepository.getById(applicationId);
+
+        applicationEvaluatorJpaRepository.deleteAllByApplication_Id(applicationId);
+
+        List<User> users = userRepository.findAllById(request.evaluatorIds());
+        if (users.size() != request.evaluatorIds().size()) {
+            throw new CustomException(ErrorCode.EVALUATOR_NOT_EXIST);
+        }
+
+        List<ApplicationEvaluator> assigns = users.stream()
+                .map(u -> new ApplicationEvaluator(application, u))
+                .toList();
+        applicationEvaluatorJpaRepository.saveAll(assigns);
     }
 
     /**

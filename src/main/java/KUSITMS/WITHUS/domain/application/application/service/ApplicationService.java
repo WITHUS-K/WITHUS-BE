@@ -19,4 +19,5 @@ public interface ApplicationService {
     Page<ApplicationResponseDTO.SummaryForAdmin> getByRecruitmentIdForAdmin(Long recruitmentId, AdminStageFilter stage, Pageable pageable);
     List<ApplicationResponseDTO.Summary> updateStatus(ApplicationRequestDTO.UpdateStatus request);
     void distributeEvaluators(ApplicationEvaluatorRequestDTO.Distribute request);
+    void updateEvaluators(ApplicationEvaluatorRequestDTO.Update request);
 }

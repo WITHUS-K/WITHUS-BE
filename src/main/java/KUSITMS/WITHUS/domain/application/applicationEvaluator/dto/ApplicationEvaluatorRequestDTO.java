@@ -36,4 +36,15 @@ public class ApplicationEvaluatorRequestDTO {
         ) {}
     }
 
+    @Schema(description = "지원서별 평가 담당자 업데이트 요청 DTO")
+    public record Update(
+            @Schema(description = "대상 지원서 ID", example = "1")
+            @NotNull
+            Long applicationId,
+
+            @Schema(description = "새로 배정할 평가자 User ID 리스트", example = "[1,2,3]")
+            @NotEmpty
+            List<@NotNull Long> evaluatorIds
+    ) {}
+
 }

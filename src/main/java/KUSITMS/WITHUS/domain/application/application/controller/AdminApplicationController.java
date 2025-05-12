@@ -50,4 +50,14 @@ public class AdminApplicationController {
         applicationService.distributeEvaluators(request);
         return SuccessResponse.ok("성공했습니다.");
     }
+
+    @PostMapping("/evaluators")
+    @Operation(summary = "지원서별 평가 담당자 업데이트",
+            description = "기존 평가자는 모두 지우고, 주어진 userId 리스트로 재배정합니다.")
+    public SuccessResponse<String> updateEvaluators(
+            @RequestBody @Valid ApplicationEvaluatorRequestDTO.Update request
+    ) {
+        applicationService.updateEvaluators(request);
+        return SuccessResponse.ok("성공했습니다.");
+    }
 }

@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ApplicationEvaluatorJpaRepository extends JpaRepository<ApplicationEvaluator, Long> {
     void deleteAllByApplication_Recruitment_Id(Long recruitmentId);
+    void deleteAllByApplication_Id(Long applicationId);
 }
