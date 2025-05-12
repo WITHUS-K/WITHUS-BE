@@ -328,30 +328,25 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     /**
-     * 지원서를 지인으로 표시 (이미 표시된 경우엔 무시)
+     * 현재 표기 상태 기반으로 지원서를 지인으로 표시하거나 표시 취소
      * @param applicationId 지인 표시할 지원서 id
      * @param currentUserId 현재 유저의 id
      */
     @Transactional
-    public void markAcquaintance(Long applicationId, Long currentUserId) {
-        if (applicationAcquaintanceJpaRepository.existsByApplication_IdAndUser_Id(applicationId, currentUserId)) {
-            return;
+    public boolean toggleAcquaintance(Long applicationId, Long currentUserId) {
+        boolean exists = applicationAcquaintanceJpaRepository
+                .existsByApplication_IdAndUser_Id(applicationId, currentUserId);
+
+        if (exists) {
+            applicationAcquaintanceJpaRepository
+                    .deleteByApplication_IdAndUser_Id(applicationId, currentUserId);
+            return false;
+        } else {
+            Application app = applicationRepository.getById(applicationId);
+            User user = userRepository.getById(currentUserId);
+            applicationAcquaintanceJpaRepository.save(new ApplicationAcquaintance(app, user));
+            return true;
         }
-
-        Application application = applicationRepository.getById(applicationId);
-        User user = userRepository.getById(currentUserId);
-
-        applicationAcquaintanceJpaRepository.save(new ApplicationAcquaintance(application, user));
-    }
-
-    /**
-     * 지인 표시 취소
-     * @param applicationId 지인 표시 취소할 지원서 id
-     * @param currentUserId 현재 유저의 id
-     */
-    @Transactional
-    public void unmarkAcquaintance(Long applicationId, Long currentUserId) {
-        applicationAcquaintanceJpaRepository.deleteByApplication_IdAndUser_Id(applicationId, currentUserId);
     }
 
     /**

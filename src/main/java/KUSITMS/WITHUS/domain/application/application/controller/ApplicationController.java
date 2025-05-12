@@ -4,6 +4,7 @@ import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.enumerate.EvaluationStatus;
 import KUSITMS.WITHUS.domain.application.application.service.ApplicationService;
+import KUSITMS.WITHUS.domain.application.applicationAcquaintance.dto.ApplicationAcquaintanceResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
 import KUSITMS.WITHUS.global.response.PagedResponse;
@@ -85,22 +86,13 @@ public class ApplicationController {
         return SuccessResponse.ok(PagedResponse.from(page));
     }
 
-    @PostMapping("/{applicationId}/acquaintance")
-    public SuccessResponse<String> markAcquaintance(
-            @PathVariable("applicationId") Long applicationId,
+    @PatchMapping("/{applicationId}/acquaintance")
+    public SuccessResponse<ApplicationAcquaintanceResponseDTO.Toggle> toggleAcquaintance(
+            @PathVariable Long applicationId,
             @CurrentUser User currentUser
     ) {
-        applicationService.markAcquaintance(applicationId, currentUser.getId());
-        return SuccessResponse.ok("지인으로 표시되었습니다.");
-    }
-
-    @DeleteMapping("/{applicationId}/acquaintance")
-    public SuccessResponse<String> unmarkAcquaintance(
-            @PathVariable("applicationId") Long applicationId,
-            @CurrentUser User currentUser
-    ) {
-        applicationService.unmarkAcquaintance(applicationId, currentUser.getId());
-        return SuccessResponse.ok("지인 표시가 취소되었습니다.");
+        boolean nowMarked = applicationService.toggleAcquaintance(applicationId, currentUser.getId());
+        return SuccessResponse.ok(new ApplicationAcquaintanceResponseDTO.Toggle(nowMarked));
     }
 }
 

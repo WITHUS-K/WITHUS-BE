@@ -20,6 +20,5 @@ public interface ApplicationService {
     List<ApplicationResponseDTO.Summary> updateStatus(ApplicationRequestDTO.UpdateStatus request);
     void distributeEvaluators(ApplicationEvaluatorRequestDTO.Distribute request);
     void updateEvaluators(ApplicationEvaluatorRequestDTO.Update request);
-    void markAcquaintance(Long applicationId, Long currentUserId);
-    void unmarkAcquaintance(Long applicationId, Long currentUserId);
+    boolean toggleAcquaintance(Long applicationId, Long userId);
 }
