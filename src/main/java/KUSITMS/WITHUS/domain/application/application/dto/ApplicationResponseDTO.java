@@ -168,7 +168,7 @@ public class ApplicationResponseDTO {
         }
     }
 
-    @Schema(description = "지원서 요약 응답 DTO")
+    @Schema(description = "사용자용 지원서 요약 응답 DTO")
     public record SummaryForUser(
             @Schema(description = "서류 발표 여부", example = "true") boolean documentResultAnnounced,
             @Schema(description = "지원서 ID") Long id,
@@ -208,6 +208,23 @@ public class ApplicationResponseDTO {
         }
     }
 
+    @Schema(description = "관리자용 지원서 요약 응답 DTO")
+    public record SummaryForAdmin(
+            @Schema(description = "지원서 ID") Long id,
+            @Schema(description = "지원자 이름") String name,
+            @Schema(description = "파트명") String positionName,
+            @Schema(description = "합불 상태") ApplicationStatus status
+    ) {
+
+        public static SummaryForAdmin from(Application application) {
+            return new SummaryForAdmin(
+                    application.getId(),
+                    application.getName(),
+                    application.getPosition() != null ? application.getPosition().getName() : null,
+                    application.getStatus()
+            );
+        }
+    }
 
     @Schema(description = "간단한 지원서 응답 DTO")
     public record DetailForTimeSlot(

@@ -3,6 +3,7 @@ package KUSITMS.WITHUS.domain.application.application.service;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
+import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
 import KUSITMS.WITHUS.domain.application.application.enumerate.EvaluationStatus;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationJpaRepository;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
@@ -11,6 +12,7 @@ import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAns
 import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.ApplicationAnswerRepository;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.availability.repository.ApplicantAvailabilityRepository;
+import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
@@ -120,7 +122,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     /**
      * 특정 공고의 지원서 전체 조회
      * @param recruitmentId 조회할 공고의 ID
-     * @return 조회한 공고의 지원서 전제의 정보
+     * @return 조회한 공고의 지원서 전체의 정보
      */
     @Override
     public Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(
@@ -154,6 +156,44 @@ public class ApplicationServiceImpl implements ApplicationService {
         List<ApplicationResponseDTO.SummaryForUser> paged = start > end ? List.of() : filtered.subList(start, end);
 
         return new PageImpl<>(paged, pageable, filtered.size());
+    }
+
+    /**
+     * 관리자용 특정 공고의 지원서 전체 조회
+     * @param recruitmentId 조회할 공고의 ID
+     * @return 조회한 공고의 지원서 전체의 정보
+     */
+    @Override
+    public Page<ApplicationResponseDTO.SummaryForAdmin> getByRecruitmentIdForAdmin(
+            Long recruitmentId,
+            AdminStageFilter stage,
+            Pageable pageable)
+    {
+//        List<Application> allApplications = applicationJpaRepository.findByRecruitmentId(recruitmentId);
+//
+//        List<ApplicationResponseDTO.SummaryForAdmin> dtos = allApplications.stream()
+//                .map(ApplicationResponseDTO.SummaryForAdmin::from)
+//                .toList();
+//
+//        // 페이징 적용
+//        int start = (int) pageable.getOffset();
+//        int end = Math.min(start + pageable.getPageSize(), dtos.size());
+//        List<ApplicationResponseDTO.SummaryForAdmin> content = start > end
+//                ? List.of()
+//                : dtos.subList(start, end);
+//
+//        return new PageImpl<>(content, pageable, dtos.size());
+        // 1) 필터할 상태 목록
+        List<ApplicationStatus> statuses = stage.toStatusList();
+
+        // 2) DB에서 바로 페이징 조회
+        Page<Application> apps =
+                applicationJpaRepository.findByRecruitmentIdAndStatusIn(
+                        recruitmentId, statuses, pageable
+                );
+
+        // 3) DTO 변환
+        return apps.map(ApplicationResponseDTO.SummaryForAdmin::from);
     }
 
     /**
