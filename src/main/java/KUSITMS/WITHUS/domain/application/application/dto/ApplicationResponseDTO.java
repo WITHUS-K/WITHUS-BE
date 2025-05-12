@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Schema(description = "지원서 응답 DTO")
@@ -215,21 +216,34 @@ public class ApplicationResponseDTO {
             @Schema(description = "지원자 이름") String name,
             @Schema(description = "파트명") String positionName,
             @Schema(description = "합불 상태") ApplicationStatus status,
+            @Schema(description = "평가 완료한 담당자 수") int evaluatedCount,
+            @Schema(description = "배정된 담당자 수") int assignedCount,
             @Schema(description = "평가 담당자 리스트") List<UserResponseDTO.Summary> evaluators
     ) {
         public static SummaryForAdmin from(Application application) {
-            List<UserResponseDTO.Summary> evaluators = application.getEvaluators().stream()
+            List<UserResponseDTO.Summary> assignedEvaluators = application.getEvaluators().stream()
                     .map(ApplicationEvaluator::getEvaluator)
                     .distinct()
                     .map(UserResponseDTO.Summary::from)
                     .toList();
+
+            Set<Long> doneIds = application.getEvaluations().stream()
+                    .map(e -> e.getUser().getId())
+                    .collect(Collectors.toSet());
+
+            int evaluatedCount = (int) assignedEvaluators.stream()
+                    .map(UserResponseDTO.Summary::userId)
+                    .filter(doneIds::contains)
+                    .count();
 
             return new SummaryForAdmin(
                     application.getId(),
                     application.getName(),
                     application.getPosition() != null ? application.getPosition().getName() : null,
                     application.getStatus(),
-                    evaluators
+                    evaluatedCount,
+                    assignedEvaluators.size(),
+                    assignedEvaluators
             );
         }
     }
