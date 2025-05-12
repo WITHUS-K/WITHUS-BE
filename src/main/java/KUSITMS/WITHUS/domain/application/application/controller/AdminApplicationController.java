@@ -30,9 +30,11 @@ public class AdminApplicationController {
     public SuccessResponse<PagedResponse<ApplicationResponseDTO.SummaryForAdmin>> getList(
             @PathVariable Long recruitmentId,
             @RequestParam(defaultValue = "DOCUMENT") AdminStageFilter stage,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction,
             @PageableDefault(size = 7) Pageable pageable
     ) {
-        Page<ApplicationResponseDTO.SummaryForAdmin> page = applicationService.getByRecruitmentIdForAdmin(recruitmentId, stage, pageable);
+        Page<ApplicationResponseDTO.SummaryForAdmin> page = applicationService.getByRecruitmentIdForAdmin(recruitmentId, stage, pageable, sortBy, direction);
         return SuccessResponse.ok(PagedResponse.from(page));
     }
 

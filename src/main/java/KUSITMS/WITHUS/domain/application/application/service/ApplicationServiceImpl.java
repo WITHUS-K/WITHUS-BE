@@ -49,6 +49,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -173,33 +175,54 @@ public class ApplicationServiceImpl implements ApplicationService {
      * @return 조회한 공고의 지원서 전체의 정보
      */
     @Override
+    @Transactional(readOnly = true)
     public Page<ApplicationResponseDTO.SummaryForAdmin> getByRecruitmentIdForAdmin(
             Long recruitmentId,
             AdminStageFilter stage,
-            Pageable pageable)
-    {
-        List<ApplicationStatus> statuses = stage.toStatusList();
+            Pageable pageable,
+            String sortBy,
+            String direction
+    ) {
+        List<Application> allApps = applicationJpaRepository
+                .findByRecruitmentIdAndStatusIn(recruitmentId, stage.toStatusList());
 
-        Page<Application> applications =
-                applicationJpaRepository.findByRecruitmentIdAndStatusIn(
-                        recruitmentId, statuses, pageable
-                );
+        allApps.sort((a, b) -> {
+            ApplicationResponseDTO.SummaryForAdmin sa = ApplicationResponseDTO.SummaryForAdmin.from(a, 0L);
+            ApplicationResponseDTO.SummaryForAdmin sb = ApplicationResponseDTO.SummaryForAdmin.from(b, 0L);
 
-        long offset = pageable.getOffset();
-        List<ApplicationResponseDTO.SummaryForAdmin> dtos = IntStream.range(0, applications.getContent().size())
-                .mapToObj(i -> {
-                    Application app = applications.getContent().get(i);
-                    long sequenceNumber = offset + i + 1;  // 1부터 시작
-                    return ApplicationResponseDTO.SummaryForAdmin.from(app, sequenceNumber);
-                })
+            int cmp;
+            switch (sortBy) {
+                case "evaluatedCount":
+                    cmp = Integer.compare(sa.evaluatedCount(), sb.evaluatedCount());
+                    break;
+                case "averageScore":
+                    cmp = Double.compare(
+                            Double.parseDouble(sa.averageScore()),
+                            Double.parseDouble(sb.averageScore())
+                    );
+                    break;
+                case "status":
+                    cmp = sa.status().compareTo(sb.status());
+                    break;
+                default:    // name
+                    cmp = sa.name().compareToIgnoreCase(sb.name());
+            }
+            return "desc".equalsIgnoreCase(direction) ? -cmp : cmp;
+        });
+
+        List<ApplicationResponseDTO.SummaryForAdmin> allDtos = IntStream.range(0, allApps.size())
+                .mapToObj(i -> ApplicationResponseDTO.SummaryForAdmin.from(allApps.get(i), i + 1L))
                 .toList();
 
-        return new PageImpl<>(
-                dtos,
-                pageable,
-                applications.getTotalElements()
-        );
+        int start = (int) pageable.getOffset();
+        int end   = Math.min(start + pageable.getPageSize(), allDtos.size());
+        List<ApplicationResponseDTO.SummaryForAdmin> content = start > end
+                ? List.of()
+                : allDtos.subList(start, end);
+
+        return new PageImpl<>(content, pageable, allDtos.size());
     }
+
 
     /**
      * 지원서 ID를 리스트로 받아서 일괄적으로 상태를 변경
@@ -251,7 +274,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                     .findAllByOrganizationRole_Id(roleId)
                     .stream()
                     .map(UserOrganizationRole::getUser)
-                    .collect(Collectors.toList());
+                    .collect(toList());
 
             if (pool.size() < count) {
                 throw new CustomException(ErrorCode.INSUFFICIENT_EVALUATORS);
@@ -268,7 +291,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
                 List<ApplicationEvaluator> assigns = chosen.stream()
                         .map(u -> new ApplicationEvaluator(app, u))
-                        .collect(Collectors.toList());
+                        .collect(toList());
 
                 applicationEvaluatorJpaRepository.saveAll(assigns);
             }
