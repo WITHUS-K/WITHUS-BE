@@ -179,12 +179,12 @@ public class ApplicationServiceImpl implements ApplicationService {
     {
         List<ApplicationStatus> statuses = stage.toStatusList();
 
-        Page<Application> apps =
+        Page<Application> applications =
                 applicationJpaRepository.findByRecruitmentIdAndStatusIn(
                         recruitmentId, statuses, pageable
                 );
 
-        return apps.map(ApplicationResponseDTO.SummaryForAdmin::from);
+        return applications.map(ApplicationResponseDTO.SummaryForAdmin::from);
     }
 
     /**

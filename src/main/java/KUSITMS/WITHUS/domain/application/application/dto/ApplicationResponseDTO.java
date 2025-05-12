@@ -3,6 +3,7 @@ package KUSITMS.WITHUS.domain.application.application.dto;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerResponseDTO;
+import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.comment.dto.CommentResponseDTO;
 import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
@@ -15,6 +16,7 @@ import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteri
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
+import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.global.common.annotation.DateFormatDot;
 import KUSITMS.WITHUS.global.common.annotation.DateFormatSlash;
 import KUSITMS.WITHUS.global.common.annotation.TimeFormat;
@@ -212,15 +214,22 @@ public class ApplicationResponseDTO {
             @Schema(description = "지원서 ID") Long id,
             @Schema(description = "지원자 이름") String name,
             @Schema(description = "파트명") String positionName,
-            @Schema(description = "합불 상태") ApplicationStatus status
+            @Schema(description = "합불 상태") ApplicationStatus status,
+            @Schema(description = "평가 담당자 리스트") List<UserResponseDTO.Summary> evaluators
     ) {
-
         public static SummaryForAdmin from(Application application) {
+            List<UserResponseDTO.Summary> evaluators = application.getEvaluators().stream()
+                    .map(ApplicationEvaluator::getEvaluator)
+                    .distinct()
+                    .map(UserResponseDTO.Summary::from)
+                    .toList();
+
             return new SummaryForAdmin(
                     application.getId(),
                     application.getName(),
                     application.getPosition() != null ? application.getPosition().getName() : null,
-                    application.getStatus()
+                    application.getStatus(),
+                    evaluators
             );
         }
     }
