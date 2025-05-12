@@ -15,4 +15,5 @@ public interface ApplicationJpaRepository extends JpaRepository<Application, Lon
             List<ApplicationStatus> statuses,
             Pageable pageable
     );
+    List<Application> findByRecruitment_IdAndPosition_Id(Long recruitmentId, Long positionId);
 }

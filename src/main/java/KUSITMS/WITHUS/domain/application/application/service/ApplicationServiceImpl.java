@@ -11,6 +11,9 @@ import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepos
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerRequestDTO;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.ApplicationAnswerRepository;
+import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
+import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
+import KUSITMS.WITHUS.domain.application.applicationEvaluator.repository.ApplicationEvaluatorJpaRepository;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.availability.repository.ApplicantAvailabilityRepository;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
@@ -26,9 +29,13 @@ import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.UserOrganizationRole;
+import KUSITMS.WITHUS.domain.user.userOrganizationRole.repository.UserOrganizationRoleJpaRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -38,10 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,6 +63,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationAnswerRepository applicationAnswerRepository;
     private final FileUploadService fileUploadService;
     private final ApplicationJpaRepository applicationJpaRepository;
+    private final UserOrganizationRoleJpaRepository userOrganizationRoleJpaRepository;
+    private final ApplicationEvaluatorJpaRepository applicationEvaluatorJpaRepository;
 
     /**
      * 지원서 생성
@@ -205,6 +211,54 @@ public class ApplicationServiceImpl implements ApplicationService {
                         app.getStatus()
                 ))
                 .toList();
+    }
+
+    /**
+     * 주어진 공고에 대해 기존에 배정된 평가 담당자를 모두 초기화하고,
+     * 요청된 파트별 정보에 따라 각 지원서마다 지정된 수의 평가자를 랜덤으로 재배정합니다.
+     * @param request 공고 ID와 함께, 파트별로 평가 담당자 Role ID 및 지원서당 배정할 인원 수를 담은 요청 DTO
+     */
+    @Override
+    @Transactional
+    public void distributeEvaluators(ApplicationEvaluatorRequestDTO.Distribute request) {
+        // 기존 배정 초기화
+        Long recruitmentId = request.recruitmentId();
+        applicationEvaluatorJpaRepository.deleteAllByApplication_Recruitment_Id(recruitmentId);
+
+        // 파트별로 배정
+        Random rnd = new Random();
+        for (var part : request.assignments()) {
+            Long posId    = part.positionId();
+            Long roleId   = part.organizationRoleId();
+            int  count    = part.count();
+
+            // 후보 평가자 풀
+            List<User> pool = userOrganizationRoleJpaRepository
+                    .findAllByOrganizationRole_Id(roleId)
+                    .stream()
+                    .map(UserOrganizationRole::getUser)
+                    .collect(Collectors.toList());
+
+            if (pool.size() < count) {
+                throw new CustomException(ErrorCode.INSUFFICIENT_EVALUATORS);
+            }
+
+            // 이 파트 지원서 리스트
+            List<Application> apps = applicationJpaRepository
+                    .findByRecruitment_IdAndPosition_Id(recruitmentId, posId);
+
+            // 각 지원서마다 랜덤 n명 배정
+            for (Application app : apps) {
+                Collections.shuffle(pool, rnd);
+                List<User> chosen = pool.subList(0, count);
+
+                List<ApplicationEvaluator> assigns = chosen.stream()
+                        .map(u -> new ApplicationEvaluator(app, u))
+                        .collect(Collectors.toList());
+
+                applicationEvaluatorJpaRepository.saveAll(assigns);
+            }
+        }
     }
 
     /**

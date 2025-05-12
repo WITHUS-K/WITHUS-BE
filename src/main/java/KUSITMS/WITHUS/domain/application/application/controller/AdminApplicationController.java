@@ -4,6 +4,7 @@ import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
 import KUSITMS.WITHUS.domain.application.application.service.ApplicationService;
+import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
 import KUSITMS.WITHUS.global.response.PagedResponse;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,5 +41,13 @@ public class AdminApplicationController {
     public SuccessResponse<List<ApplicationResponseDTO.Summary>> updateStatus(@RequestBody @Valid ApplicationRequestDTO.UpdateStatus request) {
         List<ApplicationResponseDTO.Summary> updated = applicationService.updateStatus(request);
         return SuccessResponse.ok(updated);
+    }
+
+    @PostMapping("/distribute-evaluators")
+    public SuccessResponse<String> distribute(
+            @RequestBody @Valid ApplicationEvaluatorRequestDTO.Distribute request
+    ) {
+        applicationService.distributeEvaluators(request);
+        return SuccessResponse.ok("성공했습니다.");
     }
 }
