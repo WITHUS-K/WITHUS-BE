@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum MailTemplateType {
     INTERVIEW_REQUEST("interview-request.html"),
     EVALUATION_REMINDER("evaluation-reminder.html"),
-    INVITATION("invitation.html");
+    INVITATION("invitation.html"),
+    VERIFICATION("verification.html");
 
     private final String fileName;
 
