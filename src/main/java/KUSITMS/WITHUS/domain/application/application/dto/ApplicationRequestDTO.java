@@ -1,6 +1,8 @@
 package KUSITMS.WITHUS.domain.application.application.dto;
 
 import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
+import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
+import KUSITMS.WITHUS.domain.application.application.enumerate.SimpleApplicationStatus;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerRequestDTO;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
@@ -64,7 +66,10 @@ public class ApplicationRequestDTO {
             @Schema(description = "지원서 ID 리스트", example = "[1, 2, 3]")
             @NotEmpty List<Long> applicationIds,
 
-            @Schema(description = "변경할 상태", example = "DOX_PASS")
-            @NotNull ApplicationStatus status
+            @Schema(description = "어떤 단계의 상태를 바꿀지 (DOCUMENT/INTERVIEW)", example = "DOCUMENT")
+            @NotNull AdminStageFilter stage,
+
+            @Schema(description = "변경할 간단 상태 (PASS/FAIL/HOLD)", example = "PASS")
+            @NotNull SimpleApplicationStatus status
     ) {}
 }

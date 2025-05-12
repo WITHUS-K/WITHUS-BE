@@ -178,7 +178,6 @@ public class ApplicationResponseDTO {
             @Schema(description = "해당 평가자가 이 지원서를 평가했는지 여부") boolean evaluated,
             @Schema(description = "이 사용자가 준 총 점수", example = "20", nullable = true) @Nullable Integer myScoreTotal
     ) {
-
         public static SummaryForUser from(Application application, Long currentUserId) {
             List<Evaluation> userEvaluations = application.getEvaluations().stream()
                     .filter(e -> e.getUser().getId().equals(currentUserId))

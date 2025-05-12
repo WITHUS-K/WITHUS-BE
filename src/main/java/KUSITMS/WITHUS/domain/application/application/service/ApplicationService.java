@@ -16,5 +16,5 @@ public interface ApplicationService {
     ApplicationResponseDTO.Detail getById(Long id, Long currentUserId);
     Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(Long recruitmentId, Long currentUserId, EvaluationStatus evaluationStatus, String keyword, Pageable pageable);
     Page<ApplicationResponseDTO.SummaryForAdmin> getByRecruitmentIdForAdmin(Long recruitmentId, AdminStageFilter stage, Pageable pageable);
-    void updateStatus(ApplicationRequestDTO.UpdateStatus request);
+    List<ApplicationResponseDTO.Summary> updateStatus(ApplicationRequestDTO.UpdateStatus request);
 }

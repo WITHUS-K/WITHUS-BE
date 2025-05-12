@@ -5,6 +5,7 @@ import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
 import KUSITMS.WITHUS.domain.application.application.enumerate.EvaluationStatus;
+import KUSITMS.WITHUS.domain.application.application.enumerate.SimpleApplicationStatus;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationJpaRepository;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerRequestDTO;
@@ -185,12 +186,66 @@ public class ApplicationServiceImpl implements ApplicationService {
      */
     @Override
     @Transactional
-    public void updateStatus(ApplicationRequestDTO.UpdateStatus request) {
-        List<Application> applications = request.applicationIds().stream()
-                .map(applicationRepository::getById)
-                .toList();
+    public List<ApplicationResponseDTO.Summary> updateStatus(ApplicationRequestDTO.UpdateStatus request) {
+        List<Application> applicationList = applicationJpaRepository.findAllById(request.applicationIds());
 
-        applications.forEach(app -> app.updateStatus(request.status()));
+        applicationList.forEach(app -> {
+            ApplicationStatus newStatus = mapToRealStatus(
+                    request.stage(), app.getStatus(), request.status()
+            );
+            app.updateStatus(newStatus);
+        });
+
+        return applicationList.stream()
+                .map(app -> new ApplicationResponseDTO.Summary(
+                        app.getId(),
+                        app.getName(),
+                        app.getEmail(),
+                        app.getPosition().getName(),
+                        app.getStatus()
+                ))
+                .toList();
+    }
+
+    /**
+     * PASS/FAIL/HOLD의 간단 상태를 단계와 현재 상태에 맞춰 ApplicationStatus으로 매핑
+     * @param stage   변경할 단계 (DOCUMENT, INTERVIEW, FINAL_PASS, FAIL)
+     * @param current 현재 ApplicationStatus (PENDING, DOX_PASS, 등)
+     * @param simple  간단 상태 (PASS, FAIL, HOLD)
+     */
+    private ApplicationStatus mapToRealStatus(
+            AdminStageFilter stage,
+            ApplicationStatus current,
+            SimpleApplicationStatus simple) {
+
+        if (simple == SimpleApplicationStatus.HOLD) {
+            return ApplicationStatus.PENDING;
+        }
+
+        boolean isPass = (simple == SimpleApplicationStatus.PASS);
+
+        switch (stage) {
+            case DOCUMENT:
+                // 기존 면접 단계였으면 INTERVIEW_
+                if (current == ApplicationStatus.INTERVIEW_PASS
+                        || current == ApplicationStatus.INTERVIEW_FAIL) {
+                    return isPass
+                            ? ApplicationStatus.INTERVIEW_PASS
+                            : ApplicationStatus.INTERVIEW_FAIL;
+                }
+                // 그 외(PENDING, DOX_PASS, DOX_FAIL)면 DOX_
+                return isPass
+                        ? ApplicationStatus.DOX_PASS
+                        : ApplicationStatus.DOX_FAIL;
+
+            case INTERVIEW:
+                return isPass
+                        ? ApplicationStatus.INTERVIEW_PASS
+                        : ApplicationStatus.INTERVIEW_FAIL;
+
+            default:
+                throw new CustomException(ErrorCode.STAGE_NOT_SUPPORTED);
+        }
     }
 
     private void validateRequiredFields(Recruitment recruitment, ApplicationRequestDTO.Create request) {
