@@ -169,30 +169,13 @@ public class ApplicationServiceImpl implements ApplicationService {
             AdminStageFilter stage,
             Pageable pageable)
     {
-//        List<Application> allApplications = applicationJpaRepository.findByRecruitmentId(recruitmentId);
-//
-//        List<ApplicationResponseDTO.SummaryForAdmin> dtos = allApplications.stream()
-//                .map(ApplicationResponseDTO.SummaryForAdmin::from)
-//                .toList();
-//
-//        // 페이징 적용
-//        int start = (int) pageable.getOffset();
-//        int end = Math.min(start + pageable.getPageSize(), dtos.size());
-//        List<ApplicationResponseDTO.SummaryForAdmin> content = start > end
-//                ? List.of()
-//                : dtos.subList(start, end);
-//
-//        return new PageImpl<>(content, pageable, dtos.size());
-        // 1) 필터할 상태 목록
         List<ApplicationStatus> statuses = stage.toStatusList();
 
-        // 2) DB에서 바로 페이징 조회
         Page<Application> apps =
                 applicationJpaRepository.findByRecruitmentIdAndStatusIn(
                         recruitmentId, statuses, pageable
                 );
 
-        // 3) DTO 변환
         return apps.map(ApplicationResponseDTO.SummaryForAdmin::from);
     }
 
