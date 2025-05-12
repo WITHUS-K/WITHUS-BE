@@ -215,8 +215,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     /**
-     * 주어진 공고에 대해 기존에 배정된 평가 담당자를 모두 초기화하고,
-     * 요청된 파트별 정보에 따라 각 지원서마다 지정된 수의 평가자를 랜덤으로 재배정합니다.
+     * 주어진 공고에 대해 요청된 파트별 정보에 따라 지원서 별 평가자 배정
      * @param request 공고 ID와 함께, 파트별로 평가 담당자 Role ID 및 지원서당 배정할 인원 수를 담은 요청 DTO
      */
     @Override
@@ -262,6 +261,10 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
     }
 
+    /**
+     * 주어진 지원서에 대해 기존에 배정된 평가 담당자 임의 재배정
+     * @param request applicationId와 새로 배정할 평가자 User ID 리스트를 포함한 요청 DTO
+     */
     @Override
     @Transactional
     public void updateEvaluators(ApplicationEvaluatorRequestDTO.Update request) {
