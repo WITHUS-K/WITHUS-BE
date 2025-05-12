@@ -62,6 +62,8 @@ dependencies {
 	// AWS SDK
 	implementation 'software.amazon.awssdk:s3:2.20.40'
 
+	// thymeleaf
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 }
 
 tasks.named('test') {

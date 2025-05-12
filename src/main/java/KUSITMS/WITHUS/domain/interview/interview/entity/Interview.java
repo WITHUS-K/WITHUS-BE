@@ -3,6 +3,7 @@ package KUSITMS.WITHUS.domain.interview.interview.entity;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.interview.interviewAvailabiliy.entity.InterviewerAvailability;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,6 +23,10 @@ public class Interview extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "INTERVIEW_ID")
     private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "RECRUITMENT_ID", nullable = false)
+    private Recruitment recruitment;
 
     @Builder.Default
     @OneToMany(mappedBy = "interview", cascade = CascadeType.ALL, orphanRemoval = true)

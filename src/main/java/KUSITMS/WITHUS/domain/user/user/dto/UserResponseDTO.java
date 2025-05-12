@@ -1,10 +1,11 @@
 package KUSITMS.WITHUS.domain.user.user.dto;
 
 import KUSITMS.WITHUS.domain.interview.enumerate.InterviewRole;
+import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationResponseDTO;
 import KUSITMS.WITHUS.domain.organization.organizationRole.dto.OrganizationRoleResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
-import KUSITMS.WITHUS.global.common.annotation.DateFormat;
+import KUSITMS.WITHUS.global.common.annotation.DateFormatDot;
 import KUSITMS.WITHUS.global.common.annotation.DateTimeFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -18,12 +19,14 @@ public class UserResponseDTO {
     @Schema(description = "사용자 요약 정보 응답 DTO")
     public record Summary(
             @Schema(description = "사용자 ID") Long userId,
-            @Schema(description = "이름") String name
+            @Schema(description = "이름") String name,
+            @Schema(description = "프로필 이미지 url") String profileImageUrl
     ) {
         public static Summary from(User user) {
             return new Summary(
                     user.getId(),
-                    user.getName()
+                    user.getName(),
+                    user.getProfileImageUrl()
             );
         }
     }
@@ -72,7 +75,7 @@ public class UserResponseDTO {
             @Schema(description = "이메일") String email,
             @Schema(description = "역할") List<OrganizationRoleResponseDTO.Detail> roles,
             @Schema(description = "성별") String gender,
-            @Schema(description = "생년월일") @DateFormat LocalDate birthDate,
+            @Schema(description = "생년월일") @DateFormatDot LocalDate birthDate,
             @Schema(description = "전화번호") String phoneNumber,
             @Schema(description = "가입일자") @DateTimeFormat LocalDateTime createdAt
     ) {
@@ -141,4 +144,27 @@ public class UserResponseDTO {
     public record EmailDuplicateCheck (
             @Schema(description = "이메일 중복 여부", example = "false") boolean isDuplicated
     ) {}
+
+    @Schema(description = "마이페이지 DTO")
+    public record MyPage(
+            @Schema(description = "사용자 ID") Long userId,
+            @Schema(description = "이름") String name,
+            @Schema(description = "전화번호") String phoneNumber,
+            @Schema(description = "이메일") String email,
+            @Schema(description = "프로필 이미지 URL") String imageUrl,
+            @Schema(description = "가입 동아리") List<OrganizationResponseDTO.Summary> organizations
+    ) {
+        public static MyPage from(User user) {
+            return new MyPage(
+                    user.getId(),
+                    user.getName(),
+                    user.getPhoneNumber(),
+                    user.getEmail(),
+                    user.getProfileImageUrl(),
+                    user.getUserOrganizations().stream()
+                            .map(userOrg -> OrganizationResponseDTO.Summary.from(userOrg.getOrganization()))
+                            .toList()
+            );
+        }
+    }
 }

@@ -11,4 +11,5 @@ public interface UserOrganizationService {
     List<UserOrganizationResponseDTO.Detail> addUserToOrganization(Long organizationId, List<Long> userIds);
     void removeUsers(Long organizationId, List<Long> userIds);
     List<UserResponseDTO.SummaryForSearch> getUsersWithAssignment(Long organizationId, String keyword, Long roleId);
+    void sendInvitationEmails(Long organizationId, List<Long> userIds, String inviterName);
 }

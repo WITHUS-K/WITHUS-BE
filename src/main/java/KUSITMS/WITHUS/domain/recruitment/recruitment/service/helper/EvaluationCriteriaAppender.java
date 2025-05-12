@@ -17,7 +17,6 @@ public class EvaluationCriteriaAppender {
             EvaluationType type
     ) {
         if (criteriaList == null) return;
-        recruitment.clearEvaluationCriteria();
 
         for (EvaluationCriteriaRequestDTO.Create dto : criteriaList) {
 

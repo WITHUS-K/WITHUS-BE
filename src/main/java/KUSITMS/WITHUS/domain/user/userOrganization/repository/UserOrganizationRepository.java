@@ -11,6 +11,7 @@ public interface UserOrganizationRepository {
     UserOrganization save(UserOrganization userOrganization);
     boolean existsByUserIdAndOrganizationId(Long userId, Long organizationId);
     Page<User> findByOrganizationId(Long organizationId, Pageable pageable);
+    List<User> findListByOrganizationId(Long organizationId);
     List<UserOrganization> findAllByOrganizationIdAndUserIdIn(Long organizationId, List<Long> userIds);
     void deleteAllInBatch(List<UserOrganization> userOrganizations);
     List<User> findUsersByOrganizationAndKeyword(Long orgId, String keyword);

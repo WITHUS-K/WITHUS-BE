@@ -15,7 +15,6 @@ import java.util.Optional;
 
 import static KUSITMS.WITHUS.domain.user.user.entity.QUser.user;
 import static KUSITMS.WITHUS.domain.user.userOrganization.entity.QUserOrganization.userOrganization;
-import static KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.QUserOrganizationRole.userOrganizationRole;
 
 @Repository
 @RequiredArgsConstructor
@@ -73,6 +72,20 @@ public class UserOrganizationRepositoryImpl implements UserOrganizationRepositor
     }
 
     @Override
+    public List<User> findListByOrganizationId(Long organizationId) {
+        return queryFactory
+                .select(user)
+                .from(userOrganization)
+                .join(userOrganization.user, user)
+                .where(
+                        userOrganization.organization.id.eq(organizationId),
+                        user.role.eq(Role.USER)
+                )
+                .fetch();
+
+    }
+
+    @Override
     public List<UserOrganization> findAllByOrganizationIdAndUserIdIn(Long organizationId, List<Long> userIds) {
         return queryFactory
                 .selectFrom(userOrganization)
@@ -92,15 +105,13 @@ public class UserOrganizationRepositoryImpl implements UserOrganizationRepositor
     public List<User> findUsersByOrganizationAndKeyword(Long orgId, String keyword) {
         return queryFactory
                 .select(user)
-                .from(userOrganizationRole)
-                .join(userOrganizationRole.user, user)
+                .from(userOrganization)
+                .join(userOrganization.user, user)
                 .where(
-                        userOrganizationRole.organizationRole.organization.id.eq(orgId),
+                        userOrganization.organization.id.eq(orgId),
                         keyword != null ? user.name.containsIgnoreCase(keyword).or(user.email.containsIgnoreCase(keyword)) : null
                 )
                 .distinct()
                 .fetch();
     }
-
-
 }

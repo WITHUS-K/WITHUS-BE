@@ -7,7 +7,6 @@ import java.util.List;
 public interface ApplicationRepository {
     Application getById(Long id);
     Application save(Application application);
-    List<Application> findByRecruitmentId(Long recruitmentId);
     void delete(Long id);
     List<Application> findPassedByRecruitment(Long recruitmentId);
 }

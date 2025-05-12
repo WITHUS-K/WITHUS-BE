@@ -3,24 +3,33 @@ package KUSITMS.WITHUS.domain.application.application.service;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
+import KUSITMS.WITHUS.domain.application.application.enumerate.EvaluationStatus;
+import KUSITMS.WITHUS.domain.application.application.repository.ApplicationJpaRepository;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
+import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerRequestDTO;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.ApplicationAnswerRepository;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.availability.repository.ApplicantAvailabilityRepository;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
-import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.repository.EvaluationCriteriaRepository;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.enumerate.QuestionType;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.repository.DocumentQuestionRepository;
+import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +38,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,9 +51,11 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final RecruitmentRepository recruitmentRepository;
     private final PositionRepository positionRepository;
     private final EvaluationRepository evaluationRepository;
+    private final EvaluationCriteriaRepository evaluationCriteriaRepository;
     private final DocumentQuestionRepository documentQuestionRepository;
     private final ApplicationAnswerRepository applicationAnswerRepository;
     private final FileUploadService fileUploadService;
+    private final ApplicationJpaRepository applicationJpaRepository;
 
     /**
      * 지원서 생성
@@ -68,9 +80,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         saveApplicantAvailabilities(savedApplication, request.availableTimes());
 
+        validateFileAnswers(recruitment, request.answers(), files);
+
         Map<String, String> uploadedFileUrls = fileUploadService.uploadAnswerFiles(files, recruitment.getOrganization().getId(), recruitment.getId(), savedApplication.getId());
 
-        saveApplicationAnswers(savedApplication, recruitment, request, uploadedFileUrls);
+        saveApplicationAnswers(savedApplication, recruitment, request, uploadedFileUrls, files);
 
         return ApplicationResponseDTO.Summary.from(savedApplication);
     }
@@ -92,12 +106,15 @@ public class ApplicationServiceImpl implements ApplicationService {
      * @return 조회한 지원서 정보
      */
     @Override
-    public ApplicationResponseDTO.Detail getById(Long id) {
+    public ApplicationResponseDTO.Detail getById(Long id, Long currentUserId) {
         Application application = applicationRepository.getById(id);
         List<ApplicantAvailability> availabilityList = applicantAvailabilityRepository.findByApplicationId(id);
         List<Evaluation> evaluationList = evaluationRepository.findEvaluationsForApplication(id);
 
-        return ApplicationResponseDTO.Detail.from(application, availabilityList, evaluationList);
+        Long recruitmentId = application.getRecruitment().getId();
+        List<EvaluationCriteria> evaluationCriteriaList = evaluationCriteriaRepository.findByTypeAndRecruitment(EvaluationType.DOCUMENT, recruitmentId);
+
+        return ApplicationResponseDTO.Detail.from(application, availabilityList, evaluationList, evaluationCriteriaList, currentUserId);
     }
 
     /**
@@ -106,10 +123,37 @@ public class ApplicationServiceImpl implements ApplicationService {
      * @return 조회한 공고의 지원서 전제의 정보
      */
     @Override
-    public List<ApplicationResponseDTO.Summary> getByRecruitmentId(Long recruitmentId) {
-        return applicationRepository.findByRecruitmentId(recruitmentId).stream()
-                .map(ApplicationResponseDTO.Summary::from)
+    public Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(
+            Long recruitmentId,
+            Long currentUserId,
+            EvaluationStatus evaluationStatus,
+            String keyword,
+            Pageable pageable)
+    {
+        List<Application> allApplications = applicationJpaRepository.findByRecruitmentId(recruitmentId); // 전체 가져오기
+
+        List<ApplicationResponseDTO.SummaryForUser> filtered = allApplications.stream()
+                .map(app -> ApplicationResponseDTO.SummaryForUser.from(app, currentUserId))
+                .filter(dto -> {
+                    boolean statusMatch = switch (evaluationStatus) {
+                        case EVALUATED -> dto.evaluated();
+                        case NOT_EVALUATED -> !dto.evaluated();
+                        case ALL -> true;
+                    };
+
+                    boolean keywordMatch = (keyword == null || keyword.isBlank()) ||
+                            dto.name().toLowerCase().contains(keyword.toLowerCase());
+
+                    return statusMatch && keywordMatch;
+                })
                 .toList();
+
+        // 페이징 적용
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), filtered.size());
+        List<ApplicationResponseDTO.SummaryForUser> paged = start > end ? List.of() : filtered.subList(start, end);
+
+        return new PageImpl<>(paged, pageable, filtered.size());
     }
 
     /**
@@ -126,7 +170,6 @@ public class ApplicationServiceImpl implements ApplicationService {
         applications.forEach(app -> app.updateStatus(request.status()));
     }
 
-
     private void validateRequiredFields(Recruitment recruitment, ApplicationRequestDTO.Create request) {
         if (recruitment.isNeedGender() && request.gender() == null) {
             throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
@@ -140,6 +183,12 @@ public class ApplicationServiceImpl implements ApplicationService {
         if (recruitment.isNeedAcademicStatus() && request.major() == null) {
             throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
         }
+        if (recruitment.isNeedAcademicStatus() && request.academicStatus() == null) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+        if (recruitment.isNeedAddress() && request.address() == null) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
     }
 
     private Application createApplication(ApplicationRequestDTO.Create request, Recruitment recruitment, Position position) {
@@ -150,7 +199,9 @@ public class ApplicationServiceImpl implements ApplicationService {
                 request.phoneNumber(),
                 request.university(),
                 request.major(),
+                request.academicStatus(),
                 request.birthDate(),
+                request.address(),
                 recruitment,
                 position
         );
@@ -160,11 +211,39 @@ public class ApplicationServiceImpl implements ApplicationService {
             Application application,
             Recruitment recruitment,
             ApplicationRequestDTO.Create request,
-            Map<String, String> uploadedFileUrls
+            Map<String, String> uploadedFileUrls,
+            List<MultipartFile> files
     ) {
         List<DocumentQuestion> questions = documentQuestionRepository.findByRecruitment(recruitment);
         Map<Long, DocumentQuestion> questionMap = questions.stream()
                 .collect(Collectors.toMap(DocumentQuestion::getId, q -> q));
+
+        Set<String> providedFileNames = files.stream()
+                .map(MultipartFile::getOriginalFilename)
+                .collect(Collectors.toSet());
+
+        // 파일명이 DTO에 존재하는지 검증
+        for (ApplicationAnswerRequestDTO answer : request.answers()) {
+            DocumentQuestion question = questionMap.get(answer.questionId());
+
+            if (question.getType() == QuestionType.FILE) {
+                if (answer.fileName() == null || !providedFileNames.contains(answer.fileName())) {
+                    throw new CustomException(ErrorCode.FILE_NAME_NOT_MATCH);
+                }
+            }
+        }
+
+        // 파일 개수가 정확한지 검증
+        long expectedFileCount = request.answers().stream()
+                .filter(a -> {
+                    DocumentQuestion question = questionMap.get(a.questionId());
+                    return question.getType() == QuestionType.FILE;
+                })
+                .count();
+
+        if (files.size() != expectedFileCount) {
+            throw new CustomException(ErrorCode.FILE_COUNT_MISMATCH);
+        }
 
         List<ApplicationAnswer> answers = request.answers().stream()
                 .map(dto -> {
@@ -188,4 +267,41 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .toList();
         applicantAvailabilityRepository.saveAll(availabilities);
     }
+
+    // 요청과 실제 입력 파일 간의 검증 (이름, 갯수)
+    private void validateFileAnswers(
+            Recruitment recruitment,
+            List<ApplicationAnswerRequestDTO> answers,
+            List<MultipartFile> files
+    ) {
+        List<DocumentQuestion> questions = documentQuestionRepository.findByRecruitment(recruitment);
+        Map<Long, DocumentQuestion> questionMap = questions.stream()
+                .collect(Collectors.toMap(DocumentQuestion::getId, q -> q));
+
+        Set<String> providedFileNames = files.stream()
+                .map(MultipartFile::getOriginalFilename)
+                .collect(Collectors.toSet());
+
+        for (ApplicationAnswerRequestDTO answer : answers) {
+            DocumentQuestion question = questionMap.get(answer.questionId());
+
+            if (question.getType() == QuestionType.FILE) {
+                if (answer.fileName() == null || !providedFileNames.contains(answer.fileName())) {
+                    throw new CustomException(ErrorCode.FILE_NAME_NOT_MATCH);
+                }
+            }
+        }
+
+        long expectedFileCount = answers.stream()
+                .filter(a -> {
+                    DocumentQuestion question = questionMap.get(a.questionId());
+                    return question.getType() == QuestionType.FILE;
+                })
+                .count();
+
+        if (files.size() != expectedFileCount) {
+            throw new CustomException(ErrorCode.FILE_COUNT_MISMATCH);
+        }
+    }
+
 }

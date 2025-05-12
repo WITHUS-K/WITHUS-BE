@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.global.infra.email;
+package KUSITMS.WITHUS.global.infra.email.sender;
 
 import org.springframework.stereotype.Component;
 
