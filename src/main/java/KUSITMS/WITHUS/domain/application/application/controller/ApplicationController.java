@@ -87,6 +87,7 @@ public class ApplicationController {
     }
 
     @PatchMapping("/{applicationId}/acquaintance")
+    @Operation(summary = "지원서 별 지인 표시 토글", description = "해당 지원서에 대한 지인 표시를 추가하거나 제거합니다.")
     public SuccessResponse<ApplicationAcquaintanceResponseDTO.Toggle> toggleAcquaintance(
             @PathVariable Long applicationId,
             @CurrentUser User currentUser

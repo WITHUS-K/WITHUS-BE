@@ -27,6 +27,7 @@ public class AdminApplicationController {
     private final ApplicationService applicationService;
 
     @GetMapping("/recruitment/{recruitmentId}")
+    @Operation(summary = "관리자용 지원서 목록 조회", description = "공고별 지원서를 단계(stage), 정렬(sortBy, direction), 페이지(page, size) 옵션으로 조회합니다.")
     public SuccessResponse<PagedResponse<ApplicationResponseDTO.SummaryForAdmin>> getList(
             @PathVariable Long recruitmentId,
             @RequestParam(defaultValue = "DOCUMENT") AdminStageFilter stage,
@@ -46,6 +47,7 @@ public class AdminApplicationController {
     }
 
     @PostMapping("/distribute-evaluators")
+    @Operation(summary = "지원서 평가 담당자 분배", description = "대상 공고 Id와 지원 파트 Id, 평가 담당자 역할 Id, 지원서 당 배정할 평가 담당자 수를 받아 랜덤 배정합니다.")
     public SuccessResponse<String> distribute(
             @RequestBody @Valid ApplicationEvaluatorRequestDTO.Distribute request
     ) {
@@ -54,8 +56,7 @@ public class AdminApplicationController {
     }
 
     @PostMapping("/evaluators")
-    @Operation(summary = "지원서별 평가 담당자 업데이트",
-            description = "기존 평가자는 모두 지우고, 주어진 userId 리스트로 재배정합니다.")
+    @Operation(summary = "지원서별 평가 담당자 업데이트", description = "기존 평가자는 모두 지우고, 주어진 userId 리스트로 재배정합니다.")
     public SuccessResponse<String> updateEvaluators(
             @RequestBody @Valid ApplicationEvaluatorRequestDTO.Update request
     ) {
