@@ -395,7 +395,6 @@ public class ApplicationResponseDTO {
         }
     }
 
-
     @Schema(description = "간단한 지원서 응답 DTO")
     public record DetailForTimeSlot(
             @Schema(description = "지원서 ID") Long id,

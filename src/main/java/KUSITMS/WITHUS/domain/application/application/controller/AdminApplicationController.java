@@ -9,6 +9,7 @@ import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEva
 import KUSITMS.WITHUS.global.response.PagedResponse;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "관리자용 지원서 Controller")
 @RequestMapping("/api/v1/admin/applications")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminApplicationController {
