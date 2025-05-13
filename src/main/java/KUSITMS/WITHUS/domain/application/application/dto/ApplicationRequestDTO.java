@@ -4,13 +4,13 @@ import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
 import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
 import KUSITMS.WITHUS.domain.application.application.enumerate.SimpleApplicationStatus;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerRequestDTO;
-import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -71,5 +71,20 @@ public class ApplicationRequestDTO {
 
             @Schema(description = "변경할 간단 상태 (PASS/FAIL/HOLD)", example = "PASS")
             @NotNull SimpleApplicationStatus status
+    ) {}
+
+    @Schema(description = "여러 사용자에게 메일 일괄 발송 요청 DTO")
+    public record SendBulkMail(
+            @Schema(description = "수신자 이메일 리스트", example = "[\"user1@example.com\",\"user2@example.com\"]")
+            @NotEmpty List<@NotBlank String> recipients,
+
+            @Schema(description = "메일 제목", example = "[WITHUS] 공지사항")
+            @NotBlank String subject,
+
+            @Schema(description = "메일 본문 (HTML 가능)", example = "<p>안녕하세요!</p>")
+            @NotBlank String body,
+
+            @Schema(description = "첨부파일 리스트 (선택)")
+            List<MultipartFile> attachments
     ) {}
 }
