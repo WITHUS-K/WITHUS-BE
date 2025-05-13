@@ -57,14 +57,14 @@ public class ApplicationController {
         return SuccessResponse.ok(responses);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{applicationId}")
     @Operation(summary = "지원서 삭제", description = "지원서 ID를 통해 해당 지원서를 삭제합니다.")
     public SuccessResponse<String> delete(@PathVariable Long id) {
         applicationService.delete(id);
         return SuccessResponse.ok("지원서 삭제에 성공하였습니다.");
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{applicationId}")
     @Operation(summary = "지원서 단건 조회", description = "지원서 ID를 기준으로 상세 정보를 조회합니다.")
     public SuccessResponse<ApplicationResponseDTO.Detail> getById(
             @PathVariable Long id,

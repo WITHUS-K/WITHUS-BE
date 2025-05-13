@@ -26,7 +26,7 @@ public class PositionController {
         return SuccessResponse.ok(positionService.create(request));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{positionId}")
     @Operation(summary = "파트 삭제", description = "해당 ID의 파트를 삭제합니다.")
     public SuccessResponse<String> delete(@PathVariable Long id) {
         positionService.delete(id);
