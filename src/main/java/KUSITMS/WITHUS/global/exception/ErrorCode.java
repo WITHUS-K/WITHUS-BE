@@ -71,6 +71,9 @@ public enum ErrorCode {
     RECRUITMENT_NOT_EXIST("RECRUITMENT404", "존재하지 않는 공고입니다.", HttpStatus.NOT_FOUND),
     SLUG_GENERATION_FAILED("RECRUITMENT500", "슬러그 생성에 실패하였습니다. 슬러그 자릿수를 늘리세요.", HttpStatus.INTERNAL_SERVER_ERROR),
 
+    // Available Time (면접 가능 시간)
+    AVAILABLE_TIME_NOT_EXIST("AVAILABLE_TIME404", "해당 날짜의 availableTimeRange가 없습니다.", HttpStatus.NOT_FOUND),
+
     // DocumentQuestion (지원서 서류 질문)
     DOCUMENT_QUESTION_ALREADY_EXIST("DOCUMENT_QUESTION400", "이미 존재하는 지원서 질문입니다.", HttpStatus.BAD_REQUEST),
     DOCUMENT_QUESTION_NOT_EXIST("DOCUMENT_QUESTION404", "존재하지 않는 지원서 질문입니다.", HttpStatus.NOT_FOUND),

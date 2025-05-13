@@ -4,6 +4,7 @@ import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.availability.repository.ApplicantAvailabilityRepository;
+import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewScheduleDTO;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
@@ -13,6 +14,8 @@ import KUSITMS.WITHUS.domain.interview.timeslot.repository.TimeSlotRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -167,11 +170,40 @@ public class InterviewSchedulerService {
      */
     public List<InterviewScheduleDTO> getInterviewSchedule(Long interviewId) {
         Interview interview = interviewRepository.getById(interviewId);
+        Recruitment recruitment = interview.getRecruitment();
+        Short interviewDuration = recruitment.getInterviewDuration();
+        List<AvailableTimeRange> timeRanges = recruitment.getAvailableTimeRanges();
 
         List<TimeSlot> slots = timeSlotRepository.findByInterview(interview);
 
-        return slots.stream()
-                .map(InterviewScheduleDTO::from)
+        Map<LocalDate, List<TimeSlot>> slotsByDate = slots.stream()
+                .collect(Collectors.groupingBy(TimeSlot::getDate));
+
+        // 날짜별 InterviewScheduleDTO 생성
+        return slotsByDate.entrySet().stream()
+                .map(entry -> {
+                    LocalDate date = entry.getKey();
+                    List<TimeSlot> daySlots = entry.getValue();
+
+                    // 날짜에 해당하는 available time 찾기
+                    AvailableTimeRange timeRange = timeRanges.stream()
+                            .filter(r -> r.getDate().equals(date))
+                            .findFirst()
+                            .orElseThrow(() -> new CustomException(ErrorCode.AVAILABLE_TIME_NOT_EXIST));
+
+                    List<InterviewScheduleDTO.InterviewSlotDTO> slotDTOs = daySlots.stream()
+                            .map(InterviewScheduleDTO.InterviewSlotDTO::from)
+                            .toList();
+
+                    return InterviewScheduleDTO.from(
+                            date,
+                            timeRange.getStartTime(),
+                            timeRange.getEndTime(),
+                            interviewDuration,
+                            slotDTOs
+                    );
+                })
+                .sorted(Comparator.comparing(InterviewScheduleDTO::date))
                 .toList();
     }
 

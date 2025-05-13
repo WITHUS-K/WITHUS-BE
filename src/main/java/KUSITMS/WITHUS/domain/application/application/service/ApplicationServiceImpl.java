@@ -510,9 +510,9 @@ public class ApplicationServiceImpl implements ApplicationService {
         Map<Long, DocumentQuestion> questionMap = questions.stream()
                 .collect(Collectors.toMap(DocumentQuestion::getId, q -> q));
 
-        Set<String> providedFileNames = files.stream()
-                .map(MultipartFile::getOriginalFilename)
-                .collect(Collectors.toSet());
+        Set<String> providedFileNames = files != null
+                ? files.stream().map(MultipartFile::getOriginalFilename).collect(Collectors.toSet())
+                : Set.of();
 
         for (ApplicationAnswerRequestDTO answer : answers) {
             DocumentQuestion question = questionMap.get(answer.questionId());
