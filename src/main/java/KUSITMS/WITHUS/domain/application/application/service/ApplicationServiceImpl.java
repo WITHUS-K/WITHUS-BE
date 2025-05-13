@@ -263,13 +263,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         });
 
         return applicationList.stream()
-                .map(app -> new ApplicationResponseDTO.Summary(
-                        app.getId(),
-                        app.getName(),
-                        app.getEmail(),
-                        app.getPosition().getName(),
-                        app.getStatus()
-                ))
+                .map(ApplicationResponseDTO.Summary::from)
                 .toList();
     }
 
