@@ -10,6 +10,8 @@ import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.interview.repository.InterviewRepository;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.interview.timeslot.repository.TimeSlotRepository;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,7 @@ public class InterviewSchedulerService {
     private final InterviewRepository interviewRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final ApplicantAvailabilityRepository availabilityRepository;
+    private final RecruitmentRepository recruitmentRepository;
 
     /**
      * 면접 타임슬롯 배정
@@ -69,8 +72,11 @@ public class InterviewSchedulerService {
         applicantIds.sort(Comparator.comparingInt(id -> availabilityMap.get(id).size()));
 
         // 5. 백트래킹으로 전체 배정 시도
+        Recruitment recruitment = recruitmentRepository.getById(recruitmentId);
+        int slotMinutes = recruitment.getInterviewDuration();
+
         Map<Long, TimeSlot> finalAssignment = new HashMap<>();
-        boolean success = backtrackAssign(0, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime, config, interview, finalAssignment, hasPosition);
+        boolean success = backtrackAssign(0, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime, config, interview, finalAssignment, hasPosition, slotMinutes);
 
         // 6. 배정 결과 저장
         if (success) {
@@ -100,7 +106,8 @@ public class InterviewSchedulerService {
             InterviewConfig config,
             Interview interview,
             Map<Long, TimeSlot> finalAssignment,
-            boolean hasPosition
+            boolean hasPosition,
+            int slotMinutes
     ) {
         if (index == applicantIds.size()) return true;
 
@@ -125,7 +132,7 @@ public class InterviewSchedulerService {
 
                 if (assignedCount < config.applicantPerSlot) {
                     finalAssignment.put(applicantId, currentSlot);
-                    if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime, config, interview, finalAssignment, hasPosition)) return true;
+                    if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime, config, interview, finalAssignment, hasPosition, slotMinutes)) return true;
                     finalAssignment.remove(applicantId);
                 }
             }
@@ -133,14 +140,14 @@ public class InterviewSchedulerService {
             else if (usedSlots < config.roomCount) {
                 LocalDate date = time.toLocalDate();
                 LocalTime start = time.toLocalTime();
-                LocalTime end = start.plusMinutes(config.slotMinutes);
+                LocalTime end = start.plusMinutes(slotMinutes);
 
                 TimeSlot newSlot = timeSlotRepository.findOrCreate(date, start, end, interview, hasPosition ? position : null);
                 positionSlots.put(positionId, newSlot);
                 slotsUsedPerTime.put(time, usedSlots + 1);
 
                 finalAssignment.put(applicantId, newSlot);
-                if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime, config, interview, finalAssignment, hasPosition)) return true;
+                if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime, config, interview, finalAssignment, hasPosition, slotMinutes)) return true;
 
                 // 실패 시 롤백
                 finalAssignment.remove(applicantId);
@@ -190,7 +197,6 @@ public class InterviewSchedulerService {
     public record InterviewConfig(
             int interviewerPerSlot,
             int applicantPerSlot,
-            int roomCount,
-            int slotMinutes
+            int roomCount
     ) {}
 }

@@ -80,11 +80,12 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         saveApplicantAvailabilities(savedApplication, request.availableTimes());
 
-        validateFileAnswers(recruitment, request.answers(), files);
+        List<MultipartFile> fileList = files != null ? files : List.of();
+        validateFileAnswers(recruitment, request.answers(), fileList);
 
         Map<String, String> uploadedFileUrls = fileUploadService.uploadAnswerFiles(files, recruitment.getOrganization().getId(), recruitment.getId(), savedApplication.getId());
 
-        saveApplicationAnswers(savedApplication, recruitment, request, uploadedFileUrls, files);
+        saveApplicationAnswers(savedApplication, recruitment, request, uploadedFileUrls, fileList);
 
         return ApplicationResponseDTO.Summary.from(savedApplication);
     }
