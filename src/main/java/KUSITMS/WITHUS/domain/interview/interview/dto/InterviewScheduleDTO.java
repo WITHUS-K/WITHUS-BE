@@ -34,6 +34,7 @@ public record InterviewScheduleDTO(
     @Schema(description = "면접 타임슬롯 및 배정된 지원자 정보")
     public record InterviewSlotDTO(
             @Schema(description = "면접 일자") @DateFormatDot LocalDate date,
+            @Schema(description = "면접실 이름") String roomName,
             @Schema(description = "시작 시간") @TimeFormat LocalTime startTime,
             @Schema(description = "종료 시간") @TimeFormat LocalTime endTime,
             @Schema(description = "지원자 목록") List<ApplicantInfo> applicants,
@@ -55,6 +56,7 @@ public record InterviewScheduleDTO(
 
             return new InterviewSlotDTO(
                     slot.getDate(),
+                    slot.getRoomName(),
                     slot.getStartTime(),
                     slot.getEndTime(),
                     slot.getApplications().stream().map(ApplicantInfo::from).toList(),

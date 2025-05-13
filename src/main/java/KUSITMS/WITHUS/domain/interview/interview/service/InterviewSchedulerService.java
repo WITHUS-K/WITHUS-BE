@@ -64,7 +64,7 @@ public class InterviewSchedulerService {
         boolean hasPosition = applicants.stream().anyMatch(app -> app.getPosition() != null);
 
         // 3. 각 시간대별로 포지션에 따라 타임슬롯을 나누고, 해당 시간에 생성된 슬롯 개수도 함께 관리
-        Map<LocalDateTime, Map<Long, TimeSlot>> slotPool = new HashMap<>();
+        Map<LocalDateTime, Map<Long, List<TimeSlot>>> slotPool = new HashMap<>();
         Map<LocalDateTime, Integer> slotsUsedPerTime = new HashMap<>();
         for (ApplicantAvailability avail : availabilityList) {
             slotPool.putIfAbsent(avail.getAvailableTime(), new HashMap<>());
@@ -104,7 +104,7 @@ public class InterviewSchedulerService {
             List<Long> applicantIds,
             Map<Long, List<LocalDateTime>> availabilityMap,
             Map<Long, Application> applicantMap,
-            Map<LocalDateTime, Map<Long, TimeSlot>> slotPool,
+            Map<LocalDateTime, Map<Long, List<TimeSlot>>> slotPool, // ✅ 수정: TimeSlot → List<TimeSlot>
             Map<LocalDateTime, Integer> slotsUsedPerTime,
             InterviewConfig config,
             Interview interview,
@@ -119,49 +119,65 @@ public class InterviewSchedulerService {
         List<LocalDateTime> times = availabilityMap.getOrDefault(applicantId, List.of());
 
         for (LocalDateTime time : times) {
-            Map<Long, TimeSlot> positionSlots = slotPool.get(time);
-            int usedSlots = slotsUsedPerTime.getOrDefault(time, 0);
-
             Position position = applicant.getPosition();
             Long positionId = hasPosition && position != null ? position.getId() : 0L;
-            TimeSlot currentSlot = positionSlots.get(positionId);
 
-            // 이미 생성된 슬롯 존재 -> 인원 수 확인 후 배정
-            if (currentSlot != null) {
-                Long currentSlotId = currentSlot.getId();
+            // slotPool 구조 초기화
+            slotPool.putIfAbsent(time, new HashMap<>());
+            Map<Long, List<TimeSlot>> positionSlotListMap = slotPool.get(time);
+            List<TimeSlot> slots = positionSlotListMap.getOrDefault(positionId, new ArrayList<>());
+
+            int usedRooms = slots.size();
+
+            // 기존 슬롯 중 정원이 남은 슬롯이 있는지 확인
+            for (TimeSlot slot : slots) {
                 long assignedCount = finalAssignment.values().stream()
-                        .filter(s -> s.getId().equals(currentSlotId))
+                        .filter(s -> s.getId().equals(slot.getId()))
                         .count();
 
                 if (assignedCount < config.applicantPerSlot) {
-                    finalAssignment.put(applicantId, currentSlot);
-                    if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime, config, interview, finalAssignment, hasPosition, slotMinutes)) return true;
+                    finalAssignment.put(applicantId, slot);
+                    if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap, slotPool,
+                            slotsUsedPerTime, config, interview, finalAssignment, hasPosition, slotMinutes)) {
+                        return true;
+                    }
                     finalAssignment.remove(applicantId);
                 }
             }
-            // 새 슬롯 생성 가능할 경우 -> 생성 후 배정
-            else if (usedSlots < config.roomCount) {
+
+            // roomCount 보다 적게 사용 중이면 새 슬롯 생성
+            if (usedRooms < config.roomCount) {
                 LocalDate date = time.toLocalDate();
                 LocalTime start = time.toLocalTime();
                 LocalTime end = start.plusMinutes(slotMinutes);
+                String roomName = "면접실 " + (usedRooms + 1);
 
-                TimeSlot newSlot = timeSlotRepository.findOrCreate(date, start, end, interview, hasPosition ? position : null);
-                positionSlots.put(positionId, newSlot);
-                slotsUsedPerTime.put(time, usedSlots + 1);
+                TimeSlot newSlot = timeSlotRepository.findOrCreate(
+                        date, start, end, interview, hasPosition ? position : null, roomName
+                );
+
+                slots.add(newSlot);
+                positionSlotListMap.put(positionId, slots);
+                slotPool.put(time, positionSlotListMap);
+                slotsUsedPerTime.put(time, usedRooms + 1);
 
                 finalAssignment.put(applicantId, newSlot);
-                if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime, config, interview, finalAssignment, hasPosition, slotMinutes)) return true;
+                if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap, slotPool,
+                        slotsUsedPerTime, config, interview, finalAssignment, hasPosition, slotMinutes)) {
+                    return true;
+                }
 
-                // 실패 시 롤백
+                // 롤백
                 finalAssignment.remove(applicantId);
-                positionSlots.remove(positionId);
-                slotsUsedPerTime.put(time, usedSlots);
+                slots.remove(newSlot);
+                positionSlotListMap.put(positionId, slots);
+                slotPool.put(time, positionSlotListMap);
+                slotsUsedPerTime.put(time, usedRooms); // 복원
             }
         }
 
         return false;
     }
-
 
     /**
      * 특정 면접의 배정된 전체 타임슬롯 조회

@@ -38,11 +38,12 @@ public class TimeSlotRepositoryImpl implements TimeSlotRepository {
     }
 
     @Override
-    public Optional<TimeSlot> findByDateTimeAndInterviewIdAndPosition(LocalDate date, LocalTime startTime, Long interviewId, Long positionId) {
+    public Optional<TimeSlot> findByDateTimeAndInterviewIdAndPosition(LocalDate date, LocalTime startTime, Long interviewId, Long positionId, String roomName) {
         BooleanBuilder builder = new BooleanBuilder()
                 .and(timeSlot.date.eq(date))
                 .and(timeSlot.startTime.eq(startTime))
-                .and(timeSlot.interview.id.eq(interviewId));
+                .and(timeSlot.interview.id.eq(interviewId))
+                .and(timeSlot.roomName.eq(roomName));
 
         if (positionId != null) {
             builder.and(timeSlot.position.id.eq(positionId));
@@ -58,15 +59,16 @@ public class TimeSlotRepositoryImpl implements TimeSlotRepository {
 
 
     @Override
-    public TimeSlot findOrCreate(LocalDate date, LocalTime startTime, LocalTime endTime, Interview interview, Position position) {
+    public TimeSlot findOrCreate(LocalDate date, LocalTime startTime, LocalTime endTime, Interview interview, Position position, String roomName) {
         Long positionId = position != null ? position.getId() : null;
-        return findByDateTimeAndInterviewIdAndPosition(date, startTime, interview.getId(), positionId)
+        return findByDateTimeAndInterviewIdAndPosition(date, startTime, interview.getId(), positionId, roomName)
                 .orElseGet(() -> save(TimeSlot.builder()
                         .date(date)
                         .startTime(startTime)
                         .endTime(endTime)
                         .interview(interview)
                         .position(position)
+                        .roomName(roomName)
                         .build()));
     }
 

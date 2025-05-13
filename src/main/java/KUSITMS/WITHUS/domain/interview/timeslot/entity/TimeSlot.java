@@ -35,6 +35,9 @@ public class TimeSlot extends BaseEntity {
     @Column(name = "END_TIME", nullable = false)
     private LocalTime endTime;
 
+    @Column(name = "ROOM_NAME", nullable = false)
+    private String roomName;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "INTERVIEW_ID", nullable = false)
     private Interview interview;
