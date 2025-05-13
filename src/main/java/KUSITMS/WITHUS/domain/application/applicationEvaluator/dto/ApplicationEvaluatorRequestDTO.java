@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.application.applicationEvaluator.dto;
 
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
@@ -30,6 +31,9 @@ public class ApplicationEvaluatorRequestDTO {
                 @NotNull
                 Long organizationRoleId,
 
+                @Schema(description = "평가 타입", example = "DOCUMENT | INTERVIEW")
+                @NotNull EvaluationType evaluationType,
+
                 @Schema(description = "지원서당 배정할 평가자 수", example = "3")
                 @Min(value = 1)
                 int count
@@ -41,6 +45,9 @@ public class ApplicationEvaluatorRequestDTO {
             @Schema(description = "대상 지원서 ID", example = "1")
             @NotNull
             Long applicationId,
+
+            @Schema(description = "평가 타입", example = "DOCUMENT | INTERVIEW")
+            @NotNull EvaluationType evaluationType,
 
             @Schema(description = "새로 배정할 평가자 User ID 리스트", example = "[1,2,3]")
             @NotEmpty

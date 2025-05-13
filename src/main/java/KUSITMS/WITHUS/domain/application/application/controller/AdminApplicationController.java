@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.domain.application.application.controller;
 
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
+import KUSITMS.WITHUS.domain.application.application.enumerate.AdminApplicationSortField;
 import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
 import KUSITMS.WITHUS.domain.application.application.service.ApplicationService;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
@@ -12,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +33,8 @@ public class AdminApplicationController {
     public SuccessResponse<PagedResponse<ApplicationResponseDTO.SummaryForAdmin>> getList(
             @PathVariable Long recruitmentId,
             @RequestParam(defaultValue = "DOCUMENT") AdminStageFilter stage,
-            @RequestParam(defaultValue = "name") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction,
+            @RequestParam(defaultValue = "NAME") AdminApplicationSortField sortBy,
+            @RequestParam(defaultValue = "ASC") Sort.Direction direction,
             @PageableDefault(size = 7) Pageable pageable
     ) {
         Page<ApplicationResponseDTO.SummaryForAdmin> page = applicationService.getByRecruitmentIdForAdmin(recruitmentId, stage, pageable, sortBy, direction);

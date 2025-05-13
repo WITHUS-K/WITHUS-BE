@@ -140,8 +140,9 @@ public class ApplicationResponseDTO {
                     .map(UserResponseDTO.Summary::from)
                     .toList();
 
-            // 배정된 평가자 리스트
-            List<UserResponseDTO.Summary> assigned = application.getEvaluators().stream()
+            // 배정된 서류 평가자 리스트
+            List<UserResponseDTO.Summary> assignedDocument = application.getEvaluators().stream()
+                    .filter(ae -> ae.getEvaluationType() == EvaluationType.DOCUMENT)
                     .map(ApplicationEvaluator::getEvaluator)
                     .distinct()
                     .map(UserResponseDTO.Summary::from)
@@ -164,7 +165,7 @@ public class ApplicationResponseDTO {
                     })
                     .toList();
 
-            List<UserResponseDTO.Summary> docPending = assigned.stream()
+            List<UserResponseDTO.Summary> docPending = assignedDocument.stream()
                     .filter(u -> !docByUser.containsKey(u.userId()))
                     .toList();
 
@@ -174,6 +175,13 @@ public class ApplicationResponseDTO {
                     .stripTrailingZeros().toPlainString();
 
             // —— 면접 평가도 똑같이 ——
+            List<UserResponseDTO.Summary> assignedInterview = application.getEvaluators().stream()
+                    .filter(ae -> ae.getEvaluationType() == EvaluationType.INTERVIEW)
+                    .map(ApplicationEvaluator::getEvaluator)
+                    .distinct()
+                    .map(UserResponseDTO.Summary::from)
+                    .toList();
+
             Map<Long, List<Evaluation>> intByUser = evaluationList.stream()
                     .filter(e -> e.getCriteria().getEvaluationType() == EvaluationType.INTERVIEW)
                     .collect(Collectors.groupingBy(e -> e.getUser().getId()));
@@ -188,7 +196,7 @@ public class ApplicationResponseDTO {
                     })
                     .toList();
 
-            List<UserResponseDTO.Summary> intPending = assigned.stream()
+            List<UserResponseDTO.Summary> intPending = assignedInterview.stream()
                     .filter(u -> !intByUser.containsKey(u.userId()))
                     .toList();
 
@@ -300,41 +308,70 @@ public class ApplicationResponseDTO {
             @Schema(description = "지원자 이름") String name,
             @Schema(description = "파트명") String positionName,
             @Schema(description = "합불 상태") ApplicationStatus status,
-            @Schema(description = "평가 완료한 담당자 수") int evaluatedCount,
-            @Schema(description = "배정된 담당자 수") int assignedCount,
-            @Schema(description = "서류 평균 점수", example = "85.5") String averageScore,
-            @Schema(description = "평가 담당자 리스트") List<UserResponseDTO.Summary> evaluators
+
+            @Schema(description = "서류 평가 담당자 수", example = "3") int documentAssignedCount,
+            @Schema(description = "서류 평가 완료 담당자 수", example = "2") int documentEvaluatedCount,
+            @Schema(description = "서류 평가 총점", example = "170") String documentAverageScore,
+            @Schema(description = "서류 평가 담당자 리스트") List<UserResponseDTO.Summary> documentEvaluators,
+
+            @Schema(description = "면접 평가 담당자 수", example = "3") int interviewAssignedCount,
+            @Schema(description = "면접 평가 완료 담당자 수", example = "1") int interviewEvaluatedCount,
+            @Schema(description = "면접 평가 총점", example = "85") String interviewAverageScore,
+            @Schema(description = "면접 평가 담당자 리스트") List<UserResponseDTO.Summary> interviewEvaluators
     ) {
         public static SummaryForAdmin from(Application application, long sequenceNumber) {
             String seq = String.format("%03d", sequenceNumber);
 
-            List<UserResponseDTO.Summary> assignedEvaluators = application.getEvaluators().stream()
+            // 배정된 평가자 분류
+            List<ApplicationEvaluator> evals = application.getEvaluators();
+            List<UserResponseDTO.Summary> docAssigned = evals.stream()
+                    .filter(ae -> ae.getEvaluationType() == EvaluationType.DOCUMENT)
+                    .map(ApplicationEvaluator::getEvaluator)
+                    .distinct()
+                    .map(UserResponseDTO.Summary::from)
+                    .toList();
+            List<UserResponseDTO.Summary> intAssigned = evals.stream()
+                    .filter(ae -> ae.getEvaluationType() == EvaluationType.INTERVIEW)
                     .map(ApplicationEvaluator::getEvaluator)
                     .distinct()
                     .map(UserResponseDTO.Summary::from)
                     .toList();
 
-            Set<Long> doneIds = application.getEvaluations().stream()
-                    .map(e -> e.getUser().getId())
-                    .collect(Collectors.toSet());
-
-            int evaluatedCount = (int) assignedEvaluators.stream()
-                    .map(UserResponseDTO.Summary::userId)
-                    .filter(doneIds::contains)
-                    .count();
-
-            // 사용자 별 총점 계산
-            Map<Long, Integer> sumByUser = application.getEvaluations().stream()
+            // 실제 평가(Evaluation) 분류
+            List<Evaluation> allEvals = application.getEvaluations();
+            Map<Long, Integer> docScores = allEvals.stream()
+                    .filter(e -> e.getCriteria().getEvaluationType() == EvaluationType.DOCUMENT)
+                    .collect(Collectors.groupingBy(
+                            e -> e.getUser().getId(),
+                            Collectors.summingInt(Evaluation::getScore)
+                    ));
+            Map<Long, Integer> intScores = allEvals.stream()
+                    .filter(e -> e.getCriteria().getEvaluationType() == EvaluationType.INTERVIEW)
                     .collect(Collectors.groupingBy(
                             e -> e.getUser().getId(),
                             Collectors.summingInt(Evaluation::getScore)
                     ));
 
-            double avg = sumByUser.values().stream()
+            // 완료/미완료 계산
+            int docAssignedCount     = docAssigned.size();
+            int documentEvaluatedCount = docScores.size();
+            int interviewAssignedCount = intAssigned.size();
+            int interviewEvaluatedCount = intScores.size();
+
+            // 평균 점수 계산 및 문자열 변환
+            double docAvg = docScores.values().stream()
                     .mapToInt(Integer::intValue)
                     .average()
                     .orElse(0.0);
-            String averageScore = BigDecimal.valueOf(avg)
+            String documentAverageScore = BigDecimal.valueOf(docAvg)
+                    .stripTrailingZeros()
+                    .toPlainString();
+
+            double intAvg = intScores.values().stream()
+                    .mapToInt(Integer::intValue)
+                    .average()
+                    .orElse(0.0);
+            String interviewAverageScore = BigDecimal.valueOf(intAvg)
                     .stripTrailingZeros()
                     .toPlainString();
 
@@ -344,13 +381,20 @@ public class ApplicationResponseDTO {
                     application.getName(),
                     application.getPosition() != null ? application.getPosition().getName() : null,
                     application.getStatus(),
-                    evaluatedCount,
-                    assignedEvaluators.size(),
-                    averageScore,
-                    assignedEvaluators
+
+                    docAssignedCount,
+                    documentEvaluatedCount,
+                    documentAverageScore,
+                    docAssigned,
+
+                    interviewAssignedCount,
+                    interviewEvaluatedCount,
+                    interviewAverageScore,
+                    intAssigned
             );
         }
     }
+
 
     @Schema(description = "간단한 지원서 응답 DTO")
     public record DetailForTimeSlot(

@@ -3,6 +3,7 @@ package KUSITMS.WITHUS.domain.application.application.service;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
+import KUSITMS.WITHUS.domain.application.application.enumerate.AdminApplicationSortField;
 import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
 import KUSITMS.WITHUS.domain.application.application.enumerate.EvaluationStatus;
 import KUSITMS.WITHUS.domain.application.application.enumerate.SimpleApplicationStatus;
@@ -43,6 +44,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -185,35 +187,50 @@ public class ApplicationServiceImpl implements ApplicationService {
             Long recruitmentId,
             AdminStageFilter stage,
             Pageable pageable,
-            String sortBy,
-            String direction
+            AdminApplicationSortField sortBy,
+            Sort.Direction direction
     ) {
         List<Application> allApps = applicationJpaRepository
                 .findByRecruitmentIdAndStatusIn(recruitmentId, stage.toStatusList());
 
         allApps.sort((a, b) -> {
-            ApplicationResponseDTO.SummaryForAdmin sa = ApplicationResponseDTO.SummaryForAdmin.from(a, 0L);
-            ApplicationResponseDTO.SummaryForAdmin sb = ApplicationResponseDTO.SummaryForAdmin.from(b, 0L);
+            var sa = ApplicationResponseDTO.SummaryForAdmin.from(a, 0L);
+            var sb = ApplicationResponseDTO.SummaryForAdmin.from(b, 0L);
 
             int cmp;
             switch (sortBy) {
-                case "evaluatedCount":
-                    cmp = Integer.compare(sa.evaluatedCount(), sb.evaluatedCount());
+                case DOCUMENT_EVALUATION_STATUS:
+                    cmp = Integer.compare(sa.documentEvaluatedCount(), sb.documentEvaluatedCount());
                     break;
-                case "averageScore":
+                case INTERVIEW_EVALUATION_STATUS:
+                    cmp = Integer.compare(sa.interviewEvaluatedCount(), sb.interviewEvaluatedCount());
+                    break;
+                case DOCUMENT_SCORE:
                     cmp = Double.compare(
-                            Double.parseDouble(sa.averageScore()),
-                            Double.parseDouble(sb.averageScore())
+                            Double.parseDouble(sa.documentAverageScore()),
+                            Double.parseDouble(sb.documentAverageScore())
                     );
                     break;
-                case "status":
+                case INTERVIEW_SCORE:
+                    cmp = Double.compare(
+                            Double.parseDouble(sa.interviewAverageScore()),
+                            Double.parseDouble(sb.interviewAverageScore())
+                    );
+                    break;
+                case POSITION_NAME:
+                    cmp = sa.positionName().compareToIgnoreCase(sb.positionName());
+                    break;
+                case STATUS:
                     cmp = sa.status().compareTo(sb.status());
                     break;
-                default:    // name
+                case NAME:
+                default:
                     cmp = sa.name().compareToIgnoreCase(sb.name());
+                    break;
             }
-            return "desc".equalsIgnoreCase(direction) ? -cmp : cmp;
+            return direction.isDescending() ? -cmp : cmp;
         });
+
 
         List<ApplicationResponseDTO.SummaryForAdmin> allDtos = IntStream.range(0, allApps.size())
                 .mapToObj(i -> ApplicationResponseDTO.SummaryForAdmin.from(allApps.get(i), i + 1L))
@@ -295,7 +312,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 List<User> chosen = pool.subList(0, count);
 
                 List<ApplicationEvaluator> assigns = chosen.stream()
-                        .map(u -> new ApplicationEvaluator(app, u))
+                        .map(u -> new ApplicationEvaluator(app, u, part.evaluationType() ))
                         .collect(toList());
 
                 applicationEvaluatorJpaRepository.saveAll(assigns);
@@ -322,7 +339,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         List<ApplicationEvaluator> assigns = users.stream()
-                .map(u -> new ApplicationEvaluator(application, u))
+                .map(u -> new ApplicationEvaluator(application, u, request.evaluationType()))
                 .toList();
         applicationEvaluatorJpaRepository.saveAll(assigns);
     }
