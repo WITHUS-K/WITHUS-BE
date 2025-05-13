@@ -129,6 +129,10 @@ public enum ErrorCode {
     EMAIL_SEND_FAIL("EMAIL500", "메일 전송에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     TEMPLATE_NOT_LOAD("EMAIL500", "이메일 템플릿을 로드할 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 
+    // SMS
+    SMS_SEND_FAIL("SMS500", "문자 발송에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    SMS_ATTACHMENT_PROCESS_FAIL("SMS500", "문자 첨부파일 처리에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+
     // File Upload
     FILE_UPLOAD_FAIL("FILE500", "파일 업로드에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_IO_ERROR("FILE500", "파일 처리 중 I/O 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),

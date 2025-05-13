@@ -87,4 +87,16 @@ public class ApplicationRequestDTO {
             @Schema(description = "첨부파일 리스트 (선택)")
             List<MultipartFile> attachments
     ) {}
+
+    @Schema(description = "여러 사용자에게 문자 일괄 발송 요청 DTO")
+    public record BulkSmsRequest(
+            @Schema(description = "수신자 전화번호 리스트", example = "[\"01012341234\",\"01056785678\"]")
+            @NotEmpty List<@NotBlank String> phoneNumbers,
+
+            @Schema(description = "문자 메시지 본문", example = "안녕하세요, 테스트 문자입니다.")
+            @NotBlank String message,
+
+            @Schema(description = "첨부파일 (선택, MMS 이미지)", nullable = true)
+            MultipartFile attachment
+    ) {}
 }
