@@ -4,6 +4,7 @@ import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.enumerate.EvaluationStatus;
 import KUSITMS.WITHUS.domain.application.application.service.ApplicationService;
+import KUSITMS.WITHUS.domain.application.applicationAcquaintance.dto.ApplicationAcquaintanceResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
 import KUSITMS.WITHUS.global.response.PagedResponse;
@@ -11,13 +12,12 @@ import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Encoding;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -57,14 +57,14 @@ public class ApplicationController {
         return SuccessResponse.ok(responses);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{applicationId}")
     @Operation(summary = "지원서 삭제", description = "지원서 ID를 통해 해당 지원서를 삭제합니다.")
     public SuccessResponse<String> delete(@PathVariable Long id) {
         applicationService.delete(id);
         return SuccessResponse.ok("지원서 삭제에 성공하였습니다.");
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{applicationId}")
     @Operation(summary = "지원서 단건 조회", description = "지원서 ID를 기준으로 상세 정보를 조회합니다.")
     public SuccessResponse<ApplicationResponseDTO.Detail> getById(
             @PathVariable Long id,
@@ -86,11 +86,14 @@ public class ApplicationController {
         return SuccessResponse.ok(PagedResponse.from(page));
     }
 
-    @PatchMapping("/status")
-    @Operation(summary = "지원서 상태 일괄 수정", description = "지원서 ID 리스트와 변경할 상태를 받아 일괄 수정합니다.")
-    public SuccessResponse<String> updateStatus(@RequestBody ApplicationRequestDTO.UpdateStatus request) {
-        applicationService.updateStatus(request);
-        return SuccessResponse.ok("지원서 상태가 성공적으로 수정되었습니다.");
+    @PatchMapping("/{applicationId}/acquaintance")
+    @Operation(summary = "지원서 별 지인 표시 토글", description = "해당 지원서에 대한 지인 표시를 추가하거나 제거합니다.")
+    public SuccessResponse<ApplicationAcquaintanceResponseDTO.Toggle> toggleAcquaintance(
+            @PathVariable Long applicationId,
+            @CurrentUser User currentUser
+    ) {
+        boolean nowMarked = applicationService.toggleAcquaintance(applicationId, currentUser.getId());
+        return SuccessResponse.ok(new ApplicationAcquaintanceResponseDTO.Toggle(nowMarked));
     }
 }
 

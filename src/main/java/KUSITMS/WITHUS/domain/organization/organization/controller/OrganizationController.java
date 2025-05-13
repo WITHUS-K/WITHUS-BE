@@ -35,13 +35,13 @@ public class OrganizationController {
         return SuccessResponse.ok(organizationService.create(request));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{organizationId}")
     @Operation(summary = "조직 단건 조회")
     public SuccessResponse<OrganizationResponseDTO.Detail> getById(@PathVariable Long id) {
         return SuccessResponse.ok(organizationService.getById(id));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{organizationId}")
     @Operation(summary = "조직 수정")
     public SuccessResponse<OrganizationResponseDTO.Update> update(
             @PathVariable Long id,
@@ -50,7 +50,7 @@ public class OrganizationController {
         return SuccessResponse.ok(organizationService.update(id, request));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{organizationId}")
     @Operation(summary = "조직 삭제")
     public SuccessResponse<String> delete(@PathVariable Long id) {
         organizationService.delete(id);

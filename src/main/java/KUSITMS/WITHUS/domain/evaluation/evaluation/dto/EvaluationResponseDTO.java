@@ -23,4 +23,11 @@ public class EvaluationResponseDTO {
             );
         }
     }
+
+    @Schema(description = "평가 완료한 담당자 정보 응답 DTO")
+    public record EvaluatorInfo(
+            @Schema(description = "평가자 요약") UserResponseDTO.Summary evaluator,
+            @Schema(description = "이 지원서에 이 평가자가 남긴 총 점수", example = "25") int totalScore
+    ) {}
+
 }

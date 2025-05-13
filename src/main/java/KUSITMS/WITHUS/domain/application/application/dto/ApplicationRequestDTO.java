@@ -1,14 +1,16 @@
 package KUSITMS.WITHUS.domain.application.application.dto;
 
 import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
+import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
+import KUSITMS.WITHUS.domain.application.application.enumerate.SimpleApplicationStatus;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerRequestDTO;
-import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -64,7 +66,37 @@ public class ApplicationRequestDTO {
             @Schema(description = "지원서 ID 리스트", example = "[1, 2, 3]")
             @NotEmpty List<Long> applicationIds,
 
-            @Schema(description = "변경할 상태", example = "DOX_PASS")
-            @NotNull ApplicationStatus status
+            @Schema(description = "어떤 단계의 상태를 바꿀지 (DOCUMENT/INTERVIEW)", example = "DOCUMENT")
+            @NotNull AdminStageFilter stage,
+
+            @Schema(description = "변경할 간단 상태 (PASS/FAIL/HOLD)", example = "PASS")
+            @NotNull SimpleApplicationStatus status
+    ) {}
+
+    @Schema(description = "여러 사용자에게 메일 일괄 발송 요청 DTO")
+    public record SendBulkMail(
+            @Schema(description = "수신자 이메일 리스트", example = "[\"user1@example.com\",\"user2@example.com\"]")
+            @NotEmpty List<@NotBlank String> recipients,
+
+            @Schema(description = "메일 제목", example = "[WITHUS] 공지사항")
+            @NotBlank String subject,
+
+            @Schema(description = "메일 본문 (HTML 가능)", example = "<p>안녕하세요!</p>")
+            @NotBlank String body,
+
+            @Schema(description = "첨부파일 리스트 (선택)")
+            List<MultipartFile> attachments
+    ) {}
+
+    @Schema(description = "여러 사용자에게 문자 일괄 발송 요청 DTO")
+    public record BulkSmsRequest(
+            @Schema(description = "수신자 전화번호 리스트", example = "[\"01012341234\",\"01056785678\"]")
+            @NotEmpty List<@NotBlank String> phoneNumbers,
+
+            @Schema(description = "문자 메시지 본문", example = "안녕하세요, 테스트 문자입니다.")
+            @NotBlank String message,
+
+            @Schema(description = "첨부파일 (선택, MMS 이미지)", nullable = true)
+            MultipartFile attachment
     ) {}
 }
