@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.global.infra.email.mailTemplate.entity;
+package KUSITMS.WITHUS.domain.mailTemplate.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.global.infra.email.mailTemplate.dto;
+package KUSITMS.WITHUS.domain.mailTemplate.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
