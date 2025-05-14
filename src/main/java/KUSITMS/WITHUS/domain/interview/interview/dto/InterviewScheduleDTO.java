@@ -33,6 +33,7 @@ public record InterviewScheduleDTO(
 
     @Schema(description = "면접 타임슬롯 및 배정된 지원자 정보")
     public record InterviewSlotDTO(
+            @Schema(description = "타임슬롯 ID") Long timeSlotId,
             @Schema(description = "면접 일자") @DateFormatDot LocalDate date,
             @Schema(description = "면접실 이름") String roomName,
             @Schema(description = "시작 시간") @TimeFormat LocalTime startTime,
@@ -55,6 +56,7 @@ public record InterviewScheduleDTO(
                     .toList();
 
             return new InterviewSlotDTO(
+                    slot.getId(),
                     slot.getDate(),
                     slot.getRoomName(),
                     slot.getStartTime(),
@@ -89,14 +91,32 @@ public record InterviewScheduleDTO(
             @Schema(description = "면접 ID") Long interviewId,
             @Schema(description = "면접 날짜") @DateFormatDot LocalDate date,
             @Schema(description = "시작 시간") @TimeFormat LocalTime startTime,
-            @Schema(description = "종료 시간") @TimeFormat LocalTime endTime
+            @Schema(description = "종료 시간") @TimeFormat LocalTime endTime,
+            @Schema(description = "지원자 목록") List<ApplicantInfo> applicants,
+            @Schema(description = "면접관 목록") List<UserResponseDTO.SummaryForTimeSlot> interviewers,
+            @Schema(description = "안내자 목록") List<UserResponseDTO.SummaryForTimeSlot> assistants
     ) {
         public static MyInterviewTimeDTO from(TimeSlot timeSlot) {
+            List<TimeSlotUser> users = timeSlot.getTimeSlotUsers();
+
+            List<UserResponseDTO.SummaryForTimeSlot> interviewers = users.stream()
+                    .filter(u -> u.getRole() == InterviewRole.INTERVIEWER)
+                    .map(u -> UserResponseDTO.SummaryForTimeSlot.from(u.getUser(), u.getRole()))
+                    .toList();
+
+            List<UserResponseDTO.SummaryForTimeSlot> assistants = users.stream()
+                    .filter(u -> u.getRole() == InterviewRole.ASSISTANT)
+                    .map(u -> UserResponseDTO.SummaryForTimeSlot.from(u.getUser(), u.getRole()))
+                    .toList();
+
             return new MyInterviewTimeDTO(
                     timeSlot.getInterview().getId(),
                     timeSlot.getDate(),
                     timeSlot.getStartTime(),
-                    timeSlot.getEndTime()
+                    timeSlot.getEndTime(),
+                    timeSlot.getApplications().stream().map(ApplicantInfo::from).toList(),
+                    interviewers,
+                    assistants
             );
         }
     }
