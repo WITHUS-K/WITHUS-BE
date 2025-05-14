@@ -15,6 +15,7 @@ import java.util.List;
 
 @Schema(description = "면접 일자별 스케줄 요약")
 public record InterviewScheduleDTO(
+        @Schema(description = "면접 ID") Long interviewId,
         @Schema(description = "면접 일자") @DateFormatDot LocalDate date,
         @Schema(description = "시작 시간") @TimeFormat LocalTime startTime,
         @Schema(description = "종료 시간") @TimeFormat LocalTime endTime,
@@ -22,13 +23,14 @@ public record InterviewScheduleDTO(
         @Schema(description = "해당 날짜의 타임슬롯 목록") List<InterviewSlotDTO> timeSlots
 ) {
     public static InterviewScheduleDTO from(
+            Long interviewId,
             LocalDate date,
             LocalTime startTime,
             LocalTime endTime,
             Short interviewDuration,
             List<InterviewSlotDTO> timeSlots
     ) {
-        return new InterviewScheduleDTO(date, startTime, endTime, interviewDuration, timeSlots);
+        return new InterviewScheduleDTO(interviewId, date, startTime, endTime, interviewDuration, timeSlots);
     }
 
     @Schema(description = "면접 타임슬롯 및 배정된 지원자 정보")

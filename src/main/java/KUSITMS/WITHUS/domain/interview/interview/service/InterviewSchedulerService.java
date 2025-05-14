@@ -212,6 +212,7 @@ public class InterviewSchedulerService {
                             .toList();
 
                     return InterviewScheduleDTO.from(
+                            interviewId,
                             date,
                             timeRange.getStartTime(),
                             timeRange.getEndTime(),

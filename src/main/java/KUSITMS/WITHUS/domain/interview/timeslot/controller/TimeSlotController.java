@@ -23,9 +23,9 @@ public class TimeSlotController {
 
     private final TimeSlotService timeSlotService;
 
-    @GetMapping("/{id}/applications")
+    @GetMapping("/{timeSlotId}/applications")
     @Operation(summary = "타임 슬롯에 배정된 지원자 조회", description = "해당 타임 슬롯 ID에 배정된 모든 지원자의 상세 정보를 조회합니다.")
-    public SuccessResponse<List<ApplicationResponseDTO.DetailForTimeSlot>> getApplicationsByTimeSlot(@PathVariable Long id, @CurrentUser User user) {
-        return SuccessResponse.ok(timeSlotService.getApplicationsByTimeSlotFilteredByUser(id, user.getId()));
+    public SuccessResponse<List<ApplicationResponseDTO.DetailForTimeSlot>> getApplicationsByTimeSlot(@PathVariable Long timeSlotId, @CurrentUser User user) {
+        return SuccessResponse.ok(timeSlotService.getApplicationsByTimeSlotFilteredByUser(timeSlotId, user.getId()));
     }
 }

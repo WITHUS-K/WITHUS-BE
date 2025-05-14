@@ -16,6 +16,7 @@ import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteriaResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
+import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
@@ -30,10 +31,10 @@ import org.springframework.lang.Nullable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Schema(description = "지원서 응답 DTO")
@@ -397,8 +398,11 @@ public class ApplicationResponseDTO {
 
     @Schema(description = "간단한 지원서 응답 DTO")
     public record DetailForTimeSlot(
-            @Schema(description = "지원서 ID") Long id,
+            @Schema(description = "지원서 ID") Long applicationId,
             @Schema(description = "지원자 이름") String name,
+            @Schema(description = "면접 일자") @DateFormatDot LocalDate date,
+            @Schema(description = "면접 시작 시간") @TimeFormat LocalTime startTime,
+            @Schema(description = "면접 종료 시간") @TimeFormat LocalTime endTime,
             @Schema(description = "상태") ApplicationStatus status,
             @Schema(description = "지원서 항목 질문 및 답변 목록") List<ApplicationAnswerResponseDTO> documentAnswers,
             @Schema(description = "면접 질문 목록") List<InterviewQuestionResponseDTO.Detail> interviewQuestions,
@@ -408,6 +412,7 @@ public class ApplicationResponseDTO {
     ) {
         public static DetailForTimeSlot from(
                 Application application,
+                TimeSlot timeSlot,
                 List<Evaluation> evaluationList,
                 List<Comment> documentComments,
                 List<Comment> interviewComments
@@ -435,6 +440,9 @@ public class ApplicationResponseDTO {
             return new DetailForTimeSlot(
                     application.getId(),
                     application.getName(),
+                    timeSlot.getDate(),
+                    timeSlot.getStartTime(),
+                    timeSlot.getEndTime(),
                     application.getStatus(),
                     documentAnswers,
                     questions,
