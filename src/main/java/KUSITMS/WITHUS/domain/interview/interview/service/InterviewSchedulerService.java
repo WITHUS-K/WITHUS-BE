@@ -104,7 +104,7 @@ public class InterviewSchedulerService {
             List<Long> applicantIds,
             Map<Long, List<LocalDateTime>> availabilityMap,
             Map<Long, Application> applicantMap,
-            Map<LocalDateTime, Map<Long, List<TimeSlot>>> slotPool, // ✅ 수정: TimeSlot → List<TimeSlot>
+            Map<LocalDateTime, Map<Long, List<TimeSlot>>> slotPool,
             Map<LocalDateTime, Integer> slotsUsedPerTime,
             InterviewConfig config,
             Interview interview,
