@@ -50,7 +50,7 @@ public class RecruitmentResponseDTO {
             @Schema(description = "면접 평가 방식") EvaluationScaleType interviewScaleType,
             @Schema(description = "서류 평가 기준 상세 목록") List<EvaluationCriteriaResponseDTO.Detail> documentEvaluationCriteria,
             @Schema(description = "면접 평가 기준 상세 목록") List<EvaluationCriteriaResponseDTO.Detail> interviewEvaluationCriteria,
-            @Schema(description = "지원서 질문 목록") List<DocumentQuestionResponseDTO.Summary> applicationQuestions,
+            @Schema(description = "지원서 질문 목록") List<DocumentQuestionResponseDTO.QuestionSummary> applicationQuestions,
             @Schema(description = "면접 가능 시간 목록") List<AvailableTimeRangeResponseDTO> availableTimeRanges
     ) {
         public static Detail from(Recruitment recruitment) {
@@ -64,9 +64,13 @@ public class RecruitmentResponseDTO {
                     .map(EvaluationCriteriaResponseDTO.Detail::from)
                     .toList();
 
-            List<DocumentQuestionResponseDTO.Summary> questions = recruitment.getQuestions().stream()
-                    .map(DocumentQuestionResponseDTO.Summary::from)
+            List<DocumentQuestionResponseDTO.QuestionSummary> questions = recruitment.getQuestions().stream()
+                    .map(q -> (DocumentQuestionResponseDTO.QuestionSummary) switch (q.getType()) {
+                        case TEXT -> DocumentQuestionResponseDTO.TextQuestionSummary.from(q);
+                        case FILE -> DocumentQuestionResponseDTO.FileQuestionSummary.from(q);
+                    })
                     .toList();
+
 
             List<AvailableTimeRangeResponseDTO> timeRanges = recruitment.getAvailableTimeRanges().stream()
                     .map(AvailableTimeRangeResponseDTO::from)
