@@ -100,11 +100,12 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         saveApplicantAvailabilities(savedApplication, request.availableTimes());
 
-        validateFileAnswers(recruitment, request.answers(), files);
+        List<MultipartFile> fileList = files != null ? files : List.of();
+        validateFileAnswers(recruitment, request.answers(), fileList);
 
         Map<String, String> uploadedFileUrls = fileUploadService.uploadAnswerFiles(files, recruitment.getOrganization().getId(), recruitment.getId(), savedApplication.getId());
 
-        saveApplicationAnswers(savedApplication, recruitment, request, uploadedFileUrls, files);
+        saveApplicationAnswers(savedApplication, recruitment, request, uploadedFileUrls, fileList);
 
         return ApplicationResponseDTO.Summary.from(savedApplication);
     }
@@ -509,9 +510,9 @@ public class ApplicationServiceImpl implements ApplicationService {
         Map<Long, DocumentQuestion> questionMap = questions.stream()
                 .collect(Collectors.toMap(DocumentQuestion::getId, q -> q));
 
-        Set<String> providedFileNames = files.stream()
-                .map(MultipartFile::getOriginalFilename)
-                .collect(Collectors.toSet());
+        Set<String> providedFileNames = files != null
+                ? files.stream().map(MultipartFile::getOriginalFilename).collect(Collectors.toSet())
+                : Set.of();
 
         for (ApplicationAnswerRequestDTO answer : answers) {
             DocumentQuestion question = questionMap.get(answer.questionId());

@@ -55,4 +55,13 @@ public class InterviewController {
     ) {
         return SuccessResponse.ok(schedulerService.getMyInterviewTimes(interviewId, user));
     }
+
+    @GetMapping("/my-organization-interviews")
+    @Operation(summary = "내 조직의 면접 정보 조회", description = "현재 사용자가 속한 조직에서 생성한 면접 정보를 조회합니다.")
+    public SuccessResponse<List<InterviewScheduleDTO.MyInterviewScheduleSummaryDTO>> getMyOrgInterviews(
+            @CurrentUser User user
+    ) {
+        return SuccessResponse.ok(interviewService.getMyOrganizationInterviews(user));
+    }
+
 }

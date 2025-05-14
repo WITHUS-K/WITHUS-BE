@@ -7,6 +7,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -71,5 +72,20 @@ public class RecruitmentRepositoryImpl implements RecruitmentRepository {
                 .fetchOne();
 
         return Optional.ofNullable(result);
+    }
+
+    @Override
+    public List<Recruitment> findAllByOrganizationIds(List<Long> organizationIds) {
+        if (organizationIds == null || organizationIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return queryFactory.selectFrom(recruitment)
+                .where(
+                        recruitment.organization.id.in(organizationIds),
+                        recruitment.isTemporary.isFalse()
+                )
+                .orderBy(recruitment.createdAt.desc())
+                .fetch();
     }
 }
