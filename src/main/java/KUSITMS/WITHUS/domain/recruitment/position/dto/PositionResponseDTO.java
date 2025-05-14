@@ -18,4 +18,17 @@ public class PositionResponseDTO {
             );
         }
     }
+
+    @Schema(description = "포지션 지원자 수 정보 DTO")
+    public record SummaryForRecruitment(
+            @Schema(description = "포지션 이름") String name,
+            @Schema(description = "지원자 수") int applicantCount
+    ) {
+        public static SummaryForRecruitment from(Position position) {
+            return new SummaryForRecruitment(
+                    position.getName(),
+                    position.getApplications().size()
+            );
+        }
+    }
 }

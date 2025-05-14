@@ -123,16 +123,24 @@ public class RecruitmentResponseDTO {
             @Schema(description = "서류 마감일") @DateFormatDot LocalDate documentDeadline,
             @Schema(description = "서류 발표일") @DateFormatDot LocalDate documentResultDate,
             @Schema(description = "최종 발표일") @DateFormatDot LocalDate finalResultDate,
-            @Schema(description = "조직명") String organizationName
+            @Schema(description = "조직명") String organizationName,
+            @Schema(description = "Slug 값") String urlSlug,
+            @Schema(description = "포지션별 지원자 수") List<PositionResponseDTO.SummaryForRecruitment> positionSummaries
     ) {
         public static Summary from(Recruitment recruitment) {
+            List<PositionResponseDTO.SummaryForRecruitment> positionSummaries = recruitment.getPositions().stream()
+                    .map(PositionResponseDTO.SummaryForRecruitment::from)
+                    .toList();
+
             return new Summary(
                     recruitment.getId(),
                     recruitment.getTitle(),
                     recruitment.getDocumentDeadline(),
                     recruitment.getDocumentResultDate(),
                     recruitment.getFinalResultDate(),
-                    recruitment.getOrganization().getName()
+                    recruitment.getOrganization().getName(),
+                    recruitment.getUrlSlug(),
+                    positionSummaries
             );
         }
     }
