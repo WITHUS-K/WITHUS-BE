@@ -4,6 +4,7 @@ import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.interview.enumerate.InterviewRole;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
+import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.dto.AvailableTimeRangeResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.global.common.annotation.DateFormatDot;
 import KUSITMS.WITHUS.global.common.annotation.TimeFormat;
@@ -122,4 +123,12 @@ public record InterviewScheduleDTO(
             );
         }
     }
+
+    public record MyInterviewScheduleSummaryDTO(
+            Long recruitmentId,
+            String recruitmentTitle,
+            Long interviewId,
+            List<AvailableTimeRangeResponseDTO> availableTimeRanges,
+            Short interviewDuration
+    ) {}
 }

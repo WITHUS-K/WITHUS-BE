@@ -13,4 +13,5 @@ public interface RecruitmentRepository {
     List<Recruitment> findAllByKeyword(String keyword);
     boolean existsByUrlSlug(String urlSlug);
     Optional<Recruitment> findByUrlSlug(String slug);
+    List<Recruitment> findAllByOrganizationIds(List<Long> organizationIds);
 }
