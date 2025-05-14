@@ -55,7 +55,7 @@ public class UserRequestDTO {
             @Schema(description = "동아리 Id", example = "큐시즘")
             @NotNull Long organizationId,
 
-            @Schema(description = "이메일", example = "admin@example.com")
+            @Schema(description = "이메일", example = "user@example.com")
             @Email @NotBlank String email,
 
             @Schema(description = "비밀번호", example = "Abc123!@")

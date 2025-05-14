@@ -38,14 +38,14 @@ public class RecruitmentController {
         return SuccessResponse.ok(result);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{recruitmentId}")
     @Operation(summary = "리크루팅 단건 상세 조회")
-    public SuccessResponse<RecruitmentResponseDTO.Detail> getById(@PathVariable Long id) {
-        RecruitmentResponseDTO.Detail result = recruitmentService.getById(id);
+    public SuccessResponse<RecruitmentResponseDTO.Detail> getById(@PathVariable Long recruitmentId) {
+        RecruitmentResponseDTO.Detail result = recruitmentService.getById(recruitmentId);
         return SuccessResponse.ok(result);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{recruitmentId}")
     @Operation(summary = "리크루팅 수정")
     public SuccessResponse<RecruitmentResponseDTO.Update> update(
             @PathVariable Long id,
@@ -55,7 +55,7 @@ public class RecruitmentController {
         return SuccessResponse.ok(result);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{recruitmentId}")
     @Operation(summary = "리크루팅 삭제")
     public SuccessResponse<String> delete(@PathVariable Long id) {
         recruitmentService.delete(id);

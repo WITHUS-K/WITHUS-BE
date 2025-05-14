@@ -13,8 +13,8 @@ import java.util.Optional;
 public interface TimeSlotRepository {
     TimeSlot getById(Long id);
     TimeSlot save(TimeSlot timeSlot);
-    Optional<TimeSlot> findByDateTimeAndInterviewIdAndPosition(LocalDate date, LocalTime startTime, Long interviewId, Long positionId);
-    TimeSlot findOrCreate(LocalDate date, LocalTime startTime, LocalTime endTime, Interview interview, Position position);
+    Optional<TimeSlot> findByDateTimeAndInterviewIdAndPosition(LocalDate date, LocalTime startTime, Long interviewId, Long positionId, String roomName);
+    TimeSlot findOrCreate(LocalDate date, LocalTime startTime, LocalTime endTime, Interview interview, Position position, String roomName);
     List<TimeSlot> findByInterview(Interview interview);
     List<TimeSlot> findAllByUserInvolved(Long interviewId, User user);
 }

@@ -62,6 +62,9 @@ public class RecruitmentRequestDTO {
             @Schema(description = "생년월일 입력 필요 여부", example = "true")
             boolean needBirthDate,
 
+            @Schema(description = "전공 입력 필요 여부", example = "true")
+            boolean needMajor,
+
             @Schema(description = "학적 상태 입력 필요 여부", example = "false")
             boolean needAcademicStatus,
 

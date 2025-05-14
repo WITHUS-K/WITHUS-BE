@@ -49,4 +49,19 @@ public class EvaluationCriteriaResponseDTO {
             );
         }
     }
+
+    @Schema(description = "평가 기준 요약 정보 응답 DTO")
+    public record Summary(
+            @Schema(description = "평가 기준 ID") Long id,
+            @Schema(description = "평가 기준") String content,
+            @Schema(description = "평가 타입") EvaluationType type
+    ) {
+        public static Summary from(EvaluationCriteria evaluationCriteria) {
+            return new Summary(
+                    evaluationCriteria.getId(),
+                    evaluationCriteria.getContent(),
+                    evaluationCriteria.getEvaluationType()
+            );
+        }
+    }
 }

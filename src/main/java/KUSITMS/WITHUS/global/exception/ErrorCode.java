@@ -71,6 +71,9 @@ public enum ErrorCode {
     RECRUITMENT_NOT_EXIST("RECRUITMENT404", "존재하지 않는 공고입니다.", HttpStatus.NOT_FOUND),
     SLUG_GENERATION_FAILED("RECRUITMENT500", "슬러그 생성에 실패하였습니다. 슬러그 자릿수를 늘리세요.", HttpStatus.INTERNAL_SERVER_ERROR),
 
+    // Available Time (면접 가능 시간)
+    AVAILABLE_TIME_NOT_EXIST("AVAILABLE_TIME404", "해당 날짜의 availableTimeRange가 없습니다.", HttpStatus.NOT_FOUND),
+
     // DocumentQuestion (지원서 서류 질문)
     DOCUMENT_QUESTION_ALREADY_EXIST("DOCUMENT_QUESTION400", "이미 존재하는 지원서 질문입니다.", HttpStatus.BAD_REQUEST),
     DOCUMENT_QUESTION_NOT_EXIST("DOCUMENT_QUESTION404", "존재하지 않는 지원서 질문입니다.", HttpStatus.NOT_FOUND),
@@ -83,6 +86,11 @@ public enum ErrorCode {
     APPLICATION_ALREADY_EXIST("APPLICATION400", "이미 존재하는 지원서입니다.", HttpStatus.BAD_REQUEST),
     APPLICATION_NOT_EXIST("APPLICATION404", "존재하지 않는 지원서입니다.", HttpStatus.NOT_FOUND),
     REQUIRED_FIELD_MISSING("APPLICATION400", "필수 입력값이 누락되었습니다.", HttpStatus.BAD_REQUEST),
+    STAGE_NOT_SUPPORTED("APPLICATION400", "해당 단계에서는 상태 변경을 지원하지 않습니다.", HttpStatus.BAD_REQUEST),
+
+    // 평가자 관련
+    INSUFFICIENT_EVALUATORS("APPLICATION400", "해당 파트에 평가자가 충분하지 않습니다.", HttpStatus.BAD_REQUEST),
+    EVALUATOR_NOT_EXIST("APPLICATION404", "존재하지 않는 평가자입니다.", HttpStatus.NOT_FOUND),
 
     // Interview (면접)
     INTERVIEW_ALREADY_EXIST("INTERVIEW400", "이미 존재하는 면접입니다.", HttpStatus.BAD_REQUEST),
@@ -123,6 +131,10 @@ public enum ErrorCode {
     // EMAIL
     EMAIL_SEND_FAIL("EMAIL500", "메일 전송에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     TEMPLATE_NOT_LOAD("EMAIL500", "이메일 템플릿을 로드할 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    // SMS
+    SMS_SEND_FAIL("SMS500", "문자 발송에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    SMS_ATTACHMENT_PROCESS_FAIL("SMS500", "문자 첨부파일 처리에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // File Upload
     FILE_UPLOAD_FAIL("FILE500", "파일 업로드에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),

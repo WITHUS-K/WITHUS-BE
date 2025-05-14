@@ -37,7 +37,7 @@ public class TimeSlotServiceImpl implements TimeSlotService {
                     List<Comment> interviewComments = commentRepository.findByApplicationIdAndTypeAndCreatedBy(
                             application.getId(), CommentType.INTERVIEW, currentUserId);
 
-                    return ApplicationResponseDTO.DetailForTimeSlot.from(application, evaluations, documentComments, interviewComments);
+                    return ApplicationResponseDTO.DetailForTimeSlot.from(application, timeSlot, evaluations, documentComments, interviewComments);
                 })
                 .toList();
     }

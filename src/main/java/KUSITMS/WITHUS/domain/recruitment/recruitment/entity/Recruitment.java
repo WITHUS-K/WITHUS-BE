@@ -53,6 +53,10 @@ public class Recruitment extends BaseEntity {
     private boolean needBirthDate = false;
 
     @Builder.Default
+    @Column(name = "NEED_MAJOR", nullable = false)
+    private boolean needMajor = false;
+
+    @Builder.Default
     @Column(name = "NEED_ACADEMIC_STATUS", nullable = false)
     private boolean needAcademicStatus = false;
 
