@@ -13,6 +13,7 @@ import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationT
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.repository.EvaluationCriteriaJpaRepository;
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
+import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionJpaRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
@@ -158,7 +159,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     public List<RecruitmentResponseDTO.TaskProgress> getTaskProgress(Long recruitmentId, EvaluationType stage) {
-        var recruitment = recruitmentRepository.getById(recruitmentId);
+        Recruitment recruitment = recruitmentRepository.getById(recruitmentId);
         LocalDate today = LocalDate.now();
 
         // 마감일(D-Day 계산에 사용할 날짜)
@@ -171,7 +172,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 .countByRecruitment_IdAndEvaluationType(recruitmentId, stage);
 
         // 공고에 속한 모든 파트
-        var positions = positionJpaRepository.findByRecruitment_Id(recruitmentId);
+        List<Position> positions = positionJpaRepository.findByRecruitment_Id(recruitmentId);
 
         return positions.stream().map(pos -> {
             Long posId = pos.getId();
@@ -322,18 +323,18 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         long needed = evaluationCriteriaJpaRepository
                 .countByRecruitment_IdAndEvaluationType(recruitmentId, EvaluationType.DOCUMENT);
 
-        var pending = new LinkedHashSet<ApplicationResponseDTO.Summary>();
-        var done    = new LinkedHashSet<ApplicationResponseDTO.Summary>();
+        LinkedHashSet<ApplicationResponseDTO.Summary> pending = new LinkedHashSet<>();
+        LinkedHashSet<ApplicationResponseDTO.Summary> done    = new LinkedHashSet<>();
 
         // 각 할당마다 “나(=userId)가 이 지원서에 남긴 평가 개수” 비교
-        for (var ae : assigns) {
+        for (ApplicationEvaluator ae : assigns) {
             Application app = ae.getApplication();
 
             long answered = evaluationJpaRepository.countByApplication_IdAndUser_IdAndCriteria_EvaluationType(
                     app.getId(), userId, EvaluationType.DOCUMENT
             );
 
-            var dto = ApplicationResponseDTO.Summary.from(app);
+            ApplicationResponseDTO.Summary dto = ApplicationResponseDTO.Summary.from(app);
             if (answered >= needed) done.add(dto);
             else                    pending.add(dto);
         }
