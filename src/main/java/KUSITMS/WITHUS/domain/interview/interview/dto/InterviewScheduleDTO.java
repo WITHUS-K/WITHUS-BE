@@ -21,6 +21,7 @@ public record InterviewScheduleDTO(
         @Schema(description = "시작 시간") @TimeFormat LocalTime startTime,
         @Schema(description = "종료 시간") @TimeFormat LocalTime endTime,
         @Schema(description = "면접 소요 시간") Short interviewDuration,
+        @Schema(description = "면접실 이름 목록") List<String> roomNames,
         @Schema(description = "해당 날짜의 타임슬롯 목록") List<InterviewSlotDTO> timeSlots
 ) {
     public static InterviewScheduleDTO from(
@@ -29,9 +30,10 @@ public record InterviewScheduleDTO(
             LocalTime startTime,
             LocalTime endTime,
             Short interviewDuration,
+            List<String> roomNames,
             List<InterviewSlotDTO> timeSlots
     ) {
-        return new InterviewScheduleDTO(interviewId, date, startTime, endTime, interviewDuration, timeSlots);
+        return new InterviewScheduleDTO(interviewId, date, startTime, endTime, interviewDuration, roomNames, timeSlots);
     }
 
     @Schema(description = "면접 타임슬롯 및 배정된 지원자 정보")

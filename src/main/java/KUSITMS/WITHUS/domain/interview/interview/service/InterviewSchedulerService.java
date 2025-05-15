@@ -214,12 +214,20 @@ public class InterviewSchedulerService {
                             .map(InterviewScheduleDTO.InterviewSlotDTO::from)
                             .toList();
 
+                    List<String> roomNames = daySlots.stream()
+                            .map(TimeSlot::getRoomName)
+                            .filter(Objects::nonNull)
+                            .distinct()
+                            .sorted()
+                            .toList();
+
                     return InterviewScheduleDTO.from(
                             interviewId,
                             date,
                             timeRange.getStartTime(),
                             timeRange.getEndTime(),
                             interviewDuration,
+                            roomNames,
                             slotDTOs
                     );
                 })
@@ -227,7 +235,6 @@ public class InterviewSchedulerService {
                 .filter(dto -> dto.date() != null)
                 .sorted(Comparator.comparing(InterviewScheduleDTO::date))
                 .toList();
-
     }
 
     /**
