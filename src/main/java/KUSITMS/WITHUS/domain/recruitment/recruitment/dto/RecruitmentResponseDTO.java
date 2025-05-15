@@ -42,6 +42,7 @@ public class RecruitmentResponseDTO {
             @Schema(description = "학적 상태 입력 필요 여부", example = "false") boolean needAcademicStatus,
             @Schema(description = "포지션 목록") List<PositionResponseDTO.Detail> positions,
             @Schema(description = "서류 마감일") @DateFormatDot LocalDate documentDeadline,
+            @Schema(description = "서류 합격 발표 필수 여부") boolean isDocumentResultRequired,
             @Schema(description = "서류 발표일") @DateFormatDot LocalDate documentResultDate,
             @Schema(description = "최종 발표일") @DateFormatDot LocalDate finalResultDate,
             @Schema(description = "면접 소요시간") Short interviewDuration,
@@ -51,6 +52,7 @@ public class RecruitmentResponseDTO {
             @Schema(description = "서류 평가 기준 상세 목록") List<EvaluationCriteriaResponseDTO.Detail> documentEvaluationCriteria,
             @Schema(description = "면접 평가 기준 상세 목록") List<EvaluationCriteriaResponseDTO.Detail> interviewEvaluationCriteria,
             @Schema(description = "지원서 질문 목록") List<DocumentQuestionResponseDTO.QuestionSummary> applicationQuestions,
+            @Schema(description = "면접 일정 등록 필수 여부") boolean isInterviewRequired,
             @Schema(description = "면접 가능 시간 목록") List<AvailableTimeRangeResponseDTO> availableTimeRanges
     ) {
         public static Detail from(Recruitment recruitment) {
@@ -94,6 +96,7 @@ public class RecruitmentResponseDTO {
                     recruitment.isNeedAcademicStatus(),
                     positions,
                     recruitment.getDocumentDeadline(),
+                    recruitment.isDocumentResultRequired(),
                     recruitment.getDocumentResultDate(),
                     recruitment.getFinalResultDate(),
                     recruitment.getInterviewDuration(),
@@ -103,6 +106,7 @@ public class RecruitmentResponseDTO {
                     documentCriteria,
                     interviewCriteria,
                     questions,
+                    recruitment.isInterviewRequired(),
                     timeRanges
             );
         }
