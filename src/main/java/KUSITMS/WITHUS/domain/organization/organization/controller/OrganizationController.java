@@ -101,10 +101,10 @@ public class OrganizationController {
 
     @GetMapping("/me")
     @Operation(summary = "내가 속한 조직 목록 조회", description = "로그인한 유저가 속해 있는 모든 조직의 요약 정보를 반환합니다.")
-    public SuccessResponse<List<OrganizationResponseDTO.Summary>> getMyOrgs(
+    public SuccessResponse<List<OrganizationResponseDTO.Summary>> getMyOrganizations(
             @CurrentUser User currentUser
     ) {
-        var dtos = organizationService.getMyOrganizations(currentUser.getId());
+        List<OrganizationResponseDTO.Summary> dtos = organizationService.getMyOrganizations(currentUser.getId());
         return SuccessResponse.ok(dtos);
     }
 }
