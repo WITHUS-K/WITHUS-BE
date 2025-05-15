@@ -13,4 +13,5 @@ public interface OrganizationService {
     void delete(Long id);
     List<OrganizationResponseDTO.Summary> getAll();
     List<Organization> search(String keyword);
+    List<OrganizationResponseDTO.Summary> getMyOrganizations(Long userId);
 }
