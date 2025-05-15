@@ -38,8 +38,11 @@ public class RecruitmentRequestDTO {
             @Schema(description = "서류 마감일", example = "2025-06-01")
             @NotNull @Future LocalDate documentDeadline,
 
+            @Schema(description = "서류 발표 필수 여부", example = "true")
+            Boolean isDocumentResultRequired,
+
             @Schema(description = "서류 발표일", example = "2025-06-10")
-            @NotNull @Future LocalDate documentResultDate,
+            @Future LocalDate documentResultDate,
 
             @Schema(description = "최종 발표일", example = "2025-06-20")
             @NotNull @Future LocalDate finalResultDate,
@@ -74,6 +77,9 @@ public class RecruitmentRequestDTO {
             @Schema(description = "서류 평가 기준 목록") List<EvaluationCriteriaRequestDTO.Create> documentEvaluationCriteria,
             @Schema(description = "면접 평가 기준 목록") List<EvaluationCriteriaRequestDTO.Create> interviewEvaluationCriteria,
 
+            @Schema(description = "면접 일정 등록 필수 여부", example = "true")
+            Boolean isInterviewRequired,
+
             @Schema(description = "면접 가능 시간 목록")
             List<AvailableTimeRangeRequestDTO> availableTimeRanges
     ) {}
@@ -95,8 +101,11 @@ public class RecruitmentRequestDTO {
             @Schema(description = "서류 마감일", example = "2025-06-01")
             @NotNull @Future LocalDate documentDeadline,
 
+            @Schema(description = "서류 발표 필수 여부", example = "true")
+            Boolean isDocumentResultRequired,
+
             @Schema(description = "서류 발표일", example = "2025-06-10")
-            @NotNull @Future LocalDate documentResultDate,
+            @Future LocalDate documentResultDate,
 
             @Schema(description = "최종 발표일", example = "2025-06-20")
             @NotNull @Future LocalDate finalResultDate,
@@ -117,6 +126,8 @@ public class RecruitmentRequestDTO {
 
             @Schema(description = "서류 평가 기준 목록") List<EvaluationCriteriaRequestDTO.Create> documentEvaluationCriteria,
             @Schema(description = "면접 평가 기준 목록") List<EvaluationCriteriaRequestDTO.Create> interviewEvaluationCriteria,
+
+            @Schema(description = "면접 일정 등록 필수 여부", example = "true") Boolean isInterviewRequired,
 
             @Schema(description = "면접 가능 시간 목록")
             List<AvailableTimeRangeRequestDTO> availableTimeRanges

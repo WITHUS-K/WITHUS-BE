@@ -86,4 +86,26 @@ public class RecruitmentController {
         List<RecruitmentResponseDTO.Simple> result = recruitmentService.getAllByUserOrganizations(user);
         return SuccessResponse.ok(result);
     }
+
+    @GetMapping("/{organizationId}/current/summary")
+    @Operation(summary = "내 조직의 현재 진행 중인 공고 요약 조회", description = "로그인한 운영진이 속한 조직의, 공고 생성일이 지났고 최종 발표일 +1일 이전인 공고들의 요약 정보를 반환합니다.")
+    public SuccessResponse<List<RecruitmentResponseDTO.SummaryForHome>> getCurrentSummaries(
+            @PathVariable Long organizationId,
+            @CurrentUser User currentUser
+    ) {
+        List<RecruitmentResponseDTO.SummaryForHome> dtos =
+                recruitmentService.getCurrentSummariesForUser(organizationId, currentUser.getId());
+        return SuccessResponse.ok(dtos);
+    }
+
+    @GetMapping("/{recruitmentId}/my/evaluations/documents")
+    @Operation(summary = "내 서류 평가 현황 조회", description = "내가 할당된 서류 평가 지원서 중, 미완료/완료 리스트를 반환합니다.")
+    public SuccessResponse<RecruitmentResponseDTO.MyDocumentEvaluation> myDocs(
+            @CurrentUser User currentUser,
+            @PathVariable Long recruitmentId
+    ) {
+        var response = recruitmentService.getMyDocumentEvaluations(currentUser.getId(), recruitmentId);
+        return SuccessResponse.ok(response);
+    }
+
 }

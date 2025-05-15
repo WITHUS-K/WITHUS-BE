@@ -63,11 +63,19 @@ public class Recruitment extends BaseEntity {
     @Column(name = "DOCUMENT_DEADLINE")
     private LocalDate documentDeadline;
 
+    @Builder.Default
+    @Column(name = "IS_DOCUMENT_RESULT_REQUIRED", nullable = false)
+    private boolean isDocumentResultRequired = true;
+
     @Column(name = "DOCUMENT_RESULT_DATE")
     private LocalDate documentResultDate;
 
     @Column(name = "FINAL_RESULT_DATE")
     private LocalDate finalResultDate;
+
+    @Builder.Default
+    @Column(name = "IS_INTERVIEW_REQUIRED", nullable = false)
+    private boolean isInterviewRequired = true;
 
     @Column(name = "INTERVIEW_DURATION")
     private Short interviewDuration;
@@ -112,8 +120,10 @@ public class Recruitment extends BaseEntity {
             String content,
             String fileUrl,
             LocalDate documentDeadline,
+            boolean isDocumentResultRequired,
             LocalDate documentResultDate,
             LocalDate finalResultDate,
+            boolean isInterviewRequired,
             Short interviewDuration,
             Organization organization,
             boolean needGender,
@@ -131,8 +141,10 @@ public class Recruitment extends BaseEntity {
                 .content(content)
                 .fileUrl(fileUrl)
                 .documentDeadline(documentDeadline)
+                .isDocumentResultRequired(isDocumentResultRequired)
                 .documentResultDate(documentResultDate)
                 .finalResultDate(finalResultDate)
+                .isInterviewRequired(isInterviewRequired)
                 .interviewDuration(interviewDuration)
                 .organization(organization)
                 .needGender(needGender)
@@ -152,8 +164,10 @@ public class Recruitment extends BaseEntity {
             String content,
             String fileUrl,
             LocalDate documentDeadline,
+            boolean isDocumentResultRequired,
             LocalDate documentResultDate,
             LocalDate finalResultDate,
+            boolean isInterviewRequired,
             Short interviewDuration,
             boolean needGender,
             boolean needAddress,
@@ -167,8 +181,10 @@ public class Recruitment extends BaseEntity {
         this.content = content;
         this.fileUrl = fileUrl;
         this.documentDeadline = documentDeadline;
+        this.isDocumentResultRequired = isDocumentResultRequired;
         this.documentResultDate = documentResultDate;
         this.finalResultDate = finalResultDate;
+        this.isInterviewRequired = isInterviewRequired;
         this.interviewDuration = interviewDuration;
         this.needGender = needGender;
         this.needAddress = needAddress;
