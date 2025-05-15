@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.controller;
 
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.RecruitmentService;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
@@ -9,10 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,5 +38,15 @@ public class AdminRecruitmentController {
         List<RecruitmentResponseDTO.SummaryForHome> dtos =
                 recruitmentService.getCurrentSummariesForAdmin(currentUser.getId());
         return SuccessResponse.ok(dtos);
+    }
+
+    @GetMapping("/{recruitmentId}/progress")
+    @Operation(summary = "전체 업무 진행 상황", description = "서류 또는 면접 단계별로 각 파트 별 D-Day, 총 대상 수, 완료 수, 진행률을 반환합니다.")
+    public SuccessResponse<List<RecruitmentResponseDTO.TaskProgressDTO>> getProgress(
+            @PathVariable Long recruitmentId,
+            @RequestParam(defaultValue = "DOCUMENT") EvaluationType stage
+    ) {
+        var dto = recruitmentService.getTaskProgress(recruitmentId, stage);
+        return SuccessResponse.ok(dto);
     }
 }

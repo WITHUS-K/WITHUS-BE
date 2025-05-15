@@ -140,7 +140,7 @@ public class RecruitmentResponseDTO {
         }
     }
 
-    @Schema(description = "공고 요약 정보 응답 DTO")
+    @Schema(description = "홈 페이지 용 공고 요약 정보 응답 DTO")
     public record SummaryForHome(
             @Schema(description = "공고 Id") Long recruitmentId,
             @Schema(description = "공고 제목") String title,
@@ -209,6 +209,27 @@ public class RecruitmentResponseDTO {
             }
             long diff = ChronoUnit.DAYS.between(today, date);
             return new DdayInfo(label, date, diff, diff < 0);
+        }
+    }
+
+    @Schema(description = "파트별 업무 진행 현황")
+    public record TaskProgressDTO(
+            @Schema(description = "지원 파트명") String positionName,
+            @Schema(description = "D-Day(남은 일수)", example = "3") Long daysToDeadline,
+            @Schema(description = "평가해야 할 지원서 수", example = "12") Long totalToEvaluate,
+            @Schema(description = "완료된 지원서 수", example = "4") Long evaluatedCount,
+            @Schema(description = "평가되지 않은 지원서 수", example = "8") Long notEvaluatedCount,
+            @Schema(description = "진행률(%)", example = "33") int progressPercent
+    ) {
+        public static TaskProgressDTO from(String positionName, Long daysToDeadline, Long totalToEvaluate, Long evaluatedCount, Long notEvaluatedCount, int progressPercent) {
+            return new TaskProgressDTO(
+                    positionName,
+                    daysToDeadline,
+                    totalToEvaluate,
+                    evaluatedCount,
+                    notEvaluatedCount,
+                    progressPercent
+            );
         }
     }
 }

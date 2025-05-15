@@ -1,9 +1,14 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.service;
 
+import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationJpaRepository;
+import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
+import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.repository.EvaluationCriteriaJpaRepository;
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
+import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionJpaRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
@@ -22,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.function.Function;
 
@@ -42,6 +48,9 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     private final UserOrganizationJpaRepository userOrganizationJpaRepository;
     private final RecruitmentJpaRepository recruitmentJpaRepository;
     private final ApplicationJpaRepository applicationJpaRepository;
+    private final PositionJpaRepository positionJpaRepository;
+    private final EvaluationRepository evaluationRepository;
+    private final EvaluationCriteriaJpaRepository evaluationCriteriaJpaRepository;
 
     /**
      * 공고 임시 저장
@@ -124,6 +133,72 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 .getOrganization().getId();
 
         return findCurrentSummaries(List.of(orgId));
+    }
+
+    /**
+     * 특정 공고의 서류 또는 면접 업무 진행 상황을 파트별로 계산합니다.
+     * @param recruitmentId 조회할 공고 ID
+     * @param stage DOCUMENT 또는 INTERVIEW
+     */
+    @Transactional(readOnly = true)
+    public List<RecruitmentResponseDTO.TaskProgressDTO> getTaskProgress(Long recruitmentId, EvaluationType stage) {
+        var recruitment = recruitmentRepository.getById(recruitmentId);
+        LocalDate today = LocalDate.now();
+
+        // 마감일(D-Day 계산에 사용할 날짜)
+        LocalDate deadline = (stage == EvaluationType.DOCUMENT)
+                ? recruitment.getDocumentResultDate()
+                : recruitment.getFinalResultDate();
+        long daysToDeadline = ChronoUnit.DAYS.between(today, deadline);
+
+        long requiredCriteriaCount = evaluationCriteriaJpaRepository
+                .countByRecruitment_IdAndEvaluationType(recruitmentId, stage);
+
+        // 공고에 속한 모든 파트
+        var positions = positionJpaRepository.findByRecruitment_Id(recruitmentId);
+
+        return positions.stream().map(pos -> {
+            Long posId = pos.getId();
+
+            // 이 파트의 지원서 전체 조회
+            List<Application> apps = applicationJpaRepository.findByRecruitment_IdAndPosition_Id(recruitmentId, posId);
+
+            // stage 에 따라 평가 대상 필터링
+            List<Application> targets = apps.stream()
+                    .filter(app -> {
+                        if (stage == EvaluationType.DOCUMENT) { // DOCUMENT 단계: 전체 지원서가 대상
+                            return true;
+                        } else { // INTERVIEW 단계: 서류 불합격 지원서는 제외
+                            return app.getStatus() != ApplicationStatus.DOX_FAIL;
+                        }
+                    })
+                    .toList();
+
+            long totalToEvaluate = targets.size();
+
+            // 모든 기준 채운(완료된) 지원서 수
+            long evaluatedCount = evaluationRepository
+                    .countFullyEvaluatedApplications(
+                            recruitmentId, posId, stage, requiredCriteriaCount
+                    );
+
+            // 아직 평가되지 않은 지원서 수
+            long notEvaluatedCount = totalToEvaluate - evaluatedCount;
+
+            // 진행률
+            int progressPercent = totalToEvaluate == 0
+                    ? 0
+                    : (int) (evaluatedCount * 100 / totalToEvaluate);
+
+            return RecruitmentResponseDTO.TaskProgressDTO.from(
+                    pos.getName(),
+                    daysToDeadline,
+                    totalToEvaluate,
+                    evaluatedCount,
+                    notEvaluatedCount,
+                    progressPercent
+            );
+        }).toList();
     }
 
     /**
