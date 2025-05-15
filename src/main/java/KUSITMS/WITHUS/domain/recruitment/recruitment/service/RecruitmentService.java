@@ -4,6 +4,7 @@ import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationT
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
+import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 
 import java.util.List;
 import java.util.function.Function;
@@ -20,5 +21,5 @@ public interface RecruitmentService {
     List<RecruitmentResponseDTO.SummaryForHome> getCurrentSummariesForUser(Long userId, Long organizationId);
     List<RecruitmentResponseDTO.SummaryForHome> getCurrentSummariesForAdmin(Long adminUserId);
     List<RecruitmentResponseDTO.TaskProgressDTO> getTaskProgress(Long recruitmentId, EvaluationType stage);
-    List<RecruitmentResponseDTO.PendingEvaluatorDTO> getPendingEvaluators(Long recruitmentId);
+    List<UserResponseDTO.Summary> getPendingEvaluators(Long recruitmentId);
 }

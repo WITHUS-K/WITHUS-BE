@@ -217,7 +217,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      * @param recruitmentId 조회할 공고 ID
      */
     @Override
-    public List<RecruitmentResponseDTO.PendingEvaluatorDTO> getPendingEvaluators(Long recruitmentId) {
+    public List<UserResponseDTO.Summary> getPendingEvaluators(Long recruitmentId) {
         // 공고 조회
         Recruitment recruitment = recruitmentRepository.getById(recruitmentId);
         LocalDate today = LocalDate.now();
@@ -237,8 +237,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 .findByRecruitment_IdAndEvaluationType(recruitmentId, stage)
                 .stream().map(EvaluationCriteria::getId).toList();
 
-        // 각 파트별로
-        return positionJpaRepository.findByRecruitment_Id(recruitmentId)
+        // 파트 별 미완료 평가자 추출
+        List<RecruitmentResponseDTO.PendingEvaluatorDTO> byPosition = positionJpaRepository.findByRecruitment_Id(recruitmentId)
                 .stream()
                 .map(pos -> {
                     // 이 파트에 배정된 평가자 ⇢ ApplicationEvaluator
@@ -271,6 +271,12 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
                     return new RecruitmentResponseDTO.PendingEvaluatorDTO(pos.getName(), pending);
                 })
+                .toList();
+
+        // 각 파트별로
+        return byPosition.stream()
+                .flatMap(dto -> dto.users().stream())
+                .distinct()
                 .toList();
     }
 
