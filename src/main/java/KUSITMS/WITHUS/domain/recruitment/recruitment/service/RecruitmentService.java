@@ -20,6 +20,7 @@ public interface RecruitmentService {
     RecruitmentResponseDTO.Detail getBySlug(String slug);
     List<RecruitmentResponseDTO.SummaryForHome> getCurrentSummariesForUser(Long userId, Long organizationId);
     List<RecruitmentResponseDTO.SummaryForHome> getCurrentSummariesForAdmin(Long adminUserId);
-    List<RecruitmentResponseDTO.TaskProgressDTO> getTaskProgress(Long recruitmentId, EvaluationType stage);
-    RecruitmentResponseDTO.PendingEvaluatorDTO getPendingEvaluators(Long recruitmentId);
+    List<RecruitmentResponseDTO.TaskProgress> getTaskProgress(Long recruitmentId, EvaluationType stage);
+    RecruitmentResponseDTO.PendingEvaluator getPendingEvaluators(Long recruitmentId);
+    RecruitmentResponseDTO.MyDocumentEvaluation getMyDocumentEvaluations(Long userId, Long recruitmentId);
 }

@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.dto;
 
+import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteriaResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
@@ -215,7 +216,7 @@ public class RecruitmentResponseDTO {
     }
 
     @Schema(description = "파트별 업무 진행 현황")
-    public record TaskProgressDTO(
+    public record TaskProgress(
             @Schema(description = "지원 파트명") String positionName,
             @Schema(description = "D-Day(남은 일수)", example = "3") Long daysToDeadline,
             @Schema(description = "평가해야 할 지원서 수", example = "12") Long totalToEvaluate,
@@ -223,8 +224,8 @@ public class RecruitmentResponseDTO {
             @Schema(description = "평가되지 않은 지원서 수", example = "8") Long notEvaluatedCount,
             @Schema(description = "진행률(%)", example = "33") int progressPercent
     ) {
-        public static TaskProgressDTO from(String positionName, Long daysToDeadline, Long totalToEvaluate, Long evaluatedCount, Long notEvaluatedCount, int progressPercent) {
-            return new TaskProgressDTO(
+        public static TaskProgress from(String positionName, Long daysToDeadline, Long totalToEvaluate, Long evaluatedCount, Long notEvaluatedCount, int progressPercent) {
+            return new TaskProgress(
                     positionName,
                     daysToDeadline,
                     totalToEvaluate,
@@ -249,7 +250,7 @@ public class RecruitmentResponseDTO {
     }
 
     @Schema(description="파트별 평가 미완료 사용자 리스트 DTO")
-    public record PendingEvaluatorDTO(
+    public record PendingEvaluator(
             @Schema(description = "평가 단계", example = "DOCUMENT") EvaluationType stage,
             @Schema(description = "평가 마감일시") @DateFormatSlash LocalDateTime deadline,
             @Schema(description = "마감까지 남은 일수", example = "3") long daysToDeadline,
@@ -257,8 +258,8 @@ public class RecruitmentResponseDTO {
             @Schema(description = "마감까지 남은 분(시간 제외)", example = "12") long minutesToDeadline,
             @Schema(description="평가 미완료 사용자 리스트") List<UserResponseDTO.Summary> users
     ) {
-        public static PendingEvaluatorDTO from(EvaluationType stage, LocalDateTime deadline, long daysToDeadline, long hoursToDeadline, long minutesToDeadline, List<UserResponseDTO.Summary> users) {
-            return new PendingEvaluatorDTO(
+        public static PendingEvaluator from(EvaluationType stage, LocalDateTime deadline, long daysToDeadline, long hoursToDeadline, long minutesToDeadline, List<UserResponseDTO.Summary> users) {
+            return new PendingEvaluator(
                     stage,
                     deadline,
                     daysToDeadline,
@@ -268,4 +269,18 @@ public class RecruitmentResponseDTO {
             );
         }
     }
+
+    @Schema(description = "내 서류 평가 현황 응답 DTO")
+    public record MyDocumentEvaluation(
+            @Schema(description = "미완료된 지원서 리스트") List<ApplicationResponseDTO.Summary> pending,
+            @Schema(description = "완료된 지원서 리스트") List<ApplicationResponseDTO.Summary> done
+    ) {
+        public static MyDocumentEvaluation from(List<ApplicationResponseDTO.Summary> pending, List<ApplicationResponseDTO.Summary> done) {
+            return new MyDocumentEvaluation(
+                    pending,
+                    done
+            );
+        }
+    }
+
 }

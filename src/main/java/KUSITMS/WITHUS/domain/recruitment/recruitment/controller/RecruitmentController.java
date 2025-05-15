@@ -91,4 +91,14 @@ public class RecruitmentController {
         return SuccessResponse.ok(dtos);
     }
 
+    @GetMapping("/{recruitmentId}/my/evaluations/documents")
+    @Operation(summary = "내 서류 평가 현황 조회", description = "내가 할당된 서류 평가 지원서 중, 미완료/완료 리스트를 반환합니다.")
+    public SuccessResponse<RecruitmentResponseDTO.MyDocumentEvaluation> myDocs(
+            @CurrentUser User currentUser,
+            @PathVariable Long recruitmentId
+    ) {
+        var response = recruitmentService.getMyDocumentEvaluations(currentUser.getId(), recruitmentId);
+        return SuccessResponse.ok(response);
+    }
+
 }

@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.service;
 
+import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationJpaRepository;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
@@ -36,6 +37,8 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -154,7 +157,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      * @param stage DOCUMENT 또는 INTERVIEW
      */
     @Override
-    public List<RecruitmentResponseDTO.TaskProgressDTO> getTaskProgress(Long recruitmentId, EvaluationType stage) {
+    public List<RecruitmentResponseDTO.TaskProgress> getTaskProgress(Long recruitmentId, EvaluationType stage) {
         var recruitment = recruitmentRepository.getById(recruitmentId);
         LocalDate today = LocalDate.now();
 
@@ -203,7 +206,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                     ? 0
                     : (int) (evaluatedCount * 100 / totalToEvaluate);
 
-            return RecruitmentResponseDTO.TaskProgressDTO.from(
+            return RecruitmentResponseDTO.TaskProgress.from(
                     pos.getName(),
                     daysToDeadline,
                     totalToEvaluate,
@@ -219,7 +222,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      * @param recruitmentId 조회할 공고 ID
      */
     @Override
-    public RecruitmentResponseDTO.PendingEvaluatorDTO getPendingEvaluators(Long recruitmentId) {
+    public RecruitmentResponseDTO.PendingEvaluator getPendingEvaluators(Long recruitmentId) {
         // 공고 조회
         Recruitment recruitment = recruitmentRepository.getById(recruitmentId);
         LocalDateTime now = LocalDateTime.now();
@@ -234,7 +237,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             stage = EvaluationType.INTERVIEW;
             deadline = recruitment.getDocumentResultDate().atTime(23, 59, 59);
         } else { // 그 외(최종 발표일 지남)에는 빈 리스트 반환
-            return RecruitmentResponseDTO.PendingEvaluatorDTO.from(stage = null,
+            return RecruitmentResponseDTO.PendingEvaluator.from(stage = null,
                     deadline = now,
                     0, 0, 0,
                     List.of());
@@ -295,13 +298,49 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 .distinct()
                 .toList();
 
-        return RecruitmentResponseDTO.PendingEvaluatorDTO.from(
+        return RecruitmentResponseDTO.PendingEvaluator.from(
                 stage,
                 deadline,
                 days,
                 hours,
                 minutes,
                 pending
+        );
+    }
+
+    /**
+     * 내가 맡은 서류 평가 지원서 중, 미완료/완료 리스트 조회
+     * @param userId 현재 평가자 ID
+     */
+    @Override
+    public RecruitmentResponseDTO.MyDocumentEvaluation getMyDocumentEvaluations(Long userId, Long recruitmentId) {
+        // 내가 서류 평가자로 할당된 모든 레코드
+        List<ApplicationEvaluator> assigns = applicationEvaluatorJpaRepository
+                .findByEvaluator_IdAndEvaluationTypeAndApplication_Recruitment_Id(userId, EvaluationType.DOCUMENT, recruitmentId);
+
+        // 공고별로 필요한 문항 개수 캐시
+        long needed = evaluationCriteriaJpaRepository
+                .countByRecruitment_IdAndEvaluationType(recruitmentId, EvaluationType.DOCUMENT);
+
+        var pending = new LinkedHashSet<ApplicationResponseDTO.Summary>();
+        var done    = new LinkedHashSet<ApplicationResponseDTO.Summary>();
+
+        // 각 할당마다 “나(=userId)가 이 지원서에 남긴 평가 개수” 비교
+        for (var ae : assigns) {
+            Application app = ae.getApplication();
+
+            long answered = evaluationJpaRepository.countByApplication_IdAndUser_IdAndCriteria_EvaluationType(
+                    app.getId(), userId, EvaluationType.DOCUMENT
+            );
+
+            var dto = ApplicationResponseDTO.Summary.from(app);
+            if (answered >= needed) done.add(dto);
+            else                    pending.add(dto);
+        }
+
+        return RecruitmentResponseDTO.MyDocumentEvaluation.from(
+                new ArrayList<>(pending),
+                new ArrayList<>(done)
         );
     }
 
