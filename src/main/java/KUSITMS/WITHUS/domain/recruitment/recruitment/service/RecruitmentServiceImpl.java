@@ -32,7 +32,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -217,20 +219,34 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      * @param recruitmentId 조회할 공고 ID
      */
     @Override
-    public List<UserResponseDTO.Summary> getPendingEvaluators(Long recruitmentId) {
+    public RecruitmentResponseDTO.PendingEvaluatorDTO getPendingEvaluators(Long recruitmentId) {
         // 공고 조회
         Recruitment recruitment = recruitmentRepository.getById(recruitmentId);
-        LocalDate today = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
 
         // 오늘이 서류 발표일(문서 결과일) 이전 또는 당일인지, 아니면 최종 발표일 이전 또는 당일인지 판단
         EvaluationType stage;
-        if (!today.isAfter(recruitment.getDocumentResultDate())) { // today ≤ documentResultDate
+        LocalDateTime deadline;
+        if (!now.toLocalDate().isAfter(recruitment.getDocumentResultDate())) { // today ≤ documentResultDate
             stage = EvaluationType.DOCUMENT;
-        } else if (!today.isAfter(recruitment.getFinalResultDate())) { // documentResultDate < today ≤ finalResultDate
+            deadline = recruitment.getDocumentResultDate().atTime(23, 59, 59);
+        } else if (!now.toLocalDate().isAfter(recruitment.getFinalResultDate())) { // documentResultDate < today ≤ finalResultDate
             stage = EvaluationType.INTERVIEW;
+            deadline = recruitment.getDocumentResultDate().atTime(23, 59, 59);
         } else { // 그 외(최종 발표일 지남)에는 빈 리스트 반환
-            return List.of();
+            return RecruitmentResponseDTO.PendingEvaluatorDTO.from(stage = null,
+                    deadline = now,
+                    0, 0, 0,
+                    List.of());
         }
+
+        // 남은 시간 계산
+        Duration duration = Duration.between(now, deadline);
+        long days    = duration.toDays();
+        long hours   = duration.minusDays(days).toHours();
+        long minutes = duration.minusDays(days)
+                .minusHours(hours)
+                .toMinutes();
 
         // 이 공고/단계의 평가 기준 ID 목록
         List<Long> criteriaIds = evaluationCriteriaJpaRepository
@@ -238,7 +254,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 .stream().map(EvaluationCriteria::getId).toList();
 
         // 파트 별 미완료 평가자 추출
-        List<RecruitmentResponseDTO.PendingEvaluatorDTO> byPosition = positionJpaRepository.findByRecruitment_Id(recruitmentId)
+        List<RecruitmentResponseDTO.PendingEvaluatorByPosition> byPosition = positionJpaRepository.findByRecruitment_Id(recruitmentId)
                 .stream()
                 .map(pos -> {
                     // 이 파트에 배정된 평가자 ⇢ ApplicationEvaluator
@@ -269,15 +285,24 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                             .distinct()
                             .toList();
 
-                    return new RecruitmentResponseDTO.PendingEvaluatorDTO(pos.getName(), pending);
+                    return RecruitmentResponseDTO.PendingEvaluatorByPosition.from(pos.getName(), pending);
                 })
                 .toList();
 
-        // 각 파트별로
-        return byPosition.stream()
+        // 파트별 미완료자 수집 - 플랫하게
+        List<UserResponseDTO.Summary> pending = byPosition.stream()
                 .flatMap(dto -> dto.users().stream())
                 .distinct()
                 .toList();
+
+        return RecruitmentResponseDTO.PendingEvaluatorDTO.from(
+                stage,
+                deadline,
+                days,
+                hours,
+                minutes,
+                pending
+        );
     }
 
     /**

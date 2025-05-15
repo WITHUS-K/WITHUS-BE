@@ -14,6 +14,7 @@ import KUSITMS.WITHUS.global.common.annotation.DateFormatSlash;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -235,8 +236,36 @@ public class RecruitmentResponseDTO {
     }
 
     @Schema(description="파트별 평가 미완료 사용자 리스트 DTO")
-    public record PendingEvaluatorDTO(
+    public record PendingEvaluatorByPosition(
             @Schema(description="파트명") String positionName,
             @Schema(description="평가 미완료 사용자 리스트") List<UserResponseDTO.Summary> users
-    ) {}
+    ) {
+        public static PendingEvaluatorByPosition from(String positionName, List<UserResponseDTO.Summary> users) {
+            return new PendingEvaluatorByPosition(
+                    positionName,
+                    users
+            );
+        }
+    }
+
+    @Schema(description="파트별 평가 미완료 사용자 리스트 DTO")
+    public record PendingEvaluatorDTO(
+            @Schema(description = "평가 단계", example = "DOCUMENT") EvaluationType stage,
+            @Schema(description = "평가 마감일시") @DateFormatSlash LocalDateTime deadline,
+            @Schema(description = "마감까지 남은 일수", example = "3") long daysToDeadline,
+            @Schema(description = "마감까지 남은 시간(일 제외)", example = "5") long hoursToDeadline,
+            @Schema(description = "마감까지 남은 분(시간 제외)", example = "12") long minutesToDeadline,
+            @Schema(description="평가 미완료 사용자 리스트") List<UserResponseDTO.Summary> users
+    ) {
+        public static PendingEvaluatorDTO from(EvaluationType stage, LocalDateTime deadline, long daysToDeadline, long hoursToDeadline, long minutesToDeadline, List<UserResponseDTO.Summary> users) {
+            return new PendingEvaluatorDTO(
+                    stage,
+                    deadline,
+                    daysToDeadline,
+                    hoursToDeadline,
+                    minutesToDeadline,
+                    users
+            );
+        }
+    }
 }
