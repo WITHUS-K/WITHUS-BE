@@ -28,7 +28,7 @@ class UserServiceImplTest {
                         .build()
         );
 
-        testContainer.verificationCacheUtil.markVerified("01012345678", Duration.ofMinutes(3));
+        testContainer.verificationCache.markVerified("01012345678", Duration.ofMinutes(3));
 
         UserRequestDTO.UserJoin userJoinRequest = new UserRequestDTO.UserJoin(
                 "김재관",

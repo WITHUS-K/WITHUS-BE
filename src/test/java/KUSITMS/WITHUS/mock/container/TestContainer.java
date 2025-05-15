@@ -4,7 +4,7 @@ import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRe
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.domain.user.user.service.UserServiceImpl;
 import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
-import KUSITMS.WITHUS.global.util.redis.VerificationCacheUtil;
+import KUSITMS.WITHUS.global.util.redis.VerificationCache;
 import KUSITMS.WITHUS.mock.repository.FakeOrganizationRepository;
 import KUSITMS.WITHUS.mock.repository.FakeUserRepository;
 import KUSITMS.WITHUS.util.FakeVerificationCacheUtil;
@@ -16,12 +16,12 @@ public class TestContainer {
     public final UserRepository userRepository;
     public final UserServiceImpl userService;
     public final OrganizationRepository organizationRepository;
-    public final VerificationCacheUtil verificationCacheUtil;
+    public final VerificationCache verificationCache;
     public final FileUploadService uploadService;
 
 
     public TestContainer() {
-        this.verificationCacheUtil = new FakeVerificationCacheUtil();
+        this.verificationCache = new FakeVerificationCacheUtil();
         this.uploadService = Mockito.mock(FileUploadService.class);
 
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -31,7 +31,7 @@ public class TestContainer {
         this.userService = UserServiceImpl.builder()
                 .userRepository(this.userRepository)
                 .organizationRepository(this.organizationRepository)
-                .verificationCacheUtil(this.verificationCacheUtil)
+                .verificationCache(this.verificationCache)
                 .bCryptPasswordEncoder(passwordEncoder)
                 .uploadService(uploadService)
                 .build();

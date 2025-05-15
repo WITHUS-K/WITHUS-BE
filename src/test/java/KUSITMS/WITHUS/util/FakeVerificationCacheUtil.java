@@ -1,18 +1,14 @@
 package KUSITMS.WITHUS.util;
 
-import KUSITMS.WITHUS.global.util.redis.VerificationCacheUtil;
+import KUSITMS.WITHUS.global.util.redis.VerificationCache;
 
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FakeVerificationCacheUtil extends VerificationCacheUtil {
+public class FakeVerificationCacheUtil implements VerificationCache {
 
     private final Map<String, String> store = new HashMap<>();
-
-    public FakeVerificationCacheUtil() {
-        super(null);
-    }
 
     @Override
     public void saveCode(String identifier, String code, Duration ttl) {
