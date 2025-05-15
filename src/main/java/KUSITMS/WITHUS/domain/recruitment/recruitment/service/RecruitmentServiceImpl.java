@@ -2,8 +2,12 @@ package KUSITMS.WITHUS.domain.recruitment.recruitment.service;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationJpaRepository;
+import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
+import KUSITMS.WITHUS.domain.application.applicationEvaluator.repository.ApplicationEvaluatorJpaRepository;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
+import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationJpaRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.repository.EvaluationCriteriaJpaRepository;
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
@@ -19,6 +23,8 @@ import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.DocumentQues
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.EvaluationCriteriaAppender;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.PositionAppender;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.util.SlugGenerator;
+import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationJpaRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
@@ -29,7 +35,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @Transactional(readOnly = true)
@@ -51,6 +61,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     private final PositionJpaRepository positionJpaRepository;
     private final EvaluationRepository evaluationRepository;
     private final EvaluationCriteriaJpaRepository evaluationCriteriaJpaRepository;
+    private final ApplicationEvaluatorJpaRepository applicationEvaluatorJpaRepository;
+    private final EvaluationJpaRepository evaluationJpaRepository;
 
     /**
      * 공고 임시 저장
@@ -94,7 +106,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      * @return mapper.apply(rec)가 반환하는 변환 결과
      */
     @Override
-    @Transactional(readOnly = true)
     public <R> R getByIdAs(Long id, Function<Recruitment,R> mapper) {
         Recruitment rec = recruitmentRepository.getById(id);
 
@@ -102,7 +113,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     }
 
     /**
-     * 특정 유저가 속한 조직에서 현재 진행 중인 공고의 요약 정보를 조회합니다.
+     * 특정 유저가 속한 조직에서 현재 진행 중인 공고의 요약 정보를 조회
      * @param userId        요청한 유저의 ID
      * @param organizationId 조회할 조직의 ID (유저가 속해 있는 조직이어야 함)
      * @return 해당 조직의 현재 진행 중인 공고 요약 리스트
@@ -120,7 +131,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     }
 
     /**
-     * 관리자로 로그인한 유저가 매핑된 단일 조직에서 현재 진행 중인 공고의 요약 정보를 조회합니다.
+     * 관리자로 로그인한 유저가 매핑된 단일 조직에서 현재 진행 중인 공고의 요약 정보를 조회
      * @param adminUserId 관리자 유저의 ID
      * @return 관리자 조직의 현재 진행 중인 공고 요약 리스트
      */
@@ -136,11 +147,11 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     }
 
     /**
-     * 특정 공고의 서류 또는 면접 업무 진행 상황을 파트별로 계산합니다.
+     * 특정 공고의 서류 또는 면접 업무 진행 상황을 파트별로 계산
      * @param recruitmentId 조회할 공고 ID
      * @param stage DOCUMENT 또는 INTERVIEW
      */
-    @Transactional(readOnly = true)
+    @Override
     public List<RecruitmentResponseDTO.TaskProgressDTO> getTaskProgress(Long recruitmentId, EvaluationType stage) {
         var recruitment = recruitmentRepository.getById(recruitmentId);
         LocalDate today = LocalDate.now();
@@ -199,6 +210,68 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                     progressPercent
             );
         }).toList();
+    }
+
+    /**
+     * 서류/면접 발표일 기준 해당하는 단계의 파트별 평가 미완료 사용자 명단을 반환
+     * @param recruitmentId 조회할 공고 ID
+     */
+    @Override
+    public List<RecruitmentResponseDTO.PendingEvaluatorDTO> getPendingEvaluators(Long recruitmentId) {
+        // 공고 조회
+        Recruitment recruitment = recruitmentRepository.getById(recruitmentId);
+        LocalDate today = LocalDate.now();
+
+        // 오늘이 서류 발표일(문서 결과일) 이전 또는 당일인지, 아니면 최종 발표일 이전 또는 당일인지 판단
+        EvaluationType stage;
+        if (!today.isAfter(recruitment.getDocumentResultDate())) { // today ≤ documentResultDate
+            stage = EvaluationType.DOCUMENT;
+        } else if (!today.isAfter(recruitment.getFinalResultDate())) { // documentResultDate < today ≤ finalResultDate
+            stage = EvaluationType.INTERVIEW;
+        } else { // 그 외(최종 발표일 지남)에는 빈 리스트 반환
+            return List.of();
+        }
+
+        // 이 공고/단계의 평가 기준 ID 목록
+        List<Long> criteriaIds = evaluationCriteriaJpaRepository
+                .findByRecruitment_IdAndEvaluationType(recruitmentId, stage)
+                .stream().map(EvaluationCriteria::getId).toList();
+
+        // 각 파트별로
+        return positionJpaRepository.findByRecruitment_Id(recruitmentId)
+                .stream()
+                .map(pos -> {
+                    // 이 파트에 배정된 평가자 ⇢ ApplicationEvaluator
+                    List<ApplicationEvaluator> assigns = applicationEvaluatorJpaRepository
+                            .findByApplication_Recruitment_IdAndApplication_Position_IdAndEvaluationType(
+                                    recruitmentId, pos.getId(), stage
+                            );
+
+                    // 평가자별로 “내가 맡은 지원서” 묶기
+                    Map<User, List<Application>> appsByUser = assigns.stream()
+                            .collect(Collectors.groupingBy(
+                                    ApplicationEvaluator::getEvaluator,
+                                    Collectors.mapping(ApplicationEvaluator::getApplication, toList())
+                            ));
+
+                    // “미완료” 평가자 필터링 (하나라도 기준 개수만큼 평가 안 끝낸 평가자는 “미완료”)
+                    List<UserResponseDTO.Summary> pending = appsByUser.entrySet().stream()
+                            .filter(entry -> {
+                                User user = entry.getKey();
+                                // 내가 맡은 지원서 중에 하나라도 “모든 기준” 평가가 안 끝난 게 있으면 미완료
+                                return entry.getValue().stream().anyMatch(app ->
+                                        evaluationJpaRepository.countByApplication_IdAndUser_IdAndCriteria_IdIn(
+                                                app.getId(), user.getId(), criteriaIds
+                                        ) < criteriaIds.size()
+                                );
+                            })
+                            .map(e -> UserResponseDTO.Summary.from(e.getKey()))
+                            .distinct()
+                            .toList();
+
+                    return new RecruitmentResponseDTO.PendingEvaluatorDTO(pos.getName(), pending);
+                })
+                .toList();
     }
 
     /**

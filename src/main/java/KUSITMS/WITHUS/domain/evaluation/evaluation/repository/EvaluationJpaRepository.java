@@ -10,10 +10,7 @@ import java.util.List;
 
 public interface EvaluationJpaRepository extends JpaRepository<Evaluation, Long> {
     boolean existsByApplicationIdAndCriteriaIdAndUserId(Long applicationId, Long criteriaId, Long userId);
-    List<Evaluation> findByApplicationAndUserAndCriteriaIn(
-            Application application,
-            User user,
-            List<EvaluationCriteria> criterias
-    );
+    List<Evaluation> findByApplicationAndUserAndCriteriaIn(Application application, User user, List<EvaluationCriteria> criterias);
+    long countByApplication_IdAndUser_IdAndCriteria_IdIn(Long applicationId, Long userId, List<Long> criteriaIds);
 }
 

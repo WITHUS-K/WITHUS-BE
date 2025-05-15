@@ -20,4 +20,5 @@ public interface RecruitmentService {
     List<RecruitmentResponseDTO.SummaryForHome> getCurrentSummariesForUser(Long userId, Long organizationId);
     List<RecruitmentResponseDTO.SummaryForHome> getCurrentSummariesForAdmin(Long adminUserId);
     List<RecruitmentResponseDTO.TaskProgressDTO> getTaskProgress(Long recruitmentId, EvaluationType stage);
+    List<RecruitmentResponseDTO.PendingEvaluatorDTO> getPendingEvaluators(Long recruitmentId);
 }

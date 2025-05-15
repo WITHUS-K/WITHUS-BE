@@ -8,6 +8,7 @@ import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTime
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.dto.DocumentQuestionResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.position.dto.PositionResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
+import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.global.common.annotation.DateFormatDot;
 import KUSITMS.WITHUS.global.common.annotation.DateFormatSlash;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -232,4 +233,10 @@ public class RecruitmentResponseDTO {
             );
         }
     }
+
+    @Schema(description="파트별 평가 미완료 사용자 리스트 DTO")
+    public record PendingEvaluatorDTO(
+            @Schema(description="파트명") String positionName,
+            @Schema(description="평가 미완료 사용자 리스트") List<UserResponseDTO.Summary> users
+    ) {}
 }

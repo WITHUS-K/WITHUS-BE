@@ -9,4 +9,5 @@ import java.util.List;
 public interface EvaluationCriteriaJpaRepository extends JpaRepository<EvaluationCriteria, Long> {
     List<EvaluationCriteria> findByEvaluationTypeAndRecruitmentId(EvaluationType evaluationType, Long recruitmentId);
     Long countByRecruitment_IdAndEvaluationType(Long recruitmentId, EvaluationType stage);
+    List<EvaluationCriteria> findByRecruitment_IdAndEvaluationType(Long recruitmentId, EvaluationType stage);
 }

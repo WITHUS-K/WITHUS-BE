@@ -49,4 +49,13 @@ public class AdminRecruitmentController {
         var dto = recruitmentService.getTaskProgress(recruitmentId, stage);
         return SuccessResponse.ok(dto);
     }
+
+    @GetMapping("/{recruitmentId}/pending-evaluators")
+    @Operation(summary     = "평가 미완료 사용자 명단 조회", description = "오늘이 서류 발표 전날이면 서류 평가, 최종 발표 전날이면 면접 평가 단계의 미완료 평가자 리스트를 반환합니다.")
+    public SuccessResponse<List<RecruitmentResponseDTO.PendingEvaluatorDTO>> getPendingEvaluators(
+            @PathVariable Long recruitmentId
+    ) {
+        var list = recruitmentService.getPendingEvaluators(recruitmentId);
+        return SuccessResponse.ok(list);
+    }
 }
