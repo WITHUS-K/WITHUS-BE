@@ -12,6 +12,7 @@ import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.DocumentQues
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.EvaluationCriteriaAppender;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.PositionAppender;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.util.SlugGenerator;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -124,6 +125,19 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         Recruitment recruitment = recruitmentRepository.findByUrlSlug(slug)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECRUITMENT_NOT_EXIST));
         return RecruitmentResponseDTO.Detail.from(recruitment);
+    }
+
+    @Override
+    public List<RecruitmentResponseDTO.Simple> getAllByUserOrganizations(User user) {
+        List<Long> organizationIds = user.getUserOrganizations().stream()
+                .map(userOrg -> userOrg.getOrganization().getId())
+                .toList();
+
+        List<Recruitment> recruitments = recruitmentRepository.findAllByOrganizationIds(organizationIds);
+
+        return recruitments.stream()
+                .map(RecruitmentResponseDTO.Simple::from)
+                .toList();
     }
 
     private RecruitmentResponseDTO.Create saveRecruitment(RecruitmentRequestDTO.Upsert request, boolean isTemporary) {

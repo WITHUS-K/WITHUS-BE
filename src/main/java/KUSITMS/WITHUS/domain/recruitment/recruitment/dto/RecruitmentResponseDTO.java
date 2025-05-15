@@ -136,4 +136,17 @@ public class RecruitmentResponseDTO {
             );
         }
     }
+
+    @Schema(description = "공고 최소한의 정보 응답 DTO")
+    public record Simple(
+            @Schema(description = "공고 Id") Long recruitmentId,
+            @Schema(description = "공고 제목") String title
+    ) {
+        public static Simple from(Recruitment recruitment) {
+            return new Simple(
+                    recruitment.getId(),
+                    recruitment.getTitle()
+            );
+        }
+    }
 }

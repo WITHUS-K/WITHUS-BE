@@ -3,6 +3,8 @@ package KUSITMS.WITHUS.domain.recruitment.recruitment.controller;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.RecruitmentService;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -78,4 +80,10 @@ public class RecruitmentController {
         return SuccessResponse.ok(result);
     }
 
+    @GetMapping("/my-organizations")
+    @Operation(summary = "내가 속한 조직의 모든 리크루팅 목록 조회")
+    public SuccessResponse<List<RecruitmentResponseDTO.Simple>> getAllMyOrganizationRecruitments(@CurrentUser User user) {
+        List<RecruitmentResponseDTO.Simple> result = recruitmentService.getAllByUserOrganizations(user);
+        return SuccessResponse.ok(result);
+    }
 }
