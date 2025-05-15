@@ -81,8 +81,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         Recruitment recruitment = recruitmentRepository.getById(id);
 
         recruitment.update(
-                request.title(), request.content(), request.fileUrl(), request.documentDeadline(),
-                request.documentResultDate(), request.finalResultDate(), request.interviewDuration(),
+                request.title(), request.content(), request.fileUrl(), request.documentDeadline(), request.isDocumentResultRequired(),
+                request.documentResultDate(), request.finalResultDate(), request.isInterviewRequired(), request.interviewDuration(),
                 request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
                 request.needAcademicStatus(), request.documentScaleType(), request.interviewScaleType()
         );
@@ -147,9 +147,9 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     private Recruitment createRecruitment(RecruitmentRequestDTO.Upsert request, Organization organization, boolean isTemporary) {
         return Recruitment.create(
-                request.title(), request.content(), request.fileUrl(), request.documentDeadline(),
-                request.documentResultDate(), request.finalResultDate(), request.interviewDuration(), organization,
-                request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
+                request.title(), request.content(), request.fileUrl(), request.documentDeadline(), request.isInterviewRequired(),
+                request.documentResultDate(), request.finalResultDate(), request.isInterviewRequired(), request.interviewDuration(),
+                organization, request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
                 request.needAcademicStatus(), isTemporary, request.documentScaleType(), request.interviewScaleType(), generateUniqueSlug()
         );
     }
@@ -158,8 +158,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         Recruitment recruitment = recruitmentRepository.getById(request.recruitmentId());
 
         recruitment.update(
-                request.title(), request.content(), request.fileUrl(), request.documentDeadline(),
-                request.documentResultDate(), request.finalResultDate(), request.interviewDuration(),
+                request.title(), request.content(), request.fileUrl(), request.documentDeadline(), request.isDocumentResultRequired(),
+                request.documentResultDate(), request.finalResultDate(), request.isInterviewRequired(), request.interviewDuration(),
                 request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
                 request.needAcademicStatus(), request.documentScaleType(), request.interviewScaleType()
         );
