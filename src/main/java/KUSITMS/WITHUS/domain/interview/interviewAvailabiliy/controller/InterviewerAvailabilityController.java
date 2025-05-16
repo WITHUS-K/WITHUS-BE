@@ -31,7 +31,7 @@ public class InterviewerAvailabilityController {
     @PostMapping("/{interviewId}/availabilities")
     @Operation(summary = "면접 가능 시간 등록", description = "운영진이 면접 가능한 시간을 리스트로 등록합니다.")
     public SuccessResponse<List<InterviewerAvailabilityResponseDTO>> registerAvailability(
-            @PathVariable("interviewId") Long interviewId,
+            @PathVariable Long interviewId,
             @Valid @RequestBody InterviewerAvailabilityRequestDTO request,
             @CurrentUser User user
     ) {
@@ -45,7 +45,7 @@ public class InterviewerAvailabilityController {
     @PostMapping("/{interviewId}/availabilities/request-mail")
     @Operation(summary = "운영진 면접 가능 시간 입력 요청 메일 전송", description = "조직 운영진들에게 면접 가능 시간 입력을 요청하는 이메일을 발송합니다.")
     public SuccessResponse<String> requestAvailabilityInputMail(
-            @PathVariable("interviewId") Long interviewId
+            @PathVariable Long interviewId
     ) {
         Interview interview = interviewService.getById(interviewId);
         Long organizationId = interview.getRecruitment().getOrganization().getId();

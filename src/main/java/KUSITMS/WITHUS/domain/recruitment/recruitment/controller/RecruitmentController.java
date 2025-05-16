@@ -42,7 +42,7 @@ public class RecruitmentController {
 
     @GetMapping("/{recruitmentId}")
     @Operation(summary = "리크루팅 단건 상세 조회")
-    public SuccessResponse<RecruitmentResponseDTO.Detail> getById(@PathVariable("recruitmentId") Long recruitmentId) {
+    public SuccessResponse<RecruitmentResponseDTO.Detail> getById(@PathVariable Long recruitmentId) {
         RecruitmentResponseDTO.Detail result = recruitmentService.getById(recruitmentId);
         return SuccessResponse.ok(result);
     }
@@ -50,17 +50,17 @@ public class RecruitmentController {
     @PutMapping("/{recruitmentId}")
     @Operation(summary = "리크루팅 수정")
     public SuccessResponse<RecruitmentResponseDTO.Update> update(
-            @PathVariable("recruitmentId") Long id,
+            @PathVariable Long recruitmentId,
             @Valid @RequestBody RecruitmentRequestDTO.Update request
     ) {
-        RecruitmentResponseDTO.Update result = recruitmentService.update(id, request);
+        RecruitmentResponseDTO.Update result = recruitmentService.update(recruitmentId, request);
         return SuccessResponse.ok(result);
     }
 
     @DeleteMapping("/{recruitmentId}")
     @Operation(summary = "리크루팅 삭제")
-    public SuccessResponse<String> delete(@PathVariable("recruitmentId") Long id) {
-        recruitmentService.delete(id);
+    public SuccessResponse<String> delete(@PathVariable Long recruitmentId) {
+        recruitmentService.delete(recruitmentId);
         return SuccessResponse.ok("리크루팅 삭제에 성공하였습니다.");
     }
 
@@ -90,7 +90,7 @@ public class RecruitmentController {
     @GetMapping("/{organizationId}/current/summary")
     @Operation(summary = "내 조직의 현재 진행 중인 공고 요약 조회", description = "로그인한 운영진이 속한 조직의, 공고 생성일이 지났고 최종 발표일 +1일 이전인 공고들의 요약 정보를 반환합니다.")
     public SuccessResponse<List<RecruitmentResponseDTO.SummaryForHome>> getCurrentSummaries(
-            @PathVariable("organizationId") Long organizationId,
+            @PathVariable Long organizationId,
             @CurrentUser User currentUser
     ) {
         List<RecruitmentResponseDTO.SummaryForHome> dtos =
@@ -102,7 +102,7 @@ public class RecruitmentController {
     @Operation(summary = "내 서류 평가 현황 조회", description = "내가 할당된 서류 평가 지원서 중, 미완료/완료 리스트를 반환합니다.")
     public SuccessResponse<RecruitmentResponseDTO.MyDocumentEvaluation> myDocs(
             @CurrentUser User currentUser,
-            @PathVariable("recruitmentId") Long recruitmentId
+            @PathVariable Long recruitmentId
     ) {
         var response = recruitmentService.getMyDocumentEvaluations(currentUser.getId(), recruitmentId);
         return SuccessResponse.ok(response);
