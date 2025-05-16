@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.evaluation.evaluation.repository;
 
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -34,5 +35,26 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
                 .join(evaluation.user).fetchJoin()
                 .where(evaluation.application.id.eq(applicationId))
                 .fetch();
+    }
+
+    @Override
+    public long countFullyEvaluatedApplications(
+            Long recruitmentId,
+            Long positionId,
+            EvaluationType stage,
+            long requiredCriteriaCount
+    ) {
+        return queryFactory
+                .select(evaluation.application.id)
+                .from(evaluation)
+                .where(
+                        evaluation.application.recruitment.id.eq(recruitmentId),
+                        evaluation.application.position.id.eq(positionId),
+                        evaluation.criteria.evaluationType.eq(stage)
+                )
+                .groupBy(evaluation.application.id)
+                .having(evaluation.criteria.id.countDistinct().eq(requiredCriteriaCount))
+                .fetch()
+                .size();
     }
 }

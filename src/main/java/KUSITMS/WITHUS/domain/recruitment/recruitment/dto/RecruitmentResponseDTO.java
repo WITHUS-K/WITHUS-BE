@@ -1,16 +1,22 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.dto;
 
+import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteriaResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.dto.AvailableTimeRangeResponseDTO;
+import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.dto.DocumentQuestionResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.position.dto.PositionResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
+import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.global.common.annotation.DateFormatDot;
+import KUSITMS.WITHUS.global.common.annotation.DateFormatSlash;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Schema(description = "리크루팅(공고) 관련 응답 DTO")
@@ -152,4 +158,158 @@ public class RecruitmentResponseDTO {
             );
         }
     }
+
+    @Schema(description = "홈 페이지 용 공고 요약 정보 응답 DTO")
+    public record SummaryForHome(
+            @Schema(description = "공고 Id") Long recruitmentId,
+            @Schema(description = "공고 제목") String title,
+
+            @Schema(description = "날짜별 D-Day 정보 리스트") List<DdayInfo> dDays,
+
+            @Schema(description = "조직명") String organizationName,
+
+            @Schema(description = "전체 지원자 수", example = "42") Long totalApplicants,
+            @Schema(description = "파트별 지원서 개수") List<PositionCount> positionCounts
+    ) {
+        public static SummaryForHome from(Recruitment recruitment, List<PositionCount> positionCounts) {
+
+            List<LocalDate> dates = recruitment.getAvailableTimeRanges().stream()
+                    .map(AvailableTimeRange::getDate)
+                    .distinct()
+                    .sorted()
+                    .toList();
+            LocalDate interviewStartDate = dates.isEmpty() ? null : dates.get(0);
+            LocalDate interviewEndDate   = dates.isEmpty() ? null : dates.get(dates.size() - 1);
+
+            LocalDate today = LocalDate.now();
+
+            List<DdayInfo> ddays = List.of(
+                    DdayInfo.of("서류 마감", recruitment.getDocumentDeadline(), today),
+                    DdayInfo.of("서류 발표", recruitment.getDocumentResultDate(), today),
+                    DdayInfo.of("면접 시작", interviewStartDate, today),
+                    DdayInfo.of("면접 종료", interviewEndDate, today),
+                    DdayInfo.of("최종 발표", recruitment.getFinalResultDate(), today)
+            );
+
+            Long totalApplicants = positionCounts.stream()
+                    .mapToLong(PositionCount::count)
+                    .sum();
+
+            return new SummaryForHome(
+                    recruitment.getId(),
+                    recruitment.getTitle(),
+
+                    ddays,
+
+                    recruitment.getOrganization().getName(),
+
+                    totalApplicants,
+                    positionCounts
+            );
+        }
+    }
+
+    @Schema(description = "파트명 및 해당 파트 지원서 수")
+    public record PositionCount(
+            @Schema(description = "파트명") String positionName,
+            @Schema(description = "지원서 개수", example = "5") Long count
+    ) {}
+
+    @Schema(description = "단일 날짜의 D-Day 정보")
+    public record DdayInfo(
+            @Schema(description = "이벤트명", example = "서류 마감") String label,
+            @Schema(description = "해당 날짜") @DateFormatSlash LocalDate date,
+            @Schema(description = "남은 일수 (음수면 이미 지남)", example = "3") Long daysRemaining,
+            @Schema(description = "이미 지났는지 여부", example = "false") boolean isPassed
+    ) {
+        public static DdayInfo of(String label, LocalDate date, LocalDate today) {
+            if (date == null) {
+                return new DdayInfo(label, null, 0L, false);
+            }
+            long diff = ChronoUnit.DAYS.between(today, date);
+            return new DdayInfo(label, date, diff, diff < 0);
+        }
+    }
+
+    @Schema(description = "파트별 업무 진행 현황")
+    public record TaskProgress(
+            @Schema(description = "지원 파트명") String positionName,
+            @Schema(description = "D-Day(남은 일수)", example = "3") Long daysToDeadline,
+            @Schema(description = "평가해야 할 지원서 수", example = "12") Long totalToEvaluate,
+            @Schema(description = "완료된 지원서 수", example = "4") Long evaluatedCount,
+            @Schema(description = "평가되지 않은 지원서 수", example = "8") Long notEvaluatedCount,
+            @Schema(description = "진행률(%)", example = "33") int progressPercent
+    ) {
+        public static TaskProgress from(String positionName, Long daysToDeadline, Long totalToEvaluate, Long evaluatedCount, Long notEvaluatedCount, int progressPercent) {
+            return new TaskProgress(
+                    positionName,
+                    daysToDeadline,
+                    totalToEvaluate,
+                    evaluatedCount,
+                    notEvaluatedCount,
+                    progressPercent
+            );
+        }
+    }
+
+    @Schema(description = "공고 최소한의 정보 응답 DTO")
+    public record Simple(
+            @Schema(description = "공고 Id") Long recruitmentId,
+            @Schema(description = "공고 제목") String title
+    ) {
+        public static Simple from(Recruitment recruitment) {
+            return new Simple(
+                    recruitment.getId(),
+                    recruitment.getTitle()
+            );
+        }
+    }
+
+    @Schema(description="파트별 평가 미완료 사용자 리스트 DTO")
+    public record PendingEvaluatorByPosition(
+            @Schema(description="파트명") String positionName,
+            @Schema(description="평가 미완료 사용자 리스트") List<UserResponseDTO.Summary> users
+    ) {
+        public static PendingEvaluatorByPosition from(String positionName, List<UserResponseDTO.Summary> users) {
+            return new PendingEvaluatorByPosition(
+                    positionName,
+                    users
+            );
+        }
+    }
+
+    @Schema(description="파트별 평가 미완료 사용자 리스트 DTO")
+    public record PendingEvaluator(
+            @Schema(description = "평가 단계", example = "DOCUMENT") EvaluationType stage,
+            @Schema(description = "평가 마감일시") @DateFormatSlash LocalDateTime deadline,
+            @Schema(description = "마감까지 남은 일수", example = "3") long daysToDeadline,
+            @Schema(description = "마감까지 남은 시간(일 제외)", example = "5") long hoursToDeadline,
+            @Schema(description = "마감까지 남은 분(시간 제외)", example = "12") long minutesToDeadline,
+            @Schema(description="평가 미완료 사용자 리스트") List<UserResponseDTO.Summary> users
+    ) {
+        public static PendingEvaluator from(EvaluationType stage, LocalDateTime deadline, long daysToDeadline, long hoursToDeadline, long minutesToDeadline, List<UserResponseDTO.Summary> users) {
+            return new PendingEvaluator(
+                    stage,
+                    deadline,
+                    daysToDeadline,
+                    hoursToDeadline,
+                    minutesToDeadline,
+                    users
+            );
+        }
+    }
+
+    @Schema(description = "내 서류 평가 현황 응답 DTO")
+    public record MyDocumentEvaluation(
+            @Schema(description = "미완료된 지원서 리스트") List<ApplicationResponseDTO.Summary> pending,
+            @Schema(description = "완료된 지원서 리스트") List<ApplicationResponseDTO.Summary> done
+    ) {
+        public static MyDocumentEvaluation from(List<ApplicationResponseDTO.Summary> pending, List<ApplicationResponseDTO.Summary> done) {
+            return new MyDocumentEvaluation(
+                    pending,
+                    done
+            );
+        }
+    }
+
 }

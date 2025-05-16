@@ -7,6 +7,7 @@ import KUSITMS.WITHUS.domain.organization.organization.service.OrganizationServi
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.service.UserService;
+import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
@@ -37,23 +38,23 @@ public class OrganizationController {
 
     @GetMapping("/{organizationId}")
     @Operation(summary = "조직 단건 조회")
-    public SuccessResponse<OrganizationResponseDTO.Detail> getById(@PathVariable Long id) {
-        return SuccessResponse.ok(organizationService.getById(id));
+    public SuccessResponse<OrganizationResponseDTO.Detail> getById(@PathVariable Long organizationId) {
+        return SuccessResponse.ok(organizationService.getById(organizationId));
     }
 
     @PutMapping("/{organizationId}")
     @Operation(summary = "조직 수정")
     public SuccessResponse<OrganizationResponseDTO.Update> update(
-            @PathVariable Long id,
+            @PathVariable Long organizationId,
             @Valid @RequestBody OrganizationRequestDTO.Update request
     ) {
-        return SuccessResponse.ok(organizationService.update(id, request));
+        return SuccessResponse.ok(organizationService.update(organizationId, request));
     }
 
     @DeleteMapping("/{organizationId}")
     @Operation(summary = "조직 삭제")
-    public SuccessResponse<String> delete(@PathVariable Long id) {
-        organizationService.delete(id);
+    public SuccessResponse<String> delete(@PathVariable Long organizationId) {
+        organizationService.delete(organizationId);
         return SuccessResponse.ok("조직 삭제에 성공하였습니다.");
     }
 
@@ -96,5 +97,14 @@ public class OrganizationController {
 
         UserResponseDTO.DetailProfile response = UserResponseDTO.DetailProfile.from(user, organizationId);
         return SuccessResponse.ok(response);
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "내가 속한 조직 목록 조회", description = "로그인한 유저가 속해 있는 모든 조직의 요약 정보를 반환합니다.")
+    public SuccessResponse<List<OrganizationResponseDTO.Summary>> getMyOrganizations(
+            @CurrentUser User currentUser
+    ) {
+        List<OrganizationResponseDTO.Summary> dtos = organizationService.getMyOrganizations(currentUser.getId());
+        return SuccessResponse.ok(dtos);
     }
 }

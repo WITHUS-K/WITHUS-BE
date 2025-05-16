@@ -39,7 +39,7 @@ public class JwtUtil {
     }
 
     public String createAccessToken(String email, String role) {
-        long accessTokenExpireMs = 1000L * 60 * 10; // 10분
+        long accessTokenExpireMs = 1000L * 60 * 1000; // 1000분 //FIXME 임시값
         return createJwt(email, role, accessTokenExpireMs);
     }
 
