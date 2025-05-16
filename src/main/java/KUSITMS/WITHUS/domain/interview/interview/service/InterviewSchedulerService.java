@@ -4,18 +4,16 @@ import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
 import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.availability.repository.ApplicantAvailabilityRepository;
-import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewScheduleDTO;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.interview.repository.InterviewRepository;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.interview.timeslot.repository.TimeSlotRepository;
+import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
+import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
-import KUSITMS.WITHUS.global.exception.CustomException;
-import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -201,14 +199,26 @@ public class InterviewSchedulerService {
                     LocalDate date = entry.getKey();
                     List<TimeSlot> daySlots = entry.getValue();
 
-                    // 날짜에 해당하는 available time 찾기
+                    // 해당 날짜의 available time 찾기
                     AvailableTimeRange timeRange = timeRanges.stream()
                             .filter(r -> r.getDate().equals(date))
                             .findFirst()
-                            .orElseThrow(() -> new CustomException(ErrorCode.AVAILABLE_TIME_NOT_EXIST));
+                            .orElse(null);
+
+                    // available time에 등록되지 않은 날짜는 건너뜀
+                    if (timeRange == null) {
+                        return null;
+                    }
 
                     List<InterviewScheduleDTO.InterviewSlotDTO> slotDTOs = daySlots.stream()
                             .map(InterviewScheduleDTO.InterviewSlotDTO::from)
+                            .toList();
+
+                    List<String> roomNames = daySlots.stream()
+                            .map(TimeSlot::getRoomName)
+                            .filter(Objects::nonNull)
+                            .distinct()
+                            .sorted()
                             .toList();
 
                     return InterviewScheduleDTO.from(
@@ -217,9 +227,12 @@ public class InterviewSchedulerService {
                             timeRange.getStartTime(),
                             timeRange.getEndTime(),
                             interviewDuration,
+                            roomNames,
                             slotDTOs
                     );
                 })
+                .filter(Objects::nonNull)
+                .filter(dto -> dto.date() != null)
                 .sorted(Comparator.comparing(InterviewScheduleDTO::date))
                 .toList();
     }
@@ -231,13 +244,19 @@ public class InterviewSchedulerService {
      * @return 조회된 타임 슬롯 반환
      */
     public List<InterviewScheduleDTO.MyInterviewTimeDTO> getMyInterviewTimes(Long interviewId, User user) {
-        interviewRepository.getById(interviewId);
+        Interview interview = interviewRepository.getById(interviewId);
 
-        List<TimeSlot> slots = timeSlotRepository.findAllByUserInvolved(interviewId, user);
-        return slots.stream()
-                .map(InterviewScheduleDTO.MyInterviewTimeDTO::from)
+        List<TimeSlot> allSlots = timeSlotRepository.findByInterview(interview);
+
+        Set<Long> mySlotIds = timeSlotRepository.findAllByUserInvolved(interviewId, user).stream()
+                .map(TimeSlot::getId)
+                .collect(Collectors.toSet());
+
+        return allSlots.stream()
+                .map(slot -> InterviewScheduleDTO.MyInterviewTimeDTO.from(slot, mySlotIds.contains(slot.getId())))
                 .toList();
     }
+
 
 
     /**

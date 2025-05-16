@@ -3,7 +3,6 @@ package KUSITMS.WITHUS.domain.recruitment.recruitment.controller;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.RecruitmentService;
-import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
@@ -45,7 +44,7 @@ public class AdminRecruitmentController {
     }
 
     @GetMapping("/{recruitmentId}/pending-evaluators")
-    @Operation(summary     = "평가 미완료 사용자 명단 조회", description = "오늘이 서류 발표 전날이면 서류 평가, 최종 발표 전날이면 면접 평가 단계의 미완료 평가자 리스트를 반환합니다.")
+    @Operation(summary = "평가 미완료 사용자 명단 조회", description = "오늘이 서류 발표 전날이면 서류 평가, 최종 발표 전날이면 면접 평가 단계의 미완료 평가자 리스트를 반환합니다.")
     public SuccessResponse<RecruitmentResponseDTO.PendingEvaluator> getPendingEvaluators(
             @PathVariable Long recruitmentId
     ) {

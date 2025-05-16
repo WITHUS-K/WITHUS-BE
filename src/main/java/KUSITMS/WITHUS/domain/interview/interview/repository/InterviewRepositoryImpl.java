@@ -28,6 +28,7 @@ public class InterviewRepositoryImpl implements InterviewRepository {
     }
 
     @Override
+    @Transactional
     public Interview save(Interview interview) {
         return interviewJpaRepository.save(interview);
     }

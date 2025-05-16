@@ -50,17 +50,17 @@ public class RecruitmentController {
     @PutMapping("/{recruitmentId}")
     @Operation(summary = "리크루팅 수정")
     public SuccessResponse<RecruitmentResponseDTO.Update> update(
-            @PathVariable Long id,
+            @PathVariable Long recruitmentId,
             @Valid @RequestBody RecruitmentRequestDTO.Update request
     ) {
-        RecruitmentResponseDTO.Update result = recruitmentService.update(id, request);
+        RecruitmentResponseDTO.Update result = recruitmentService.update(recruitmentId, request);
         return SuccessResponse.ok(result);
     }
 
     @DeleteMapping("/{recruitmentId}")
     @Operation(summary = "리크루팅 삭제")
-    public SuccessResponse<String> delete(@PathVariable Long id) {
-        recruitmentService.delete(id);
+    public SuccessResponse<String> delete(@PathVariable Long recruitmentId) {
+        recruitmentService.delete(recruitmentId);
         return SuccessResponse.ok("리크루팅 삭제에 성공하였습니다.");
     }
 
@@ -75,8 +75,15 @@ public class RecruitmentController {
 
     @GetMapping("/slug/{slug}")
     @Operation(summary = "슬러그 기반 리크루팅 상세 조회", description = "slug를 통해 공고 상세 정보를 조회합니다.")
-    public SuccessResponse<RecruitmentResponseDTO.Detail> getBySlug(@PathVariable String slug) {
+    public SuccessResponse<RecruitmentResponseDTO.Detail> getBySlug(@PathVariable("slug") String slug) {
         RecruitmentResponseDTO.Detail result = recruitmentService.getBySlug(slug);
+        return SuccessResponse.ok(result);
+    }
+
+    @GetMapping("/my-organizations")
+    @Operation(summary = "내가 속한 조직의 모든 리크루팅 목록 조회")
+    public SuccessResponse<List<RecruitmentResponseDTO.Simple>> getAllMyOrganizationRecruitments(@CurrentUser User user) {
+        List<RecruitmentResponseDTO.Simple> result = recruitmentService.getAllByUserOrganizations(user);
         return SuccessResponse.ok(result);
     }
 

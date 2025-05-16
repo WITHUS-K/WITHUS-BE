@@ -21,6 +21,7 @@ public record InterviewScheduleDTO(
         @Schema(description = "시작 시간") @TimeFormat LocalTime startTime,
         @Schema(description = "종료 시간") @TimeFormat LocalTime endTime,
         @Schema(description = "면접 소요 시간") Short interviewDuration,
+        @Schema(description = "면접실 이름 목록") List<String> roomNames,
         @Schema(description = "해당 날짜의 타임슬롯 목록") List<InterviewSlotDTO> timeSlots
 ) {
     public static InterviewScheduleDTO from(
@@ -29,9 +30,10 @@ public record InterviewScheduleDTO(
             LocalTime startTime,
             LocalTime endTime,
             Short interviewDuration,
+            List<String> roomNames,
             List<InterviewSlotDTO> timeSlots
     ) {
-        return new InterviewScheduleDTO(interviewId, date, startTime, endTime, interviewDuration, timeSlots);
+        return new InterviewScheduleDTO(interviewId, date, startTime, endTime, interviewDuration, roomNames, timeSlots);
     }
 
     @Schema(description = "면접 타임슬롯 및 배정된 지원자 정보")
@@ -95,29 +97,40 @@ public record InterviewScheduleDTO(
             @Schema(description = "면접 날짜") @DateFormatDot LocalDate date,
             @Schema(description = "시작 시간") @TimeFormat LocalTime startTime,
             @Schema(description = "종료 시간") @TimeFormat LocalTime endTime,
+            @Schema(description = "면접실") String roomName,
             @Schema(description = "지원자 목록") List<ApplicantInfo> applicants,
             @Schema(description = "면접관 목록") List<UserResponseDTO.SummaryForTimeSlot> interviewers,
             @Schema(description = "안내자 목록") List<UserResponseDTO.SummaryForTimeSlot> assistants
     ) {
-        public static MyInterviewTimeDTO from(TimeSlot timeSlot) {
-            List<TimeSlotUser> users = timeSlot.getTimeSlotUsers();
+        public static MyInterviewTimeDTO from(TimeSlot timeSlot, boolean isInvolved) {
+            List<UserResponseDTO.SummaryForTimeSlot> interviewers = List.of();
+            List<UserResponseDTO.SummaryForTimeSlot> assistants = List.of();
+            List<ApplicantInfo> applicants = List.of();
 
-            List<UserResponseDTO.SummaryForTimeSlot> interviewers = users.stream()
-                    .filter(u -> u.getRole() == InterviewRole.INTERVIEWER)
-                    .map(u -> UserResponseDTO.SummaryForTimeSlot.from(u.getUser(), u.getRole()))
-                    .toList();
+            if (isInvolved) {
+                List<TimeSlotUser> users = timeSlot.getTimeSlotUsers();
+                interviewers = users.stream()
+                        .filter(u -> u.getRole() == InterviewRole.INTERVIEWER)
+                        .map(u -> UserResponseDTO.SummaryForTimeSlot.from(u.getUser(), u.getRole()))
+                        .toList();
 
-            List<UserResponseDTO.SummaryForTimeSlot> assistants = users.stream()
-                    .filter(u -> u.getRole() == InterviewRole.ASSISTANT)
-                    .map(u -> UserResponseDTO.SummaryForTimeSlot.from(u.getUser(), u.getRole()))
-                    .toList();
+                assistants = users.stream()
+                        .filter(u -> u.getRole() == InterviewRole.ASSISTANT)
+                        .map(u -> UserResponseDTO.SummaryForTimeSlot.from(u.getUser(), u.getRole()))
+                        .toList();
+
+                applicants = timeSlot.getApplications().stream()
+                        .map(ApplicantInfo::from)
+                        .toList();
+            }
 
             return new MyInterviewTimeDTO(
                     timeSlot.getInterview().getId(),
                     timeSlot.getDate(),
                     timeSlot.getStartTime(),
                     timeSlot.getEndTime(),
-                    timeSlot.getApplications().stream().map(ApplicantInfo::from).toList(),
+                    timeSlot.getRoomName(),
+                    applicants,
                     interviewers,
                     assistants
             );

@@ -402,6 +402,19 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         return RecruitmentResponseDTO.Detail.from(recruitment);
     }
 
+    @Override
+    public List<RecruitmentResponseDTO.Simple> getAllByUserOrganizations(User user) {
+        List<Long> organizationIds = user.getUserOrganizations().stream()
+                .map(userOrg -> userOrg.getOrganization().getId())
+                .toList();
+
+        List<Recruitment> recruitments = recruitmentRepository.findAllByOrganizationIds(organizationIds);
+
+        return recruitments.stream()
+                .map(RecruitmentResponseDTO.Simple::from)
+                .toList();
+    }
+
     private RecruitmentResponseDTO.Create saveRecruitment(RecruitmentRequestDTO.Upsert request, boolean isTemporary) {
         Organization organization = organizationRepository.getById(request.organizationId());
 

@@ -38,23 +38,23 @@ public class OrganizationController {
 
     @GetMapping("/{organizationId}")
     @Operation(summary = "조직 단건 조회")
-    public SuccessResponse<OrganizationResponseDTO.Detail> getById(@PathVariable Long id) {
-        return SuccessResponse.ok(organizationService.getById(id));
+    public SuccessResponse<OrganizationResponseDTO.Detail> getById(@PathVariable Long organizationId) {
+        return SuccessResponse.ok(organizationService.getById(organizationId));
     }
 
     @PutMapping("/{organizationId}")
     @Operation(summary = "조직 수정")
     public SuccessResponse<OrganizationResponseDTO.Update> update(
-            @PathVariable Long id,
+            @PathVariable Long organizationId,
             @Valid @RequestBody OrganizationRequestDTO.Update request
     ) {
-        return SuccessResponse.ok(organizationService.update(id, request));
+        return SuccessResponse.ok(organizationService.update(organizationId, request));
     }
 
     @DeleteMapping("/{organizationId}")
     @Operation(summary = "조직 삭제")
-    public SuccessResponse<String> delete(@PathVariable Long id) {
-        organizationService.delete(id);
+    public SuccessResponse<String> delete(@PathVariable Long organizationId) {
+        organizationService.delete(organizationId);
         return SuccessResponse.ok("조직 삭제에 성공하였습니다.");
     }
 
