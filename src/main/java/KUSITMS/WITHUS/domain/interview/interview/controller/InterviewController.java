@@ -23,18 +23,18 @@ public class InterviewController {
     private final InterviewSchedulerService schedulerService;
     private final InterviewService interviewService;
 
-    @PostMapping
+    @PostMapping("/recruitments/{recruitmentId}/interviews")
     @Operation(summary = "면접 생성", description = "면접 객체를 생성하고 ID를 반환합니다.")
-    public SuccessResponse<Long> createInterview(@RequestParam("recruitmentId") Long recruitmentId) {
+    public SuccessResponse<Long> createInterview(@PathVariable Long recruitmentId) {
         Long interviewId = interviewService.create(recruitmentId);
         return SuccessResponse.ok(interviewId);
     }
 
-    @PostMapping("/schedule")
+    @PostMapping("/recruitments/{recruitmentId}/interviews/{interviewId}/schedule")
     @Operation(summary = "면접 타임테이블 생성", description = "공고별 서류 합격자들에 대해 면접 시간을 배정합니다.")
     public SuccessResponse<String> assignSchedule(
-            @RequestParam("recruitmentId") Long recruitmentId,
-            @RequestParam("interviewId") Long interviewId,
+            @PathVariable Long recruitmentId,
+            @PathVariable Long interviewId,
             @Valid @RequestBody InterviewSchedulerService.InterviewConfig config
     ) {
         schedulerService.assignInterviewSlots(recruitmentId, interviewId, config);
