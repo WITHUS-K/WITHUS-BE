@@ -9,17 +9,13 @@ public class UserOrganizationResponseDTO {
     @Schema(description = "조직에 사용자 추가 응답 DTO")
     public record Detail(
             @Schema(description = "UserOrganization ID") Long id,
-            @Schema(description = "사용자 이름") Long userId,
             @Schema(description = "사용자 이름") String userName,
-            @Schema(description = "조직 ID") Long organizationId,
             @Schema(description = "조직 이름") String organizationName
     ) {
         public static Detail from(UserOrganization userOrganization) {
             return new Detail(
                     userOrganization.getId(),
-                    userOrganization.getUser().getId(),
                     userOrganization.getUser().getName(),
-                    userOrganization.getOrganization().getId(),
                     userOrganization.getOrganization().getName()
             );
         }

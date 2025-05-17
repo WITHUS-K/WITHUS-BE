@@ -12,9 +12,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "USERS")
@@ -57,7 +55,7 @@ public class User extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UserOrganization> userOrganizations = new HashSet<>();
+    private List<UserOrganization> userOrganizations = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -69,7 +67,7 @@ public class User extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UserOrganizationRole> userOrganizationRoles = new HashSet<>();
+    private List<UserOrganizationRole> userOrganizationRoles = new ArrayList<>();
 
     public void updatePassword(String newEncodedPassword) {
         this.password = newEncodedPassword;
