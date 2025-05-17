@@ -2,6 +2,8 @@ package KUSITMS.WITHUS.global.auth.jwt;
 
 import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.global.auth.dto.CustomUserDetails;
 import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
 import KUSITMS.WITHUS.global.util.redis.RefreshTokenCacheUtil;
@@ -28,6 +30,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenCacheUtil refreshTokenCacheUtil;
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
     @Override
     protected String obtainUsername(HttpServletRequest request) {
@@ -82,6 +85,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         // 응답으로 AccessToken + RefreshToken 내려주기 (JSON Body로)
         response.addHeader("Authorization", "Bearer " + accessToken);
         response.setHeader("Refresh-Token", refreshToken);
+
+        response.setContentType("application/json;charset=UTF-8");
+
+        User userEntity = userRepository.getByEmailWithOrgRoles(email);
+        UserResponseDTO.Login loginDto = UserResponseDTO.Login.from(userEntity);
+
+        new ObjectMapper().writeValue(response.getWriter(), loginDto);
 
     }
 

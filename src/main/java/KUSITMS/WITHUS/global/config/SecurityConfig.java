@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.global.config;
 
+import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.global.auth.jwt.JwtFilter;
 import KUSITMS.WITHUS.global.auth.jwt.LoginFilter;
 import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
@@ -38,6 +39,7 @@ public class SecurityConfig {
     private final RefreshTokenCacheUtil refreshTokenCacheUtil;
     //JWTUtil 주입
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
     //AuthenticationManager Bean 등록
     @Bean
@@ -55,11 +57,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), refreshTokenCacheUtil, jwtUtil);
+        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), refreshTokenCacheUtil, jwtUtil, userRepository);
         loginFilter.setFilterProcessesUrl("/api/v1/auth/login");
 
         http.cors(Customizer.withDefaults());
-
         http.csrf(AbstractHttpConfigurer::disable);
 
         http.formLogin(AbstractHttpConfigurer::disable);

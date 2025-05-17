@@ -31,6 +31,28 @@ public class UserResponseDTO {
         }
     }
 
+    @Schema(description = "로그인 시 사용자 요약 정보 응답 DTO")
+    public record Login(
+            @Schema(description = "사용자 ID") Long userId,
+            @Schema(description = "이름") String name,
+            @Schema(description = "프로필 이미지 url") String profileImageUrl,
+            @Schema(description = "사용자 / 관리자 여부") Role role,
+            @Schema(description = "조직 내 역할(학회장, 부학회장, 기획 등) 리스트") List<OrganizationRoleResponseDTO.Detail> userOrganizationRoles
+    ) {
+        public static Login from(User user) {
+
+            return new Login(
+                    user.getId(),
+                    user.getName(),
+                    user.getProfileImageUrl(),
+                    user.getRole(),
+                    user.getUserOrganizationRoles().stream()
+                            .map(uor -> OrganizationRoleResponseDTO.Detail.from(uor.getOrganizationRole()))
+                            .toList()
+            );
+        }
+    }
+
     @Schema(description = "이메일 검색 결과에 대한 사용자 요약 정보 응답 DTO")
     public record SummaryForEmailSearch(
             @Schema(description = "사용자 ID") Long userId,
