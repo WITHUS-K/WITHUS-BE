@@ -5,6 +5,7 @@ import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.global.auth.dto.CustomUserDetails;
 import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
 import KUSITMS.WITHUS.global.auth.service.AuthService;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import KUSITMS.WITHUS.global.util.redis.RefreshTokenCacheUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,17 +13,22 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Iterator;
+
+import static java.util.Map.of;
 
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -96,9 +102,33 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     //로그인 실패시 실행하는 메소드
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
 
-        //로그인 실패시 401 응답 코드 반환
-        response.setStatus(401);
+        response.setContentType("application/json;charset=UTF-8");
+        ObjectMapper om = new ObjectMapper();
+
+        if (failed instanceof UsernameNotFoundException) {
+            System.out.println("UsernameNotFoundException");
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            om.writeValue(response.getWriter(), of(
+                    "errorCode", ErrorCode.USER_NOT_EXIST.getErrorCode(),
+                    "message",   "가입된 이메일이 존재하지 않습니다. 다시 입력해주세요."
+            ));
+        }
+        else if (failed instanceof BadCredentialsException) {
+            System.out.println("BadCredentialsException");
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            om.writeValue(response.getWriter(), of(
+                    "errorCode", ErrorCode.USER_WRONG_PASSWORD.getErrorCode(),
+                    "message",   "비밀번호가 일치하지 않습니다. 다시 입력해주세요."
+            ));
+        }
+        else {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            om.writeValue(response.getWriter(), of(
+                    "errorCode", ErrorCode.UNAUTHORIZED.getErrorCode(),
+                    "message",   "인증에 실패했습니다."
+            ));
+        }
     }
 }

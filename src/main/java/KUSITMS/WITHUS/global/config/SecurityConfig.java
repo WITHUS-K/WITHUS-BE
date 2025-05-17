@@ -4,18 +4,19 @@ import KUSITMS.WITHUS.global.auth.jwt.JwtFilter;
 import KUSITMS.WITHUS.global.auth.jwt.LoginFilter;
 import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
 import KUSITMS.WITHUS.global.auth.service.AuthService;
+import KUSITMS.WITHUS.global.auth.service.CustomUserDetailsService;
 import KUSITMS.WITHUS.global.util.redis.RefreshTokenCacheUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -36,28 +37,20 @@ public class SecurityConfig {
 
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final AuthenticationManager authenticationManager;
+    private final DaoAuthenticationProvider daoAuthenticationProvider;
     private final RefreshTokenCacheUtil refreshTokenCacheUtil;
-    //JWTUtil 주입
     private final JwtUtil jwtUtil;
     private final AuthService authService;
-
-    //AuthenticationManager Bean 등록
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-
-        return configuration.getAuthenticationManager();
-    }
-
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-
-        return new BCryptPasswordEncoder();
-    }
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), refreshTokenCacheUtil, jwtUtil, authService);
+        // 커스텀 프로바이더 등록
+        http.authenticationProvider(daoAuthenticationProvider);
+
+        LoginFilter loginFilter = new LoginFilter(authenticationManager, refreshTokenCacheUtil, jwtUtil, authService);
         loginFilter.setFilterProcessesUrl("/api/v1/auth/login");
 
         http.cors(Customizer.withDefaults());
