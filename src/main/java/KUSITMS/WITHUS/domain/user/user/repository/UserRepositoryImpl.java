@@ -4,6 +4,7 @@ import KUSITMS.WITHUS.domain.organization.organization.entity.QOrganization;
 import KUSITMS.WITHUS.domain.organization.organizationRole.entity.QOrganizationRole;
 import KUSITMS.WITHUS.domain.user.user.entity.QUser;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.domain.user.userOrganization.entity.QUserOrganization;
 import KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.QUserOrganizationRole;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
@@ -60,21 +61,37 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User getByEmailWithOrgRoles(String email) {
-        QUser user = QUser.user;
-        QUserOrganizationRole userOrganizationRole = QUserOrganizationRole.userOrganizationRole;
-        QOrganizationRole organizationRole = QOrganizationRole.organizationRole;
-        QOrganization organization = QOrganization.organization;
 
-        User result = queryFactory
-                .selectFrom(user)
-                .leftJoin(user.userOrganizationRoles, userOrganizationRole).fetchJoin()
-                .leftJoin(userOrganizationRole.organizationRole, organizationRole).fetchJoin()
-                .leftJoin(organizationRole.organization, organization).fetchJoin()
-                .where(user.email.eq(email))
+        QUser u      = QUser.user;
+        QUserOrganization uo = QUserOrganization.userOrganization;
+        QOrganization orgQ   = QOrganization.organization;
+        QUserOrganizationRole uor = QUserOrganizationRole.userOrganizationRole;
+        QOrganizationRole orole   = QOrganizationRole.organizationRole;
+
+        // userOrganizations + organization 로드
+        User user = queryFactory
+                .selectFrom(u)
+                .distinct()
+                .leftJoin(u.userOrganizations, uo).fetchJoin()
+                .leftJoin(uo.organization, orgQ).fetchJoin()
+                .where(u.email.eq(email))
                 .fetchOne();
-        if (result == null) {
+
+        if (user == null) {
             throw new CustomException(ErrorCode.USER_NOT_EXIST);
         }
-        return result;
+
+        // 같은 영속성 컨텍스트에서 userOrganizationRoles + nested 엔티티 로드
+        queryFactory
+                .selectFrom(u)
+                .distinct()
+                .leftJoin(u.userOrganizationRoles, uor).fetchJoin()
+                .leftJoin(uor.organizationRole, orole).fetchJoin()
+                .leftJoin(orole.organization, orgQ).fetchJoin()
+                .where(u.email.eq(email))
+                .fetch();
+
+        return user;
+
     }
 }

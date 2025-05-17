@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.global.auth.service;
 
+import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.global.auth.dto.CustomUserDetails;
@@ -39,6 +40,16 @@ public class AuthServiceImpl implements AuthService {
 
     private static final Duration CODE_TTL = Duration.ofMinutes(5); // 인증코드 유효기간 5분
     private static final Duration VERIFIED_TTL = Duration.ofMinutes(10); // 인증완료 상태 유지 10분
+
+    /**
+     * 이메일로 사용자 정보를 조회하고, 로그인 응답용 DTO로 변환하여 반환한다.
+     * @param email 로그인할 사용자의 이메일
+     */
+    @Override
+    public UserResponseDTO.Login loginDtoByEmail(String email) {
+        User user = userRepository.getByEmailWithOrgRoles(email);
+        return UserResponseDTO.Login.from(user);
+    }
 
     /**
      * Refresh Token을 검증하고, 유효한 경우 새로운 Access Token을 발급합니다.

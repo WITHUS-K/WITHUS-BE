@@ -5,6 +5,7 @@ import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationResponseD
 import KUSITMS.WITHUS.domain.organization.organizationRole.dto.OrganizationRoleResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
+import KUSITMS.WITHUS.domain.user.userOrganization.dto.UserOrganizationResponseDTO;
 import KUSITMS.WITHUS.global.common.annotation.DateFormatDot;
 import KUSITMS.WITHUS.global.common.annotation.DateTimeFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,19 +37,27 @@ public class UserResponseDTO {
             @Schema(description = "사용자 ID") Long userId,
             @Schema(description = "이름") String name,
             @Schema(description = "프로필 이미지 url") String profileImageUrl,
+            @Schema(description = "사용자가 속한 조직 ID") List<UserOrganizationResponseDTO.Detail> userOrganizations,
             @Schema(description = "사용자 / 관리자 여부") Role role,
             @Schema(description = "조직 내 역할(학회장, 부학회장, 기획 등) 리스트") List<OrganizationRoleResponseDTO.Detail> userOrganizationRoles
     ) {
         public static Login from(User user) {
 
+            List<UserOrganizationResponseDTO.Detail> organizations = user.getUserOrganizations().stream()
+                    .map(UserOrganizationResponseDTO.Detail::from)
+                    .toList();
+
+            List<OrganizationRoleResponseDTO.Detail> organizationRoles = user.getUserOrganizationRoles().stream()
+                    .map(uor -> OrganizationRoleResponseDTO.Detail.from(uor.getOrganizationRole()))
+                    .toList();
+
             return new Login(
                     user.getId(),
                     user.getName(),
                     user.getProfileImageUrl(),
+                    organizations,
                     user.getRole(),
-                    user.getUserOrganizationRoles().stream()
-                            .map(uor -> OrganizationRoleResponseDTO.Detail.from(uor.getOrganizationRole()))
-                            .toList()
+                    organizationRoles
             );
         }
     }
