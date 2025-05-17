@@ -4,6 +4,7 @@ import KUSITMS.WITHUS.domain.organization.organization.entity.QOrganization;
 import KUSITMS.WITHUS.domain.organization.organizationRole.entity.QOrganizationRole;
 import KUSITMS.WITHUS.domain.user.user.entity.QUser;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.domain.user.userOrganization.entity.QUserOrganization;
 import KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.QUserOrganizationRole;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
@@ -61,12 +62,15 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User getByEmailWithOrgRoles(String email) {
         QUser user = QUser.user;
+        QUserOrganization userOrganization = QUserOrganization.userOrganization;
         QUserOrganizationRole userOrganizationRole = QUserOrganizationRole.userOrganizationRole;
         QOrganizationRole organizationRole = QOrganizationRole.organizationRole;
         QOrganization organization = QOrganization.organization;
 
         User result = queryFactory
                 .selectFrom(user)
+                .distinct()
+                .leftJoin(user.userOrganizations, userOrganization).fetchJoin()
                 .leftJoin(user.userOrganizationRoles, userOrganizationRole).fetchJoin()
                 .leftJoin(userOrganizationRole.organizationRole, organizationRole).fetchJoin()
                 .leftJoin(organizationRole.organization, organization).fetchJoin()
