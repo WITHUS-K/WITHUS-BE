@@ -5,6 +5,7 @@ import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.global.auth.dto.CustomUserDetails;
 import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
 import KUSITMS.WITHUS.global.auth.service.AuthService;
+import KUSITMS.WITHUS.global.response.SuccessResponse;
 import KUSITMS.WITHUS.global.util.redis.RefreshTokenCacheUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -81,7 +82,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Duration refreshTokenTTL = Duration.ofDays(7);
         refreshTokenCacheUtil.saveRefreshToken(email, refreshToken, refreshTokenTTL);
 
-        // 응답으로 AccessToken + RefreshToken 내려주기 (JSON Body로)
+        // 응답으로 AccessToken + RefreshToken 내려주기
         response.addHeader("Authorization", "Bearer " + accessToken);
         response.setHeader("Refresh-Token", refreshToken);
 
@@ -89,7 +90,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         UserResponseDTO.Login loginDto = authService.loginDtoByEmail(email);
 
-        new ObjectMapper().writeValue(response.getWriter(), loginDto);
+        new ObjectMapper().writeValue(response.getWriter(), SuccessResponse.ok(loginDto));
 
     }
 
