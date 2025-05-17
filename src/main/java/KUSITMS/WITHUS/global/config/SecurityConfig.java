@@ -10,15 +10,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -35,22 +38,37 @@ public class SecurityConfig {
             "/api/v1/organizations/search"
     };
 
-    //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
-    private final AuthenticationConfiguration authenticationConfiguration;
-    private final AuthenticationManager authenticationManager;
-    private final DaoAuthenticationProvider daoAuthenticationProvider;
     private final RefreshTokenCacheUtil refreshTokenCacheUtil;
     private final JwtUtil jwtUtil;
     private final AuthService authService;
     private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(customUserDetailsService);
+        provider.setPasswordEncoder(bCryptPasswordEncoder());
+        provider.setHideUserNotFoundExceptions(false);
+        return provider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager() {
+        return new ProviderManager(List.of(daoAuthenticationProvider()));
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         // 커스텀 프로바이더 등록
-        http.authenticationProvider(daoAuthenticationProvider);
+        http.authenticationProvider(daoAuthenticationProvider());
 
-        LoginFilter loginFilter = new LoginFilter(authenticationManager, refreshTokenCacheUtil, jwtUtil, authService);
+        LoginFilter loginFilter = new LoginFilter(authenticationManager(), refreshTokenCacheUtil, jwtUtil, authService);
         loginFilter.setFilterProcessesUrl("/api/v1/auth/login");
 
         http.cors(Customizer.withDefaults());
