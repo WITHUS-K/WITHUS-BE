@@ -12,7 +12,8 @@ import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
-import KUSITMS.WITHUS.global.util.redis.VerificationCacheUtil;
+import KUSITMS.WITHUS.global.util.redis.VerificationCache;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,13 +23,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 
 @Service
+@Builder
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final OrganizationRepository organizationRepository;
-    private final VerificationCacheUtil verificationCacheUtil;
+    private final VerificationCache verificationCache;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final FileUploadService uploadService;
 
@@ -155,7 +157,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void resetPassword(String email, String newPassword) {
-        if (!verificationCacheUtil.isVerified(email)) {
+        if (!verificationCache.isVerified(email)) {
             throw new CustomException(ErrorCode.NOT_VERIFIED);
         }
 
@@ -193,7 +195,7 @@ public class UserServiceImpl implements UserService {
      * @throws CustomException 전화번호 인증이 완료되지 않은 경우 예외를 발생시킵니다.
      */
     public void checkPhoneVerifiedBeforeJoin(String phoneNumber) {
-        if (!verificationCacheUtil.isVerified(phoneNumber)) {
+        if (!verificationCache.isVerified(phoneNumber)) {
             throw new CustomException(ErrorCode.NOT_VERIFIED);
         }
     }
