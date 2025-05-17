@@ -26,9 +26,6 @@ public class RecruitmentRequestDTO {
             @Schema(description = "공고 내용", example = "큐시즘 학회원 모집합니다.")
             @NotBlank String content,
 
-            @Schema(description = "첨부 파일 URL", example = "https://withus.com/files/recruit.pdf")
-            String fileUrl,
-
             @Schema(description = "등록할 포지션 이름 목록", example = "[\"백엔드\", \"디자인\"]")
             List<String> positions,
 
