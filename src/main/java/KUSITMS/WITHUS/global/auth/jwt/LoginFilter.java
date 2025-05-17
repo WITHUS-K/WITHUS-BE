@@ -108,26 +108,30 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         ObjectMapper om = new ObjectMapper();
 
         if (failed instanceof UsernameNotFoundException) {
-            System.out.println("UsernameNotFoundException");
             response.setStatus(HttpStatus.NOT_FOUND.value());
             om.writeValue(response.getWriter(), of(
-                    "errorCode", ErrorCode.USER_NOT_EXIST.getErrorCode(),
-                    "message",   "가입된 이메일이 존재하지 않습니다. 다시 입력해주세요."
+                    "code", ErrorCode.USER_NOT_EXIST.getErrorCode(),
+                    "message",   "가입된 이메일이 존재하지 않습니다. 다시 입력해주세요.",
+                    "result",   "",
+                    "success",  false
             ));
         }
         else if (failed instanceof BadCredentialsException) {
-            System.out.println("BadCredentialsException");
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             om.writeValue(response.getWriter(), of(
-                    "errorCode", ErrorCode.USER_WRONG_PASSWORD.getErrorCode(),
-                    "message",   "비밀번호가 일치하지 않습니다. 다시 입력해주세요."
+                    "code", ErrorCode.USER_WRONG_PASSWORD.getErrorCode(),
+                    "message",   "비밀번호가 일치하지 않습니다. 다시 입력해주세요.",
+                    "result",   "",
+                    "success",  false
             ));
         }
         else {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             om.writeValue(response.getWriter(), of(
                     "errorCode", ErrorCode.UNAUTHORIZED.getErrorCode(),
-                    "message",   "인증에 실패했습니다."
+                    "message",   "인증에 실패했습니다.",
+                    "result",   "",
+                    "success",  false
             ));
         }
     }
