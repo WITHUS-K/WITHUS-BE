@@ -2,10 +2,9 @@ package KUSITMS.WITHUS.global.auth.jwt;
 
 import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
-import KUSITMS.WITHUS.domain.user.user.entity.User;
-import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.global.auth.dto.CustomUserDetails;
 import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
+import KUSITMS.WITHUS.global.auth.service.AuthService;
 import KUSITMS.WITHUS.global.util.redis.RefreshTokenCacheUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -30,7 +29,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenCacheUtil refreshTokenCacheUtil;
     private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
+    private final AuthService authService;
 
     @Override
     protected String obtainUsername(HttpServletRequest request) {
@@ -88,8 +87,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         response.setContentType("application/json;charset=UTF-8");
 
-        User userEntity = userRepository.getByEmailWithOrgRoles(email);
-        UserResponseDTO.Login loginDto = UserResponseDTO.Login.from(userEntity);
+        UserResponseDTO.Login loginDto = authService.loginDtoByEmail(email);
 
         new ObjectMapper().writeValue(response.getWriter(), loginDto);
 
