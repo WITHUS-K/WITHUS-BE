@@ -33,9 +33,6 @@ public class Recruitment extends BaseEntity {
     @Column(name = "CONTENT", length = 1000)
     private String content;
 
-    @Column(name = "FILE_URL")
-    private String fileUrl;
-
     @Builder.Default
     @Column(name = "NEED_GENDER", nullable = false)
     private boolean needGender = false;
@@ -118,7 +115,6 @@ public class Recruitment extends BaseEntity {
     public static Recruitment create(
             String title,
             String content,
-            String fileUrl,
             LocalDate documentDeadline,
             boolean isDocumentResultRequired,
             LocalDate documentResultDate,
@@ -139,7 +135,6 @@ public class Recruitment extends BaseEntity {
         return Recruitment.builder()
                 .title(title)
                 .content(content)
-                .fileUrl(fileUrl)
                 .documentDeadline(documentDeadline)
                 .isDocumentResultRequired(isDocumentResultRequired)
                 .documentResultDate(documentResultDate)
@@ -162,7 +157,6 @@ public class Recruitment extends BaseEntity {
     public void update(
             String title,
             String content,
-            String fileUrl,
             LocalDate documentDeadline,
             boolean isDocumentResultRequired,
             LocalDate documentResultDate,
@@ -179,7 +173,6 @@ public class Recruitment extends BaseEntity {
     ) {
         this.title = title;
         this.content = content;
-        this.fileUrl = fileUrl;
         this.documentDeadline = documentDeadline;
         this.isDocumentResultRequired = isDocumentResultRequired;
         this.documentResultDate = documentResultDate;
