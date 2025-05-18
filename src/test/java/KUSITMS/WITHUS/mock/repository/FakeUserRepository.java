@@ -81,10 +81,6 @@ public class FakeUserRepository implements UserRepository {
 
     @Override
     public User getByEmailWithOrgRoles(String email) {
-        User user = findByEmail(email);
-        if (user == null) {
-            throw new CustomException(ErrorCode.USER_NOT_EXIST);
-        }
-        return user;
+        return null;
     }
 }
