@@ -6,6 +6,7 @@ import KUSITMS.WITHUS.global.auth.dto.CustomUserDetails;
 import KUSITMS.WITHUS.global.auth.jwt.util.JwtUtil;
 import KUSITMS.WITHUS.global.auth.service.AuthService;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import KUSITMS.WITHUS.global.response.ErrorResponse;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import KUSITMS.WITHUS.global.util.redis.RefreshTokenCacheUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -105,34 +106,26 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
 
         response.setContentType("application/json;charset=UTF-8");
-        ObjectMapper om = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
 
+        ErrorCode errorCode;
+        HttpStatus status;
         if (failed instanceof UsernameNotFoundException) {
-            response.setStatus(HttpStatus.NOT_FOUND.value());
-            om.writeValue(response.getWriter(), of(
-                    "code", ErrorCode.USER_NOT_EXIST.getErrorCode(),
-                    "message",   "가입된 이메일이 존재하지 않습니다. 다시 입력해주세요.",
-                    "result",   "",
-                    "success",  false
-            ));
+            errorCode = ErrorCode.USER_EMAIL_NOT_EXIST;
+            status = HttpStatus.NOT_FOUND;
+        } else if (failed instanceof BadCredentialsException) {
+            errorCode = ErrorCode.USER_WRONG_PASSWORD;
+            status = HttpStatus.UNAUTHORIZED;
+        } else {
+            errorCode = ErrorCode.UNAUTHORIZED;
+            status = HttpStatus.UNAUTHORIZED;
         }
-        else if (failed instanceof BadCredentialsException) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            om.writeValue(response.getWriter(), of(
-                    "code", ErrorCode.USER_WRONG_PASSWORD.getErrorCode(),
-                    "message",   "비밀번호가 일치하지 않습니다. 다시 입력해주세요.",
-                    "result",   "",
-                    "success",  false
-            ));
-        }
-        else {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            om.writeValue(response.getWriter(), of(
-                    "errorCode", ErrorCode.UNAUTHORIZED.getErrorCode(),
-                    "message",   "인증에 실패했습니다.",
-                    "result",   "",
-                    "success",  false
-            ));
-        }
+
+        response.setStatus(status.value());
+        ErrorResponse<Object> payload = ErrorResponse.of(
+                errorCode.getErrorCode(),
+                errorCode.getMessage()
+        );
+        response.getWriter().write(objectMapper.writeValueAsString(payload));
     }
 }
