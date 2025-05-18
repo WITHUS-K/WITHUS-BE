@@ -49,9 +49,9 @@ public enum ErrorCode {
     // User (회원)
     USER_ALREADY_EXIST("USER400", "이미 회원가입된 유저입니다.", HttpStatus.BAD_REQUEST),
     USER_NOT_EXIST("USER404", "존재하지 않는 유저입니다.", HttpStatus.NOT_FOUND),
-    USER_EMPLOYEE_ID_NOT_EXIST("USER404", "존재하지 않는 사번입니다.", HttpStatus.NOT_FOUND),
+    USER_EMAIL_NOT_EXIST("USER404", "가입된 이메일이 존재하지 않습니다. 다시 입력해주세요.", HttpStatus.NOT_FOUND),
     USER_NOT_VALID("USER404", "유효한 사용자 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
-    USER_WRONG_PASSWORD("USER401", "비밀번호가 틀렸습니다.", HttpStatus.UNAUTHORIZED),
+    USER_WRONG_PASSWORD("USER401", "비밀번호가 일치하지 않습니다. 다시 입력해주세요.", HttpStatus.UNAUTHORIZED),
     USER_SAME_PASSWORD("USER400", "동일한 비밀번호로 변경할 수 없습니다.", HttpStatus.BAD_REQUEST),
     PASSWORDS_NOT_MATCH("PASSWORD401", "입력한 두 개의 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
     USER_NO_PERMISSION("USER403", "권한이 없습니다.", HttpStatus.FORBIDDEN),
