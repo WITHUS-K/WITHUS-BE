@@ -1,8 +1,7 @@
-package KUSITMS.WITHUS.global.infra.sms;
+package KUSITMS.WITHUS.util;
 
-import org.springframework.stereotype.Component;
+import KUSITMS.WITHUS.global.infra.sms.SmsSender;
 
-@Component
 public class FakeSmsSender implements SmsSender {
 
     @Override

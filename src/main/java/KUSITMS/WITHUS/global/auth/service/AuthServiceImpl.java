@@ -12,7 +12,7 @@ import KUSITMS.WITHUS.global.infra.email.template.MailTemplateProvider;
 import KUSITMS.WITHUS.global.infra.email.template.MailTemplateType;
 import KUSITMS.WITHUS.global.infra.sms.SmsSender;
 import KUSITMS.WITHUS.global.util.redis.RefreshTokenCacheUtil;
-import KUSITMS.WITHUS.global.util.redis.VerificationCacheUtil;
+import KUSITMS.WITHUS.global.util.redis.VerificationCache;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,7 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final RefreshTokenCacheUtil refreshTokenCacheUtil;
-    private final VerificationCacheUtil verificationCacheUtil;
+    private final VerificationCache verificationCache;
     private final SmsSender smsSender;
     private final MailSender mailSender;
     private final MailTemplateProvider templateProvider;
@@ -99,7 +99,7 @@ public class AuthServiceImpl implements AuthService {
 
         String code = String.valueOf(new Random().nextInt(900000) + 100000);
 
-        verificationCacheUtil.saveCode(email, code, CODE_TTL);
+        verificationCache.saveCode(email, code, CODE_TTL);
 
         sendEmail(email, code);
 
@@ -112,7 +112,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void requestPhoneVerification(String phoneNumber) {
         String code = generateCode(); // 랜덤 인증번호 생성
-        verificationCacheUtil.saveCode(phoneNumber, code, CODE_TTL);
+        verificationCache.saveCode(phoneNumber, code, CODE_TTL);
 
         sendSms(phoneNumber, code);
     }
@@ -125,7 +125,7 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public void confirmVerification(String identifier, String inputCode) {
-        String savedCode = verificationCacheUtil.getCode(identifier);
+        String savedCode = verificationCache.getCode(identifier);
 
         if (savedCode == null) {
             throw new CustomException(ErrorCode.VERIFICATION_INVALID);
@@ -134,7 +134,7 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(ErrorCode.VERIFICATION_NOT_EQUAL);
         }
 
-        verificationCacheUtil.markVerified(identifier, VERIFIED_TTL);
+        verificationCache.markVerified(identifier, VERIFIED_TTL);
     }
 
     /**

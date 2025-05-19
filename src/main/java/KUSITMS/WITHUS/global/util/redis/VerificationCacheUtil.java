@@ -1,12 +1,14 @@
 package KUSITMS.WITHUS.global.util.redis;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 
 @Component
+@Profile("!test")
 @RequiredArgsConstructor
 public class VerificationCacheUtil implements VerificationCache {
 
