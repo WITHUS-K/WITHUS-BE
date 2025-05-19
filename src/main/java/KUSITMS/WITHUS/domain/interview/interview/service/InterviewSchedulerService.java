@@ -189,26 +189,14 @@ public class InterviewSchedulerService {
         List<AvailableTimeRange> timeRanges = recruitment.getAvailableTimeRanges();
 
         List<TimeSlot> slots = timeSlotRepository.findByInterview(interview);
-
         Map<LocalDate, List<TimeSlot>> slotsByDate = slots.stream()
                 .collect(Collectors.groupingBy(TimeSlot::getDate));
 
-        // 날짜별 InterviewScheduleDTO 생성
-        return slotsByDate.entrySet().stream()
-                .map(entry -> {
-                    LocalDate date = entry.getKey();
-                    List<TimeSlot> daySlots = entry.getValue();
-
-                    // 해당 날짜의 available time 찾기
-                    AvailableTimeRange timeRange = timeRanges.stream()
-                            .filter(r -> r.getDate().equals(date))
-                            .findFirst()
-                            .orElse(null);
-
-                    // available time에 등록되지 않은 날짜는 건너뜀
-                    if (timeRange == null) {
-                        return null;
-                    }
+        // 모든 available date에 대해 기본 응답을 보장
+        return timeRanges.stream()
+                .map(timeRange -> {
+                    LocalDate date = timeRange.getDate();
+                    List<TimeSlot> daySlots = slotsByDate.getOrDefault(date, List.of());
 
                     List<InterviewScheduleDTO.InterviewSlotDTO> slotDTOs = daySlots.stream()
                             .map(InterviewScheduleDTO.InterviewSlotDTO::from)
@@ -222,7 +210,7 @@ public class InterviewSchedulerService {
                             .toList();
 
                     return InterviewScheduleDTO.from(
-                            interviewId,
+                            interview.getId(),
                             date,
                             timeRange.getStartTime(),
                             timeRange.getEndTime(),
@@ -231,11 +219,10 @@ public class InterviewSchedulerService {
                             slotDTOs
                     );
                 })
-                .filter(Objects::nonNull)
-                .filter(dto -> dto.date() != null)
                 .sorted(Comparator.comparing(InterviewScheduleDTO::date))
                 .toList();
     }
+
 
     /**
      * 내 면접 시간 조회 (배정된 타임 슬롯 조회)
