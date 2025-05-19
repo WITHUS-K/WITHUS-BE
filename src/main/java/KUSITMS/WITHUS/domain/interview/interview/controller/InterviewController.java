@@ -49,7 +49,7 @@ public class InterviewController {
 
     @GetMapping("/{interviewId}/my-time-slots")
     @Operation(summary = "내 면접 배정 결과 조회", description = "해당 인터뷰 ID에 배정된 본인의 정보를 조회합니다.")
-    public SuccessResponse<List<InterviewScheduleDTO.MyInterviewTimeDTO>> getSchedule(
+    public SuccessResponse<List<InterviewScheduleDTO>> getSchedule(
             @PathVariable("interviewId") Long interviewId,
             @CurrentUser User user
     ) {

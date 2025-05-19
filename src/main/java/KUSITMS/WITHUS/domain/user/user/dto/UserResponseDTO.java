@@ -139,12 +139,14 @@ public class UserResponseDTO {
     public record SummaryForTimeSlot(
             @Schema(description = "사용자 ID") Long userId,
             @Schema(description = "이름") String name,
+            @Schema(description = "프로필 사진 URL") String profileUrl,
             @Schema(description = "역할") InterviewRole role
     ) {
         public static SummaryForTimeSlot from(User user, InterviewRole role) {
             return new SummaryForTimeSlot(
                     user.getId(),
                     user.getName(),
+                    user.getProfileImageUrl(),
                     role
             );
         }
