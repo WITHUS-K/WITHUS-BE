@@ -243,17 +243,62 @@ public class InterviewSchedulerService {
      * @param user 현재 로그인 유저
      * @return 조회된 타임 슬롯 반환
      */
-    public List<InterviewScheduleDTO.MyInterviewTimeDTO> getMyInterviewTimes(Long interviewId, User user) {
+    public List<InterviewScheduleDTO> getMyInterviewTimes(Long interviewId, User user) {
         Interview interview = interviewRepository.getById(interviewId);
+        Recruitment recruitment = interview.getRecruitment();
+        Short interviewDuration = recruitment.getInterviewDuration();
+        List<AvailableTimeRange> timeRanges = recruitment.getAvailableTimeRanges();
 
-        List<TimeSlot> allSlots = timeSlotRepository.findByInterview(interview);
-
+        // 전체 슬롯 중 유저가 배정된 슬롯만 필터링
         Set<Long> mySlotIds = timeSlotRepository.findAllByUserInvolved(interviewId, user).stream()
                 .map(TimeSlot::getId)
                 .collect(Collectors.toSet());
 
-        return allSlots.stream()
-                .map(slot -> InterviewScheduleDTO.MyInterviewTimeDTO.from(slot, mySlotIds.contains(slot.getId())))
+        List<TimeSlot> allSlots = timeSlotRepository.findByInterview(interview).stream()
+                .filter(slot -> mySlotIds.contains(slot.getId()))
+                .toList();
+
+        Map<LocalDate, List<TimeSlot>> slotsByDate = allSlots.stream()
+                .collect(Collectors.groupingBy(TimeSlot::getDate));
+
+        return slotsByDate.entrySet().stream()
+                .map(entry -> {
+                    LocalDate date = entry.getKey();
+                    List<TimeSlot> daySlots = entry.getValue();
+
+                    // 해당 날짜의 available time 찾기
+                    AvailableTimeRange timeRange = timeRanges.stream()
+                            .filter(r -> r.getDate().equals(date))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (timeRange == null) {
+                        return null;
+                    }
+
+                    List<InterviewScheduleDTO.InterviewSlotDTO> slotDTOs = daySlots.stream()
+                            .map(slot -> InterviewScheduleDTO.InterviewSlotDTO.from(slot, true))
+                            .toList();
+
+                    List<String> roomNames = daySlots.stream()
+                            .map(TimeSlot::getRoomName)
+                            .filter(Objects::nonNull)
+                            .distinct()
+                            .sorted()
+                            .toList();
+
+                    return InterviewScheduleDTO.from(
+                            interviewId,
+                            date,
+                            timeRange.getStartTime(),
+                            timeRange.getEndTime(),
+                            interviewDuration,
+                            roomNames,
+                            slotDTOs
+                    );
+                })
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(InterviewScheduleDTO::date))
                 .toList();
     }
 
