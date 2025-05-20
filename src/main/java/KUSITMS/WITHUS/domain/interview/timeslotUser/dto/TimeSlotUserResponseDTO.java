@@ -8,12 +8,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record TimeSlotUserResponseDTO(
         @Schema(description = "사용자 ID") Long userId,
         @Schema(description = "이름") String name,
+        @Schema(description = "프로필 이미지 URL") String profileImageUrl,
         @Schema(description = "역할")InterviewRole role
         ) {
     public static TimeSlotUserResponseDTO from(TimeSlotUser timeSlotUser) {
         return new TimeSlotUserResponseDTO(
                 timeSlotUser.getUser().getId(),
                 timeSlotUser.getUser().getName(),
+                timeSlotUser.getUser().getProfileImageUrl(),
                 timeSlotUser.getRole()
         );
     }
