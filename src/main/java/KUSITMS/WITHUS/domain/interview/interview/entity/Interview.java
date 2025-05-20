@@ -24,6 +24,9 @@ public class Interview extends BaseEntity {
     @Column(name = "INTERVIEW_ID")
     private Long id;
 
+    @Column(name = "ROOM_COUNT", nullable = false)
+    private int roomCount;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RECRUITMENT_ID", nullable = false)
     private Recruitment recruitment;
@@ -40,18 +43,12 @@ public class Interview extends BaseEntity {
     @Builder.Default
     private List<InterviewerAvailability> interviewerAvailabilities = new ArrayList<>();
 
-    public void addTimeSlot(TimeSlot timeSlot) {
-        this.timeSlots.add(timeSlot);
-        timeSlot.associateInterview(this);
-    }
-
-    public void addApplication(Application application) {
-        this.applications.add(application);
-        application.associateInterview(this);
-    }
-
     public void addInterviewerAvailability(InterviewerAvailability availability) {
         this.interviewerAvailabilities.add(availability);
         availability.associateInterview(this);
+    }
+
+    public void setRoomCount(int roomCount) {
+        this.roomCount = roomCount;
     }
 }
