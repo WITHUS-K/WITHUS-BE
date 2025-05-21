@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.domain.template.dto;
 
 import KUSITMS.WITHUS.domain.template.entity.Template;
-import KUSITMS.WITHUS.domain.template.enumerate.TemplateType;
+import KUSITMS.WITHUS.domain.template.enumerate.Medium;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "메일 템플릿 응답 DTO")
@@ -13,7 +13,7 @@ public class TemplateResponseDTO {
             String name,
             String subject,
             String body,
-            TemplateType templateType
+            Medium medium
     ) {
         public static Detail from(Template e) {
             return new Detail(
@@ -21,7 +21,7 @@ public class TemplateResponseDTO {
                     e.getName(),
                     e.getSubject(),
                     e.getBody(),
-                    e.getTemplateType()
+                    e.getMedium()
             );
         }
     }
@@ -30,13 +30,13 @@ public class TemplateResponseDTO {
     public record Summary(
             Long id,
             String name,
-            TemplateType templateType
+            Medium medium
     ) {
         public static Summary from(Template e) {
             return new Summary(
                     e.getId(),
                     e.getName(),
-                    e.getTemplateType()
+                    e.getMedium()
             );
         }
     }

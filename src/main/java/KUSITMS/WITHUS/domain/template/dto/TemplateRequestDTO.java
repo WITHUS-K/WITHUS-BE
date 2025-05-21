@@ -1,6 +1,6 @@
 package KUSITMS.WITHUS.domain.template.dto;
 
-import KUSITMS.WITHUS.domain.template.enumerate.TemplateType;
+import KUSITMS.WITHUS.domain.template.enumerate.Medium;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,6 +20,6 @@ public class TemplateRequestDTO {
             @NotBlank String body,
 
             @Schema(description = "템플릿 타입", example = "SMS | MAIL")
-            @NotNull TemplateType templateType
+            @NotNull Medium medium
             ) {}
 }

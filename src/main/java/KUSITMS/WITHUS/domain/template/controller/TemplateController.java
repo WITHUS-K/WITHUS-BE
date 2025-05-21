@@ -2,7 +2,7 @@ package KUSITMS.WITHUS.domain.template.controller;
 
 import KUSITMS.WITHUS.domain.template.dto.TemplateRequestDTO;
 import KUSITMS.WITHUS.domain.template.dto.TemplateResponseDTO;
-import KUSITMS.WITHUS.domain.template.enumerate.TemplateType;
+import KUSITMS.WITHUS.domain.template.enumerate.Medium;
 import KUSITMS.WITHUS.domain.template.service.TemplateService;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,9 +33,9 @@ public class TemplateController {
     @GetMapping
     @Operation(summary = "문자/메일 템플릿 목록 조회", description = "등록된 템플릿의 요약 리스트(ID, 이름)를 반환합니다.")
     public SuccessResponse<List<TemplateResponseDTO.Summary>> list(
-            @RequestParam TemplateType templateType
+            @RequestParam Medium medium
             ) {
-        List<TemplateResponseDTO.Summary> TemplatesList = templateService.listAll(templateType);
+        List<TemplateResponseDTO.Summary> TemplatesList = templateService.listAll(medium);
         return SuccessResponse.ok(TemplatesList);
     }
 

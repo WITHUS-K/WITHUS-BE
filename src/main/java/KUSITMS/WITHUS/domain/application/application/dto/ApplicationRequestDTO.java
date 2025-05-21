@@ -71,7 +71,7 @@ public class ApplicationRequestDTO {
     ) {}
 
     @Schema(description = "여러 사용자에게 메일 일괄 발송 요청 DTO")
-    public record SendBulkMail(
+    public record BulkMailRequest(
             @Schema(description = "수신자 지원자(지원서) ID 리스트", example = "[1, 2, 3]")
             @NotEmpty List<@Positive Long> applicationIds,
 

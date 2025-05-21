@@ -1,6 +1,6 @@
 package KUSITMS.WITHUS.domain.template.enumerate;
 
-public enum TemplateType {
+public enum Medium {
     SMS,
     MAIL
 }

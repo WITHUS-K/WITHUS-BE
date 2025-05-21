@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.domain.template.repository;
 
 import KUSITMS.WITHUS.domain.template.entity.Template;
-import KUSITMS.WITHUS.domain.template.enumerate.TemplateType;
+import KUSITMS.WITHUS.domain.template.enumerate.Medium;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +22,8 @@ public class TemplateRepositoryImpl implements TemplateRepository{
     }
 
     @Override
-    public List<Template> findAllByTemplateType(TemplateType templateType) {
-        return templateJpaRepository.findAllByTemplateType(templateType);
+    public List<Template> findAllByTemplateType(Medium medium) {
+        return templateJpaRepository.findAllByTemplateType(medium);
     }
 
     @Override

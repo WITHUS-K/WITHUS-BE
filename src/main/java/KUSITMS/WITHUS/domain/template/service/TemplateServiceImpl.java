@@ -3,7 +3,7 @@ package KUSITMS.WITHUS.domain.template.service;
 import KUSITMS.WITHUS.domain.template.dto.TemplateRequestDTO;
 import KUSITMS.WITHUS.domain.template.dto.TemplateResponseDTO;
 import KUSITMS.WITHUS.domain.template.entity.Template;
-import KUSITMS.WITHUS.domain.template.enumerate.TemplateType;
+import KUSITMS.WITHUS.domain.template.enumerate.Medium;
 import KUSITMS.WITHUS.domain.template.repository.TemplateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,8 +33,8 @@ public class TemplateServiceImpl implements TemplateService {
      * @return 모든 메일 템플릿의 요약 정보 리스트
      */
     @Override
-    public List<TemplateResponseDTO.Summary> listAll(TemplateType templateType) {
-        return templateRepository.findAllByTemplateType(templateType).stream()
+    public List<TemplateResponseDTO.Summary> listAll(Medium medium) {
+        return templateRepository.findAllByTemplateType(medium).stream()
                 .map(TemplateResponseDTO.Summary::from)
                 .toList();
     }
@@ -47,7 +47,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @Transactional
     public TemplateResponseDTO.Detail create(TemplateRequestDTO.Create dto) {
-        Template ent = new Template(dto.name(), dto.subject(), dto.body(), dto.templateType());
+        Template ent = new Template(dto.name(), dto.subject(), dto.body(), dto.medium());
         Template saved = templateRepository.save(ent);
         return TemplateResponseDTO.Detail.from(saved);
     }
