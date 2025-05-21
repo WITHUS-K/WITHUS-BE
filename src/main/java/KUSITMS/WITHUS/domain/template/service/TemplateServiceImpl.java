@@ -4,7 +4,7 @@ import KUSITMS.WITHUS.domain.template.dto.TemplateRequestDTO;
 import KUSITMS.WITHUS.domain.template.dto.TemplateResponseDTO;
 import KUSITMS.WITHUS.domain.template.entity.Template;
 import KUSITMS.WITHUS.domain.template.enumerate.TemplateType;
-import KUSITMS.WITHUS.domain.template.repository.TemplateJpaRepository;
+import KUSITMS.WITHUS.domain.template.repository.TemplateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TemplateServiceImpl implements TemplateService {
 
-    private final TemplateJpaRepository templateJpaRepository;
+    private final TemplateRepository templateRepository;
 
     /**
      * 문자/메일 템플릿 목록 조회
@@ -24,7 +24,7 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     public List<TemplateResponseDTO.Summary> listAll(TemplateType templateType) {
-        return templateJpaRepository.findAllByTemplateType(templateType).stream()
+        return templateRepository.findAllByTemplateType(templateType).stream()
                 .map(TemplateResponseDTO.Summary::from)
                 .toList();
     }
@@ -38,7 +38,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Transactional
     public TemplateResponseDTO.Detail create(TemplateRequestDTO.Create dto) {
         Template ent = new Template(dto.name(), dto.subject(), dto.body(), dto.templateType());
-        Template saved = templateJpaRepository.save(ent);
+        Template saved = templateRepository.save(ent);
         return TemplateResponseDTO.Detail.from(saved);
     }
 
