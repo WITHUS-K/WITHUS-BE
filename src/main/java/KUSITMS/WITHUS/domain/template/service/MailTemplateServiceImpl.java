@@ -1,9 +1,9 @@
-package KUSITMS.WITHUS.domain.template.mailTemplate.service;
+package KUSITMS.WITHUS.domain.template.service;
 
-import KUSITMS.WITHUS.domain.template.mailTemplate.dto.MailTemplateRequestDTO;
-import KUSITMS.WITHUS.domain.template.mailTemplate.dto.MailTemplateResponseDTO;
-import KUSITMS.WITHUS.domain.template.mailTemplate.entity.MailTemplate;
-import KUSITMS.WITHUS.domain.template.mailTemplate.repository.MailTemplateJpaRepository;
+import KUSITMS.WITHUS.domain.template.dto.MailTemplateRequestDTO;
+import KUSITMS.WITHUS.domain.template.dto.MailTemplateResponseDTO;
+import KUSITMS.WITHUS.domain.template.entity.MailTemplate;
+import KUSITMS.WITHUS.domain.template.repository.MailTemplateJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

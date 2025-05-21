@@ -1,6 +1,6 @@
-package KUSITMS.WITHUS.domain.template.mailTemplate.repository;
+package KUSITMS.WITHUS.domain.template.repository;
 
-import KUSITMS.WITHUS.domain.template.mailTemplate.entity.MailTemplate;
+import KUSITMS.WITHUS.domain.template.entity.MailTemplate;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MailTemplateJpaRepository extends JpaRepository<MailTemplate, Long> {

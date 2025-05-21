@@ -1,8 +1,8 @@
-package KUSITMS.WITHUS.domain.template.mailTemplate.controller;
+package KUSITMS.WITHUS.domain.template.controller;
 
-import KUSITMS.WITHUS.domain.template.mailTemplate.dto.MailTemplateRequestDTO;
-import KUSITMS.WITHUS.domain.template.mailTemplate.dto.MailTemplateResponseDTO;
-import KUSITMS.WITHUS.domain.template.mailTemplate.service.MailTemplateService;
+import KUSITMS.WITHUS.domain.template.dto.MailTemplateRequestDTO;
+import KUSITMS.WITHUS.domain.template.dto.MailTemplateResponseDTO;
+import KUSITMS.WITHUS.domain.template.service.MailTemplateService;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
