@@ -94,7 +94,7 @@ public class AdminApplicationController {
             @ModelAttribute @Valid ApplicationRequestDTO.BulkSmsRequest request
     ) {
         smsService.sendBulkSms(
-                request.phoneNumbers(),
+                request.applicationIds(),
                 request.message(),
                 request.attachment()
         );
