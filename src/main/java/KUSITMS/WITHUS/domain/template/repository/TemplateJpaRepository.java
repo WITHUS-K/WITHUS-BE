@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TemplateJpaRepository extends JpaRepository<Template, Long> {
-    List<Template> findAllByTemplateType(Medium medium);
+    List<Template> findAllByMedium(Medium medium);
 }

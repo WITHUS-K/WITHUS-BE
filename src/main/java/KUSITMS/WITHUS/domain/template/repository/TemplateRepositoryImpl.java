@@ -22,8 +22,8 @@ public class TemplateRepositoryImpl implements TemplateRepository{
     }
 
     @Override
-    public List<Template> findAllByTemplateType(Medium medium) {
-        return templateJpaRepository.findAllByTemplateType(medium);
+    public List<Template> findAllByMedium(Medium medium) {
+        return templateJpaRepository.findAllByMedium(medium);
     }
 
     @Override

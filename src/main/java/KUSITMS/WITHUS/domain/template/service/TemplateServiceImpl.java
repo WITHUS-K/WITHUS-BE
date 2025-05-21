@@ -34,7 +34,7 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     public List<TemplateResponseDTO.Summary> listAll(Medium medium) {
-        return templateRepository.findAllByTemplateType(medium).stream()
+        return templateRepository.findAllByMedium(medium).stream()
                 .map(TemplateResponseDTO.Summary::from)
                 .toList();
     }
