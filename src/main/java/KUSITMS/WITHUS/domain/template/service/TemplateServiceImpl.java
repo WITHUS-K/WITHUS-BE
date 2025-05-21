@@ -19,6 +19,16 @@ public class TemplateServiceImpl implements TemplateService {
     private final TemplateRepository templateRepository;
 
     /**
+     * 문자/메일 템플릿 개별 조회
+     * @return 메일 템플릿의 상세 정보
+     */
+    @Override
+    public TemplateResponseDTO.Detail getById(Long templateId) {
+        Template template = templateRepository.getById(templateId);
+        return TemplateResponseDTO.Detail.from(template);
+    }
+
+    /**
      * 문자/메일 템플릿 목록 조회
      * @return 모든 메일 템플릿의 요약 정보 리스트
      */

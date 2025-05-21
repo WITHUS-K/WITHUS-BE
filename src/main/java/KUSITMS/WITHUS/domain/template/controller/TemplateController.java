@@ -21,6 +21,15 @@ public class TemplateController {
 
     private final TemplateService templateService;
 
+    @GetMapping("/{templateId}")
+    @Operation(summary = "문자/메일 템플릿 개별 조회", description = "등록된 템플릿의 상세 정보를 반환합니다.")
+    public SuccessResponse<TemplateResponseDTO.Detail> getById(
+            @PathVariable Long templateId
+    ) {
+        TemplateResponseDTO.Detail template = templateService.getById(templateId);
+        return SuccessResponse.ok(template);
+    }
+
     @GetMapping
     @Operation(summary = "문자/메일 템플릿 목록 조회", description = "등록된 템플릿의 요약 리스트(ID, 이름)를 반환합니다.")
     public SuccessResponse<List<TemplateResponseDTO.Summary>> list(

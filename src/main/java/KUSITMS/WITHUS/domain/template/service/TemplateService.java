@@ -7,6 +7,7 @@ import KUSITMS.WITHUS.domain.template.enumerate.TemplateType;
 import java.util.List;
 
 public interface TemplateService {
+    TemplateResponseDTO.Detail getById(Long templateId);
     List<TemplateResponseDTO.Summary> listAll(TemplateType templateType);
     TemplateResponseDTO.Detail create(TemplateRequestDTO.Create dto);
 }
