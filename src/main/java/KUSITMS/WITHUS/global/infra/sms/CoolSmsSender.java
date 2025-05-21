@@ -35,10 +35,12 @@ public class CoolSmsSender implements SmsSender {
 
     @Override
     public void send(String phoneNumber, String message) {
+        String processed = message.replace("\\n", "\n");
+
         Message msg = new Message();
         msg.setFrom(sender);
         msg.setTo(phoneNumber);
-        msg.setText(message);
+        msg.setText(processed);
 
         messageService.sendOne(new SingleMessageSendingRequest(msg));
 
@@ -61,10 +63,12 @@ public class CoolSmsSender implements SmsSender {
                     tempFile.toFile(), StorageType.MMS, null
             );
 
+            String processed = message.replace("\\n", "\n");
+
             Message msg = new Message();
             msg.setFrom(sender);
             msg.setTo(phoneNumber);
-            msg.setText(message);
+            msg.setText(processed);
             msg.setImageId(imageId);
 
             messageService.sendOne(new SingleMessageSendingRequest(msg));
