@@ -318,7 +318,10 @@ public class ApplicationResponseDTO {
             @Schema(description = "면접 평가 담당자 수", example = "3") int interviewAssignedCount,
             @Schema(description = "면접 평가 완료 담당자 수", example = "1") int interviewEvaluatedCount,
             @Schema(description = "면접 평가 총점", example = "85") String interviewAverageScore,
-            @Schema(description = "면접 평가 담당자 리스트") List<UserResponseDTO.Summary> interviewEvaluators
+            @Schema(description = "면접 평가 담당자 리스트") List<UserResponseDTO.Summary> interviewEvaluators,
+
+            @Schema(description = "메일 발송 여부") Boolean isMailSent,
+            @Schema(description = "문자 발송 여부") Boolean isSmsSent
     ) {
         public static SummaryForAdmin from(Application application, long sequenceNumber) {
             String seq = String.format("%03d", sequenceNumber);
@@ -391,7 +394,10 @@ public class ApplicationResponseDTO {
                     interviewAssignedCount,
                     interviewEvaluatedCount,
                     interviewAverageScore,
-                    intAssigned
+                    intAssigned,
+
+                    application.getIsMailSent(),
+                    application.getIsSmsSent()
             );
         }
     }

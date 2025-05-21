@@ -80,7 +80,7 @@ public class AdminApplicationController {
             @ModelAttribute @Valid ApplicationRequestDTO.SendBulkMail request
     ) throws MessagingException {
         mailService.sendBulkMail(
-                request.recipients(),
+                request.applicationIds(),
                 request.subject(),
                 request.body(),
                 request.attachments()

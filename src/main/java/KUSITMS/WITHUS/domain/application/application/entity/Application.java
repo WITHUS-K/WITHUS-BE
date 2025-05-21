@@ -49,8 +49,10 @@ public class Application extends BaseEntity {
     @Column(name = "PHONE_NUMBER", nullable = false)
     private String phoneNumber;
 
+    @Column(name = "UNIVERSITY")
     private String university;
 
+    @Column(name = "MAJOR")
     private String major;
 
     @Enumerated(EnumType.STRING)
@@ -63,7 +65,16 @@ public class Application extends BaseEntity {
     @Column(name = "IMAGE_URL")
     private String imageUrl;
 
+    @Column(name = "ADDRESS")
     private String address;
+
+    @Builder.Default
+    @Column(name = "IS_MAIL_SENT")
+    private Boolean isMailSent = false;
+
+    @Builder.Default
+    @Column(name = "IS_SMS_SENT")
+    private Boolean isSmsSent = false;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -134,6 +145,14 @@ public class Application extends BaseEntity {
                 .recruitment(recruitment)
                 .position(position)
                 .build();
+    }
+
+    public void updateIsMailSent(Boolean isMailSent) {
+        this.isMailSent = isMailSent;
+    }
+
+    public void updateIsSmsSent(Boolean isSmsSent) {
+        this.isSmsSent = isSmsSent;
     }
 
     public void updateImageUrl(String imageUrl) {

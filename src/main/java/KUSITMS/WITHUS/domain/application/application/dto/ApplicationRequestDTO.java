@@ -6,10 +6,7 @@ import KUSITMS.WITHUS.domain.application.application.enumerate.SimpleApplication
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerRequestDTO;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -75,8 +72,8 @@ public class ApplicationRequestDTO {
 
     @Schema(description = "여러 사용자에게 메일 일괄 발송 요청 DTO")
     public record SendBulkMail(
-            @Schema(description = "수신자 이메일 리스트", example = "[\"user1@example.com\",\"user2@example.com\"]")
-            @NotEmpty List<@NotBlank String> recipients,
+            @Schema(description = "수신자 지원자(지원서) ID 리스트", example = "[1, 2, 3]")
+            @NotEmpty List<@Positive Long> applicationIds,
 
             @Schema(description = "메일 제목", example = "[WITHUS] 공지사항")
             @NotBlank String subject,
