@@ -224,6 +224,17 @@ public class ApplicationServiceImpl implements ApplicationService {
                 case STATUS:
                     cmp = sa.status().compareTo(sb.status());
                     break;
+                case IS_MAIL_SENT: // false < true 순으로 오름차순
+                    // Boolean.TRUE.equals 로 null → false 처리
+                    boolean mailA = Boolean.TRUE.equals(sa.isMailSent());
+                    boolean mailB = Boolean.TRUE.equals(sb.isMailSent());
+                    cmp = Boolean.compare(mailA, mailB);
+                    break;
+                case IS_SMS_SENT:
+                    boolean smsA = Boolean.TRUE.equals(sa.isSmsSent());
+                    boolean smsB = Boolean.TRUE.equals(sb.isSmsSent());
+                    cmp = Boolean.compare(smsA, smsB);
+                    break;
                 case NAME:
                 default:
                     cmp = sa.name().compareToIgnoreCase(sb.name());
