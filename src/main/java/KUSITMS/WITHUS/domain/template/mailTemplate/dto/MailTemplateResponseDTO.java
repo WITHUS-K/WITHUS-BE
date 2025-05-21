@@ -1,6 +1,6 @@
-package KUSITMS.WITHUS.domain.mailTemplate.dto;
+package KUSITMS.WITHUS.domain.template.mailTemplate.dto;
 
-import KUSITMS.WITHUS.domain.mailTemplate.entity.MailTemplate;
+import KUSITMS.WITHUS.domain.template.mailTemplate.entity.MailTemplate;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "메일 템플릿 응답 DTO")
