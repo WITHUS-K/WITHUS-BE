@@ -130,6 +130,7 @@ public enum ErrorCode {
 
     // TEMPLATE
     TEMPLATE_NOT_FOUND("TEMPLATE404", "존재하지 않는 템플릿입니다.", HttpStatus.NOT_FOUND),
+    EMAIL_SUBJECT_REQUIRED("TEMPLATE402", "이메일 템플릿의 경우 제목이 필요합니다.", HttpStatus.BAD_REQUEST),
 
     // EMAIL
     EMAIL_SEND_FAIL("EMAIL500", "메일 전송에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),

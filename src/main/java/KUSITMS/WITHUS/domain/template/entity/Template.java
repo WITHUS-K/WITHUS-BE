@@ -1,6 +1,8 @@
 package KUSITMS.WITHUS.domain.template.entity;
 
 import KUSITMS.WITHUS.domain.template.enumerate.TemplateType;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,6 +32,9 @@ public class Template {
     private TemplateType templateType;
 
     public Template(String name, String subject, String body, TemplateType templateType) {
+        if(templateType == TemplateType.MAIL && (subject == null || subject.isBlank())) {
+            throw new CustomException(ErrorCode.EMAIL_SUBJECT_REQUIRED);
+        }
         this.name = name;
         this.subject = subject;
         this.body = body;
