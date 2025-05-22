@@ -5,6 +5,7 @@ import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRe
 import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.domain.user.user.enumerate.ProfileColor;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @Builder
@@ -73,6 +75,12 @@ public class UserServiceImpl implements UserService {
                 Organization.create(organizationName)
         );
 
+        // 랜덤 프로필 컬러 선택
+        ProfileColor[] colors = ProfileColor.values();
+        ProfileColor randomColor = colors[
+                ThreadLocalRandom.current().nextInt(colors.length)
+                ];
+
         // User 생성
         User user = User.builder()
                 .name(name)
@@ -81,6 +89,7 @@ public class UserServiceImpl implements UserService {
                 .phoneNumber(phoneNumber)
                 .role(Role.ADMIN)
                 .gender(Gender.NONE)
+                .profileColor(randomColor)
                 .build();
 
         // UserOrganization 생성 및 연관관계 설정
@@ -124,6 +133,12 @@ public class UserServiceImpl implements UserService {
         // 존재하는 조직 Id로 조회
         Organization organization = organizationRepository.getById(organizationId);
 
+        // 랜덤 프로필 컬러 선택
+        ProfileColor[] colors = ProfileColor.values();
+        ProfileColor randomColor = colors[
+                ThreadLocalRandom.current().nextInt(colors.length)
+                ];
+
         // User 생성
         User user = User.builder()
                 .name(name)
@@ -132,6 +147,7 @@ public class UserServiceImpl implements UserService {
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(password))
                 .phoneNumber(phoneNumber)
+                .profileColor(randomColor)
                 .role(Role.USER)
                 .build();
 
