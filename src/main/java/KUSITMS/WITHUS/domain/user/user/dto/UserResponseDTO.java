@@ -21,13 +21,15 @@ public class UserResponseDTO {
     public record Summary(
             @Schema(description = "사용자 ID") Long userId,
             @Schema(description = "이름") String name,
-            @Schema(description = "프로필 이미지 url") String profileImageUrl
+            @Schema(description = "프로필 이미지 url") String profileImageUrl,
+            @Schema(description = "프로필 이미지 사진") String profileColor
     ) {
         public static Summary from(User user) {
             return new Summary(
                     user.getId(),
                     user.getName(),
-                    user.getProfileImageUrl()
+                    user.getProfileImageUrl(),
+                    (user.getProfileColor() == null) ? "gray" : user.getProfileColor().getKey()
             );
         }
     }
@@ -85,6 +87,7 @@ public class UserResponseDTO {
             @Schema(description = "이름") String name,
             @Schema(description = "이메일") String email,
             @Schema(description = "프로필 사진 URL") String imageUrl,
+            @Schema(description = "프로필 색상") String profileColor,
             @Schema(description = "역할에 속해있는지 여부") boolean isAssigned
     ) {
         public static SummaryForSearch from(User user, boolean isAssigned) {
@@ -93,6 +96,7 @@ public class UserResponseDTO {
                     user.getName(),
                     user.getEmail(),
                     user.getProfileImageUrl(),
+                    (user.getProfileColor() == null) ? "gray" : user.getProfileColor().getKey(),
                     isAssigned
             );
         }

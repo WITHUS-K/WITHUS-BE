@@ -77,10 +77,10 @@ public class AdminApplicationController {
     @PostMapping("/bulk-mail")
     @Operation(summary = "지원서 대상 다중 메일 발송", description = "복수의 수신자 이메일, 제목, 본문, 첨부파일을 받아 일괄 메일을 발송합니다.")
     public SuccessResponse<String> sendBulkMail(
-            @ModelAttribute @Valid ApplicationRequestDTO.SendBulkMail request
+            @ModelAttribute @Valid ApplicationRequestDTO.BulkMailRequest request
     ) throws MessagingException {
         mailService.sendBulkMail(
-                request.recipients(),
+                request.applicationIds(),
                 request.subject(),
                 request.body(),
                 request.attachments()
@@ -94,7 +94,7 @@ public class AdminApplicationController {
             @ModelAttribute @Valid ApplicationRequestDTO.BulkSmsRequest request
     ) {
         smsService.sendBulkSms(
-                request.phoneNumbers(),
+                request.applicationIds(),
                 request.message(),
                 request.attachment()
         );

@@ -7,5 +7,7 @@ public enum AdminApplicationSortField {
     INTERVIEW_EVALUATION_STATUS,
     DOCUMENT_SCORE,
     INTERVIEW_SCORE,
-    STATUS
+    STATUS,
+    IS_MAIL_SENT,
+    IS_SMS_SENT
 }

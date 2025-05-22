@@ -20,12 +20,10 @@ public enum AdminStageFilter {
                     ApplicationStatus.INTERVIEW_FAIL
             );
             case FINAL_PASS -> List.of(
-                    ApplicationStatus.PENDING,
                     ApplicationStatus.INTERVIEW_PASS
             );
             case FAIL -> List.of(
                     ApplicationStatus.DOX_FAIL,
-                    ApplicationStatus.DOX_PASS,
                     ApplicationStatus.INTERVIEW_FAIL
             );
         };
