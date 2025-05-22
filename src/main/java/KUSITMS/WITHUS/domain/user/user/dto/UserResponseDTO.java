@@ -21,13 +21,15 @@ public class UserResponseDTO {
     public record Summary(
             @Schema(description = "사용자 ID") Long userId,
             @Schema(description = "이름") String name,
-            @Schema(description = "프로필 이미지 url") String profileImageUrl
+            @Schema(description = "프로필 이미지 url") String profileImageUrl,
+            @Schema(description = "프로필 이미지 사진") String profileColor
     ) {
         public static Summary from(User user) {
             return new Summary(
                     user.getId(),
                     user.getName(),
-                    user.getProfileImageUrl()
+                    user.getProfileImageUrl(),
+                    (user.getProfileColor() == null) ? "gray" : user.getProfileColor().getKey()
             );
         }
     }
