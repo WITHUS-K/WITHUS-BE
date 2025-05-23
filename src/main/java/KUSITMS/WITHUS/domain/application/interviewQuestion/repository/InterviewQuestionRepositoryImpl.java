@@ -1,6 +1,8 @@
 package KUSITMS.WITHUS.domain.application.interviewQuestion.repository;
 
 import KUSITMS.WITHUS.domain.application.interviewQuestion.entity.InterviewQuestion;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -13,5 +15,11 @@ public class InterviewQuestionRepositoryImpl implements InterviewQuestionReposit
     @Override
     public InterviewQuestion save(InterviewQuestion interviewQuestion) {
         return interviewQuestionJpaRepository.save(interviewQuestion);
+    }
+
+    @Override
+    public InterviewQuestion getById(Long questionId) {
+        return interviewQuestionJpaRepository.findById(questionId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INTERVIEW_QUESTION_NOT_EXIST));
     }
 }

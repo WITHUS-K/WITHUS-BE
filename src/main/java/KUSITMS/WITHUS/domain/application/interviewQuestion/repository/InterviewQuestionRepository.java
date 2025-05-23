@@ -4,4 +4,5 @@ import KUSITMS.WITHUS.domain.application.interviewQuestion.entity.InterviewQuest
 
 public interface InterviewQuestionRepository {
     InterviewQuestion save(InterviewQuestion interviewQuestion);
+    InterviewQuestion getById(Long questionId);
 }

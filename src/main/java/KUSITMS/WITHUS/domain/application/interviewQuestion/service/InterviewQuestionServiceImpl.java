@@ -6,6 +6,8 @@ import KUSITMS.WITHUS.domain.application.interviewQuestion.entity.InterviewQuest
 import KUSITMS.WITHUS.domain.application.interviewQuestion.repository.InterviewQuestionRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +35,20 @@ public class InterviewQuestionServiceImpl implements InterviewQuestionService {
 
         interviewQuestionRepository.save(question);
         application.addInterviewQuestion(question);
+
+        return question;
+    }
+
+    @Override
+    @Transactional
+    public InterviewQuestion updateQuestion(Long questionId, Long id, String content) {
+        InterviewQuestion question = interviewQuestionRepository.getById(questionId);
+
+        if (!question.getUser().getId().equals(id)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+
+        question.updateContent(content);
 
         return question;
     }
