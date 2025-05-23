@@ -1,9 +1,9 @@
-package KUSITMS.WITHUS.domain.application.interviewQuestion.controller;
+package KUSITMS.WITHUS.domain.interview.interviewQuestion.controller;
 
-import KUSITMS.WITHUS.domain.application.interviewQuestion.dto.InterviewQuestionRequestDTO;
-import KUSITMS.WITHUS.domain.application.interviewQuestion.dto.InterviewQuestionResponseDTO;
-import KUSITMS.WITHUS.domain.application.interviewQuestion.entity.InterviewQuestion;
-import KUSITMS.WITHUS.domain.application.interviewQuestion.service.InterviewQuestionService;
+import KUSITMS.WITHUS.domain.interview.interviewQuestion.dto.InterviewQuestionRequestDTO;
+import KUSITMS.WITHUS.domain.interview.interviewQuestion.dto.InterviewQuestionResponseDTO;
+import KUSITMS.WITHUS.domain.interview.interviewQuestion.entity.InterviewQuestion;
+import KUSITMS.WITHUS.domain.interview.interviewQuestion.service.InterviewQuestionService;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
 import KUSITMS.WITHUS.global.response.SuccessResponse;

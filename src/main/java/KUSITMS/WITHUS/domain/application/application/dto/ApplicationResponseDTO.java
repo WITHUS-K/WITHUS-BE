@@ -10,7 +10,7 @@ import KUSITMS.WITHUS.domain.application.comment.dto.CommentResponseDTO;
 import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.application.comment.enumerate.CommentType;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
-import KUSITMS.WITHUS.domain.application.interviewQuestion.dto.InterviewQuestionResponseDTO;
+import KUSITMS.WITHUS.domain.interview.interviewQuestion.dto.InterviewQuestionResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.dto.EvaluationResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteriaResponseDTO;

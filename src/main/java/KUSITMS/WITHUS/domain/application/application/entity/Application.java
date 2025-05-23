@@ -7,7 +7,7 @@ import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.Application
 import KUSITMS.WITHUS.domain.application.applicantAvailability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
-import KUSITMS.WITHUS.domain.application.interviewQuestion.entity.InterviewQuestion;
+import KUSITMS.WITHUS.domain.interview.interviewQuestion.entity.InterviewQuestion;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;

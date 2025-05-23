@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.domain.application.interviewQuestion.entity;
+package KUSITMS.WITHUS.domain.interview.interviewQuestion.entity;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
@@ -32,9 +32,5 @@ public class InterviewQuestion extends BaseEntity {
 
     public void associateApplication(Application application) {
         this.application = application;
-    }
-
-    public void associateUser(User user) {
-        this.user = user;
     }
 }
