@@ -27,6 +27,12 @@ public class Interview extends BaseEntity {
     @Column(name = "ROOM_COUNT", nullable = false)
     private int roomCount;
 
+    @Builder.Default
+    @ElementCollection
+    @CollectionTable(name = "INTERVIEW_ROOM_NAMES", joinColumns = @JoinColumn(name = "interview_id"))
+    @Column(name = "ROOM_NAME")
+    private List<String> roomNames = new ArrayList<>();
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RECRUITMENT_ID", nullable = false)
     private Recruitment recruitment;
@@ -50,5 +56,10 @@ public class Interview extends BaseEntity {
 
     public void setRoomCount(int roomCount) {
         this.roomCount = roomCount;
+    }
+
+    public void setRoomNames(List<String> names) {
+        this.roomNames.clear();
+        this.roomNames.addAll(names);
     }
 }

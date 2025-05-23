@@ -13,6 +13,8 @@ import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +25,6 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 @Transactional(readOnly = true)
@@ -44,12 +45,17 @@ public class InterviewSchedulerService {
      */
     @Transactional
     public void assignInterviewSlots(Long recruitmentId, Long interviewId, InterviewConfig config) {
+        if (config.roomNames().size() != config.roomCount()) {
+            throw new CustomException(ErrorCode.MISMATCHED_ROOM_COUNT);
+        }
+
         // 1. 서류 합격 지원자 및 가능 시간 조회
         List<Application> applicants = new ArrayList<>(applicationRepository.findPassedByRecruitment(recruitmentId));
         List<ApplicantAvailability> availabilityList = availabilityRepository.findByApplicationIn(applicants);
         Interview interview = interviewRepository.getById(interviewId);
 
         interview.setRoomCount(config.roomCount());
+        interview.setRoomNames(config.roomNames());
 
         // 2. ID로 빠르게 찾기 위한 맵 구성
         Map<Long, Application> applicantMap = applicants.stream()
@@ -150,7 +156,7 @@ public class InterviewSchedulerService {
                 LocalDate date = time.toLocalDate();
                 LocalTime start = time.toLocalTime();
                 LocalTime end = start.plusMinutes(slotMinutes);
-                String roomName = "면접실 " + (usedRooms + 1);
+                String roomName = config.roomNames().get(usedRooms);
 
                 TimeSlot newSlot = timeSlotRepository.findOrCreate(
                         date, start, end, interview, hasPosition ? position : null, roomName
@@ -231,16 +237,7 @@ public class InterviewSchedulerService {
                                     : InterviewScheduleDTO.InterviewSlotDTO.from(slot))
                             .toList();
 
-                    List<String> roomNames = daySlots.isEmpty()
-                            ? IntStream.rangeClosed(1, interview.getRoomCount())
-                            .mapToObj(i -> "면접실 " + i)
-                            .toList()
-                            : daySlots.stream()
-                            .map(TimeSlot::getRoomName)
-                            .filter(name -> name != null && !name.isBlank())
-                            .distinct()
-                            .sorted()
-                            .toList();
+                    List<String> roomNames = interview.getRoomNames();
 
                     return InterviewScheduleDTO.from(
                             interview.getId(),
@@ -263,6 +260,7 @@ public class InterviewSchedulerService {
     public record InterviewConfig(
             int interviewerPerSlot,
             int applicantPerSlot,
-            int roomCount
+            int roomCount,
+            List<String> roomNames
     ) {}
 }

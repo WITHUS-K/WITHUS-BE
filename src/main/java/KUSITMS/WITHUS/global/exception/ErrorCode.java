@@ -95,6 +95,7 @@ public enum ErrorCode {
     // Interview (면접)
     INTERVIEW_ALREADY_EXIST("INTERVIEW400", "이미 존재하는 면접입니다.", HttpStatus.BAD_REQUEST),
     INTERVIEW_NOT_EXIST("INTERVIEW404", "존재하지 않는 면접입니다.", HttpStatus.NOT_FOUND),
+    MISMATCHED_ROOM_COUNT("INTERVIEW400", "roomNames 수가 roomCount와 일치하지 않습니다.",HttpStatus.BAD_REQUEST),
 
     // TimeSlot (면접)
     TIME_SLOT_ALREADY_EXIST("TIME_SLOT400", "이미 존재하는 TimeSlot입니다.", HttpStatus.BAD_REQUEST),
