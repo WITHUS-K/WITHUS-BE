@@ -17,4 +17,19 @@ public class ApplicationAcquaintanceRepositoryImpl implements ApplicationAcquain
         return applicationAcquaintanceJpaRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_NOT_EXIST));
     }
+
+    @Override
+    public boolean existsByApplication_IdAndUser_Id(Long applicationId, Long userId) {
+        return applicationAcquaintanceJpaRepository.existsByApplication_IdAndUser_Id(applicationId, userId);
+    }
+
+    @Override
+    public void deleteByApplication_IdAndUser_Id(Long applicationId, Long userId) {
+        applicationAcquaintanceJpaRepository.deleteByApplication_IdAndUser_Id(applicationId, userId);
+    }
+
+    @Override
+    public void save(ApplicationAcquaintance applicationAcquaintance) {
+        applicationAcquaintanceJpaRepository.save(applicationAcquaintance);
+    }
 }

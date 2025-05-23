@@ -114,4 +114,14 @@ public class UserOrganizationRepositoryImpl implements UserOrganizationRepositor
                 .distinct()
                 .fetch();
     }
+
+    @Override
+    public List<UserOrganization> findByUser_Id(Long userId) {
+        return userOrganizationJpaRepository.findByUser_Id(userId);
+    }
+
+    @Override
+    public boolean existsByUser_IdAndOrganization_Id(Long userId, Long organizationId) {
+        return userOrganizationJpaRepository.existsByUser_IdAndOrganization_Id(userId, organizationId);
+    }
 }

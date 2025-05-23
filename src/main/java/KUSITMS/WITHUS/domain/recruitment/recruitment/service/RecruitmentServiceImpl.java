@@ -2,23 +2,21 @@ package KUSITMS.WITHUS.domain.recruitment.recruitment.service;
 
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
-import KUSITMS.WITHUS.domain.application.application.repository.ApplicationJpaRepository;
+import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
-import KUSITMS.WITHUS.domain.application.applicationEvaluator.repository.ApplicationEvaluatorJpaRepository;
+import KUSITMS.WITHUS.domain.application.applicationEvaluator.repository.ApplicationEvaluatorRepository;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
-import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationJpaRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
-import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.repository.EvaluationCriteriaJpaRepository;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.repository.EvaluationCriteriaRepository;
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
-import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionJpaRepository;
+import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
-import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentJpaRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.AvailableTimeRangeAppender;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.DocumentQuestionAppender;
@@ -27,7 +25,7 @@ import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.PositionAppe
 import KUSITMS.WITHUS.domain.recruitment.recruitment.util.SlugGenerator;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
-import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationJpaRepository;
+import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +52,12 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     private final RecruitmentRepository recruitmentRepository;
     private final OrganizationRepository organizationRepository;
+    private final UserOrganizationRepository userOrganizationRepository;
+    private final ApplicationRepository applicationRepository;
+    private final PositionRepository positionRepository;
+    private final EvaluationRepository evaluationRepository;
+    private final EvaluationCriteriaRepository evaluationCriteriaRepository;
+    private final ApplicationEvaluatorRepository applicationEvaluatorRepository;
 
     private final AvailableTimeRangeAppender availableTimeRangeAppender;
     private final PositionAppender positionAppender;
@@ -61,14 +65,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     private final EvaluationCriteriaAppender criteriaAppender;
 
     private static final int MAX_ATTEMPTS = 10;
-    private final UserOrganizationJpaRepository userOrganizationJpaRepository;
-    private final RecruitmentJpaRepository recruitmentJpaRepository;
-    private final ApplicationJpaRepository applicationJpaRepository;
-    private final PositionJpaRepository positionJpaRepository;
-    private final EvaluationRepository evaluationRepository;
-    private final EvaluationCriteriaJpaRepository evaluationCriteriaJpaRepository;
-    private final ApplicationEvaluatorJpaRepository applicationEvaluatorJpaRepository;
-    private final EvaluationJpaRepository evaluationJpaRepository;
 
     /**
      * 공고 임시 저장
@@ -127,7 +123,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     @Override
     public List<RecruitmentResponseDTO.SummaryForHome> getCurrentSummariesForUser(Long userId, Long organizationId) {
 
-        boolean isMember = userOrganizationJpaRepository
+        boolean isMember = userOrganizationRepository
                 .existsByUser_IdAndOrganization_Id(userId, organizationId);
         if (!isMember) {
             throw new CustomException(ErrorCode.USER_ORGANIZATION_NOT_FOUND);
@@ -144,7 +140,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     @Override
     public List<RecruitmentResponseDTO.SummaryForHome> getCurrentSummariesForAdmin(Long adminUserId) {
         // Admin 은 하나의 조직에만 매핑되어 있다고 가정
-        Long orgId = userOrganizationJpaRepository.findByUser_Id(adminUserId).stream()
+        Long orgId = userOrganizationRepository.findByUser_Id(adminUserId).stream()
                 .findFirst()
                 .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_NOT_EXIST))
                 .getOrganization().getId();
@@ -168,17 +164,17 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 : recruitment.getFinalResultDate();
         long daysToDeadline = ChronoUnit.DAYS.between(today, deadline);
 
-        long requiredCriteriaCount = evaluationCriteriaJpaRepository
+        long requiredCriteriaCount = evaluationCriteriaRepository
                 .countByRecruitment_IdAndEvaluationType(recruitmentId, stage);
 
         // 공고에 속한 모든 파트
-        List<Position> positions = positionJpaRepository.findByRecruitment_Id(recruitmentId);
+        List<Position> positions = positionRepository.findByRecruitment_Id(recruitmentId);
 
         return positions.stream().map(pos -> {
             Long posId = pos.getId();
 
             // 이 파트의 지원서 전체 조회
-            List<Application> apps = applicationJpaRepository.findByRecruitment_IdAndPosition_Id(recruitmentId, posId);
+            List<Application> apps = applicationRepository.findByRecruitment_IdAndPosition_Id(recruitmentId, posId);
 
             // stage 에 따라 평가 대상 필터링
             List<Application> targets = apps.stream()
@@ -253,17 +249,17 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 .toMinutes();
 
         // 이 공고/단계의 평가 기준 ID 목록
-        List<Long> criteriaIds = evaluationCriteriaJpaRepository
+        List<Long> criteriaIds = evaluationCriteriaRepository
                 .findByRecruitment_IdAndEvaluationType(recruitmentId, stage)
                 .stream().map(EvaluationCriteria::getId).toList();
 
         // 파트 별 미완료 평가자 추출
-        List<RecruitmentResponseDTO.PendingEvaluatorByPosition> byPosition = positionJpaRepository.findByRecruitment_Id(recruitmentId)
+        List<RecruitmentResponseDTO.PendingEvaluatorByPosition> byPosition = positionRepository.findByRecruitment_Id(recruitmentId)
                 .stream()
                 .map(pos -> {
                     // 이 파트에 배정된 평가자 ⇢ ApplicationEvaluator
-                    List<ApplicationEvaluator> assigns = applicationEvaluatorJpaRepository
-                            .findByApplication_Recruitment_IdAndApplication_Position_IdAndEvaluationType(
+                    List<ApplicationEvaluator> assigns = applicationEvaluatorRepository
+                            .findByRecruitmentAndPositionAndType(
                                     recruitmentId, pos.getId(), stage
                             );
 
@@ -280,7 +276,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                                 User user = entry.getKey();
                                 // 내가 맡은 지원서 중에 하나라도 “모든 기준” 평가가 안 끝난 게 있으면 미완료
                                 return entry.getValue().stream().anyMatch(app ->
-                                        evaluationJpaRepository.countByApplication_IdAndUser_IdAndCriteria_IdIn(
+                                        evaluationRepository.countByApplication_IdAndUser_IdAndCriteria_IdIn(
                                                 app.getId(), user.getId(), criteriaIds
                                         ) < criteriaIds.size()
                                 );
@@ -316,11 +312,11 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     @Override
     public RecruitmentResponseDTO.MyDocumentEvaluation getMyDocumentEvaluations(Long userId, Long recruitmentId) {
         // 내가 서류 평가자로 할당된 모든 레코드
-        List<ApplicationEvaluator> assigns = applicationEvaluatorJpaRepository
-                .findByEvaluator_IdAndEvaluationTypeAndApplication_Recruitment_Id(userId, EvaluationType.DOCUMENT, recruitmentId);
+        List<ApplicationEvaluator> assigns = applicationEvaluatorRepository
+                .findByEvaluatorAndRecruitmentAndType(userId, EvaluationType.DOCUMENT, recruitmentId);
 
         // 공고별로 필요한 문항 개수 캐시
-        long needed = evaluationCriteriaJpaRepository
+        long needed = evaluationCriteriaRepository
                 .countByRecruitment_IdAndEvaluationType(recruitmentId, EvaluationType.DOCUMENT);
 
         LinkedHashSet<ApplicationResponseDTO.Summary> pending = new LinkedHashSet<>();
@@ -330,7 +326,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         for (ApplicationEvaluator ae : assigns) {
             Application app = ae.getApplication();
 
-            long answered = evaluationJpaRepository.countByApplication_IdAndUser_IdAndCriteria_EvaluationType(
+            long answered = evaluationRepository.countByApplication_IdAndUser_IdAndCriteria_EvaluationType(
                     app.getId(), userId, EvaluationType.DOCUMENT
             );
 
@@ -463,7 +459,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         if (orgIds.isEmpty()) return List.of();
 
         LocalDate today = LocalDate.now();
-        List<Recruitment> all = recruitmentJpaRepository.findByOrganization_IdIn(orgIds);
+        List<Recruitment> all = recruitmentRepository.findByOrganization_IdIn(orgIds);
 
         return all.stream()
                 .filter(r -> {
@@ -475,7 +471,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                     List<RecruitmentResponseDTO.PositionCount> counts = r.getPositions().stream()
                             .map(pos -> new RecruitmentResponseDTO.PositionCount(
                                     pos.getName(),
-                                    applicationJpaRepository.countByRecruitment_IdAndPosition_Id(r.getId(), pos.getId())
+                                    applicationRepository.countByRecruitment_IdAndPosition_Id(r.getId(), pos.getId())
                             ))
                             .toList();
                     return RecruitmentResponseDTO.SummaryForHome.from(r, counts);

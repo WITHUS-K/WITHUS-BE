@@ -46,4 +46,29 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
                 )
                 .fetch();
     }
+
+    @Override
+    public List<Application> findByRecruitmentId(Long recruitmentId) {
+        return applicationJpaRepository.findByRecruitmentId(recruitmentId);
+    }
+
+    @Override
+    public List<Application> findByRecruitmentIdAndStatusIn(Long recruitmentId, List<ApplicationStatus> statuses) {
+        return applicationJpaRepository.findByRecruitmentIdAndStatusIn(recruitmentId, statuses);
+    }
+
+    @Override
+    public List<Application> findByRecruitment_IdAndPosition_Id(Long recruitmentId, Long positionId) {
+        return applicationJpaRepository.findByRecruitment_IdAndPosition_Id(recruitmentId, positionId);
+    }
+
+    @Override
+    public Long countByRecruitment_IdAndPosition_Id(Long recruitmentId, Long positionId) {
+        return applicationJpaRepository.countByRecruitment_IdAndPosition_Id(recruitmentId, positionId);
+    }
+
+    @Override
+    public List<Application> findAllById(List<Long> longs) {
+        return applicationJpaRepository.findAllById(longs);
+    }
 }

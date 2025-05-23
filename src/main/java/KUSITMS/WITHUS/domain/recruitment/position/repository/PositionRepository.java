@@ -13,4 +13,5 @@ public interface PositionRepository {
     void delete(Long id);
     Optional<Position> findByRecruitmentAndName(Recruitment recruitment, String name);
     List<Position> findAllByRecruitmentId(Long recruitmentId);
+    List<Position> findByRecruitment_Id(Long recruitmentId);
 }

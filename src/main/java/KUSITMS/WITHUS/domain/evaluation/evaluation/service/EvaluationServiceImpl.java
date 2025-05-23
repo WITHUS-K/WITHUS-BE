@@ -5,10 +5,8 @@ import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepos
 import KUSITMS.WITHUS.domain.evaluation.evaluation.dto.EvaluationRequestDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.dto.EvaluationResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
-import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationJpaRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
-import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.repository.EvaluationCriteriaJpaRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.repository.EvaluationCriteriaRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
@@ -29,8 +27,6 @@ public class EvaluationServiceImpl implements EvaluationService {
     private final ApplicationRepository applicationRepository;
     private final EvaluationCriteriaRepository criteriaRepository;
     private final UserRepository userRepository;
-    private final EvaluationJpaRepository evaluationJpaRepository;
-    private final EvaluationCriteriaJpaRepository evaluationCriteriaJpaRepository;
 
     @Override
     @Transactional
@@ -68,10 +64,10 @@ public class EvaluationServiceImpl implements EvaluationService {
                 .map(EvaluationRequestDTO.BulkCreate.EvaluationItem::criteriaId)
                 .toList();
 
-        List<EvaluationCriteria> criteriaList = evaluationCriteriaJpaRepository.findAllById(criteriaIds);
+        List<EvaluationCriteria> criteriaList = criteriaRepository.findAllById(criteriaIds);
 
-        List<Evaluation> existingEvaluations = evaluationJpaRepository.findByApplicationAndUserAndCriteriaIn(application, user, criteriaList);
-        evaluationJpaRepository.deleteAll(existingEvaluations);
+        List<Evaluation> existingEvaluations = evaluationRepository.findByApplicationAndUserAndCriteriaIn(application, user, criteriaList);
+        evaluationRepository.deleteAll(existingEvaluations);
 
         List<Evaluation> evaluations = request.evaluations().stream()
                 .map(item -> {
@@ -85,7 +81,7 @@ public class EvaluationServiceImpl implements EvaluationService {
                 })
                 .toList();
 
-        evaluationJpaRepository.saveAll(evaluations);
+        evaluationRepository.saveAll(evaluations);
 
         return evaluations.stream()
                 .map(EvaluationResponseDTO.Detail::from)
