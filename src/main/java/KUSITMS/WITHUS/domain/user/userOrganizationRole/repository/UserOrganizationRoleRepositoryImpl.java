@@ -26,4 +26,9 @@ public class UserOrganizationRoleRepositoryImpl implements UserOrganizationRoleR
     public void saveAll(List<UserOrganizationRole> userOrganizationRoles) {
         userOrganizationRoleJpaRepository.saveAll(userOrganizationRoles);
     }
+
+    @Override
+    public List<UserOrganizationRole> findAllByOrganizationRole_Id(Long organizationRoleId) {
+        return userOrganizationRoleJpaRepository.findAllByOrganizationRole_Id(organizationRoleId);
+    }
 }

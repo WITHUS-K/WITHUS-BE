@@ -1,6 +1,6 @@
-package KUSITMS.WITHUS.domain.application.interviewQuestion.dto;
+package KUSITMS.WITHUS.domain.interview.interviewQuestion.dto;
 
-import KUSITMS.WITHUS.domain.application.interviewQuestion.entity.InterviewQuestion;
+import KUSITMS.WITHUS.domain.interview.interviewQuestion.entity.InterviewQuestion;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 

@@ -1,5 +1,7 @@
 package KUSITMS.WITHUS.domain.application.application.service;
 
+import KUSITMS.WITHUS.domain.application.applicantAvailability.entity.ApplicantAvailability;
+import KUSITMS.WITHUS.domain.application.applicantAvailability.repository.ApplicantAvailabilityRepository;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
@@ -7,19 +9,15 @@ import KUSITMS.WITHUS.domain.application.application.enumerate.AdminApplicationS
 import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
 import KUSITMS.WITHUS.domain.application.application.enumerate.EvaluationStatus;
 import KUSITMS.WITHUS.domain.application.application.enumerate.SimpleApplicationStatus;
-import KUSITMS.WITHUS.domain.application.application.repository.ApplicationJpaRepository;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
 import KUSITMS.WITHUS.domain.application.applicationAcquaintance.entity.ApplicationAcquaintance;
-import KUSITMS.WITHUS.domain.application.applicationAcquaintance.repository.ApplicationAcquaintanceJpaRepository;
 import KUSITMS.WITHUS.domain.application.applicationAcquaintance.repository.ApplicationAcquaintanceRepository;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerRequestDTO;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.ApplicationAnswerRepository;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
-import KUSITMS.WITHUS.domain.application.applicationEvaluator.repository.ApplicationEvaluatorJpaRepository;
-import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
-import KUSITMS.WITHUS.domain.application.availability.repository.ApplicantAvailabilityRepository;
+import KUSITMS.WITHUS.domain.application.applicationEvaluator.repository.ApplicationEvaluatorRepository;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
@@ -36,7 +34,7 @@ import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepos
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.UserOrganizationRole;
-import KUSITMS.WITHUS.domain.user.userOrganizationRole.repository.UserOrganizationRoleJpaRepository;
+import KUSITMS.WITHUS.domain.user.userOrganizationRole.repository.UserOrganizationRoleRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
@@ -69,13 +67,11 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final EvaluationCriteriaRepository evaluationCriteriaRepository;
     private final DocumentQuestionRepository documentQuestionRepository;
     private final ApplicationAnswerRepository applicationAnswerRepository;
-    private final FileUploadService fileUploadService;
-    private final ApplicationJpaRepository applicationJpaRepository;
-    private final UserOrganizationRoleJpaRepository userOrganizationRoleJpaRepository;
-    private final ApplicationEvaluatorJpaRepository applicationEvaluatorJpaRepository;
+    private final UserOrganizationRoleRepository userOrganizationRoleRepository;
+    private final ApplicationEvaluatorRepository applicationEvaluatorRepository;
     private final UserRepository userRepository;
-    private final ApplicationAcquaintanceJpaRepository applicationAcquaintanceJpaRepository;
     private final ApplicationAcquaintanceRepository applicationAcquaintanceRepository;
+    private final FileUploadService fileUploadService;
 
     /**
      * 지원서 생성
@@ -151,7 +147,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             String keyword,
             Pageable pageable)
     {
-        List<Application> allApplications = applicationJpaRepository.findByRecruitmentId(recruitmentId); // 전체 가져오기
+        List<Application> allApplications = applicationRepository.findByRecruitmentId(recruitmentId);
 
         List<ApplicationResponseDTO.SummaryForUser> filtered = allApplications.stream()
                 .map(app -> ApplicationResponseDTO.SummaryForUser.from(app, currentUserId))
@@ -191,7 +187,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             AdminApplicationSortField sortBy,
             Sort.Direction direction
     ) {
-        List<Application> allApps = applicationJpaRepository
+        List<Application> allApps = applicationRepository
                 .findByRecruitmentIdAndStatusIn(recruitmentId, stage.toStatusList());
 
         allApps.sort((a, b) -> {
@@ -265,7 +261,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional
     public List<ApplicationResponseDTO.Summary> updateStatus(ApplicationRequestDTO.UpdateStatus request) {
-        List<Application> applicationList = applicationJpaRepository.findAllById(request.applicationIds());
+        List<Application> applicationList = applicationRepository.findAllById(request.applicationIds());
 
         applicationList.forEach(app -> {
             ApplicationStatus newStatus = mapToRealStatus(
@@ -288,7 +284,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     public void distributeEvaluators(ApplicationEvaluatorRequestDTO.Distribute request) {
         // 기존 배정 초기화
         Long recruitmentId = request.recruitmentId();
-        applicationEvaluatorJpaRepository.deleteAllByApplication_Recruitment_Id(recruitmentId);
+        applicationEvaluatorRepository.deleteAllByApplication_Recruitment_Id(recruitmentId);
 
         // 파트별로 배정
         Random rnd = new Random();
@@ -298,7 +294,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             int  count    = part.count();
 
             // 후보 평가자 풀
-            List<User> pool = userOrganizationRoleJpaRepository
+            List<User> pool = userOrganizationRoleRepository
                     .findAllByOrganizationRole_Id(roleId)
                     .stream()
                     .map(UserOrganizationRole::getUser)
@@ -309,7 +305,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             }
 
             // 이 파트 지원서 리스트
-            List<Application> apps = applicationJpaRepository
+            List<Application> apps = applicationRepository
                     .findByRecruitment_IdAndPosition_Id(recruitmentId, posId);
 
             // 각 지원서마다 랜덤 n명 배정
@@ -321,7 +317,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                         .map(u -> new ApplicationEvaluator(app, u, part.evaluationType() ))
                         .collect(toList());
 
-                applicationEvaluatorJpaRepository.saveAll(assigns);
+                applicationEvaluatorRepository.saveAll(assigns);
             }
         }
     }
@@ -337,7 +333,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         Application application = applicationRepository.getById(applicationId);
 
-        applicationEvaluatorJpaRepository.deleteAllByApplication_Id(applicationId);
+        applicationEvaluatorRepository.deleteAllByApplication_Id(applicationId);
 
         List<User> users = userRepository.findAllById(request.evaluatorIds());
         if (users.size() != request.evaluatorIds().size()) {
@@ -347,7 +343,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         List<ApplicationEvaluator> assigns = users.stream()
                 .map(u -> new ApplicationEvaluator(application, u, request.evaluationType()))
                 .toList();
-        applicationEvaluatorJpaRepository.saveAll(assigns);
+        applicationEvaluatorRepository.saveAll(assigns);
     }
 
     /**
@@ -357,17 +353,17 @@ public class ApplicationServiceImpl implements ApplicationService {
      */
     @Transactional
     public boolean toggleAcquaintance(Long applicationId, Long currentUserId) {
-        boolean exists = applicationAcquaintanceJpaRepository
+        boolean exists = applicationAcquaintanceRepository
                 .existsByApplication_IdAndUser_Id(applicationId, currentUserId);
 
         if (exists) {
-            applicationAcquaintanceJpaRepository
+            applicationAcquaintanceRepository
                     .deleteByApplication_IdAndUser_Id(applicationId, currentUserId);
             return false;
         } else {
             Application app = applicationRepository.getById(applicationId);
             User user = userRepository.getById(currentUserId);
-            applicationAcquaintanceJpaRepository.save(new ApplicationAcquaintance(app, user));
+            applicationAcquaintanceRepository.save(new ApplicationAcquaintance(app, user));
             return true;
         }
     }

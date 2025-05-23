@@ -2,8 +2,8 @@ package KUSITMS.WITHUS.domain.interview.interview.service;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
-import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
-import KUSITMS.WITHUS.domain.application.availability.repository.ApplicantAvailabilityRepository;
+import KUSITMS.WITHUS.domain.application.applicantAvailability.entity.ApplicantAvailability;
+import KUSITMS.WITHUS.domain.application.applicantAvailability.repository.ApplicantAvailabilityRepository;
 import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewScheduleDTO;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.interview.repository.InterviewRepository;

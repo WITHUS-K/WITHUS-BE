@@ -15,4 +15,6 @@ public interface UserOrganizationRepository {
     List<UserOrganization> findAllByOrganizationIdAndUserIdIn(Long organizationId, List<Long> userIds);
     void deleteAllInBatch(List<UserOrganization> userOrganizations);
     List<User> findUsersByOrganizationAndKeyword(Long orgId, String keyword);
+    List<UserOrganization> findByUser_Id(Long userId);
+    boolean existsByUser_IdAndOrganization_Id(Long userId, Long organizationId);
 }

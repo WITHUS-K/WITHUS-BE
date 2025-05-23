@@ -1,6 +1,6 @@
-package KUSITMS.WITHUS.domain.application.interviewQuestion.service;
+package KUSITMS.WITHUS.domain.interview.interviewQuestion.service;
 
-import KUSITMS.WITHUS.domain.application.interviewQuestion.entity.InterviewQuestion;
+import KUSITMS.WITHUS.domain.interview.interviewQuestion.entity.InterviewQuestion;
 
 public interface InterviewQuestionService {
     InterviewQuestion addQuestionToApplication(Long applicationId, Long userId, String content);

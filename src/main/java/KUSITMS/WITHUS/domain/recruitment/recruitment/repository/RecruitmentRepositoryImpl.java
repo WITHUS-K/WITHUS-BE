@@ -28,11 +28,8 @@ public class RecruitmentRepositoryImpl implements RecruitmentRepository {
     }
 
     @Override
-    public List<Recruitment> findAll() {
-        return queryFactory.selectFrom(recruitment)
-                .where(recruitment.isTemporary.isFalse())
-                .orderBy(recruitment.createdAt.desc())
-                .fetch();
+    public List<Recruitment> findByOrganization_IdIn(List<Long> organizationIds) {
+        return recruitmentJpaRepository.findByOrganization_IdIn(organizationIds);
     }
 
     @Override

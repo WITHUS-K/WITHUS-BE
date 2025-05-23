@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.domain.application.interviewQuestion.dto;
+package KUSITMS.WITHUS.domain.interview.interviewQuestion.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

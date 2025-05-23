@@ -5,7 +5,7 @@ import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationResponseD
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
-import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationJpaRepository;
+import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +18,7 @@ import java.util.List;
 public class OrganizationServiceImpl implements OrganizationService {
 
     private final OrganizationRepository organizationRepository;
-    private final UserOrganizationJpaRepository userOrganizationJpaRepository;
+    private final UserOrganizationRepository userOrganizationRepository;
 
     /**
      * 조직 생성
@@ -95,7 +95,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public List<OrganizationResponseDTO.Summary> getMyOrganizations(Long userId) {
-        return userOrganizationJpaRepository
+        return userOrganizationRepository
                 .findByUser_Id(userId)
                 .stream()
                 .map(UserOrganization::getOrganization)

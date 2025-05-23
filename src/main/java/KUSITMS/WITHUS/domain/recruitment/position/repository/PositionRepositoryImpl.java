@@ -61,4 +61,9 @@ public class PositionRepositoryImpl implements PositionRepository {
                 .where(position.recruitment.id.eq(recruitmentId))
                 .fetch();
     }
+
+    @Override
+    public List<Position> findByRecruitment_Id(Long recruitmentId) {
+        return positionJpaRepository.findByRecruitment_Id(recruitmentId);
+    }
 }

@@ -1,9 +1,9 @@
-package KUSITMS.WITHUS.domain.application.interviewQuestion.service;
+package KUSITMS.WITHUS.domain.interview.interviewQuestion.service;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
-import KUSITMS.WITHUS.domain.application.interviewQuestion.entity.InterviewQuestion;
-import KUSITMS.WITHUS.domain.application.interviewQuestion.repository.InterviewQuestionRepository;
+import KUSITMS.WITHUS.domain.interview.interviewQuestion.entity.InterviewQuestion;
+import KUSITMS.WITHUS.domain.interview.interviewQuestion.repository.InterviewQuestionRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;

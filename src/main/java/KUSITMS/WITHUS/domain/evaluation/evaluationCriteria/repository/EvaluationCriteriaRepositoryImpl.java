@@ -4,7 +4,6 @@ import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCrit
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -26,5 +25,18 @@ public class EvaluationCriteriaRepositoryImpl implements EvaluationCriteriaRepos
         return evaluationCriteriaJpaRepository.findByEvaluationTypeAndRecruitmentId(type, recruitmentId);
     }
 
+    @Override
+    public Long countByRecruitment_IdAndEvaluationType(Long recruitmentId, EvaluationType stage) {
+        return evaluationCriteriaJpaRepository.countByRecruitment_IdAndEvaluationType(recruitmentId, stage);
+    }
 
+    @Override
+    public List<EvaluationCriteria> findByRecruitment_IdAndEvaluationType(Long recruitmentId, EvaluationType stage) {
+        return evaluationCriteriaJpaRepository.findByRecruitment_IdAndEvaluationType(recruitmentId, stage);
+    }
+
+    @Override
+    public List<EvaluationCriteria> findAllById(List<Long> criteriaIds) {
+        return evaluationCriteriaJpaRepository.findAllById(criteriaIds);
+    }
 }
