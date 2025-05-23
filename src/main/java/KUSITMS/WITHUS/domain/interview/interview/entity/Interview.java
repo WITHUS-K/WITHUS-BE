@@ -24,6 +24,15 @@ public class Interview extends BaseEntity {
     @Column(name = "INTERVIEW_ID")
     private Long id;
 
+    @Column(name = "INTERVIEWER_PER_SLOT")
+    private Integer interviewerPerSlot;
+
+    @Column(name = "APPLICANT_PER_SLOT")
+    private Integer applicantPerSlot;
+
+    @Column(name = "ASSISTANT_PER_SLOT")
+    private Integer assistantPerSlot;
+
     @Column(name = "ROOM_COUNT", nullable = false)
     private int roomCount;
 
@@ -54,7 +63,10 @@ public class Interview extends BaseEntity {
         availability.associateInterview(this);
     }
 
-    public void setRoomCount(int roomCount) {
+    public void setConfig(int interviewerPerSlot, int applicantPerSlot, int assistantPerSlot, int roomCount) {
+        this.interviewerPerSlot = interviewerPerSlot;
+        this.applicantPerSlot = applicantPerSlot;
+        this.assistantPerSlot = assistantPerSlot;
         this.roomCount = roomCount;
     }
 

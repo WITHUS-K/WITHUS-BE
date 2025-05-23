@@ -54,7 +54,7 @@ public class InterviewSchedulerService {
         List<ApplicantAvailability> availabilityList = availabilityRepository.findByApplicationIn(applicants);
         Interview interview = interviewRepository.getById(interviewId);
 
-        interview.setRoomCount(config.roomCount());
+        interview.setConfig(config.interviewerPerSlot, config.applicantPerSlot, config.assistantPerSlot, config.roomCount());
         interview.setRoomNames(config.roomNames());
 
         // 2. ID로 빠르게 찾기 위한 맵 구성
@@ -260,6 +260,7 @@ public class InterviewSchedulerService {
     public record InterviewConfig(
             int interviewerPerSlot,
             int applicantPerSlot,
+            int assistantPerSlot,
             int roomCount,
             List<String> roomNames
     ) {}
