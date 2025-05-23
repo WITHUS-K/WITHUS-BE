@@ -34,7 +34,7 @@ public class InterviewQuestion extends BaseEntity {
         this.application = application;
     }
 
-    public void associateUser(User user) {
-        this.user = user;
+    public void updateContent(String content) {
+        this.content = content;
     }
 }
