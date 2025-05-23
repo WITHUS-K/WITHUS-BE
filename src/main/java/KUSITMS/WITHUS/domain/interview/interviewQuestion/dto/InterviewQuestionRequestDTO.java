@@ -9,4 +9,9 @@ public class InterviewQuestionRequestDTO {
     public record Create(
             @Schema(description = "면접질문 내용", example = "지원동기가 무엇인가요?") String content
     ) {}
+
+    @Schema(description = "면접질문 수정 요청")
+    public record Update(
+            @Schema(description = "면접질문 내용", example = "다른 지원동기가 무엇인가요?") String content
+    ) {}
 }

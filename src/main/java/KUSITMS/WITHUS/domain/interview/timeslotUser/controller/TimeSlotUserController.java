@@ -42,5 +42,13 @@ public class TimeSlotUserController {
                 .toList();
         return SuccessResponse.ok(response);
     }
-
+    @PatchMapping("/{timeSlotId}/users")
+    @Operation(summary = "타임슬롯 사용자 수정", description = "타임슬롯에 배정된 사용자 정보를 수정합니다.")
+    public SuccessResponse<String> updateUsersInTimeSlot(
+            @PathVariable Long timeSlotId,
+            @RequestBody @Valid TimeSlotUserRequestDTO.UpdateUsers request
+    ) {
+        timeSlotUserService.updateUsersInTimeSlot(timeSlotId, request.userIds(), request.role());
+        return SuccessResponse.ok("타임슬롯 사용자 목록이 수정되었습니다.");
+    }
 }

@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.interview.interview.controller;
 
+import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewResponseDTO;
 import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewScheduleDTO;
 import KUSITMS.WITHUS.domain.interview.interview.service.InterviewSchedulerService;
 import KUSITMS.WITHUS.domain.interview.interview.service.InterviewService;
@@ -64,4 +65,10 @@ public class InterviewController {
         return SuccessResponse.ok(interviewService.getMyOrganizationInterviews(user));
     }
 
+    @GetMapping("/{interviewId}/config")
+    @Operation(summary = "면접 구성 조회", description = "면접실 이름 배열, 면접관 수, 지원자 수, 안내자 수를 반환합니다.")
+    public SuccessResponse<InterviewResponseDTO.Config> getInterviewConfig(@PathVariable Long interviewId) {
+        InterviewResponseDTO.Config config = interviewService.getInterviewConfig(interviewId);
+        return SuccessResponse.ok(config);
+    }
 }

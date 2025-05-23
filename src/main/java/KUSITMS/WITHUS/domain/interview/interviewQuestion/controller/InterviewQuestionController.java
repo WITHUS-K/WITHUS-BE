@@ -31,4 +31,17 @@ public class InterviewQuestionController {
         InterviewQuestion interviewQuestion = interviewQuestionService.addQuestionToApplication(applicationId, currentUser.getId(), request.content());
         return SuccessResponse.ok(InterviewQuestionResponseDTO.Create.from(interviewQuestion));
     }
+
+    @PatchMapping("/{questionId}")
+    @Operation(summary = "면접 질문 수정", description = "기존 면접 질문의 내용을 수정합니다.")
+    public SuccessResponse<InterviewQuestionResponseDTO.Detail> updateQuestion(
+            @PathVariable Long applicationId,
+            @PathVariable Long questionId,
+            @CurrentUser User currentUser,
+            @RequestBody @Valid InterviewQuestionRequestDTO.Update request
+    ) {
+        InterviewQuestion updated = interviewQuestionService.updateQuestion(questionId, currentUser.getId(), request.content());
+        return SuccessResponse.ok(InterviewQuestionResponseDTO.Detail.from(updated));
+    }
+
 }
