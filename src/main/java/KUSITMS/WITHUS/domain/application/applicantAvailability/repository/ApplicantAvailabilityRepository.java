@@ -1,7 +1,7 @@
-package KUSITMS.WITHUS.domain.application.availability.repository;
+package KUSITMS.WITHUS.domain.application.applicantAvailability.repository;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
-import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
+import KUSITMS.WITHUS.domain.application.applicantAvailability.entity.ApplicantAvailability;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

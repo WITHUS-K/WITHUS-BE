@@ -5,7 +5,7 @@ import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
 import KUSITMS.WITHUS.domain.application.applicationAcquaintance.entity.ApplicationAcquaintance;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerResponseDTO;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
-import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
+import KUSITMS.WITHUS.domain.application.applicantAvailability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.comment.dto.CommentResponseDTO;
 import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.application.comment.enumerate.CommentType;

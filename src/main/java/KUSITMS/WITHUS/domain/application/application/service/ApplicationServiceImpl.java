@@ -18,8 +18,8 @@ import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.Applicatio
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.repository.ApplicationEvaluatorJpaRepository;
-import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
-import KUSITMS.WITHUS.domain.application.availability.repository.ApplicantAvailabilityRepository;
+import KUSITMS.WITHUS.domain.application.applicantAvailability.entity.ApplicantAvailability;
+import KUSITMS.WITHUS.domain.application.applicantAvailability.repository.ApplicantAvailabilityRepository;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;

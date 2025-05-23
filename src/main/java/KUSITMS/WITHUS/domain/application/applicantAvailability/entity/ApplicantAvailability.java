@@ -1,4 +1,4 @@
-package KUSITMS.WITHUS.domain.application.availability.entity;
+package KUSITMS.WITHUS.domain.application.applicantAvailability.entity;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import jakarta.persistence.*;
