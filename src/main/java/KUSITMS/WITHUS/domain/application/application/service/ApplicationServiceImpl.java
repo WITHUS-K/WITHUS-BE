@@ -364,8 +364,8 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     private boolean matchStatus(ApplicationResponseDTO.SummaryForUser dto, EvaluationStatus status) {
         return switch (status) {
-            case EVALUATED -> dto.evaluated();
-            case NOT_EVALUATED -> !dto.evaluated();
+            case EVALUATED -> dto.documentEvaluated();
+            case NOT_EVALUATED -> !dto.documentEvaluated();
             case ALL -> true;
         };
     }
