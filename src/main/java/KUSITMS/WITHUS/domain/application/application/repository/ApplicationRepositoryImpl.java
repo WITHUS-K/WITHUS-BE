@@ -71,4 +71,9 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
     public List<Application> findAllById(List<Long> longs) {
         return applicationJpaRepository.findAllById(longs);
     }
+
+    @Override
+    public List<Application> findDistinctByRecruitment_IdAndEvaluators_Evaluator_Id(Long recruitmentId, Long evaluatorId) {
+        return applicationJpaRepository.findDistinctByRecruitment_IdAndEvaluators_Evaluator_Id(recruitmentId, evaluatorId);
+    }
 }

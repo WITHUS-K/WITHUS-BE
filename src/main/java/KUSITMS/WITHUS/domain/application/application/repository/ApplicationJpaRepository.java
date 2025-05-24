@@ -11,4 +11,5 @@ public interface ApplicationJpaRepository extends JpaRepository<Application, Lon
     List<Application> findByRecruitmentIdAndStatusIn(Long recruitmentId, List<ApplicationStatus> statuses);
     List<Application> findByRecruitment_IdAndPosition_Id(Long recruitmentId, Long positionId);
     Long countByRecruitment_IdAndPosition_Id(Long recruitmentId, Long positionId);
+    List<Application> findDistinctByRecruitment_IdAndEvaluators_Evaluator_Id(Long recruitmentId, Long evaluatorId);
 }
