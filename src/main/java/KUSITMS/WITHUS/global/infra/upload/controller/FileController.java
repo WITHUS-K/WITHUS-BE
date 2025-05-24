@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.global.infra.upload.controller;
 
+import KUSITMS.WITHUS.global.infra.upload.dto.FileRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -7,10 +8,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -24,14 +22,13 @@ public class FileController {
     @GetMapping("/download")
     @Operation(summary = "파일 다운로드 api", description = "브라우저에서 이미지 다운로드")
     public ResponseEntity<InputStreamResource> downloadImage(
-            @RequestParam String imageUrl,
-            @RequestParam String fileName
-    ) {
+            @RequestBody FileRequestDTO.Download request
+            ) {
         try {
-            InputStream in = new URL(imageUrl).openStream();
+            InputStream in = new URL(request.imageUrl()).openStream();
 
             HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Disposition", "attachment; filename=" + fileName);
+            headers.add("Content-Disposition", "attachment; filename=" + request.fileName());
 
             return ResponseEntity.ok()
                     .headers(headers)
