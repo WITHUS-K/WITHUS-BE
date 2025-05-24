@@ -1,13 +1,11 @@
 package KUSITMS.WITHUS.domain.application.distributionRequest.entity;
 
-import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "DISTRIBUTION_REQUEST")
@@ -29,24 +27,11 @@ public class DistributionRequest extends BaseEntity {
     @Column(nullable = false)
     private List<DistributionAssignment> assignments = new ArrayList<>();
 
-    public static DistributionRequest create(Long recruitmentId, List<ApplicationEvaluatorRequestDTO.Distribute.PartAssignment> dtos) {
-        // Assignment 엔티티 생성
-        List<DistributionAssignment> assigns = dtos.stream()
-                .map(dto -> DistributionAssignment.builder()
-                        .positionId(dto.positionId())
-                        .organizationRoleId(dto.organizationRoleId())
-                        .evaluationType(dto.evaluationType())
-                        .count(dto.count())
-                        .build())
-                .collect(Collectors.toList());
-
-        // DistributionRequest 빌더 호출
+    public static DistributionRequest create(Long recruitmentId, List<DistributionAssignment> assignments) {
         DistributionRequest req = DistributionRequest.builder()
                 .recruitmentId(recruitmentId)
-                .assignments(assigns)
+                .assignments(assignments)
                 .build();
-
-        // 연관관계
         req.getAssignments().forEach(a -> a.updateRequest(req));
         return req;
     }
