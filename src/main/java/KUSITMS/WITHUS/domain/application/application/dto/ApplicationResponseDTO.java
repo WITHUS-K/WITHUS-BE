@@ -34,6 +34,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -272,7 +273,8 @@ public class ApplicationResponseDTO {
             @Schema(description = "합불 상태") ApplicationStatus status,
             @Schema(description = "해당 평가자가 이 지원서를 서류 평가했는지 여부") boolean documentEvaluated,
             @Schema(description = "이 사용자가 준 총 서류 평가 점수", example = "20", nullable = true) @Nullable Integer myScoreTotal,
-            @Schema(description = "서류 평가 만점 (기준 개수 × 10)", example = "50") int documentMaxScore
+            @Schema(description = "서류 평가 만점 (기준 개수 × 10)", example = "50") int documentMaxScore,
+            @Schema(description = "면접 일정", example = "4/18 (금) 10:00 - 10:30", nullable = true) String interviewSchedule
     ) {
         public static SummaryForUser from(Application application, Long currentUserId) {
             Recruitment recruitment = application.getRecruitment();
@@ -297,6 +299,17 @@ public class ApplicationResponseDTO {
                     .sum()
                     : null;
 
+            TimeSlot ts = application.getTimeSlot();
+            String interviewSchedule = null;
+            if (ts != null) {
+                DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("M/d (E)", Locale.KOREA);
+                DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HH:mm");
+                String datePart  = ts.getDate().format(dateFmt);
+                String startPart = ts.getStartTime().format(timeFmt);
+                String endPart   = ts.getEndTime().format(timeFmt);
+                interviewSchedule = String.format("%s %s - %s", datePart, startPart, endPart);
+            }
+
             boolean isDocumentResultAnnounced = LocalDate.now().isAfter(recruitment.getDocumentResultDate())
                     || LocalDate.now().isEqual(recruitment.getDocumentResultDate());
 
@@ -308,7 +321,8 @@ public class ApplicationResponseDTO {
                     application.getStatus(),
                     evaluated,
                     myScoreTotal,
-                    documentMaxScore
+                    documentMaxScore,
+                    interviewSchedule
             );
         }
     }
