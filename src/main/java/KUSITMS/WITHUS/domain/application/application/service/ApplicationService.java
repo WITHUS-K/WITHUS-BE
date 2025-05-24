@@ -6,6 +6,7 @@ import KUSITMS.WITHUS.domain.application.application.enumerate.AdminApplicationS
 import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
 import KUSITMS.WITHUS.domain.application.application.enumerate.EvaluationStatus;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
+import KUSITMS.WITHUS.domain.application.distributionRequest.entity.DistributionRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -21,6 +22,7 @@ public interface ApplicationService {
     Page<ApplicationResponseDTO.SummaryForAdmin> getByRecruitmentIdForAdmin(Long recruitmentId, AdminStageFilter stage, Pageable pageable, AdminApplicationSortField sortBy, Sort.Direction direction);
     List<ApplicationResponseDTO.Summary> updateStatus(ApplicationRequestDTO.UpdateStatus request);
     void distributeEvaluators(ApplicationEvaluatorRequestDTO.Distribute request);
+    DistributionRequest distributeEvaluatorsLatestRequest(Long recruitmentId);
     void updateEvaluators(ApplicationEvaluatorRequestDTO.Update request);
     boolean toggleAcquaintance(Long applicationId, Long userId);
 }

@@ -49,10 +49,8 @@ public class Application extends BaseEntity {
     @Column(name = "PHONE_NUMBER", nullable = false)
     private String phoneNumber;
 
-    @Column(name = "UNIVERSITY")
     private String university;
 
-    @Column(name = "MAJOR")
     private String major;
 
     @Enumerated(EnumType.STRING)
@@ -65,7 +63,6 @@ public class Application extends BaseEntity {
     @Column(name = "IMAGE_URL")
     private String imageUrl;
 
-    @Column(name = "ADDRESS")
     private String address;
 
     @Builder.Default
