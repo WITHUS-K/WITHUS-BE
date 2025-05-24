@@ -74,7 +74,7 @@ public class ApplicationController {
     }
 
     @GetMapping("/recruitment/{recruitmentId}")
-    @Operation(summary = "공고별 지원서 목록 조회", description = "공고 ID를 기준으로 전체 지원서 목록을 조회합니다.")
+    @Operation(summary = "공고별 서류 평가 대상 지원서 목록 조회", description = "공고 ID를 기준으로 로그인한 사용자가 서류 평가 담당자로 지정된 지원서 목록을 조회합니다.")
     public SuccessResponse<PagedResponse<ApplicationResponseDTO.SummaryForUser>> getByRecruitment(
             @PathVariable Long recruitmentId,
             @CurrentUser User currentUser,
