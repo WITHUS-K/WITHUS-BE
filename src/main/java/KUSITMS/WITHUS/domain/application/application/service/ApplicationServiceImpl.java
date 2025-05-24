@@ -144,13 +144,13 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     /**
-     * 특정 공고의 로그인한 사용자가 평가 담당자로 지정된 지원서 전체 조회
+     * 특정 공고의 로그인한 사용자가 서류 평가 담당자로 지정된 지원서 전체 조회
      * @param recruitmentId 조회할 공고의 ID
      * @return 조회한 공고의 지원서 전체의 정보
      */
     @Override
     public Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(Long recruitmentId, Long currentUserId, EvaluationStatus evaluationStatus, String keyword, Pageable pageable) {
-        List<Application> apps = applicationRepository.findDistinctByRecruitment_IdAndEvaluators_Evaluator_Id(recruitmentId, currentUserId);
+        List<Application> apps = applicationRepository.findDistinctByRecruitment_IdAndEvaluators_Evaluator_IdAndEvaluators_EvaluationType(recruitmentId, currentUserId, EvaluationType.DOCUMENT);
 
         List<ApplicationResponseDTO.SummaryForUser> filtered = apps.stream()
                 .map(app -> ApplicationResponseDTO.SummaryForUser.from(app, currentUserId))
