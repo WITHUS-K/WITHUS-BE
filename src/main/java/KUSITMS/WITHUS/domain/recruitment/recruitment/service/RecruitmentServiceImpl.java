@@ -22,6 +22,7 @@ import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.AvailableTim
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.DocumentQuestionAppender;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.EvaluationCriteriaAppender;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper.PositionAppender;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.service.validator.RecruitmentValidator;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.util.SlugGenerator;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
@@ -63,6 +64,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     private final PositionAppender positionAppender;
     private final DocumentQuestionAppender documentQuestionAppender;
     private final EvaluationCriteriaAppender criteriaAppender;
+
+    private final RecruitmentValidator validator;
 
     private static final int MAX_ATTEMPTS = 10;
 
@@ -310,7 +313,9 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     }
 
     private RecruitmentResponseDTO.Create saveRecruitment(RecruitmentRequestDTO.Upsert request, boolean isTemporary) {
+        validator.validateRecruitmentRequest(request);
         Organization organization = organizationRepository.getById(request.organizationId());
+        validator.validateOrganizationExists(organization);
 
         Recruitment recruitment = (request.recruitmentId() != null)
                 ? updateRecruitment(request, isTemporary)
@@ -330,7 +335,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     private void validateMembership(Long userId, Long organizationId) {
         boolean isMember = userOrganizationRepository.existsByUser_IdAndOrganization_Id(userId, organizationId);
-        if (!isMember) throw new CustomException(ErrorCode.USER_ORGANIZATION_NOT_FOUND);
+        validator.validateUserBelongsToOrganization(isMember);
     }
 
     private long calculateDaysToDeadline(EvaluationType stage, Recruitment recruitment) {
