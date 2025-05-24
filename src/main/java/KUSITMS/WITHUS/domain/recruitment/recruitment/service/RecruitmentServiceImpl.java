@@ -432,7 +432,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     private Recruitment createRecruitment(RecruitmentRequestDTO.Upsert request, Organization organization, boolean isTemporary) {
         return Recruitment.create(
-                request.title(), request.content(), request.documentDeadline(), request.isInterviewRequired(),
+                request.title(), request.content(), request.documentDeadline(), request.isDocumentResultRequired(),
                 request.documentResultDate(), request.finalResultDate(), request.isInterviewRequired(), request.interviewDuration(),
                 organization, request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
                 request.needAcademicStatus(), isTemporary, request.documentScaleType(), request.interviewScaleType(), generateUniqueSlug()
