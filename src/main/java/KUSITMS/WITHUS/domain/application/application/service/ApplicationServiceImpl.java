@@ -10,15 +10,15 @@ import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
 import KUSITMS.WITHUS.domain.application.application.enumerate.EvaluationStatus;
 import KUSITMS.WITHUS.domain.application.application.enumerate.SimpleApplicationStatus;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
+import KUSITMS.WITHUS.domain.application.application.service.assembler.ApplicationAssembler;
+import KUSITMS.WITHUS.domain.application.application.service.evaluator.EvaluatorAssignmentService;
+import KUSITMS.WITHUS.domain.application.application.service.factory.ApplicationFactory;
+import KUSITMS.WITHUS.domain.application.application.service.validator.ApplicationValidator;
 import KUSITMS.WITHUS.domain.application.applicationAcquaintance.entity.ApplicationAcquaintance;
 import KUSITMS.WITHUS.domain.application.applicationAcquaintance.repository.ApplicationAcquaintanceRepository;
-import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerRequestDTO;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.ApplicationAnswerRepository;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
-import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
-import KUSITMS.WITHUS.domain.application.applicationEvaluator.repository.ApplicationEvaluatorRepository;
-import KUSITMS.WITHUS.domain.application.distributionRequest.entity.DistributionAssignment;
 import KUSITMS.WITHUS.domain.application.distributionRequest.entity.DistributionRequest;
 import KUSITMS.WITHUS.domain.application.distributionRequest.repository.DistributionRequestRepository;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
@@ -27,10 +27,7 @@ import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationReposito
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.repository.EvaluationCriteriaRepository;
-import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
-import KUSITMS.WITHUS.domain.organization.organizationRole.repository.OrganizationRoleRepository;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
-import KUSITMS.WITHUS.domain.recruitment.documentQuestion.enumerate.QuestionType;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.repository.DocumentQuestionRepository;
 import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
@@ -38,8 +35,6 @@ import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
-import KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.UserOrganizationRole;
-import KUSITMS.WITHUS.domain.user.userOrganizationRole.repository.UserOrganizationRoleRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
@@ -53,11 +48,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 @Transactional(readOnly = true)
@@ -72,13 +67,15 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final EvaluationCriteriaRepository evaluationCriteriaRepository;
     private final DocumentQuestionRepository documentQuestionRepository;
     private final ApplicationAnswerRepository applicationAnswerRepository;
-    private final UserOrganizationRoleRepository userOrganizationRoleRepository;
-    private final OrganizationRoleRepository organizationRoleRepository;
-    private final ApplicationEvaluatorRepository applicationEvaluatorRepository;
     private final UserRepository userRepository;
     private final ApplicationAcquaintanceRepository applicationAcquaintanceRepository;
     private final DistributionRequestRepository distributionRequestRepository;
     private final FileUploadService fileUploadService;
+
+    private final ApplicationValidator validator;
+    private final ApplicationFactory factory;
+    private final EvaluatorAssignmentService evaluatorService;
+    private final ApplicationAssembler assembler;
 
     /**
      * 지원서 생성
@@ -93,24 +90,31 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .flatMap(positionRepository::findById)
                 .orElse(null);
 
-        validateRequiredFields(recruitment, request);
+        validator.validateRequiredFields(recruitment, request);
 
-        Application application = createApplication(request, recruitment, position);
-        Application savedApplication = applicationRepository.save(application);
+        Application application = factory.createApplication(request, recruitment, position);
+        applicationRepository.save(application);
 
-        String imageUrl = fileUploadService.uploadProfileImage(profileImage, recruitment.getOrganization().getId(), recruitment.getId(), savedApplication.getId());
-        savedApplication.updateImageUrl(imageUrl);
+        String imageUrl = fileUploadService.uploadProfileImage(profileImage,
+                recruitment.getOrganization().getId(), recruitment.getId(), application.getId());
+        application.updateImageUrl(imageUrl);
 
-        saveApplicantAvailabilities(savedApplication, request.availableTimes());
+        saveApplicantAvailabilities(application, request.availableTimes());
 
         List<MultipartFile> fileList = files != null ? files : List.of();
-        validateFileAnswers(recruitment, request.answers(), fileList);
+        List<DocumentQuestion> questions = documentQuestionRepository.findByRecruitment(recruitment);
+        validator.validateFileAnswers(request.answers(), fileList, questions);
 
-        Map<String, String> uploadedFileUrls = fileUploadService.uploadAnswerFiles(files, recruitment.getOrganization().getId(), recruitment.getId(), savedApplication.getId());
+        Map<String, String> uploadedFileUrls = fileUploadService.uploadAnswerFiles(fileList,
+                recruitment.getOrganization().getId(), recruitment.getId(), application.getId());
 
-        saveApplicationAnswers(savedApplication, recruitment, request, uploadedFileUrls, fileList);
+        Map<Long, DocumentQuestion> questionMap = questions.stream()
+                .collect(Collectors.toMap(DocumentQuestion::getId, q -> q));
 
-        return ApplicationResponseDTO.Summary.from(savedApplication);
+        List<ApplicationAnswer> answers = factory.createAnswers(application, request.answers(), questionMap, uploadedFileUrls);
+        applicationAnswerRepository.saveAll(answers);
+
+        return ApplicationResponseDTO.Summary.from(application);
     }
 
     /**
@@ -131,14 +135,12 @@ public class ApplicationServiceImpl implements ApplicationService {
      */
     @Override
     public ApplicationResponseDTO.Detail getById(Long id, Long currentUserId) {
-        Application application = applicationRepository.getById(id);
+        Application app = applicationRepository.getById(id);
         List<ApplicantAvailability> availabilityList = applicantAvailabilityRepository.findByApplicationId(id);
         List<Evaluation> evaluationList = evaluationRepository.findEvaluationsForApplication(id);
+        List<EvaluationCriteria> criteriaList = evaluationCriteriaRepository.findByTypeAndRecruitment(EvaluationType.DOCUMENT, app.getRecruitment().getId());
 
-        Long recruitmentId = application.getRecruitment().getId();
-        List<EvaluationCriteria> evaluationCriteriaList = evaluationCriteriaRepository.findByTypeAndRecruitment(EvaluationType.DOCUMENT, recruitmentId);
-
-        return ApplicationResponseDTO.Detail.from(application, availabilityList, evaluationList, evaluationCriteriaList, currentUserId);
+        return assembler.toDetail(app, availabilityList, evaluationList, criteriaList, currentUserId);
     }
 
     /**
@@ -147,37 +149,18 @@ public class ApplicationServiceImpl implements ApplicationService {
      * @return 조회한 공고의 지원서 전체의 정보
      */
     @Override
-    public Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(
-            Long recruitmentId,
-            Long currentUserId,
-            EvaluationStatus evaluationStatus,
-            String keyword,
-            Pageable pageable)
-    {
-        List<Application> allApplications = applicationRepository.findByRecruitmentId(recruitmentId);
-
-        List<ApplicationResponseDTO.SummaryForUser> filtered = allApplications.stream()
+    public Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(Long recruitmentId, Long currentUserId, EvaluationStatus evaluationStatus, String keyword, Pageable pageable) {
+        List<Application> apps = applicationRepository.findByRecruitmentId(recruitmentId);
+        List<ApplicationResponseDTO.SummaryForUser> filtered = apps.stream()
                 .map(app -> ApplicationResponseDTO.SummaryForUser.from(app, currentUserId))
-                .filter(dto -> {
-                    boolean statusMatch = switch (evaluationStatus) {
-                        case EVALUATED -> dto.evaluated();
-                        case NOT_EVALUATED -> !dto.evaluated();
-                        case ALL -> true;
-                    };
-
-                    boolean keywordMatch = (keyword == null || keyword.isBlank()) ||
-                            dto.name().toLowerCase().contains(keyword.toLowerCase());
-
-                    return statusMatch && keywordMatch;
-                })
+                .filter(dto -> matchStatus(dto, evaluationStatus) && matchKeyword(dto, keyword))
                 .toList();
 
-        // 페이징 적용
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), filtered.size());
-        List<ApplicationResponseDTO.SummaryForUser> paged = start > end ? List.of() : filtered.subList(start, end);
+        List<ApplicationResponseDTO.SummaryForUser> content = start > end ? List.of() : filtered.subList(start, end);
 
-        return new PageImpl<>(paged, pageable, filtered.size());
+        return new PageImpl<>(content, pageable, filtered.size());
     }
 
     /**
@@ -186,7 +169,6 @@ public class ApplicationServiceImpl implements ApplicationService {
      * @return 조회한 공고의 지원서 전체의 정보
      */
     @Override
-    @Transactional(readOnly = true)
     public Page<ApplicationResponseDTO.SummaryForAdmin> getByRecruitmentIdForAdmin(
             Long recruitmentId,
             AdminStageFilter stage,
@@ -268,19 +250,16 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional
     public List<ApplicationResponseDTO.Summary> updateStatus(ApplicationRequestDTO.UpdateStatus request) {
-        List<Application> applicationList = applicationRepository.findAllById(request.applicationIds());
-
-        applicationList.forEach(app -> {
-            ApplicationStatus newStatus = mapToRealStatus(
-                    request.stage(), app.getStatus(), request.status()
-            );
+        List<Application> apps = applicationRepository.findAllById(request.applicationIds());
+        apps.forEach(app -> {
+            ApplicationStatus newStatus = mapToRealStatus(request.stage(), app.getStatus(), request.status());
             app.updateStatus(newStatus);
         });
-
-        return applicationList.stream()
+        return apps.stream()
                 .map(ApplicationResponseDTO.Summary::from)
                 .toList();
     }
+
 
     /**
      * 주어진 공고에 대해 요청된 파트별 정보에 따라 지원서 별 평가자 배정
@@ -289,65 +268,13 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional
     public void distributeEvaluators(ApplicationEvaluatorRequestDTO.Distribute request) {
-        // 요청 이력 dto -> 엔티티 매핑
-        List<DistributionAssignment> assignments = request.assignments().stream()
-                .map(dto -> {
-                    Position position = positionRepository.getById(dto.positionId());
-                    OrganizationRole role =
-                            organizationRoleRepository.getById(dto.organizationRoleId());
-                    return DistributionAssignment.builder()
-                            .position(position)
-                            .organizationRole(role)
-                            .evaluationType(dto.evaluationType())
-                            .count(dto.count())
-                            .build();
-                })
-                .collect(Collectors.toList());
-
-        // 요청 이력 저장
-        DistributionRequest record = DistributionRequest.create(request.recruitmentId(), assignments);
-        distributionRequestRepository.save(record);
-
-        // 기존 배정 초기화
-        Long recruitmentId = request.recruitmentId();
-        applicationEvaluatorRepository.deleteAllByApplication_Recruitment_Id(recruitmentId);
-
-        // 파트별로 배정
-        Random rnd = new Random();
-        for (var part : request.assignments()) {
-            Long posId    = part.positionId();
-            Long roleId   = part.organizationRoleId();
-            int  count    = part.count();
-
-            // 후보 평가자 풀
-            List<User> pool = userOrganizationRoleRepository
-                    .findAllByOrganizationRole_Id(roleId)
-                    .stream()
-                    .map(UserOrganizationRole::getUser)
-                    .collect(toList());
-
-            if (pool.size() < count) {
-                throw new CustomException(ErrorCode.INSUFFICIENT_EVALUATORS);
-            }
-
-            // 이 파트 지원서 리스트
-            List<Application> apps = applicationRepository
-                    .findByRecruitment_IdAndPosition_Id(recruitmentId, posId);
-
-            // 각 지원서마다 랜덤 n명 배정
-            for (Application app : apps) {
-                Collections.shuffle(pool, rnd);
-                List<User> chosen = pool.subList(0, count);
-
-                List<ApplicationEvaluator> assigns = chosen.stream()
-                        .map(u -> new ApplicationEvaluator(app, u, part.evaluationType() ))
-                        .collect(toList());
-
-                applicationEvaluatorRepository.saveAll(assigns);
-            }
-        }
+        evaluatorService.distributeEvaluators(request);
     }
 
+    /**
+     * 주어진 공고에 대해 가장 최근 평가자 배정 이력 반환
+     * @param recruitmentId 공고 ID
+     */
     @Override
     public DistributionRequest distributeEvaluatorsLatestRequest(Long recruitmentId) {
         return distributionRequestRepository.findTopByRecruitmentIdOrderByCreatedAtDesc(recruitmentId);
@@ -360,21 +287,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional
     public void updateEvaluators(ApplicationEvaluatorRequestDTO.Update request) {
-        Long applicationId = request.applicationId();
-
-        Application application = applicationRepository.getById(applicationId);
-
-        applicationEvaluatorRepository.deleteAllByApplication_Id(applicationId);
-
-        List<User> users = userRepository.findAllById(request.evaluatorIds());
-        if (users.size() != request.evaluatorIds().size()) {
-            throw new CustomException(ErrorCode.EVALUATOR_NOT_EXIST);
-        }
-
-        List<ApplicationEvaluator> assigns = users.stream()
-                .map(u -> new ApplicationEvaluator(application, u, request.evaluationType()))
-                .toList();
-        applicationEvaluatorRepository.saveAll(assigns);
+        evaluatorService.updateEvaluators(request);
     }
 
     /**
@@ -382,6 +295,7 @@ public class ApplicationServiceImpl implements ApplicationService {
      * @param applicationId 지인 표시할 지원서 id
      * @param currentUserId 현재 유저의 id
      */
+    @Override
     @Transactional
     public boolean toggleAcquaintance(Long applicationId, Long currentUserId) {
         boolean exists = applicationAcquaintanceRepository
@@ -440,97 +354,6 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
     }
 
-    private void validateRequiredFields(Recruitment recruitment, ApplicationRequestDTO.Create request) {
-        if (recruitment.isNeedGender() && request.gender() == null) {
-            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
-        }
-        if (recruitment.isNeedSchool() && request.university() == null) {
-            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
-        }
-        if (recruitment.isNeedBirthDate() && request.birthDate() == null) {
-            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
-        }
-        if (recruitment.isNeedAcademicStatus() && request.major() == null) {
-            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
-        }
-        if (recruitment.isNeedAcademicStatus() && request.academicStatus() == null) {
-            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
-        }
-        if (recruitment.isNeedAddress() && request.address() == null) {
-            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
-        }
-    }
-
-    private Application createApplication(ApplicationRequestDTO.Create request, Recruitment recruitment, Position position) {
-        return Application.create(
-                request.name(),
-                request.gender(),
-                request.email(),
-                request.phoneNumber(),
-                request.university(),
-                request.major(),
-                request.academicStatus(),
-                request.birthDate(),
-                request.address(),
-                recruitment,
-                position
-        );
-    }
-
-    private void saveApplicationAnswers(
-            Application application,
-            Recruitment recruitment,
-            ApplicationRequestDTO.Create request,
-            Map<String, String> uploadedFileUrls,
-            List<MultipartFile> files
-    ) {
-        List<DocumentQuestion> questions = documentQuestionRepository.findByRecruitment(recruitment);
-        Map<Long, DocumentQuestion> questionMap = questions.stream()
-                .collect(Collectors.toMap(DocumentQuestion::getId, q -> q));
-
-        Set<String> providedFileNames = files.stream()
-                .map(MultipartFile::getOriginalFilename)
-                .collect(Collectors.toSet());
-
-        // 파일명이 DTO에 존재하는지 검증
-        for (ApplicationAnswerRequestDTO answer : request.answers()) {
-            DocumentQuestion question = questionMap.get(answer.questionId());
-
-            if (question.getType() == QuestionType.FILE) {
-                if (answer.fileName() == null || !providedFileNames.contains(answer.fileName())) {
-                    throw new CustomException(ErrorCode.FILE_NAME_NOT_MATCH);
-                }
-            }
-        }
-
-        // 파일 개수가 정확한지 검증
-        long expectedFileCount = request.answers().stream()
-                .filter(a -> {
-                    DocumentQuestion question = questionMap.get(a.questionId());
-                    return question.getType() == QuestionType.FILE;
-                })
-                .count();
-
-        if (files.size() != expectedFileCount) {
-            throw new CustomException(ErrorCode.FILE_COUNT_MISMATCH);
-        }
-
-        List<ApplicationAnswer> answers = request.answers().stream()
-                .map(dto -> {
-                    DocumentQuestion question = questionMap.get(dto.questionId());
-                    String fileUrl = null;
-
-                    if (question.getType() == QuestionType.FILE && dto.fileName() != null) {
-                        fileUrl = uploadedFileUrls.get(dto.fileName());
-                    }
-
-                    return ApplicationAnswer.create(application, question, dto.answerText(), fileUrl);
-                })
-                .toList();
-
-        applicationAnswerRepository.saveAll(answers);
-    }
-
     private void saveApplicantAvailabilities(Application application, List<LocalDateTime> availableTimes) {
         List<ApplicantAvailability> availabilities = availableTimes.stream()
                 .map(time -> ApplicantAvailability.of(application, time))
@@ -538,40 +361,15 @@ public class ApplicationServiceImpl implements ApplicationService {
         applicantAvailabilityRepository.saveAll(availabilities);
     }
 
-    // 요청과 실제 입력 파일 간의 검증 (이름, 갯수)
-    private void validateFileAnswers(
-            Recruitment recruitment,
-            List<ApplicationAnswerRequestDTO> answers,
-            List<MultipartFile> files
-    ) {
-        List<DocumentQuestion> questions = documentQuestionRepository.findByRecruitment(recruitment);
-        Map<Long, DocumentQuestion> questionMap = questions.stream()
-                .collect(Collectors.toMap(DocumentQuestion::getId, q -> q));
-
-        Set<String> providedFileNames = files != null
-                ? files.stream().map(MultipartFile::getOriginalFilename).collect(Collectors.toSet())
-                : Set.of();
-
-        for (ApplicationAnswerRequestDTO answer : answers) {
-            DocumentQuestion question = questionMap.get(answer.questionId());
-
-            if (question.getType() == QuestionType.FILE) {
-                if (answer.fileName() == null || !providedFileNames.contains(answer.fileName())) {
-                    throw new CustomException(ErrorCode.FILE_NAME_NOT_MATCH);
-                }
-            }
-        }
-
-        long expectedFileCount = answers.stream()
-                .filter(a -> {
-                    DocumentQuestion question = questionMap.get(a.questionId());
-                    return question.getType() == QuestionType.FILE;
-                })
-                .count();
-
-        if (files.size() != expectedFileCount) {
-            throw new CustomException(ErrorCode.FILE_COUNT_MISMATCH);
-        }
+    private boolean matchStatus(ApplicationResponseDTO.SummaryForUser dto, EvaluationStatus status) {
+        return switch (status) {
+            case EVALUATED -> dto.evaluated();
+            case NOT_EVALUATED -> !dto.evaluated();
+            case ALL -> true;
+        };
     }
 
+    private boolean matchKeyword(ApplicationResponseDTO.SummaryForUser dto, String keyword) {
+        return keyword == null || keyword.isBlank() || dto.name().toLowerCase().contains(keyword.toLowerCase());
+    }
 }
