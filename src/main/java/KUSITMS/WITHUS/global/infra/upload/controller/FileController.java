@@ -19,7 +19,7 @@ import java.net.URL;
 @RequestMapping("/api/v1/files")
 public class FileController {
 
-    @GetMapping("/download")
+    @PostMapping("/download")
     @Operation(summary = "파일 다운로드 api", description = "브라우저에서 이미지 다운로드")
     public ResponseEntity<InputStreamResource> downloadImage(
             @RequestBody FileRequestDTO.Download request
