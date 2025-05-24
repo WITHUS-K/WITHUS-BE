@@ -91,6 +91,7 @@ public enum ErrorCode {
     // 평가자 관련
     INSUFFICIENT_EVALUATORS("APPLICATION400", "해당 파트에 평가자가 충분하지 않습니다.", HttpStatus.BAD_REQUEST),
     EVALUATOR_NOT_EXIST("APPLICATION404", "존재하지 않는 평가자입니다.", HttpStatus.NOT_FOUND),
+    DISTRIBUTION_HISTORY_NOT_FOUND("APPLICATION404", "해당 공고에 대한 분배 요청 이력이 없습니다.", HttpStatus.NOT_FOUND),
 
     // Interview (면접)
     INTERVIEW_ALREADY_EXIST("INTERVIEW400", "이미 존재하는 면접입니다.", HttpStatus.BAD_REQUEST),

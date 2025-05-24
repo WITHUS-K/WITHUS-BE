@@ -18,6 +18,8 @@ import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.Applicatio
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.repository.ApplicationEvaluatorRepository;
+import KUSITMS.WITHUS.domain.application.distributionRequest.entity.DistributionRequest;
+import KUSITMS.WITHUS.domain.application.distributionRequest.repository.DistributionRequestRepository;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
@@ -71,6 +73,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationEvaluatorRepository applicationEvaluatorRepository;
     private final UserRepository userRepository;
     private final ApplicationAcquaintanceRepository applicationAcquaintanceRepository;
+    private final DistributionRequestRepository distributionRequestRepository;
     private final FileUploadService fileUploadService;
 
     /**
@@ -282,6 +285,13 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional
     public void distributeEvaluators(ApplicationEvaluatorRequestDTO.Distribute request) {
+        // 요청 이력 저장
+        DistributionRequest record = DistributionRequest.create(
+                request.recruitmentId(),
+                request.assignments()
+        );
+        distributionRequestRepository.save(record);
+
         // 기존 배정 초기화
         Long recruitmentId = request.recruitmentId();
         applicationEvaluatorRepository.deleteAllByApplication_Recruitment_Id(recruitmentId);
@@ -320,6 +330,11 @@ public class ApplicationServiceImpl implements ApplicationService {
                 applicationEvaluatorRepository.saveAll(assigns);
             }
         }
+    }
+
+    @Override
+    public DistributionRequest distributeEvaluatorsLatestRequest(Long recruitmentId) {
+        return distributionRequestRepository.findTopByRecruitmentIdOrderByCreatedAtDesc(recruitmentId);
     }
 
     /**

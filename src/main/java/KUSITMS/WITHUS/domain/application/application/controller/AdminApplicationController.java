@@ -8,6 +8,8 @@ import KUSITMS.WITHUS.domain.application.application.service.ApplicationMailServ
 import KUSITMS.WITHUS.domain.application.application.service.ApplicationService;
 import KUSITMS.WITHUS.domain.application.application.service.ApplicationSmsService;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
+import KUSITMS.WITHUS.domain.application.distributionRequest.dto.DistributionRequestResponseDTO;
+import KUSITMS.WITHUS.domain.application.distributionRequest.entity.DistributionRequest;
 import KUSITMS.WITHUS.global.response.PagedResponse;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,7 +21,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,6 +64,15 @@ public class AdminApplicationController {
     ) {
         applicationService.distributeEvaluators(request);
         return SuccessResponse.ok("성공했습니다.");
+    }
+
+    @GetMapping("/distribute-evaluators/latest/{recruitmentId}")
+    @Operation(summary = "지원서 평가 담당자 배정 최신 요청 조회")
+    public SuccessResponse<DistributionRequestResponseDTO.Detail> latest(
+            @PathVariable Long recruitmentId
+    ) {
+        DistributionRequest record = applicationService.distributeEvaluatorsLatestRequest(recruitmentId);
+        return SuccessResponse.ok(DistributionRequestResponseDTO.Detail.from(record));
     }
 
     @PostMapping("/evaluators")
