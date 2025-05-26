@@ -16,6 +16,9 @@ spring:
     generate-ddl: true
     database-platform: org.hibernate.dialect.H2Dialect
 
+  jwt:
+    secret: ${TEST_JWT_SECRET}
+
 ncp:
   storage:
     endpoint: https://dummy.endpoint.com
