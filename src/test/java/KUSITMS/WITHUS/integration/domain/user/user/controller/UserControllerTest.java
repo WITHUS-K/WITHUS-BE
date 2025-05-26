@@ -9,6 +9,7 @@ import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.global.util.redis.VerificationCache;
+import KUSITMS.WITHUS.integration.common.IntegrationTestSupport;
 import KUSITMS.WITHUS.integration.config.MockInfraBeans;
 import KUSITMS.WITHUS.integration.util.TestAuthHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(MockInfraBeans.class)
-class UserControllerTest {
+class UserControllerTest extends IntegrationTestSupport {
 
     @Autowired
     private MockMvc mockMvc;
