@@ -10,6 +10,7 @@ import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.global.util.redis.VerificationCache;
 import KUSITMS.WITHUS.integration.config.MockInfraBeans;
+import KUSITMS.WITHUS.integration.util.TestAuthHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +25,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
@@ -58,6 +58,9 @@ class UserControllerTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private TestAuthHelper testAuthHelper;
+
     @Autowired private BCryptPasswordEncoder encoder;
 
     Long savedOrganizationId;
@@ -85,19 +88,6 @@ class UserControllerTest {
 
         verificationCache.markVerified(testPhone, Duration.ofMinutes(3));
         verificationCache.markVerified(testMail, Duration.ofMinutes(3));
-    }
-
-    protected String getAccessToken(String email, String password) throws Exception {
-        UserRequestDTO.Login request = new UserRequestDTO.Login(email, password);
-        String json = objectMapper.writeValueAsString(request);
-
-        MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
-                        .contentType(APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        return result.getResponse().getHeader("Authorization");
     }
 
     @Test
@@ -201,7 +191,7 @@ class UserControllerTest {
     @Test
     @DisplayName("마이페이지 조회")
     void getMyPageSuccess() throws Exception {
-        String accessToken = getAccessToken(testMail, "password1!");
+        String accessToken = testAuthHelper.loginAndGetAccessToken(testMail, "password1!");
 
         mockMvc.perform(get("/api/v1/users/my-page")
                     .header("Authorization", accessToken)
@@ -215,7 +205,7 @@ class UserControllerTest {
     @Test
     @DisplayName("회원 정보 수정")
     void updateUserSuccess() throws Exception {
-        String accessToken = getAccessToken(testMail, "password1!");
+        String accessToken = testAuthHelper.loginAndGetAccessToken(testMail, "password1!");
 
         var updateReq = new UserRequestDTO.Update("홍길동", "01099999999", null, null, null);
         MockMultipartFile jsonPart = new MockMultipartFile(
