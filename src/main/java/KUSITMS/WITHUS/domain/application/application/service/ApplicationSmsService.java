@@ -2,12 +2,18 @@ package KUSITMS.WITHUS.domain.application.application.service;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
+import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.sms.SmsSender;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,17 +49,56 @@ public class ApplicationSmsService {
             }
         }
 
+        DateTimeFormatter dateFmt  = DateTimeFormatter.ofPattern("M/d(E)", Locale.KOREA);
+        DateTimeFormatter timeFmt  = DateTimeFormatter.ofPattern("HH:mm", Locale.KOREA);
+
         for (Long applicationId : applicationIds) {
             Application application = applicationRepository.getById(applicationId);
+
+            Map<String, String> values = new HashMap<>();
+
+            // name
+            values.put("name", application.getName());
+
+            // position
+            String position = application.getPosition() != null
+                    ? application.getPosition().getName()
+                    : "(불러올 수 없음)";
+            values.put("position", position);
+
+            // interviewDateTime
+            TimeSlot ts = application.getTimeSlot();
+            String interviewDateTime = "(불러올 수 없음)";
+            String interviewRoom     = "(불러올 수 없음)";
+            if (ts != null) {
+                String datePart  = ts.getDate().format(dateFmt);
+                String startPart = ts.getStartTime().format(timeFmt);
+                String endPart   = ts.getEndTime().format(timeFmt);
+                interviewDateTime = datePart + " " + startPart + "-" + endPart;
+                interviewRoom     = ts.getRoomName();
+            }
+            values.put("interviewDateTime", interviewDateTime);
+            values.put("interviewRoom", interviewRoom);
+
+            String message = replaceTemplates(text, values);
+
             String to = application.getPhoneNumber();
 
             if (imageBytes != null) {
-                smsSender.sendMms(to, text, imageBytes, filename);
+                smsSender.sendMms(to, message, imageBytes, filename);
             } else {
-                smsSender.send(to, text);
+                smsSender.send(to, message);
             }
 
             application.updateIsSmsSent(true);
         }
+    }
+
+    private String replaceTemplates(String template, Map<String,String> vars) {
+        String result = template;
+        for (var entry : vars.entrySet()) {
+            result = result.replace("{{" + entry.getKey() + "}}", entry.getValue());
+        }
+        return result;
     }
 }

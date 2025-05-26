@@ -34,6 +34,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -270,23 +271,45 @@ public class ApplicationResponseDTO {
             @Schema(description = "지원자 이름") String name,
             @Schema(description = "파트명") String positionName,
             @Schema(description = "합불 상태") ApplicationStatus status,
-            @Schema(description = "해당 평가자가 이 지원서를 평가했는지 여부") boolean evaluated,
-            @Schema(description = "이 사용자가 준 총 점수", example = "20", nullable = true) @Nullable Integer myScoreTotal
+            @Schema(description = "해당 평가자가 이 지원서를 서류 평가했는지 여부") boolean documentEvaluated,
+            @Schema(description = "이 사용자가 준 총 서류 평가 점수", example = "20", nullable = true) @Nullable Integer myScoreTotal,
+            @Schema(description = "서류 평가 만점 (기준 개수 × 10)", example = "50") int documentMaxScore,
+            @Schema(description = "면접 일정", example = "4/18 (금) 10:00 - 10:30", nullable = true) String interviewSchedule
     ) {
         public static SummaryForUser from(Application application, Long currentUserId) {
-            List<Evaluation> userEvaluations = application.getEvaluations().stream()
+            Recruitment recruitment = application.getRecruitment();
+
+            int documentCriteriaCount = (int) recruitment
+                    .getEvaluationCriteriaList()
+                    .stream()
+                    .filter(c -> c.getEvaluationType() == EvaluationType.DOCUMENT)
+                    .count();
+            int documentMaxScore = documentCriteriaCount * 10;
+
+            List<Evaluation> userDocsEvaluations = application.getEvaluations().stream()
                     .filter(e -> e.getUser().getId().equals(currentUserId))
+                    .filter(e -> e.getCriteria().getEvaluationType() == EvaluationType.DOCUMENT)
                     .toList();
 
-            boolean evaluated = !userEvaluations.isEmpty();
+            boolean evaluated = !(documentCriteriaCount > userDocsEvaluations.size() || userDocsEvaluations.isEmpty());
 
-            Integer totalScore = evaluated
-                    ? userEvaluations.stream()
+            Integer myScoreTotal = evaluated
+                    ? userDocsEvaluations.stream()
                     .mapToInt(Evaluation::getScore)
                     .sum()
                     : null;
 
-            Recruitment recruitment = application.getRecruitment();
+            TimeSlot ts = application.getTimeSlot();
+            String interviewSchedule = null;
+            if (ts != null) {
+                DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("M/d (E)", Locale.KOREA);
+                DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HH:mm");
+                String datePart  = ts.getDate().format(dateFmt);
+                String startPart = ts.getStartTime().format(timeFmt);
+                String endPart   = ts.getEndTime().format(timeFmt);
+                interviewSchedule = String.format("%s %s - %s", datePart, startPart, endPart);
+            }
+
             boolean isDocumentResultAnnounced = LocalDate.now().isAfter(recruitment.getDocumentResultDate())
                     || LocalDate.now().isEqual(recruitment.getDocumentResultDate());
 
@@ -297,7 +320,9 @@ public class ApplicationResponseDTO {
                     application.getPosition() != null ? application.getPosition().getName() : null,
                     application.getStatus(),
                     evaluated,
-                    totalScore
+                    myScoreTotal,
+                    documentMaxScore,
+                    interviewSchedule
             );
         }
     }

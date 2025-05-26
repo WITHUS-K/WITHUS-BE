@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.domain.application.application.repository;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -70,5 +71,10 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
     @Override
     public List<Application> findAllById(List<Long> longs) {
         return applicationJpaRepository.findAllById(longs);
+    }
+
+    @Override
+    public List<Application> findDistinctByRecruitment_IdAndEvaluators_Evaluator_IdAndEvaluators_EvaluationType(Long recruitmentId, Long evaluatorId, EvaluationType evaluationType) {
+        return applicationJpaRepository.findDistinctByRecruitment_IdAndEvaluators_Evaluator_IdAndEvaluators_EvaluationType(recruitmentId, evaluatorId, evaluationType);
     }
 }
