@@ -4,11 +4,9 @@ import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
 import KUSITMS.WITHUS.domain.application.application.enumerate.SimpleApplicationStatus;
 import KUSITMS.WITHUS.domain.interview.interview.service.InterviewSchedulerService;
-import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
-import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.domain.user.user.service.UserService;
 import KUSITMS.WITHUS.global.util.redis.VerificationCache;
@@ -57,9 +55,8 @@ class InterviewControllerTest {
     @Autowired private VerificationCache verificationCache;
 
     private String accessToken;
-    private Long recruitmentId;
-    private Long interviewId;
     private Long savedOrganizationId;
+
     private final String testMail = "admin@gmail.com";
     private final String testPassword = "password1!";
     private final String testPhone = "01012345678";
@@ -69,30 +66,54 @@ class InterviewControllerTest {
         verificationCache.markVerified(testPhone, Duration.ofMinutes(3));
         createTestUser();
         accessToken = testAuthHelper.loginAndGetAccessToken(testMail, testPassword);
-        recruitmentId = testHelper.createRecruitment("면접 테스트용 공고", savedOrganizationId, accessToken);
-        interviewId = testHelper.createInterview(recruitmentId, accessToken);
     }
 
     private void createTestUser() {
-        UserRequestDTO.AdminJoin request = new UserRequestDTO.AdminJoin(
-                "관리자",
-                "큐시즘",
-                testMail,
-                testPassword,
-                testPhone
-        );
-        userService.adminJoinProcess(request);
+        userService.adminJoinProcess(new UserRequestDTO.AdminJoin(
+                "관리자", "큐시즘", testMail, testPassword, testPhone));
+        savedOrganizationId = userRepository.getByEmail(testMail)
+                .getUserOrganizations().get(0).getOrganization().getId();
+    }
 
-        User user = userRepository.getByEmail(testMail);
-        Organization org = user.getUserOrganizations().get(0).getOrganization();
-        savedOrganizationId = org.getId();
+    private Long createAndScheduleInterview(Long recruitmentId) throws Exception {
+        Long interviewId = testHelper.createInterview(recruitmentId, accessToken);
+        InterviewSchedulerService.InterviewConfig config = new InterviewSchedulerService.InterviewConfig(
+                2, 2, 2, 2, List.of("Room A", "Room B"));
+        mockMvc.perform(post("/api/v1/interviews/recruitments/" + recruitmentId + "/interviews/" + interviewId + "/schedule")
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(config)))
+                .andExpect(status().isOk());
+        return interviewId;
+    }
+
+    private void updateApplicationStatus(List<Long> appIds) throws Exception {
+        ApplicationRequestDTO.UpdateStatus updateStatus = new ApplicationRequestDTO.UpdateStatus(
+                appIds, AdminStageFilter.DOCUMENT, SimpleApplicationStatus.PASS);
+        mockMvc.perform(patch("/api/v1/admin/applications/status")
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateStatus)))
+                .andExpect(status().isOk());
+    }
+
+    private Long prepareInterviewScenario() throws Exception {
+        Long recruitmentId = testHelper.createRecruitment("면접 테스트용 공고", savedOrganizationId, accessToken);
+
+        Long positionId1 = testHelper.createPosition(recruitmentId, "백엔드", accessToken);
+        Long positionId2 = testHelper.createPosition(recruitmentId, "프론트엔드", accessToken);
+
+        Long appId1 = testHelper.createApplication(accessToken, recruitmentId, positionId1, "지원자1", "applicant1@example.com");
+        Long appId2 = testHelper.createApplication(accessToken, recruitmentId, positionId2, "지원자2", "applicant2@example.com");
+
+        updateApplicationStatus(List.of(appId1, appId2));
+        return createAndScheduleInterview(recruitmentId);
     }
 
     @Test
     @DisplayName("면접 생성 성공")
     void createInterviewSuccess() throws Exception {
         Long recruitmentId = testHelper.createRecruitment("면접 테스트용 공고", savedOrganizationId, accessToken);
-
         mockMvc.perform(post("/api/v1/interviews/recruitments/" + recruitmentId + "/interviews")
                         .header("Authorization", accessToken))
                 .andExpect(status().isOk())
@@ -102,27 +123,18 @@ class InterviewControllerTest {
     @Test
     @DisplayName("면접 스케줄 배정 성공")
     void assignScheduleSuccess() throws Exception {
-        // Given
+        Long recruitmentId = testHelper.createRecruitment("면접 테스트용 공고", savedOrganizationId, accessToken);
         Long positionId = testHelper.createPosition(recruitmentId, "파트", accessToken);
+        Long appId1 = testHelper.createApplication(accessToken, recruitmentId, positionId, "지원자1", "app1@example.com");
+        Long appId2 = testHelper.createApplication(accessToken, recruitmentId, positionId, "지원자2", "app2@example.com");
 
-        Long appId1 = testHelper.createApplication(accessToken, recruitmentId, positionId, "지원자1", "applicant1@example.com");
-        Long appId2 = testHelper.createApplication(accessToken, recruitmentId, positionId, "지원자2", "applicant2@example.com");
+        updateApplicationStatus(List.of(appId1, appId2));
 
-        ApplicationRequestDTO.UpdateStatus updateStatus = new ApplicationRequestDTO.UpdateStatus(List.of(appId1, appId2), AdminStageFilter.DOCUMENT, SimpleApplicationStatus.PASS);
+        InterviewSchedulerService.InterviewConfig config = new InterviewSchedulerService.InterviewConfig(
+                2, 2, 2, 2, List.of("Room A", "Room B"));
 
-        mockMvc.perform(patch("/api/v1/admin/applications/status")
-                        .header("Authorization", accessToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateStatus)))
-                .andExpect(status().isOk());
+        Long interviewId = testHelper.createInterview(recruitmentId, accessToken);
 
-        // When
-        var config = new InterviewSchedulerService.InterviewConfig(
-                2, 2, 2, 2,
-                List.of("Room A", "Room B")
-        );
-
-        // Then
         mockMvc.perform(post("/api/v1/interviews/recruitments/" + recruitmentId + "/interviews/" + interviewId + "/schedule")
                         .header("Authorization", accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -134,35 +146,8 @@ class InterviewControllerTest {
     @Test
     @DisplayName("전체 면접 스케줄 조회 성공")
     void getScheduleSuccess() throws Exception {
-        // Given
-        Long newRecruitmentId = testHelper.createRecruitment("면접 테스트용 공고", savedOrganizationId, accessToken);
-        Long positionId1 = testHelper.createPosition(newRecruitmentId, "파트1", accessToken);
-        Long positionId2 = testHelper.createPosition(newRecruitmentId, "파트2", accessToken);
+        Long interviewId = prepareInterviewScenario();
 
-        Long appId1 = testHelper.createApplication(accessToken, newRecruitmentId, positionId1, "지원자1", "applicant1@example.com");
-        Long appId2 = testHelper.createApplication(accessToken, newRecruitmentId, positionId2, "지원자2", "applicant2@example.com");
-
-        ApplicationRequestDTO.UpdateStatus updateStatus = new ApplicationRequestDTO.UpdateStatus(
-                List.of(appId1, appId2), AdminStageFilter.DOCUMENT, SimpleApplicationStatus.PASS
-        );
-
-        mockMvc.perform(patch("/api/v1/admin/applications/status")
-                        .header("Authorization", accessToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateStatus)))
-                .andExpect(status().isOk());
-
-        Long interviewId = testHelper.createInterview(newRecruitmentId, accessToken);
-
-        // When
-        var config = new InterviewSchedulerService.InterviewConfig(2, 2, 2, 2, List.of("Room A", "Room B"));
-        mockMvc.perform(post("/api/v1/interviews/recruitments/" + newRecruitmentId + "/interviews/" + interviewId + "/schedule")
-                        .header("Authorization", accessToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(config)))
-                .andExpect(status().isOk());
-
-        // Then
         mockMvc.perform(get("/api/v1/interviews/" + interviewId + "/schedule")
                         .header("Authorization", accessToken))
                 .andExpect(status().isOk())
@@ -211,35 +196,5 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$.result.applicantCount").value(2))
                 .andExpect(jsonPath("$.result.assistantCount").value(2));
     }
-
-    private Long prepareInterviewScenario() throws Exception {
-        Long recruitmentId = testHelper.createRecruitment("면접 테스트용 공고", savedOrganizationId, accessToken);
-        Long positionId = testHelper.createPosition(recruitmentId, "백엔드", accessToken);
-
-        Long appId = testHelper.createApplication(accessToken, recruitmentId, positionId, "지원자1", "applicant@example.com");
-
-        ApplicationRequestDTO.UpdateStatus updateStatus = new ApplicationRequestDTO.UpdateStatus(
-                List.of(appId), AdminStageFilter.DOCUMENT, SimpleApplicationStatus.PASS
-        );
-
-        mockMvc.perform(patch("/api/v1/admin/applications/status")
-                        .header("Authorization", accessToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateStatus)))
-                .andExpect(status().isOk());
-
-        Long interviewId = testHelper.createInterview(recruitmentId, accessToken);
-
-        InterviewSchedulerService.InterviewConfig config = new InterviewSchedulerService.InterviewConfig(
-                2, 2, 2, 2, List.of("Room A", "Room B")
-        );
-
-        mockMvc.perform(post("/api/v1/interviews/recruitments/" + recruitmentId + "/interviews/" + interviewId + "/schedule")
-                        .header("Authorization", accessToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(config)))
-                .andExpect(status().isOk());
-
-        return interviewId;
-    }
 }
+
