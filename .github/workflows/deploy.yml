@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      TEST_JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
 
     steps:
       - uses: actions/checkout@v4
