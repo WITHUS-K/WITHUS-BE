@@ -16,6 +16,7 @@ import KUSITMS.WITHUS.domain.user.userOrganization.service.UserOrganizationServi
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.integration.config.MockInfraBeans;
 import KUSITMS.WITHUS.integration.util.TestAuthHelper;
+import KUSITMS.WITHUS.integration.util.TestHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,6 +58,7 @@ class RecruitmentControllerTest {
     @Autowired private UserOrganizationService userOrganizationService;
     @Autowired private BCryptPasswordEncoder encoder;
     @Autowired private TestAuthHelper testAuthHelper;
+    @Autowired private TestHelper testHelper;
 
     private final String testMail = "testMail@gmail.com";
     private Long savedOrganizationId;
@@ -68,7 +70,7 @@ class RecruitmentControllerTest {
         savedOrganizationId = organizationService.create(new OrganizationRequestDTO.Create("테스트 조직")).id();
         createTestUser();
         accessToken = testAuthHelper.loginAndGetAccessToken(testMail, "password1!");
-        savedRecruitmentId = createRecruitment("기본 공고").id();
+        savedRecruitmentId = testHelper.createRecruitment("기본 공고", savedOrganizationId, accessToken);
     }
 
     private void createTestUser() {
@@ -85,25 +87,12 @@ class RecruitmentControllerTest {
         userRepository.save(user);
     }
 
-    private record RecruitmentResult(Long id, String slug) {}
-
-    private RecruitmentResult createRecruitment(String title) throws Exception {
-        var request = createUpsertRequest(title);
-        var content = objectMapper.writeValueAsString(request);
-
-        var response = performWithAuth(post("/api/v1/recruitments/publish"), content)
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        Number recruitmentId = JsonPath.read(response, "$.result.recruitmentId");
-        String slug = null;
-        if (response.contains("UrlSlug")) {
-            slug = JsonPath.read(response, "$.result.UrlSlug");
-        }
-
-        return new RecruitmentResult(recruitmentId.longValue(), slug);
+    private ResultActions performWithAuth(MockHttpServletRequestBuilder requestBuilder, String content) throws Exception {
+        return mockMvc.perform(requestBuilder
+                .header("Authorization", accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content));
     }
-
 
     private RecruitmentRequestDTO.Upsert createUpsertRequest(String title) {
         return new RecruitmentRequestDTO.Upsert(
@@ -120,13 +109,6 @@ class RecruitmentControllerTest {
                 true,
                 List.of(new AvailableTimeRangeRequestDTO(LocalDate.now().plusDays(2), LocalTime.of(10, 0), LocalTime.of(12, 0)))
         );
-    }
-
-    private ResultActions performWithAuth(MockHttpServletRequestBuilder requestBuilder, String content) throws Exception {
-        return mockMvc.perform(requestBuilder
-                .header("Authorization", accessToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content));
     }
 
     @Test
@@ -177,11 +159,7 @@ class RecruitmentControllerTest {
     @Test
     @DisplayName("공고 목록 조회")
     void getRecruitmentsSuccess() throws Exception {
-        var request = createUpsertRequest("테스트 공고 제목");
-        var content = objectMapper.writeValueAsString(request);
-
-        performWithAuth(post("/api/v1/recruitments/publish"), content)
-                .andExpect(status().isOk());
+        testHelper.createRecruitment("테스트 공고 제목", savedOrganizationId, accessToken);
 
         mockMvc.perform(get("/api/v1/recruitments")
                         .header("Authorization", accessToken)
