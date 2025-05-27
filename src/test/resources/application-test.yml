@@ -17,6 +17,7 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
 
   jwt:
+    #secret: "VGhpcyBpcyBhIHN1cGVyIHNlY3JldCBmb3IgdGVzdGluZw=="
     secret: ${TEST_JWT_SECRET}
 
 ncp:
