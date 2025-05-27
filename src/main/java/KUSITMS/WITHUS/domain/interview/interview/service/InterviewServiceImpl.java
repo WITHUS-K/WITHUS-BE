@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.domain.interview.interview.service;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
+import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewResponseDTO;
 import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewScheduleDTO;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.interview.repository.InterviewRepository;
@@ -82,4 +83,15 @@ public class InterviewServiceImpl implements InterviewService {
                 .toList();
     }
 
+    @Override
+    public InterviewResponseDTO.Config getInterviewConfig(Long interviewId) {
+        Interview interview = interviewRepository.getById(interviewId);
+
+        return InterviewResponseDTO.Config.from(
+                interview,
+                interview.getInterviewerPerSlot(),
+                interview.getApplicantPerSlot(),
+                interview.getAssistantPerSlot()
+        );
+    }
 }

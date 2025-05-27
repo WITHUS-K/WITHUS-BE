@@ -2,18 +2,19 @@ package KUSITMS.WITHUS.domain.interview.interview.service;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
-import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
-import KUSITMS.WITHUS.domain.application.availability.repository.ApplicantAvailabilityRepository;
+import KUSITMS.WITHUS.domain.application.applicantAvailability.entity.ApplicantAvailability;
+import KUSITMS.WITHUS.domain.application.applicantAvailability.repository.ApplicantAvailabilityRepository;
 import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewScheduleDTO;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.interview.repository.InterviewRepository;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.interview.timeslot.repository.TimeSlotRepository;
-import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,10 +45,17 @@ public class InterviewSchedulerService {
      */
     @Transactional
     public void assignInterviewSlots(Long recruitmentId, Long interviewId, InterviewConfig config) {
+        if (config.roomNames().size() != config.roomCount()) {
+            throw new CustomException(ErrorCode.MISMATCHED_ROOM_COUNT);
+        }
+
         // 1. 서류 합격 지원자 및 가능 시간 조회
         List<Application> applicants = new ArrayList<>(applicationRepository.findPassedByRecruitment(recruitmentId));
         List<ApplicantAvailability> availabilityList = availabilityRepository.findByApplicationIn(applicants);
         Interview interview = interviewRepository.getById(interviewId);
+
+        interview.setConfig(config.interviewerPerSlot, config.applicantPerSlot, config.assistantPerSlot, config.roomCount());
+        interview.setRoomNames(config.roomNames());
 
         // 2. ID로 빠르게 찾기 위한 맵 구성
         Map<Long, Application> applicantMap = applicants.stream()
@@ -148,7 +156,7 @@ public class InterviewSchedulerService {
                 LocalDate date = time.toLocalDate();
                 LocalTime start = time.toLocalTime();
                 LocalTime end = start.plusMinutes(slotMinutes);
-                String roomName = "면접실 " + (usedRooms + 1);
+                String roomName = config.roomNames().get(usedRooms);
 
                 TimeSlot newSlot = timeSlotRepository.findOrCreate(
                         date, start, end, interview, hasPosition ? position : null, roomName
@@ -185,57 +193,11 @@ public class InterviewSchedulerService {
     public List<InterviewScheduleDTO> getInterviewSchedule(Long interviewId) {
         Interview interview = interviewRepository.getById(interviewId);
         Recruitment recruitment = interview.getRecruitment();
-        Short interviewDuration = recruitment.getInterviewDuration();
-        List<AvailableTimeRange> timeRanges = recruitment.getAvailableTimeRanges();
 
         List<TimeSlot> slots = timeSlotRepository.findByInterview(interview);
-
-        Map<LocalDate, List<TimeSlot>> slotsByDate = slots.stream()
-                .collect(Collectors.groupingBy(TimeSlot::getDate));
-
-        // 날짜별 InterviewScheduleDTO 생성
-        return slotsByDate.entrySet().stream()
-                .map(entry -> {
-                    LocalDate date = entry.getKey();
-                    List<TimeSlot> daySlots = entry.getValue();
-
-                    // 해당 날짜의 available time 찾기
-                    AvailableTimeRange timeRange = timeRanges.stream()
-                            .filter(r -> r.getDate().equals(date))
-                            .findFirst()
-                            .orElse(null);
-
-                    // available time에 등록되지 않은 날짜는 건너뜀
-                    if (timeRange == null) {
-                        return null;
-                    }
-
-                    List<InterviewScheduleDTO.InterviewSlotDTO> slotDTOs = daySlots.stream()
-                            .map(InterviewScheduleDTO.InterviewSlotDTO::from)
-                            .toList();
-
-                    List<String> roomNames = daySlots.stream()
-                            .map(TimeSlot::getRoomName)
-                            .filter(Objects::nonNull)
-                            .distinct()
-                            .sorted()
-                            .toList();
-
-                    return InterviewScheduleDTO.from(
-                            interviewId,
-                            date,
-                            timeRange.getStartTime(),
-                            timeRange.getEndTime(),
-                            interviewDuration,
-                            roomNames,
-                            slotDTOs
-                    );
-                })
-                .filter(Objects::nonNull)
-                .filter(dto -> dto.date() != null)
-                .sorted(Comparator.comparing(InterviewScheduleDTO::date))
-                .toList();
+        return buildScheduleDTOs(interview, recruitment, slots, false);
     }
+
 
     /**
      * 내 면접 시간 조회 (배정된 타임 슬롯 조회)
@@ -243,20 +205,53 @@ public class InterviewSchedulerService {
      * @param user 현재 로그인 유저
      * @return 조회된 타임 슬롯 반환
      */
-    public List<InterviewScheduleDTO.MyInterviewTimeDTO> getMyInterviewTimes(Long interviewId, User user) {
+    public List<InterviewScheduleDTO> getMyInterviewTimes(Long interviewId, User user) {
         Interview interview = interviewRepository.getById(interviewId);
-
-        List<TimeSlot> allSlots = timeSlotRepository.findByInterview(interview);
+        Recruitment recruitment = interview.getRecruitment();
 
         Set<Long> mySlotIds = timeSlotRepository.findAllByUserInvolved(interviewId, user).stream()
                 .map(TimeSlot::getId)
                 .collect(Collectors.toSet());
 
-        return allSlots.stream()
-                .map(slot -> InterviewScheduleDTO.MyInterviewTimeDTO.from(slot, mySlotIds.contains(slot.getId())))
+        List<TimeSlot> mySlots = timeSlotRepository.findByInterview(interview).stream()
+                .filter(slot -> mySlotIds.contains(slot.getId()))
                 .toList();
+
+        return buildScheduleDTOs(interview, recruitment, mySlots, true);
     }
 
+
+    private List<InterviewScheduleDTO> buildScheduleDTOs(Interview interview, Recruitment recruitment,
+                                                         List<TimeSlot> slots, boolean isMySchedule) {
+        Map<LocalDate, List<TimeSlot>> slotsByDate = slots.stream()
+                .collect(Collectors.groupingBy(TimeSlot::getDate));
+
+        return recruitment.getAvailableTimeRanges().stream()
+                .map(timeRange -> {
+                    LocalDate date = timeRange.getDate();
+                    List<TimeSlot> daySlots = slotsByDate.getOrDefault(date, List.of());
+
+                    List<InterviewScheduleDTO.InterviewSlotDTO> slotDTOs = daySlots.stream()
+                            .map(slot -> isMySchedule
+                                    ? InterviewScheduleDTO.InterviewSlotDTO.from(slot, true)
+                                    : InterviewScheduleDTO.InterviewSlotDTO.from(slot))
+                            .toList();
+
+                    List<String> roomNames = interview.getRoomNames();
+
+                    return InterviewScheduleDTO.from(
+                            interview.getId(),
+                            date,
+                            timeRange.getStartTime(),
+                            timeRange.getEndTime(),
+                            recruitment.getInterviewDuration(),
+                            roomNames,
+                            slotDTOs
+                    );
+                })
+                .sorted(Comparator.comparing(InterviewScheduleDTO::date))
+                .toList();
+    }
 
 
     /**
@@ -265,6 +260,8 @@ public class InterviewSchedulerService {
     public record InterviewConfig(
             int interviewerPerSlot,
             int applicantPerSlot,
-            int roomCount
+            int assistantPerSlot,
+            int roomCount,
+            List<String> roomNames
     ) {}
 }

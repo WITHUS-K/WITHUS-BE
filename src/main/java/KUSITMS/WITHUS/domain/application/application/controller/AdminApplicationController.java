@@ -8,6 +8,8 @@ import KUSITMS.WITHUS.domain.application.application.service.ApplicationMailServ
 import KUSITMS.WITHUS.domain.application.application.service.ApplicationService;
 import KUSITMS.WITHUS.domain.application.application.service.ApplicationSmsService;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
+import KUSITMS.WITHUS.domain.application.distributionRequest.dto.DistributionRequestResponseDTO;
+import KUSITMS.WITHUS.domain.application.distributionRequest.entity.DistributionRequest;
 import KUSITMS.WITHUS.global.response.PagedResponse;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,11 +17,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,8 +45,9 @@ public class AdminApplicationController {
             @RequestParam(defaultValue = "ASC") Sort.Direction direction,
             @PageableDefault(size = 7) Pageable pageable
     ) {
-        Page<ApplicationResponseDTO.SummaryForAdmin> page = applicationService.getByRecruitmentIdForAdmin(recruitmentId, stage, pageable, sortBy, direction);
-        return SuccessResponse.ok(PagedResponse.from(page));
+        ApplicationResponseDTO.AdminPageWithStageCounts result = applicationService.getByRecruitmentIdForAdmin(recruitmentId, stage, pageable, sortBy, direction);
+        PagedResponse<ApplicationResponseDTO.SummaryForAdmin> paged = PagedResponse.from(result.page(), result.counts());
+        return SuccessResponse.ok(paged);
     }
 
     @PatchMapping("/status")
@@ -65,6 +66,15 @@ public class AdminApplicationController {
         return SuccessResponse.ok("성공했습니다.");
     }
 
+    @GetMapping("/distribute-evaluators/latest/{recruitmentId}")
+    @Operation(summary = "지원서 평가 담당자 배정 최신 요청 조회")
+    public SuccessResponse<DistributionRequestResponseDTO.Detail> latest(
+            @PathVariable Long recruitmentId
+    ) {
+        DistributionRequest record = applicationService.distributeEvaluatorsLatestRequest(recruitmentId);
+        return SuccessResponse.ok(DistributionRequestResponseDTO.Detail.from(record));
+    }
+
     @PostMapping("/evaluators")
     @Operation(summary = "지원서별 평가 담당자 업데이트", description = "기존 평가자는 모두 지우고, 주어진 userId 리스트로 재배정합니다.")
     public SuccessResponse<String> updateEvaluators(
@@ -77,10 +87,10 @@ public class AdminApplicationController {
     @PostMapping("/bulk-mail")
     @Operation(summary = "지원서 대상 다중 메일 발송", description = "복수의 수신자 이메일, 제목, 본문, 첨부파일을 받아 일괄 메일을 발송합니다.")
     public SuccessResponse<String> sendBulkMail(
-            @ModelAttribute @Valid ApplicationRequestDTO.SendBulkMail request
+            @ModelAttribute @Valid ApplicationRequestDTO.BulkMailRequest request
     ) throws MessagingException {
         mailService.sendBulkMail(
-                request.recipients(),
+                request.applicationIds(),
                 request.subject(),
                 request.body(),
                 request.attachments()
@@ -94,7 +104,7 @@ public class AdminApplicationController {
             @ModelAttribute @Valid ApplicationRequestDTO.BulkSmsRequest request
     ) {
         smsService.sendBulkSms(
-                request.phoneNumbers(),
+                request.applicationIds(),
                 request.message(),
                 request.attachment()
         );

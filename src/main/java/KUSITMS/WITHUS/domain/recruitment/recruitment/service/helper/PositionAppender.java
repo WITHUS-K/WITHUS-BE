@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper;
 
 import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.recruitment.position.enumerate.PositionColor;
 import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class PositionAppender {
                                 Position p = Position.builder()
                                         .name(name)
                                         .recruitment(recruitment)
+                                        .color(PositionColor.getRandomColor())
                                         .build();
                                 return positionRepository.save(p);
                             });

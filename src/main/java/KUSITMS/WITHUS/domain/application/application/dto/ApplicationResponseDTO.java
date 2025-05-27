@@ -2,15 +2,16 @@ package KUSITMS.WITHUS.domain.application.application.dto;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
+import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
 import KUSITMS.WITHUS.domain.application.applicationAcquaintance.entity.ApplicationAcquaintance;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerResponseDTO;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
-import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
+import KUSITMS.WITHUS.domain.application.applicantAvailability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.comment.dto.CommentResponseDTO;
 import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.application.comment.enumerate.CommentType;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
-import KUSITMS.WITHUS.domain.application.interviewQuestion.dto.InterviewQuestionResponseDTO;
+import KUSITMS.WITHUS.domain.interview.interviewQuestion.dto.InterviewQuestionResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.dto.EvaluationResponseDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteriaResponseDTO;
@@ -26,6 +27,7 @@ import KUSITMS.WITHUS.global.common.annotation.TimeFormat;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.data.domain.Page;
 import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
@@ -34,6 +36,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -62,9 +65,12 @@ public class ApplicationResponseDTO {
             @Schema(description = "주소") String address,
             @Schema(description = "합불 상태") ApplicationStatus status,
             @Schema(description = "지원서 항목 질문 및 답변 목록") List<ApplicationAnswerResponseDTO> documentAnswers,
+
             @Schema(description = "면접 가능 시간") @TimeFormat List<LocalDateTime> availableTimes,
             @Schema(description = "면접 질문 목록") List<InterviewQuestionResponseDTO.Detail> interviewQuestions,
-            @Schema(description = "면접 평가 목록") List<EvaluationResponseDTO.Detail> evaluations,
+
+            @Schema(description = "서류/면접 평가 목록") List<EvaluationResponseDTO.Detail> evaluations,
+
             @Schema(description = "서류 코맨트 목록") List<CommentResponseDTO.Detail> documentComments,
             @Schema(description = "면접 코맨트 목록") List<CommentResponseDTO.Detail> interviewComments,
 
@@ -270,23 +276,45 @@ public class ApplicationResponseDTO {
             @Schema(description = "지원자 이름") String name,
             @Schema(description = "파트명") String positionName,
             @Schema(description = "합불 상태") ApplicationStatus status,
-            @Schema(description = "해당 평가자가 이 지원서를 평가했는지 여부") boolean evaluated,
-            @Schema(description = "이 사용자가 준 총 점수", example = "20", nullable = true) @Nullable Integer myScoreTotal
+            @Schema(description = "해당 평가자가 이 지원서를 서류 평가했는지 여부") boolean documentEvaluated,
+            @Schema(description = "이 사용자가 준 총 서류 평가 점수", example = "20", nullable = true) @Nullable Integer myScoreTotal,
+            @Schema(description = "서류 평가 만점 (기준 개수 × 10)", example = "50") int documentMaxScore,
+            @Schema(description = "면접 일정", example = "4/18 (금) 10:00 - 10:30", nullable = true) String interviewSchedule
     ) {
         public static SummaryForUser from(Application application, Long currentUserId) {
-            List<Evaluation> userEvaluations = application.getEvaluations().stream()
+            Recruitment recruitment = application.getRecruitment();
+
+            int documentCriteriaCount = (int) recruitment
+                    .getEvaluationCriteriaList()
+                    .stream()
+                    .filter(c -> c.getEvaluationType() == EvaluationType.DOCUMENT)
+                    .count();
+            int documentMaxScore = documentCriteriaCount * 10;
+
+            List<Evaluation> userDocsEvaluations = application.getEvaluations().stream()
                     .filter(e -> e.getUser().getId().equals(currentUserId))
+                    .filter(e -> e.getCriteria().getEvaluationType() == EvaluationType.DOCUMENT)
                     .toList();
 
-            boolean evaluated = !userEvaluations.isEmpty();
+            boolean evaluated = !(documentCriteriaCount > userDocsEvaluations.size() || userDocsEvaluations.isEmpty());
 
-            Integer totalScore = evaluated
-                    ? userEvaluations.stream()
+            Integer myScoreTotal = evaluated
+                    ? userDocsEvaluations.stream()
                     .mapToInt(Evaluation::getScore)
                     .sum()
                     : null;
 
-            Recruitment recruitment = application.getRecruitment();
+            TimeSlot ts = application.getTimeSlot();
+            String interviewSchedule = null;
+            if (ts != null) {
+                DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("M/d (E)", Locale.KOREA);
+                DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HH:mm");
+                String datePart  = ts.getDate().format(dateFmt);
+                String startPart = ts.getStartTime().format(timeFmt);
+                String endPart   = ts.getEndTime().format(timeFmt);
+                interviewSchedule = String.format("%s %s - %s", datePart, startPart, endPart);
+            }
+
             boolean isDocumentResultAnnounced = LocalDate.now().isAfter(recruitment.getDocumentResultDate())
                     || LocalDate.now().isEqual(recruitment.getDocumentResultDate());
 
@@ -297,7 +325,39 @@ public class ApplicationResponseDTO {
                     application.getPosition() != null ? application.getPosition().getName() : null,
                     application.getStatus(),
                     evaluated,
-                    totalScore
+                    myScoreTotal,
+                    documentMaxScore,
+                    interviewSchedule
+            );
+        }
+    }
+
+    @Schema(description = "단계별 count 포함 관리자용 지원서 리스트 요약 응답 DTO")
+    public record AdminPageWithStageCounts(
+            Page<SummaryForAdmin> page,
+            StageCount counts
+    ) {
+        public static AdminPageWithStageCounts from(Page<SummaryForAdmin> page, StageCount counts) {
+            return new AdminPageWithStageCounts(
+                    page,
+                    counts
+            );
+        }
+    }
+
+    @Schema(description = "관리자용 지원서 리스트 단계별 count DTO")
+    public record StageCount(
+            long document,
+            long interview,
+            long finalPass,
+            long fail
+    ) {
+        public static StageCount from(long document, long interview, long finalPass, long fail) {
+            return new StageCount(
+                    document,
+                    interview,
+                    finalPass,
+                    fail
             );
         }
     }
@@ -318,7 +378,10 @@ public class ApplicationResponseDTO {
             @Schema(description = "면접 평가 담당자 수", example = "3") int interviewAssignedCount,
             @Schema(description = "면접 평가 완료 담당자 수", example = "1") int interviewEvaluatedCount,
             @Schema(description = "면접 평가 총점", example = "85") String interviewAverageScore,
-            @Schema(description = "면접 평가 담당자 리스트") List<UserResponseDTO.Summary> interviewEvaluators
+            @Schema(description = "면접 평가 담당자 리스트") List<UserResponseDTO.Summary> interviewEvaluators,
+
+            @Schema(description = "메일 발송 여부") Boolean isMailSent,
+            @Schema(description = "문자 발송 여부") Boolean isSmsSent
     ) {
         public static SummaryForAdmin from(Application application, long sequenceNumber) {
             String seq = String.format("%03d", sequenceNumber);
@@ -391,7 +454,10 @@ public class ApplicationResponseDTO {
                     interviewAssignedCount,
                     interviewEvaluatedCount,
                     interviewAverageScore,
-                    intAssigned
+                    intAssigned,
+
+                    application.getIsMailSent(),
+                    application.getIsSmsSent()
             );
         }
     }

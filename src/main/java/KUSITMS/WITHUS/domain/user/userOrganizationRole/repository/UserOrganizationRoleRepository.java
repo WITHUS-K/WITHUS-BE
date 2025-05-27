@@ -8,4 +8,5 @@ public interface UserOrganizationRoleRepository {
     UserOrganizationRole save(UserOrganizationRole userOrganizationRole);
     void deleteAll(List<UserOrganizationRole> userOrganizationRoles);
     void saveAll(List<UserOrganizationRole> userOrganizationRoles);
+    List<UserOrganizationRole> findAllByOrganizationRole_Id(Long organizationRoleId);
 }

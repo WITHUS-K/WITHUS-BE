@@ -5,6 +5,7 @@ import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationResponseD
 import KUSITMS.WITHUS.domain.organization.organizationRole.dto.OrganizationRoleResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
+import KUSITMS.WITHUS.domain.user.userOrganization.dto.UserOrganizationResponseDTO;
 import KUSITMS.WITHUS.global.common.annotation.DateFormatDot;
 import KUSITMS.WITHUS.global.common.annotation.DateTimeFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,13 +21,45 @@ public class UserResponseDTO {
     public record Summary(
             @Schema(description = "사용자 ID") Long userId,
             @Schema(description = "이름") String name,
-            @Schema(description = "프로필 이미지 url") String profileImageUrl
+            @Schema(description = "프로필 이미지 url") String profileImageUrl,
+            @Schema(description = "프로필 이미지 사진") String profileColor
     ) {
         public static Summary from(User user) {
             return new Summary(
                     user.getId(),
                     user.getName(),
-                    user.getProfileImageUrl()
+                    user.getProfileImageUrl(),
+                    (user.getProfileColor() == null) ? "gray" : user.getProfileColor().getKey()
+            );
+        }
+    }
+
+    @Schema(description = "로그인 시 사용자 요약 정보 응답 DTO")
+    public record Login(
+            @Schema(description = "사용자 ID") Long userId,
+            @Schema(description = "이름") String name,
+            @Schema(description = "프로필 이미지 url") String profileImageUrl,
+            @Schema(description = "사용자가 속한 조직 ID") List<UserOrganizationResponseDTO.Detail> userOrganizations,
+            @Schema(description = "사용자 / 관리자 여부") Role role,
+            @Schema(description = "조직 내 역할(학회장, 부학회장, 기획 등) 리스트") List<OrganizationRoleResponseDTO.Detail> userOrganizationRoles
+    ) {
+        public static Login from(User user) {
+
+            List<UserOrganizationResponseDTO.Detail> organizations = user.getUserOrganizations().stream()
+                    .map(UserOrganizationResponseDTO.Detail::from)
+                    .toList();
+
+            List<OrganizationRoleResponseDTO.Detail> organizationRoles = user.getUserOrganizationRoles().stream()
+                    .map(uor -> OrganizationRoleResponseDTO.Detail.from(uor.getOrganizationRole()))
+                    .toList();
+
+            return new Login(
+                    user.getId(),
+                    user.getName(),
+                    user.getProfileImageUrl(),
+                    organizations,
+                    user.getRole(),
+                    organizationRoles
             );
         }
     }
@@ -54,6 +87,7 @@ public class UserResponseDTO {
             @Schema(description = "이름") String name,
             @Schema(description = "이메일") String email,
             @Schema(description = "프로필 사진 URL") String imageUrl,
+            @Schema(description = "프로필 색상") String profileColor,
             @Schema(description = "역할에 속해있는지 여부") boolean isAssigned
     ) {
         public static SummaryForSearch from(User user, boolean isAssigned) {
@@ -62,6 +96,7 @@ public class UserResponseDTO {
                     user.getName(),
                     user.getEmail(),
                     user.getProfileImageUrl(),
+                    (user.getProfileColor() == null) ? "gray" : user.getProfileColor().getKey(),
                     isAssigned
             );
         }
@@ -108,12 +143,14 @@ public class UserResponseDTO {
     public record SummaryForTimeSlot(
             @Schema(description = "사용자 ID") Long userId,
             @Schema(description = "이름") String name,
+            @Schema(description = "프로필 사진 URL") String profileUrl,
             @Schema(description = "역할") InterviewRole role
     ) {
         public static SummaryForTimeSlot from(User user, InterviewRole role) {
             return new SummaryForTimeSlot(
                     user.getId(),
                     user.getName(),
+                    user.getProfileImageUrl(),
                     role
             );
         }

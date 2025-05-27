@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.domain.user.user.entity;
 
 import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
+import KUSITMS.WITHUS.domain.user.user.enumerate.ProfileColor;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.UserOrganizationRole;
@@ -52,6 +53,9 @@ public class User extends BaseEntity {
 
     @Column(name = "PROFILE_IMAGE_URL")
     private String profileImageUrl;
+
+    @Column(name = "PROFILE_COLOR")
+    private ProfileColor profileColor;
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

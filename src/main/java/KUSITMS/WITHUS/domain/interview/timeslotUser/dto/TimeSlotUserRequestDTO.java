@@ -13,4 +13,10 @@ public class TimeSlotUserRequestDTO {
             @Schema(description = "추가할 사용자 ID 목록", example = "[1, 2]") List<Long> userIds,
             @Schema(description = "면접 역할", example = "INTERVIEWER") InterviewRole role
     ) {}
+
+    @Schema(description = "TimeSlot에 사용자 수정 요청 DTO")
+    public record UpdateUsers(
+            @Schema(description = "수정할 사용자 ID 목록", example = "[1, 2]") List<Long> userIds,
+            @Schema(description = "면접 역할", example = "INTERVIEWER") InterviewRole role
+    ) {}
 }

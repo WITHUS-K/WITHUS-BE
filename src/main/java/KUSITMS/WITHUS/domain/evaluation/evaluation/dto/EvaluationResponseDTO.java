@@ -11,14 +11,14 @@ public class EvaluationResponseDTO {
     @Schema(description = "평가 정보 응답 DTO")
     public record Detail(
             @Schema(description = "평가 ID") Long id,
-            @Schema(description = "평가 기준") EvaluationCriteriaResponseDTO.Summary criteria,
+            @Schema(description = "평가 기준") EvaluationCriteriaResponseDTO.Detail criteria,
             @Schema(description = "평가 점수") int score,
             @Schema(description = "평가자") UserResponseDTO.Summary user
     ) {
         public static Detail from(Evaluation evaluation) {
             return new Detail(
                     evaluation.getId(),
-                    EvaluationCriteriaResponseDTO.Summary.from(evaluation.getCriteria()),
+                    EvaluationCriteriaResponseDTO.Detail.from(evaluation.getCriteria()),
                     evaluation.getScore(),
                     UserResponseDTO.Summary.from(evaluation.getUser())
             );

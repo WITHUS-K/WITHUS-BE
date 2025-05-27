@@ -1,7 +1,10 @@
 package KUSITMS.WITHUS.domain.evaluation.evaluation.repository;
 
+import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -23,6 +26,11 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
     }
 
     @Override
+    public void saveAll(List<Evaluation> evaluations) {
+        evaluationJpaRepository.saveAll(evaluations);
+    }
+
+    @Override
     public boolean existsByApplicationAndCriteriaAndUser(Long applicationId, Long criteriaId, Long userId) {
         return evaluationJpaRepository.existsByApplicationIdAndCriteriaIdAndUserId(applicationId, criteriaId, userId);
     }
@@ -35,6 +43,11 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
                 .join(evaluation.user).fetchJoin()
                 .where(evaluation.application.id.eq(applicationId))
                 .fetch();
+    }
+
+    @Override
+    public List<Evaluation> findByApplicationAndUserAndCriteriaIn(Application application, User user, List<EvaluationCriteria> criterias) {
+        return evaluationJpaRepository.findByApplicationAndUserAndCriteriaIn(application, user, criterias);
     }
 
     @Override
@@ -56,5 +69,20 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
                 .having(evaluation.criteria.id.countDistinct().eq(requiredCriteriaCount))
                 .fetch()
                 .size();
+    }
+
+    @Override
+    public long countByApplication_IdAndUser_IdAndCriteria_IdIn(Long applicationId, Long userId, List<Long> criteriaIds) {
+        return evaluationJpaRepository.countByApplication_IdAndUser_IdAndCriteria_IdIn(applicationId, userId, criteriaIds);
+    }
+
+    @Override
+    public long countByApplication_IdAndUser_IdAndCriteria_EvaluationType(Long id, Long userId, EvaluationType evaluationType) {
+        return evaluationJpaRepository.countByApplication_IdAndUser_IdAndCriteria_EvaluationType(id, userId, evaluationType);
+    }
+
+    @Override
+    public void deleteAll(List<Evaluation> existingEvaluations) {
+        evaluationJpaRepository.deleteAll(existingEvaluations);
     }
 }

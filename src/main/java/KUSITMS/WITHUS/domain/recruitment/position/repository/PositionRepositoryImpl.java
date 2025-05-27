@@ -9,6 +9,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import static KUSITMS.WITHUS.domain.recruitment.position.entity.QPosition.position;
@@ -51,5 +52,18 @@ public class PositionRepositoryImpl implements PositionRepository {
                         )
                         .fetchOne()
         );
+    }
+
+    @Override
+    public List<Position> findAllByRecruitmentId(Long recruitmentId) {
+        return queryFactory
+                .selectFrom(position)
+                .where(position.recruitment.id.eq(recruitmentId))
+                .fetch();
+    }
+
+    @Override
+    public List<Position> findByRecruitment_Id(Long recruitmentId) {
+        return positionJpaRepository.findByRecruitment_Id(recruitmentId);
     }
 }

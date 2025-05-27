@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface RecruitmentRepository {
     Recruitment getById(Long id);
-    List<Recruitment> findAll();
+    List<Recruitment> findByOrganization_IdIn(List<Long> organizationIds);
     Recruitment save(Recruitment recruitment);
     void delete(Long id);
     List<Recruitment> findAllByKeyword(String keyword);

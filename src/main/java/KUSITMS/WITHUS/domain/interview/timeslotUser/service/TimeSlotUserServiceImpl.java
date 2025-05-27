@@ -11,7 +11,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -44,5 +49,43 @@ public class TimeSlotUserServiceImpl implements TimeSlotUserService {
     @Override
     public List<TimeSlotUser> getUsersByTimeSlot(Long timeSlotId) {
         return timeSlotUserRepository.findByTimeSlotId(timeSlotId);
+    }
+
+    @Override
+    @Transactional
+    public void updateUsersInTimeSlot(Long timeSlotId, List<Long> requestedUserIds, InterviewRole role) {
+        TimeSlot timeSlot = timeSlotRepository.getById(timeSlotId);
+
+        // 현재 DB에 존재하는 사용자 ID
+        Map<Long, TimeSlotUser> existingUserMap = timeSlot.getTimeSlotUsers().stream()
+                .filter(u -> u.getRole() == role)
+                .collect(Collectors.toMap(
+                        u -> u.getUser().getId(),
+                        Function.identity()
+                ));
+
+        Set<Long> requestedSet = new HashSet<>(requestedUserIds);
+
+        // 삭제 대상 - DB에는 있었는데 요청에는 없는 ID
+        for (Long existingId : existingUserMap.keySet()) {
+            if (!requestedSet.contains(existingId)) {
+                timeSlot.getTimeSlotUsers().remove(existingUserMap.get(existingId));
+            }
+        }
+
+        // 추가 대상 - 요청에는 있는데 DB에 없는 ID
+        List<Long> toAdd = requestedUserIds.stream()
+                .filter(id -> !existingUserMap.containsKey(id))
+                .toList();
+
+        List<User> usersToAdd = userRepository.findAllById(toAdd);
+        for (User user : usersToAdd) {
+            TimeSlotUser newRelation = TimeSlotUser.builder()
+                    .timeSlot(timeSlot)
+                    .user(user)
+                    .role(role)
+                    .build();
+            timeSlot.getTimeSlotUsers().add(newRelation);
+        }
     }
 }

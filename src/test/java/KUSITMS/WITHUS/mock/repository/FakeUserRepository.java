@@ -78,4 +78,9 @@ public class FakeUserRepository implements UserRepository {
                 .filter(user -> userIds.contains(user.getId()))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public User getByEmailWithOrgRoles(String email) {
+        return null;
+    }
 }

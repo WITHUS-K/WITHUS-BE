@@ -49,9 +49,9 @@ public enum ErrorCode {
     // User (회원)
     USER_ALREADY_EXIST("USER400", "이미 회원가입된 유저입니다.", HttpStatus.BAD_REQUEST),
     USER_NOT_EXIST("USER404", "존재하지 않는 유저입니다.", HttpStatus.NOT_FOUND),
-    USER_EMPLOYEE_ID_NOT_EXIST("USER404", "존재하지 않는 사번입니다.", HttpStatus.NOT_FOUND),
+    USER_EMAIL_NOT_EXIST("USER404", "가입된 이메일이 존재하지 않습니다. 다시 입력해주세요.", HttpStatus.NOT_FOUND),
     USER_NOT_VALID("USER404", "유효한 사용자 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
-    USER_WRONG_PASSWORD("USER401", "비밀번호가 틀렸습니다.", HttpStatus.UNAUTHORIZED),
+    USER_WRONG_PASSWORD("USER401", "비밀번호가 일치하지 않습니다. 다시 입력해주세요.", HttpStatus.UNAUTHORIZED),
     USER_SAME_PASSWORD("USER400", "동일한 비밀번호로 변경할 수 없습니다.", HttpStatus.BAD_REQUEST),
     PASSWORDS_NOT_MATCH("PASSWORD401", "입력한 두 개의 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
     USER_NO_PERMISSION("USER403", "권한이 없습니다.", HttpStatus.FORBIDDEN),
@@ -91,10 +91,13 @@ public enum ErrorCode {
     // 평가자 관련
     INSUFFICIENT_EVALUATORS("APPLICATION400", "해당 파트에 평가자가 충분하지 않습니다.", HttpStatus.BAD_REQUEST),
     EVALUATOR_NOT_EXIST("APPLICATION404", "존재하지 않는 평가자입니다.", HttpStatus.NOT_FOUND),
+    DISTRIBUTION_HISTORY_NOT_FOUND("APPLICATION404", "해당 공고에 대한 분배 요청 이력이 없습니다.", HttpStatus.NOT_FOUND),
 
     // Interview (면접)
     INTERVIEW_ALREADY_EXIST("INTERVIEW400", "이미 존재하는 면접입니다.", HttpStatus.BAD_REQUEST),
     INTERVIEW_NOT_EXIST("INTERVIEW404", "존재하지 않는 면접입니다.", HttpStatus.NOT_FOUND),
+    MISMATCHED_ROOM_COUNT("INTERVIEW400", "roomNames 수가 roomCount와 일치하지 않습니다.",HttpStatus.BAD_REQUEST),
+    INTERVIEW_QUESTION_NOT_EXIST("INTERVIEW_QUESTION400", "존재하지 않는 면접 질문입니다.", HttpStatus.NOT_FOUND),
 
     // TimeSlot (면접)
     TIME_SLOT_ALREADY_EXIST("TIME_SLOT400", "이미 존재하는 TimeSlot입니다.", HttpStatus.BAD_REQUEST),
@@ -127,6 +130,10 @@ public enum ErrorCode {
     NOT_VERIFIED("VERIFICATION403", "인증이 완료되지 않았습니다.", HttpStatus.FORBIDDEN),
     EMAIL_AUTH_FAIL("EMAIL401", "이메일 인증에 실패했습니다.", HttpStatus.UNAUTHORIZED),
     EMAIL_REQUEST_LIMIT_EXCEEDED("EMAIL429", "5분 후 다시 시도해주세요.", HttpStatus.TOO_MANY_REQUESTS),
+
+    // TEMPLATE
+    TEMPLATE_NOT_FOUND("TEMPLATE404", "존재하지 않는 템플릿입니다.", HttpStatus.NOT_FOUND),
+    EMAIL_SUBJECT_REQUIRED("TEMPLATE402", "이메일 템플릿의 경우 제목이 필요합니다.", HttpStatus.BAD_REQUEST),
 
     // EMAIL
     EMAIL_SEND_FAIL("EMAIL500", "메일 전송에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),

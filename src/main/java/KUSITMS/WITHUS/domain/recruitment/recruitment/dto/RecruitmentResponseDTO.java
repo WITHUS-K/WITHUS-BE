@@ -36,10 +36,10 @@ public class RecruitmentResponseDTO {
     @Schema(description = "공고 상세 정보 응답 DTO")
     public record Detail(
             @Schema(description = "공고 Id") Long recruitmentId,
+            @Schema(description = "조직 Id") Long organizationId,
             @Schema(description = "고유 슬러그 값") String UrlSlug,
             @Schema(description = "공고 제목") String title,
             @Schema(description = "공고 내용") String content,
-            @Schema(description = "첨부 파일 URL") String fileUrl,
             @Schema(description = "성별 입력 필요 여부", example = "true") boolean needGender,
             @Schema(description = "주소 입력 필요 여부", example = "false") boolean needAddress,
             @Schema(description = "학교 입력 필요 여부", example = "true") boolean needSchool,
@@ -90,10 +90,10 @@ public class RecruitmentResponseDTO {
 
             return new Detail(
                     recruitment.getId(),
+                    recruitment.getOrganization().getId(),
                     recruitment.getUrlSlug(),
                     recruitment.getTitle(),
                     recruitment.getContent(),
-                    recruitment.getFileUrl(),
                     recruitment.isNeedGender(),
                     recruitment.isNeedAddress(),
                     recruitment.isNeedSchool(),

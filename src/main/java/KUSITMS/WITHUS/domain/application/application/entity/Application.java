@@ -4,10 +4,10 @@ import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
 import KUSITMS.WITHUS.domain.application.applicationAcquaintance.entity.ApplicationAcquaintance;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
-import KUSITMS.WITHUS.domain.application.availability.entity.ApplicantAvailability;
+import KUSITMS.WITHUS.domain.application.applicantAvailability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
-import KUSITMS.WITHUS.domain.application.interviewQuestion.entity.InterviewQuestion;
+import KUSITMS.WITHUS.domain.interview.interviewQuestion.entity.InterviewQuestion;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
@@ -64,6 +64,14 @@ public class Application extends BaseEntity {
     private String imageUrl;
 
     private String address;
+
+    @Builder.Default
+    @Column(name = "IS_MAIL_SENT")
+    private Boolean isMailSent = false;
+
+    @Builder.Default
+    @Column(name = "IS_SMS_SENT")
+    private Boolean isSmsSent = false;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -134,6 +142,14 @@ public class Application extends BaseEntity {
                 .recruitment(recruitment)
                 .position(position)
                 .build();
+    }
+
+    public void updateIsMailSent(Boolean isMailSent) {
+        this.isMailSent = isMailSent;
+    }
+
+    public void updateIsSmsSent(Boolean isSmsSent) {
+        this.isSmsSent = isSmsSent;
     }
 
     public void updateImageUrl(String imageUrl) {
