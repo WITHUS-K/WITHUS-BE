@@ -65,9 +65,12 @@ public class ApplicationResponseDTO {
             @Schema(description = "주소") String address,
             @Schema(description = "합불 상태") ApplicationStatus status,
             @Schema(description = "지원서 항목 질문 및 답변 목록") List<ApplicationAnswerResponseDTO> documentAnswers,
+
             @Schema(description = "면접 가능 시간") @TimeFormat List<LocalDateTime> availableTimes,
             @Schema(description = "면접 질문 목록") List<InterviewQuestionResponseDTO.Detail> interviewQuestions,
-            @Schema(description = "면접 평가 목록") List<EvaluationResponseDTO.Detail> evaluations,
+
+            @Schema(description = "서류/면접 평가 목록") List<EvaluationResponseDTO.Detail> evaluations,
+
             @Schema(description = "서류 코맨트 목록") List<CommentResponseDTO.Detail> documentComments,
             @Schema(description = "면접 코맨트 목록") List<CommentResponseDTO.Detail> interviewComments,
 
