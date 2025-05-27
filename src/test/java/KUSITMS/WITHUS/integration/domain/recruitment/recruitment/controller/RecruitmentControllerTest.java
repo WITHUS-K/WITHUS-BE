@@ -107,7 +107,7 @@ class RecruitmentControllerTest {
 
     private RecruitmentRequestDTO.Upsert createUpsertRequest(String title) {
         return new RecruitmentRequestDTO.Upsert(
-                null, title, "설명", null,
+                null, title, "설명",
                 List.of("백엔드"),
                 List.of(new DocumentQuestionRequestDTO.Create("질문", "", QuestionType.TEXT, true, 500, true, null, null, null)),
                 LocalDate.now().plusDays(5),
