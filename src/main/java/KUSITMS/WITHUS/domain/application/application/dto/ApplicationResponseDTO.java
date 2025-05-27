@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.domain.application.application.dto;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
+import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
 import KUSITMS.WITHUS.domain.application.applicationAcquaintance.entity.ApplicationAcquaintance;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerResponseDTO;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
@@ -26,6 +27,7 @@ import KUSITMS.WITHUS.global.common.annotation.TimeFormat;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.data.domain.Page;
 import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
@@ -323,6 +325,36 @@ public class ApplicationResponseDTO {
                     myScoreTotal,
                     documentMaxScore,
                     interviewSchedule
+            );
+        }
+    }
+
+    @Schema(description = "단계별 count 포함 관리자용 지원서 리스트 요약 응답 DTO")
+    public record AdminPageWithStageCounts(
+            Page<SummaryForAdmin> page,
+            StageCount counts
+    ) {
+        public static AdminPageWithStageCounts from(Page<SummaryForAdmin> page, StageCount counts) {
+            return new AdminPageWithStageCounts(
+                    page,
+                    counts
+            );
+        }
+    }
+
+    @Schema(description = "관리자용 지원서 리스트 단계별 count DTO")
+    public record StageCount(
+            long document,
+            long interview,
+            long finalPass,
+            long fail
+    ) {
+        public static StageCount from(long document, long interview, long finalPass, long fail) {
+            return new StageCount(
+                    document,
+                    interview,
+                    finalPass,
+                    fail
             );
         }
     }

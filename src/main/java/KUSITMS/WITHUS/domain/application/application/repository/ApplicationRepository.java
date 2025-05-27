@@ -17,4 +17,5 @@ public interface ApplicationRepository {
     Long countByRecruitment_IdAndPosition_Id(Long recruitmentId, Long positionId);
     List<Application> findAllById(List<Long> longs);
     List<Application> findDistinctByRecruitment_IdAndEvaluators_Evaluator_IdAndEvaluators_EvaluationType(Long recruitmentId, Long evaluatorId, EvaluationType evaluationType);
+    Long countByRecruitmentIdAndStatusIn(Long recruitmentId, List<ApplicationStatus> statuses);
 }

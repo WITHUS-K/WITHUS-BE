@@ -17,7 +17,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -46,8 +45,9 @@ public class AdminApplicationController {
             @RequestParam(defaultValue = "ASC") Sort.Direction direction,
             @PageableDefault(size = 7) Pageable pageable
     ) {
-        Page<ApplicationResponseDTO.SummaryForAdmin> page = applicationService.getByRecruitmentIdForAdmin(recruitmentId, stage, pageable, sortBy, direction);
-        return SuccessResponse.ok(PagedResponse.from(page));
+        ApplicationResponseDTO.AdminPageWithStageCounts result = applicationService.getByRecruitmentIdForAdmin(recruitmentId, stage, pageable, sortBy, direction);
+        PagedResponse<ApplicationResponseDTO.SummaryForAdmin> paged = PagedResponse.from(result.page(), result.counts());
+        return SuccessResponse.ok(paged);
     }
 
     @PatchMapping("/status")

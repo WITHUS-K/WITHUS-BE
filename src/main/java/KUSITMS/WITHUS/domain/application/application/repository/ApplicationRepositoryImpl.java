@@ -77,4 +77,9 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
     public List<Application> findDistinctByRecruitment_IdAndEvaluators_Evaluator_IdAndEvaluators_EvaluationType(Long recruitmentId, Long evaluatorId, EvaluationType evaluationType) {
         return applicationJpaRepository.findDistinctByRecruitment_IdAndEvaluators_Evaluator_IdAndEvaluators_EvaluationType(recruitmentId, evaluatorId, evaluationType);
     }
+
+    @Override
+    public Long countByRecruitmentIdAndStatusIn(Long recruitmentId, List<ApplicationStatus> statuses) {
+        return applicationJpaRepository.countByRecruitmentIdAndStatusIn(recruitmentId, statuses);
+    }
 }
