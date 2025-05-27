@@ -9,6 +9,10 @@ spring:
     console:
       enabled: true
 
+  redis:
+    host: redis
+    port: 6379
+
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -17,7 +21,6 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
 
   jwt:
-    #secret: "VGhpcyBpcyBhIHN1cGVyIHNlY3JldCBmb3IgdGVzdGluZw=="
     secret: ${TEST_JWT_SECRET}
 
 ncp:
