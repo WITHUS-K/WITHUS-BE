@@ -170,7 +170,7 @@ public class ApplicationServiceImpl implements ApplicationService {
      * @return 조회한 공고의 지원서 전체의 정보
      */
     @Override
-    public Page<ApplicationResponseDTO.SummaryForAdmin> getByRecruitmentIdForAdmin(
+    public ApplicationResponseDTO.AdminPageWithStageCounts getByRecruitmentIdForAdmin(
             Long recruitmentId,
             AdminStageFilter stage,
             Pageable pageable,
@@ -240,7 +240,22 @@ public class ApplicationServiceImpl implements ApplicationService {
                 ? List.of()
                 : allDtos.subList(start, end);
 
-        return new PageImpl<>(content, pageable, allDtos.size());
+        Page<ApplicationResponseDTO.SummaryForAdmin> page = new PageImpl<>(content, pageable, allDtos.size());
+
+        long documentCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
+                recruitmentId, AdminStageFilter.DOCUMENT.toStatusList());
+        long interviewCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
+                recruitmentId, AdminStageFilter.INTERVIEW.toStatusList());
+        long finalPassCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
+                recruitmentId, AdminStageFilter.FINAL_PASS.toStatusList());
+        long failCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
+                recruitmentId, AdminStageFilter.FAIL.toStatusList());
+
+        ApplicationResponseDTO.StageCount counts = ApplicationResponseDTO.StageCount.from(
+                documentCnt, interviewCnt, finalPassCnt, failCnt
+        );
+
+        return ApplicationResponseDTO.AdminPageWithStageCounts.from(page, counts);
     }
 
 
