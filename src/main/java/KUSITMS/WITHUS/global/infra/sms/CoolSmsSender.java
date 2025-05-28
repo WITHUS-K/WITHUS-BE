@@ -13,6 +13,11 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -57,6 +62,13 @@ public class CoolSmsSender implements SmsSender {
             String filename
     ) {
         try {
+            String ext = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+            if (!ext.equals("jpg") && !ext.equals("jpeg")) {
+                imageBytes = convertImageToJpeg(imageBytes);
+//                filename = filename.substring(0, filename.lastIndexOf('.')) + ".jpg";
+                filename = filename.replaceFirst("\\.[^.]+$", ".jpg");
+            }
+
             // 메모리 바이트 → 톰캣 임시파일이 아닌, JVM temp 디렉토리에 새로 생성
             Path tempFile = Files.createTempFile("mms-", "-" + filename);
             Files.write(tempFile, imageBytes);
@@ -83,6 +95,23 @@ public class CoolSmsSender implements SmsSender {
             throw new CustomException(ErrorCode.SMS_ATTACHMENT_PROCESS_FAIL);
         } catch (RuntimeException e) { // SDK 내부에서 던지는 unchecked 예외
             throw new CustomException(ErrorCode.SMS_SEND_FAIL);
+        }
+    }
+
+    private byte[] convertImageToJpeg(byte[] imageData) throws IOException {
+        // 원본 바이트 → BufferedImage
+        BufferedImage srcImage = ImageIO.read(new ByteArrayInputStream(imageData));
+        // RGB 타입의 새 이미지(배경 흰색)
+        BufferedImage jpgImage = new BufferedImage(
+                srcImage.getWidth(),
+                srcImage.getHeight(),
+                BufferedImage.TYPE_INT_RGB);
+        jpgImage.createGraphics().drawImage(srcImage, 0, 0, Color.WHITE, null);
+
+        // JPEG로 인코딩
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            ImageIO.write(jpgImage, "jpg", baos);
+            return baos.toByteArray();
         }
     }
 
