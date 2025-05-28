@@ -65,7 +65,6 @@ public class CoolSmsSender implements SmsSender {
             String ext = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
             if (!ext.equals("jpg") && !ext.equals("jpeg")) {
                 imageBytes = convertImageToJpeg(imageBytes);
-//                filename = filename.substring(0, filename.lastIndexOf('.')) + ".jpg";
                 filename = filename.replaceFirst("\\.[^.]+$", ".jpg");
             }
 
@@ -101,6 +100,7 @@ public class CoolSmsSender implements SmsSender {
     private byte[] convertImageToJpeg(byte[] imageData) throws IOException {
         // 원본 바이트 → BufferedImage
         BufferedImage srcImage = ImageIO.read(new ByteArrayInputStream(imageData));
+
         // RGB 타입의 새 이미지(배경 흰색)
         BufferedImage jpgImage = new BufferedImage(
                 srcImage.getWidth(),
