@@ -35,7 +35,8 @@ public class SecurityConfig {
             "/",
             "/api/v1/auth/**",
             "/api/v1/users/**",
-            "/api/v1/organizations/search"
+            "/api/v1/organizations/search",
+            "/api/v1/applications"
     };
 
     private final RefreshTokenCacheUtil refreshTokenCacheUtil;

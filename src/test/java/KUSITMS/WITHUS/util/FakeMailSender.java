@@ -1,12 +1,10 @@
-package KUSITMS.WITHUS.global.infra.email.sender;
+package KUSITMS.WITHUS.util;
 
-import jakarta.mail.MessagingException;
+import KUSITMS.WITHUS.global.infra.email.sender.MailSender;
 import org.springframework.core.io.InputStreamSource;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
 public class FakeMailSender implements MailSender {
     @Override
     public void send(String to, String subject, String text) {
