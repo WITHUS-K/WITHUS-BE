@@ -10,6 +10,7 @@ import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import org.springframework.stereotype.Component;
 
+import java.text.Normalizer;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,7 +43,8 @@ public class ApplicationFactory {
                     DocumentQuestion question = questionMap.get(dto.questionId());
                     String fileUrl = null;
                     if (question.getType() == QuestionType.FILE && dto.fileName() != null) {
-                        fileUrl = uploadedFileUrls.get(dto.fileName());
+                        String normalizedDtoFileName = Normalizer.normalize(dto.fileName(), Normalizer.Form.NFC);
+                        fileUrl = uploadedFileUrls.get(normalizedDtoFileName);
                     }
                     return ApplicationAnswer.create(application, question, dto.answerText(), fileUrl);
                 })

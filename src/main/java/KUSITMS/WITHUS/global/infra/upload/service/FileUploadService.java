@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URL;
+import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -43,9 +45,10 @@ public class FileUploadService {
         if (files == null) return result;
 
         for (MultipartFile file : files) {
-            String path = pathBuilder.buildUploadPath("applications", String.valueOf(orgId), String.valueOf(recruitmentId), String.valueOf(appId), "answer", file.getOriginalFilename());
+            String normalizedFileName = Normalizer.normalize(Objects.requireNonNull(file.getOriginalFilename()), Normalizer.Form.NFC);
+            String path = pathBuilder.buildUploadPath("applications", String.valueOf(orgId), String.valueOf(recruitmentId), String.valueOf(appId), "answer", normalizedFileName);
             String url = uploader.upload(file, path);
-            result.put(file.getOriginalFilename(), url);
+            result.put(normalizedFileName, url);
         }
 
         return result;
