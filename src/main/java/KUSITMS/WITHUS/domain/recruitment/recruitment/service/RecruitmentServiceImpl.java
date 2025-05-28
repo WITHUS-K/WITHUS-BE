@@ -313,7 +313,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     }
 
     private RecruitmentResponseDTO.Create saveRecruitment(RecruitmentRequestDTO.Upsert request, boolean isTemporary) {
-        validator.validateRecruitmentRequest(request);
+        validator.validateRecruitmentRequest(request, isTemporary);
         Organization organization = organizationRepository.getById(request.organizationId());
         validator.validateOrganizationExists(organization);
 

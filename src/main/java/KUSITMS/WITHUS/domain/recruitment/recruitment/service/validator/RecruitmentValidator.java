@@ -15,17 +15,20 @@ public class RecruitmentValidator {
         }
     }
 
-    public void validateRecruitmentRequest(RecruitmentRequestDTO.Upsert request) {
-        if (request.organizationId() == null) {
-            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
-        }
-        if (request.title() == null || request.title().isBlank()) {
-            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
-        }
-        if (request.documentDeadline() == null || request.documentResultDate() == null || request.finalResultDate() == null) {
-            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+    public void validateRecruitmentRequest(RecruitmentRequestDTO.Upsert request, boolean isTemporary) {
+        if (!isTemporary) {
+            if (request.organizationId() == null) {
+                throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+            }
+            if (request.title() == null || request.title().isBlank()) {
+                throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+            }
+            if (request.documentDeadline() == null || request.documentResultDate() == null || request.finalResultDate() == null) {
+                throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+            }
         }
     }
+
 
     public void validateOrganizationExists(Organization organization) {
         if (organization == null) {
