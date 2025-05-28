@@ -102,7 +102,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         saveApplicantAvailabilities(application, request.availableTimes());
 
         List<MultipartFile> fileList = files != null ? files : List.of();
-        List<DocumentQuestion> questions = documentQuestionRepository.findByRecruitment(recruitment);
+        List<DocumentQuestion> questions = documentQuestionRepository.findCommonAndByPosition(recruitment, position);
         validator.validateFileAnswers(request.answers(), fileList, questions);
 
         Map<String, String> uploadedFileUrls = fileUploadService.uploadAnswerFiles(fileList,
