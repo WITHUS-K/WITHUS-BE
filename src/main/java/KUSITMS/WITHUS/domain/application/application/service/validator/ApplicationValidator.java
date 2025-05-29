@@ -10,6 +10,7 @@ import KUSITMS.WITHUS.global.exception.ErrorCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.Normalizer;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,14 +47,20 @@ public class ApplicationValidator {
         Map<Long, DocumentQuestion> questionMap = questions.stream()
                 .collect(Collectors.toMap(DocumentQuestion::getId, q -> q));
 
-        Set<String> providedFileNames = files != null
-                ? files.stream().map(MultipartFile::getOriginalFilename).collect(Collectors.toSet())
-                : Set.of();
+        Set<String> providedFileNames = files.stream()
+                .map(MultipartFile::getOriginalFilename)
+                .map(name -> Normalizer.normalize(name, Normalizer.Form.NFC))
+                .collect(Collectors.toSet());
 
         for (var answer : answers) {
             DocumentQuestion question = questionMap.get(answer.questionId());
+
+            String answerFileName = answer.fileName() != null
+                    ? Normalizer.normalize(answer.fileName(), Normalizer.Form.NFC)
+                    : null;
+
             if (question.getType() == QuestionType.FILE) {
-                if (answer.fileName() == null || !providedFileNames.contains(answer.fileName())) {
+                if (answerFileName == null || !providedFileNames.contains(answerFileName)) {
                     throw new CustomException(ErrorCode.FILE_NAME_NOT_MATCH);
                 }
             }

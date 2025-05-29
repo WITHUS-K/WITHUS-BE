@@ -1,9 +1,11 @@
 package KUSITMS.WITHUS.domain.recruitment.documentQuestion.repository;
 
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
+import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -28,6 +30,22 @@ public class DocumentQuestionRepositoryImpl implements DocumentQuestionRepositor
     public List<DocumentQuestion> findByRecruitment(Recruitment recruitment) {
         return queryFactory.selectFrom(documentQuestion)
                 .where(documentQuestion.recruitment.eq(recruitment))
+                .fetch();
+    }
+
+    @Override
+    public List<DocumentQuestion> findCommonAndByPosition(Recruitment recruitment, Position position) {
+        BooleanExpression positionFilter = position == null
+                ? documentQuestion.position.isNull()
+                : documentQuestion.position.isNull()
+                .or(documentQuestion.position.eq(position));
+
+        return queryFactory
+                .selectFrom(documentQuestion)
+                .where(
+                        documentQuestion.recruitment.eq(recruitment)
+                                .and(positionFilter)
+                )
                 .fetch();
     }
 }
