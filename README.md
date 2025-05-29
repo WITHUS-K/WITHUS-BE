@@ -45,7 +45,7 @@ PM의 별명에서 비롯된 팀명으로, 서비스명 ‘위더스(WithUs)’�
 </br>
 
 # 💻 서비스 기능
-![Main Features](https://github.com/user-attachments/assets/a4132527-7c09-4a9a-a2b6-ab4a959e93fe)
+![Main Features](https://github.com/user-attachments/assets/d71f5e6a-7e45-4cf7-aa14-067980fbaad5)
 
 </br>
 
