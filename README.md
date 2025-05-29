@@ -1,6 +1,6 @@
 # 📥 리크루팅 프로세스 자동화 통합 솔루션, 위더스(WITHUS)
 
-🔗 Link : [https://withus-ten.vercel.app](https://withus-ten.vercel.app/)
+> 🔗 Link : [https://withus-ten.vercel.app](https://withus-ten.vercel.app/)
 
 ![image](https://github.com/user-attachments/assets/c6e512ce-7da8-4fca-81a8-5e54f8e415f6)
 
@@ -30,7 +30,7 @@
 > **중전마더스**
 > 
 
-PM의 별명에서 비롯된 팀명으로, 서비스명 ‘위더스(WithUs)’와 라임을 맞춰 유쾌하면서도 따뜻한 팀의 색깔을 담았습니다. ‘중전’처럼 중심을 잡고 서로를 챙기며, ‘마더스’처럼 따뜻하게 사용자 곁에서 진심을 다하는 서비스를 만들겠다는 의지를 담은 이름입니다.
+PM의 별명에서 비롯된 팀명으로, 서비스명 `위더스(WithUs)`와 라임을 맞춰 유쾌하면서도 따뜻한 팀의 색깔을 담았습니다. `중전`처럼 중심을 잡고 서로를 챙기며, `마더스`처럼 따뜻하게 **사용자 곁에서 진심을 다하는 서비스를 만들겠다는 의지를 담은 이름**입니다.
 
 </br>
 
@@ -88,15 +88,15 @@ Swagger : https://jk-project.site/swagger-ui/index.html
   ![Turborepo](https://img.shields.io/badge/Turborepo-000000?style=flat-square&logo=Vercel&logoColor=white)
   ![pnpm](https://img.shields.io/badge/pnpm-F69220?style=flat-square&logo=pnpm&logoColor=white)
   ![TanStack Query](https://img.shields.io/badge/TanStack_Query-FF4154?style=flat-square&logo=ReactQuery&logoColor=white)
-  - **Next.js (App Router)** : App Router 기반으로 페이지, 레이아웃, 모달 등 구조적 분리를 명확히 함
-  - **TypeScript** : API 통신, 컴포넌트 Props에 강한 타입을 부여해 안정성 확보
-  - **vanilla-extract** : 디자인 토큰 기반 CSS-in-TypeScript로, color, spacing, typography 등을 type-safe하게 관리
-  - **Turborepo + pnpm** : 모노레포 구조로 앱과 패키지(컴포넌트, 테마, 유틸 등)를 분리, 패키지 간 의존성 명확하게 관리, 병렬 빌드 성능 향상
-  - **TanStack Query (React Query)** : 서버 상태 관리, 요청 중복 제거, 캐싱, SSR/CSR 통합 처리에 최적화
+  - **Next.js (App Router)** : 페이지·레이아웃·모달의 구조적 분리를 통해 유지보수성과 재사용성을 강화
+  - **TypeScript** :  Props와 API 타입 명세를 통해 코드의 안정성과 예측 가능성 확보
+  - **vanilla-extract** : 디자인 토큰 기반의 타입 안전한 스타일 관리를 통해 일관된 UI 구현
+  - **Turborepo + pnpm** :  모노레포 구조와 병렬 빌드를 통해 패키지 간 의존성 관리와 빌드 속도 향상
+  - **TanStack Query (React Query)** : 서버 상태 관리 자동화를 통해 데이터 요청 최적화 및 CSR/SSR 통합 처리
 - #### CI/CD
   ![Storybook](https://img.shields.io/badge/Storybook-FF4785.svg?style=flat-square&logo=Storybook&logoColor=white)
   ![Github Actions](https://img.shields.io/badge/Github_Actions-2088FF.svg?style=flat-square&logo=GithubActions&logoColor=white)
-  - **Storybook + GitHub Actions** : 공통 컴포넌트 변경사항을 PR마다 자동 배포로 시각화하여 디자이너·개발자 협업 간 피드백 사이클 단축
+  - **Storybook + GitHub Actions** : PR마다 공통 컴포넌트 변경사항을 시각화 배포하여 디자이너·개발자 협업 간 피드백 사이클 단축
 - #### 협업 툴
   ![Discord](https://img.shields.io/badge/Discord-5865F2.svg?style=flat-square&logo=discord&logoColor=white)
   ![Notion](https://img.shields.io/badge/Notion-000000.svg?style=flat-square&logo=notion&logoColor=white)
@@ -104,10 +104,93 @@ Swagger : https://jk-project.site/swagger-ui/index.html
 
 ### 📜 개발 규칙
 - #### branch naming convention
+  `[branch 유형]/[이슈번호-작업내용]` (예: `feat/#1-login-UI`)
 - #### commit convention
+  `[커밋 유형] : [커밋 메시지] ([이슈번호])` (예: `feat: 로그인 구현 (#1)`)
+
+  | Convention Type | Description |
+  | --- | --- |
+  | `init` | 브랜치 첫 커밋 |
+  | `feat` | 새로운 기능에 대한 커밋 |
+  | `fix` | 버그 수정에 대한 커밋 |
+  | `build` | 빌드 관련 파일 수정에 대한 커밋 |
+  | `chore` | 그 외 자잘한 수정에 대한 커밋 |
+  | `docs` | 문서 수정에 대한 커밋 |
+  | `style` | 코드 스타일 혹은 포맷 등에 관한 커밋 |
+  | `refactor` | 코드 리팩토링에 대한 커밋 |
+
+- #### code convention
+  - 2-space indent
+  - `camelCase` : 변수명, 함수명, 폴더명, 파일 명 (컴포넌트 제외), 파라미터
+  - `PascalCase` : 클래스명, 컴포넌트명
+  - `BIG_SNAKE_CASE` : 상수명
 - #### issue template
+  **제목** : `[prefix]` `[구현할 내용]` (예: `[feat] 로그인 UI 구현`)
+  ```markdown
+   ## 💚 어떤 기능인가요?
+    카톡 로그인 기능을 개발.
+  
+  
+  ## ✅ To Dos
+  
+    - [ ]
+    - [ ]
+    - [ ]
+  ```
 - #### PR template
+   **제목** : `[prefix]` `[구현할 내용]` (예: `[feat] 로그인 UI 구현`)
+  ```markdown
+  ## 이슈 넘버
+  - close # 
+  <!-- # 뒤에 이슈넘버를 써서 이슈를 닫아주세요 -->
+  
+  ## 구현 사항
+  <!-- 실제로 변경한 사항을 설명해주세요.-->
+  
+  - [ ]
+  - [ ]
+  - [ ]
+  - [ ]
+  
+  ## Need Review
+  - ~ 부분 이렇게 구현했어요, 피드백 부탁해요!
+  <!-- 어떤 부분에 리뷰어가 집중해야 하는지 or 해당 PR에서 논의가 필요한 사항을 적어주세요. -->
+  
+  
+  
+  ## 📸 스크린샷
+  <!-- 팀원들이 이해하기 쉽도록 스크린샷을 첨부해주세요. -->
+  
+  
+  
+  ## Reference
+  <!-- 참고한 사이트가 있다면 링크를 공유해주세요. -->
+  ```
 </br>
+
+### 📂 프로젝트 구조
+```
+.
+├── apps/
+│   └── web/                  # Next.js 애플리케이션 (App Router 기반)
+├── packages/
+│   ├── eslint-config/        # Turborepo용 ESLint 설정 패키지 
+│   ├── typescript-config/    # 공통 TypeScript 설정
+│   ├── theme/                # 디자인 토큰 저장소
+│   │   └── tokens/           # 색상, 타이포그래피 등 theme 구성 요소들
+│   ├── ui/                   # 공통 UI 컴포넌트 및 아이콘
+│   └── utils/                # 공통 유틸 함수 및 커스텀 훅 
+```
+
+### 🗂 각 폴더 설명
+
+| 폴더 경로 | 설명 |
+|------|------|
+| `apps/web` | 실제 사용자 화면을 구성하기 위한 **Next.js 애플리케이션 코드**가 위치한 곳 |
+| `packages/eslint-config`<br>`packages/typescript-config` | 코드 품질과 일관성을 유지하기 위한 **ESLint 및 TypeScript 공통 설정** 패키지 |
+| `packages/theme` | 색상, 여백, 타이포그래피 등을 재사용 가능하게 구성하기 위한 **디자인 토큰 패키지** |
+| `packages/ui` | 버튼, 인풋, 헤더 등 UI 요소의 재사용을 위한 **공통 UI 컴포넌트 및 아이콘 패키지** |
+| `packages/utils` | 프로젝트 전반에 활용되는 **공통 유틸 함수 및 커스텀 훅**을 관리하기 위한 패키지 |
 
 # 🌃 백엔드
 ### 🛠️ 기술 스택
@@ -142,9 +225,10 @@ Swagger : https://jk-project.site/swagger-ui/index.html
   `[branch 유형]/[이슈번호-작업내용]` (예: `feat/55-login`)
 - #### commit convention
   `[커밋 유형] : [커밋 메시지] [이슈번호]` (예: `feat: 로그인 구현 #4`)
-
-  | `feat` | 새로운 기능 구현 |
+  
+  | Convention Type | Description |
   | --- | --- |
+  | `feat` | 새로운 기능 구현 |
   | `add` | 파일 및 코드 추가 |
   | `chore` | 부수적인 코드 수정 및 기타 변경사항 |
   | `docs` | 문서 추가 및 수정, 삭제 |
