@@ -39,7 +39,7 @@ PM의 별명에서 비롯된 팀명으로, 서비스명 ‘위더스(WithUs)’�
 ### 2️⃣ 유저 리서치 / 기대 효과
 ![image](https://github.com/user-attachments/assets/16bb132d-f8ea-4515-b320-c15e76dae6d1)
 
-### 3️⃣ Information Architecture, 비즈니스 모델
+### 3️⃣ Information Architecture / 비즈니스 모델
 ![image](https://github.com/user-attachments/assets/5ab8ceaf-80bb-4292-a0c7-017e8af18a11)
 
 </br>
