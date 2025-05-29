@@ -10,6 +10,7 @@ import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationReposito
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCriteria;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.repository.EvaluationCriteriaRepository;
+import KUSITMS.WITHUS.domain.interview.interview.repository.InterviewRepository;
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
@@ -59,6 +60,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     private final EvaluationRepository evaluationRepository;
     private final EvaluationCriteriaRepository evaluationCriteriaRepository;
     private final ApplicationEvaluatorRepository applicationEvaluatorRepository;
+    private final InterviewRepository interviewRepository;
 
     private final AvailableTimeRangeAppender availableTimeRangeAppender;
     private final PositionAppender positionAppender;
@@ -276,6 +278,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     @Override
     @Transactional
     public void delete(Long id) {
+        interviewRepository.findByRecruitmentId(id)
+                .ifPresent(interviewRepository::delete);
         recruitmentRepository.getById(id);
         recruitmentRepository.delete(id);
     }

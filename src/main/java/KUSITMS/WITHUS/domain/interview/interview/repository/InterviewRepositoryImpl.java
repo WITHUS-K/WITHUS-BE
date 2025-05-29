@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static KUSITMS.WITHUS.domain.interview.interview.entity.QInterview.interview;
 
@@ -42,5 +43,15 @@ public class InterviewRepositoryImpl implements InterviewRepository {
         return queryFactory.selectFrom(interview)
                 .where(interview.recruitment.id.in(recruitmentIds))
                 .fetch();
+    }
+
+    @Override
+    public Optional<Interview> findByRecruitmentId(Long id) {
+        return interviewJpaRepository.findByRecruitmentId(id);
+    }
+
+    @Override
+    public void delete(Interview interview) {
+        interviewJpaRepository.delete(interview);
     }
 }
