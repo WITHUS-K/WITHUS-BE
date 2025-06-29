@@ -104,8 +104,8 @@ class RecruitmentControllerTest {
                 (short) 10, savedOrganizationId,
                 true, true, true, true, true, false,
                 EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
-                List.of(new EvaluationCriteriaRequestDTO.Create("기준1", "", EvaluationType.DOCUMENT)),
-                List.of(new EvaluationCriteriaRequestDTO.Create("기준2", "", EvaluationType.INTERVIEW)),
+                List.of(new EvaluationCriteriaRequestDTO.Create("기준1", "", EvaluationType.DOCUMENT, null)),
+                List.of(new EvaluationCriteriaRequestDTO.Create("기준2", "", EvaluationType.INTERVIEW, null)),
                 true,
                 List.of(new AvailableTimeRangeRequestDTO(LocalDate.now().plusDays(2), LocalTime.of(10, 0), LocalTime.of(12, 0)))
         );
