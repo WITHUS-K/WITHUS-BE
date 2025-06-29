@@ -16,7 +16,7 @@ public interface RecruitmentService {
     <R> R getByIdAs(Long id, Function<Recruitment,R> mapper);
     RecruitmentResponseDTO.Update update(Long id, RecruitmentRequestDTO.Update request);
     void delete(Long id);
-    List<RecruitmentResponseDTO.Summary> getAllByKeyword(String keyword);
+    List<RecruitmentResponseDTO.Summary> getAllByKeyword(User user, String keyword);
     RecruitmentResponseDTO.Detail getBySlug(String slug);
     List<RecruitmentResponseDTO.Simple> getAllByUserOrganizations(User user);
     List<RecruitmentResponseDTO.SummaryForHome> getCurrentSummariesForUser(Long userId, Long organizationId);

@@ -10,7 +10,7 @@ public interface RecruitmentRepository {
     List<Recruitment> findByOrganization_IdIn(List<Long> organizationIds);
     Recruitment save(Recruitment recruitment);
     void delete(Long id);
-    List<Recruitment> findAllByKeyword(String keyword);
+    List<Recruitment> findAllByKeyword(String keyword, List<Long> organizationIds);
     boolean existsByUrlSlug(String urlSlug);
     Optional<Recruitment> findByUrlSlug(String slug);
     List<Recruitment> findAllByOrganizationIds(List<Long> organizationIds);
