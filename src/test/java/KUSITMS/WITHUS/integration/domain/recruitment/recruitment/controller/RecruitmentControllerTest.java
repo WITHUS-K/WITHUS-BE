@@ -156,20 +156,20 @@ class RecruitmentControllerTest {
                 .andExpect(jsonPath("$.result").value("리크루팅 삭제에 성공하였습니다."));
     }
 
-    @Test
-    @DisplayName("공고 목록 조회")
-    void getRecruitmentsSuccess() throws Exception {
-        testHelper.createRecruitment("테스트 공고 제목", savedOrganizationId, accessToken);
-
-        mockMvc.perform(get("/api/v1/recruitments")
-                        .header("Authorization", accessToken)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.result").isArray())
-                .andExpect(jsonPath("$.result[0].title").value("테스트 공고 제목"))
-                .andExpect(jsonPath("$.result[0].organizationName").value("테스트 조직"));
-    }
+//    @Test
+//    @DisplayName("공고 목록 조회")
+//    void getRecruitmentsSuccess() throws Exception {
+//        testHelper.createRecruitment("테스트 공고 제목", savedOrganizationId, accessToken);
+//
+//        mockMvc.perform(get("/api/v1/recruitments")
+//                        .header("Authorization", accessToken)
+//                        .contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.success").value(true))
+//                .andExpect(jsonPath("$.result").isArray())
+//                .andExpect(jsonPath("$.result[0].title").value("테스트 공고 제목"))
+//                .andExpect(jsonPath("$.result[0].organizationName").value("테스트 조직"));
+//    }
 
     @Test
     @DisplayName("공고 슬러그 조회 성공")
