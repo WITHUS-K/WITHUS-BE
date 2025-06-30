@@ -5,7 +5,7 @@ import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationS
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.dto.AvailableTimeRangeRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.dto.DocumentQuestionRequestDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -33,16 +33,16 @@ public class RecruitmentRequestDTO {
             List<DocumentQuestionRequestDTO.Create> applicationQuestions,
 
             @Schema(description = "서류 마감일", example = "2025-06-01")
-            @NotNull @Future LocalDate documentDeadline,
+            @NotNull @FutureOrPresent LocalDate documentDeadline,
 
             @Schema(description = "서류 발표 필수 여부", example = "true")
             Boolean isDocumentResultRequired,
 
             @Schema(description = "서류 발표일", example = "2025-06-10")
-            @Future LocalDate documentResultDate,
+            @FutureOrPresent LocalDate documentResultDate,
 
             @Schema(description = "최종 발표일", example = "2025-06-20")
-            @NotNull @Future LocalDate finalResultDate,
+            @NotNull @FutureOrPresent LocalDate finalResultDate,
 
             @Schema(description = "면접 소요시간", example = "30")
             Short interviewDuration,
@@ -68,7 +68,7 @@ public class RecruitmentRequestDTO {
             @Schema(description = "학적 상태 입력 필요 여부", example = "false")
             boolean needAcademicStatus,
 
-            @Schema(description = "서류 평가 방식", example = "SCORE")EvaluationScaleType documentScaleType,
+            @Schema(description = "서류 평가 방식", example = "SCORE") EvaluationScaleType documentScaleType,
             @Schema(description = "면접 평가 방식", example = "SCORE") EvaluationScaleType interviewScaleType,
 
             @Schema(description = "서류 평가 기준 목록") List<EvaluationCriteriaRequestDTO.Create> documentEvaluationCriteria,
@@ -96,16 +96,16 @@ public class RecruitmentRequestDTO {
             List<String> positions,
 
             @Schema(description = "서류 마감일", example = "2025-06-01")
-            @NotNull @Future LocalDate documentDeadline,
+            @NotNull @FutureOrPresent LocalDate documentDeadline,
 
             @Schema(description = "서류 발표 필수 여부", example = "true")
             Boolean isDocumentResultRequired,
 
             @Schema(description = "서류 발표일", example = "2025-06-10")
-            @Future LocalDate documentResultDate,
+            @FutureOrPresent LocalDate documentResultDate,
 
             @Schema(description = "최종 발표일", example = "2025-06-20")
-            @NotNull @Future LocalDate finalResultDate,
+            @NotNull @FutureOrPresent LocalDate finalResultDate,
 
             @Schema(description = "면접 소요시간")
             Short interviewDuration,

@@ -23,7 +23,10 @@ public class RecruitmentValidator {
             if (request.title() == null || request.title().isBlank()) {
                 throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
             }
-            if (request.documentDeadline() == null || request.documentResultDate() == null || request.finalResultDate() == null) {
+            if (request.documentDeadline() == null || request.finalResultDate() == null) {
+                throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+            }
+            if (Boolean.TRUE.equals(request.isDocumentResultRequired()) && request.documentResultDate() == null) {
                 throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
             }
         }

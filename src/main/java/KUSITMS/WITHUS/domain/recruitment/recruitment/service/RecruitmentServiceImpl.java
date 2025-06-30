@@ -290,8 +290,10 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      * @return 검색된 공고의 정보 반환
      */
     @Override
-    public List<RecruitmentResponseDTO.Summary> getAllByKeyword(String keyword) {
-        return recruitmentRepository.findAllByKeyword(keyword).stream()
+    public List<RecruitmentResponseDTO.Summary> getAllByKeyword(User user, String keyword) {
+        List<Long> organizationIds = userOrganizationRepository.findOrganizationIdsByUserId(user.getId());
+
+        return recruitmentRepository.findAllByKeyword(keyword, organizationIds).stream()
                 .map(RecruitmentResponseDTO.Summary::from)
                 .toList();
     }
