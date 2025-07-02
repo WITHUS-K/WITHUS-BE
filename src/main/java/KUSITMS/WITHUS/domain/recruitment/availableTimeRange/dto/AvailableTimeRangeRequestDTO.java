@@ -8,7 +8,7 @@ import java.time.LocalTime;
 
 @Schema(description = "면접 가능 시간 추가 요청 DTO")
 public record AvailableTimeRangeRequestDTO(
-        @Schema(description = "날짜", example = "2025-07-30")
+        @Schema(description = "날짜", example = "2026-07-30")
         @NotNull LocalDate date,
 
         @Schema(description = "시작 시간", example = "10:00")

@@ -21,10 +21,10 @@ public class RecruitmentRequestDTO {
             Long recruitmentId,
 
             @Schema(description = "공고 제목", example = "2025-1 큐시즘 모집")
-            @NotBlank String title,
+            String title,
 
             @Schema(description = "공고 내용", example = "큐시즘 학회원 모집합니다.")
-            @NotBlank String content,
+            String content,
 
             @Schema(description = "등록할 포지션 이름 목록", example = "[\"백엔드\", \"디자인\"]")
             List<String> positions,
@@ -32,17 +32,17 @@ public class RecruitmentRequestDTO {
             @Schema(description = "지원서 문항 목록")
             List<DocumentQuestionRequestDTO.Create> applicationQuestions,
 
-            @Schema(description = "서류 마감일", example = "2025-06-01")
-            @NotNull @FutureOrPresent LocalDate documentDeadline,
+            @Schema(description = "서류 마감일", example = "2026-06-01")
+            @FutureOrPresent LocalDate documentDeadline,
 
             @Schema(description = "서류 발표 필수 여부", example = "true")
             Boolean isDocumentResultRequired,
 
-            @Schema(description = "서류 발표일", example = "2025-06-10")
+            @Schema(description = "서류 발표일", example = "2026-06-10")
             @FutureOrPresent LocalDate documentResultDate,
 
-            @Schema(description = "최종 발표일", example = "2025-06-20")
-            @NotNull @FutureOrPresent LocalDate finalResultDate,
+            @Schema(description = "최종 발표일", example = "2026-06-20")
+            @FutureOrPresent LocalDate finalResultDate,
 
             @Schema(description = "면접 소요시간", example = "30")
             Short interviewDuration,
