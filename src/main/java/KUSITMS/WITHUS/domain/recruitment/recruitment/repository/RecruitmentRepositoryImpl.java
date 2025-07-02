@@ -46,7 +46,6 @@ public class RecruitmentRepositoryImpl implements RecruitmentRepository {
     public List<Recruitment> findAllByKeyword(String keyword, List<Long> organizationIds) {
         return queryFactory.selectFrom(recruitment)
                 .where(
-                        recruitment.isTemporary.isFalse(),
                         recruitment.organization.id.in(organizationIds),
                         keyword != null && !keyword.isBlank()
                                 ? recruitment.title.containsIgnoreCase(keyword)

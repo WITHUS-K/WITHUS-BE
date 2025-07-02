@@ -116,10 +116,10 @@ public class Recruitment extends BaseEntity {
             String title,
             String content,
             LocalDate documentDeadline,
-            boolean isDocumentResultRequired,
+            Boolean isDocumentResultRequired,
             LocalDate documentResultDate,
             LocalDate finalResultDate,
-            boolean isInterviewRequired,
+            Boolean isInterviewRequired,
             Short interviewDuration,
             Organization organization,
             boolean needGender,
@@ -136,10 +136,10 @@ public class Recruitment extends BaseEntity {
                 .title(title)
                 .content(content)
                 .documentDeadline(documentDeadline)
-                .isDocumentResultRequired(isDocumentResultRequired)
+                .isDocumentResultRequired(Boolean.TRUE.equals(isDocumentResultRequired))
                 .documentResultDate(documentResultDate)
                 .finalResultDate(finalResultDate)
-                .isInterviewRequired(isInterviewRequired)
+                .isInterviewRequired(Boolean.TRUE.equals(isInterviewRequired))
                 .interviewDuration(interviewDuration)
                 .organization(organization)
                 .needGender(needGender)
@@ -158,10 +158,10 @@ public class Recruitment extends BaseEntity {
             String title,
             String content,
             LocalDate documentDeadline,
-            boolean isDocumentResultRequired,
+            Boolean isDocumentResultRequired,
             LocalDate documentResultDate,
             LocalDate finalResultDate,
-            boolean isInterviewRequired,
+            Boolean isInterviewRequired,
             Short interviewDuration,
             boolean needGender,
             boolean needAddress,
@@ -174,10 +174,10 @@ public class Recruitment extends BaseEntity {
         this.title = title;
         this.content = content;
         this.documentDeadline = documentDeadline;
-        this.isDocumentResultRequired = isDocumentResultRequired;
+        this.isDocumentResultRequired = Boolean.TRUE.equals(isDocumentResultRequired);
         this.documentResultDate = documentResultDate;
         this.finalResultDate = finalResultDate;
-        this.isInterviewRequired = isInterviewRequired;
+        this.isInterviewRequired = Boolean.TRUE.equals(isInterviewRequired);
         this.interviewDuration = interviewDuration;
         this.needGender = needGender;
         this.needAddress = needAddress;
