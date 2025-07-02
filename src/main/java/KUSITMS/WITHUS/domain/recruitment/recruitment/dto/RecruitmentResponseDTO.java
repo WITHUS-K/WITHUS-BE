@@ -134,6 +134,7 @@ public class RecruitmentResponseDTO {
     public record Summary(
             @Schema(description = "공고 Id") Long recruitmentId,
             @Schema(description = "공고 제목") String title,
+            @Schema(description = "임시저장 여부") Boolean isTemporary,
             @Schema(description = "서류 마감일") @DateFormatDot LocalDate documentDeadline,
             @Schema(description = "서류 발표일") @DateFormatDot LocalDate documentResultDate,
             @Schema(description = "최종 발표일") @DateFormatDot LocalDate finalResultDate,
@@ -149,6 +150,7 @@ public class RecruitmentResponseDTO {
             return new Summary(
                     recruitment.getId(),
                     recruitment.getTitle(),
+                    recruitment.isTemporary(),
                     recruitment.getDocumentDeadline(),
                     recruitment.getDocumentResultDate(),
                     recruitment.getFinalResultDate(),
