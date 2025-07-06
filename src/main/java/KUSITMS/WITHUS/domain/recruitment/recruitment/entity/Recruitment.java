@@ -126,6 +126,7 @@ public class Recruitment extends BaseEntity {
             boolean needAddress,
             boolean needSchool,
             boolean needBirthDate,
+            boolean needMajor,
             boolean needAcademicStatus,
             boolean isTemporary,
             EvaluationScaleType documentScaleType,
@@ -146,6 +147,7 @@ public class Recruitment extends BaseEntity {
                 .needAddress(needAddress)
                 .needSchool(needSchool)
                 .needBirthDate(needBirthDate)
+                .needMajor(needMajor)
                 .needAcademicStatus(needAcademicStatus)
                 .isTemporary(isTemporary)
                 .documentScaleType(documentScaleType)
