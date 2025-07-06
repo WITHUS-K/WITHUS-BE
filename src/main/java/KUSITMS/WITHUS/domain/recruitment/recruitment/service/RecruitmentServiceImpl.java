@@ -261,8 +261,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         recruitment.update(
                 request.title(), request.content(), request.documentDeadline(), request.isDocumentResultRequired(),
                 request.documentResultDate(), request.finalResultDate(), request.isInterviewRequired(), request.interviewDuration(),
-                request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
-                request.needAcademicStatus(), request.documentScaleType(), request.interviewScaleType()
+                request.needImage(), request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
+                request.needMajor(), request.needAcademicStatus(), request.documentScaleType(), request.interviewScaleType()
         );
 
         if (request.isTemporary()) recruitment.markAsTemporary();
@@ -389,7 +389,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         return Recruitment.create(
                 request.title(), request.content(), request.documentDeadline(), request.isDocumentResultRequired(),
                 request.documentResultDate(), request.finalResultDate(), request.isInterviewRequired(), request.interviewDuration(),
-                organization, request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
+                organization, request.needImage(), request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
                 request.needMajor(), request.needAcademicStatus(), isTemporary, request.documentScaleType(), request.interviewScaleType(),
                 generateUniqueSlug()
         );
@@ -400,8 +400,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         recruitment.update(
                 request.title(), request.content(), request.documentDeadline(), request.isDocumentResultRequired(),
                 request.documentResultDate(), request.finalResultDate(), request.isInterviewRequired(), request.interviewDuration(),
-                request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
-                request.needAcademicStatus(), request.documentScaleType(), request.interviewScaleType()
+                request.needImage(), request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
+                request.needMajor(), request.needAcademicStatus(), request.documentScaleType(), request.interviewScaleType()
         );
         if (isTemporary) recruitment.markAsTemporary();
         else recruitment.markAsFinal();

@@ -90,7 +90,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .flatMap(positionRepository::findById)
                 .orElse(null);
 
-        validator.validateRequiredFields(recruitment, request);
+        validator.validateRequiredFields(recruitment, request, profileImage);
 
         Application application = factory.createApplication(request, recruitment, position);
         applicationRepository.save(application);

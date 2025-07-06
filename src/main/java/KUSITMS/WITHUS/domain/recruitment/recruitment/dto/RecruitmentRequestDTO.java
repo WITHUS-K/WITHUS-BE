@@ -50,6 +50,9 @@ public class RecruitmentRequestDTO {
             @Schema(description = "조직 ID", example = "1")
             @NotNull Long organizationId,
 
+            @Schema(description = "사진 입력 필요 여부", example = "true")
+            boolean needImage,
+
             @Schema(description = "성별 입력 필요 여부", example = "true")
             boolean needGender,
 
@@ -110,10 +113,12 @@ public class RecruitmentRequestDTO {
             @Schema(description = "면접 소요시간")
             Short interviewDuration,
 
+            @Schema(description = "사진 입력 필요 여부") boolean needImage,
             @Schema(description = "성별 수집 여부") boolean needGender,
             @Schema(description = "주소 수집 여부") boolean needAddress,
             @Schema(description = "학교 수집 여부") boolean needSchool,
             @Schema(description = "생년월일 수집 여부") boolean needBirthDate,
+            @Schema(description = "전공 수집 여부") boolean needMajor,
             @Schema(description = "학적 상태 수집 여부") boolean needAcademicStatus,
 
             @Schema(description = "임시 저장 여부") boolean isTemporary,

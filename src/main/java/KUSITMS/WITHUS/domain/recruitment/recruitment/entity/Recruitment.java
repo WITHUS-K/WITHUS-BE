@@ -34,6 +34,10 @@ public class Recruitment extends BaseEntity {
     private String content;
 
     @Builder.Default
+    @Column(name = "NEED_IMAGE", nullable = false)
+    private boolean needImage = false;
+
+    @Builder.Default
     @Column(name = "NEED_GENDER", nullable = false)
     private boolean needGender = false;
 
@@ -122,6 +126,7 @@ public class Recruitment extends BaseEntity {
             Boolean isInterviewRequired,
             Short interviewDuration,
             Organization organization,
+            boolean needImage,
             boolean needGender,
             boolean needAddress,
             boolean needSchool,
@@ -143,6 +148,7 @@ public class Recruitment extends BaseEntity {
                 .isInterviewRequired(Boolean.TRUE.equals(isInterviewRequired))
                 .interviewDuration(interviewDuration)
                 .organization(organization)
+                .needImage(needImage)
                 .needGender(needGender)
                 .needAddress(needAddress)
                 .needSchool(needSchool)
@@ -165,10 +171,12 @@ public class Recruitment extends BaseEntity {
             LocalDate finalResultDate,
             Boolean isInterviewRequired,
             Short interviewDuration,
+            boolean needImage,
             boolean needGender,
             boolean needAddress,
             boolean needSchool,
             boolean needBirthDate,
+            boolean needMajor,
             boolean needAcademicStatus,
             EvaluationScaleType documentScaleType,
             EvaluationScaleType interviewScaleType
@@ -181,10 +189,12 @@ public class Recruitment extends BaseEntity {
         this.finalResultDate = finalResultDate;
         this.isInterviewRequired = Boolean.TRUE.equals(isInterviewRequired);
         this.interviewDuration = interviewDuration;
+        this.needImage = needImage;
         this.needGender = needGender;
         this.needAddress = needAddress;
         this.needSchool = needSchool;
         this.needBirthDate = needBirthDate;
+        this.needMajor = needMajor;
         this.needAcademicStatus = needAcademicStatus;
         this.documentScaleType = documentScaleType;
         this.interviewScaleType = interviewScaleType;

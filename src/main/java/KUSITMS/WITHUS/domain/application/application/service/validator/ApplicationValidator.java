@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Component
 public class ApplicationValidator {
 
-    public void validateRequiredFields(Recruitment recruitment, ApplicationRequestDTO.Create request) {
+    public void validateRequiredFields(Recruitment recruitment, ApplicationRequestDTO.Create request, MultipartFile profileImage) {
         if (recruitment.isNeedGender() && request.gender() == null) {
             throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
         }
@@ -36,6 +36,9 @@ public class ApplicationValidator {
             throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
         }
         if (recruitment.isNeedAddress() && request.address() == null) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+        if (recruitment.isNeedImage() && (profileImage == null || profileImage.isEmpty())) {
             throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
         }
     }
