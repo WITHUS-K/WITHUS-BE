@@ -102,7 +102,7 @@ class RecruitmentControllerTest {
                 LocalDate.now().plusDays(5),
                 true, LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
                 (short) 10, savedOrganizationId,
-                true, true, true, true, true, false,
+                true, true, true, true, true, false, true,
                 EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
                 List.of(new EvaluationCriteriaRequestDTO.Create("기준1", "", EvaluationType.DOCUMENT, null)),
                 List.of(new EvaluationCriteriaRequestDTO.Create("기준2", "", EvaluationType.INTERVIEW, null)),
