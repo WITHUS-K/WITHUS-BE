@@ -92,6 +92,7 @@ public class RecruitmentRepositoryImpl implements RecruitmentRepository {
         return queryFactory
                 .selectFrom(recruitment)
                 .where(recruitment.organization.id.eq(organizationId))
+                .orderBy(recruitment.createdAt.desc())
                 .fetch();
     }
 }
