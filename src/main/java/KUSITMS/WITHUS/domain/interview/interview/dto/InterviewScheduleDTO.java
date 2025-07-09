@@ -130,7 +130,7 @@ public record InterviewScheduleDTO(
         }
     }
 
-    public record MyInterviewScheduleSummaryDTO(
+    public record InterviewScheduleSummaryDTO(
             Long recruitmentId,
             String recruitmentTitle,
             Long interviewId,

@@ -42,6 +42,7 @@ public class InterviewRepositoryImpl implements InterviewRepository {
 
         return queryFactory.selectFrom(interview)
                 .where(interview.recruitment.id.in(recruitmentIds))
+                .orderBy(interview.createdAt.desc())
                 .fetch();
     }
 
