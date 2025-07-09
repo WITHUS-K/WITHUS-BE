@@ -14,4 +14,5 @@ public interface RecruitmentRepository {
     boolean existsByUrlSlug(String urlSlug);
     Optional<Recruitment> findByUrlSlug(String slug);
     List<Recruitment> findAllByOrganizationIds(List<Long> organizationIds);
+    List<Recruitment> findAllByOrganizationId(Long organizationId);
 }

@@ -19,6 +19,7 @@ public interface RecruitmentService {
     List<RecruitmentResponseDTO.Summary> getAllByKeyword(User user, String keyword);
     RecruitmentResponseDTO.Detail getBySlug(String slug);
     List<RecruitmentResponseDTO.Simple> getAllByUserOrganizations(User user);
+    List<RecruitmentResponseDTO.Simple> getAllOrganization(Long organizationId);
     List<RecruitmentResponseDTO.SummaryForHome> getCurrentSummariesForUser(Long userId, Long organizationId);
     List<RecruitmentResponseDTO.SummaryForHome> getCurrentSummariesForAdmin(Long adminUserId);
     List<RecruitmentResponseDTO.TaskProgress> getTaskProgress(Long recruitmentId, EvaluationType stage);

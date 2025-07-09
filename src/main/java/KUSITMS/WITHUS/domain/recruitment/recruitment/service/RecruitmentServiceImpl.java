@@ -299,6 +299,16 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<RecruitmentResponseDTO.Simple> getAllOrganization(Long organizationId) {
+        List<Recruitment> recruitments = recruitmentRepository.findAllByOrganizationId(organizationId);
+
+        return recruitments.stream()
+                .map(RecruitmentResponseDTO.Simple::from)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public RecruitmentResponseDTO.Detail getBySlug(String slug) {
         Recruitment recruitment = recruitmentRepository.findByUrlSlug(slug)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECRUITMENT_NOT_EXIST));

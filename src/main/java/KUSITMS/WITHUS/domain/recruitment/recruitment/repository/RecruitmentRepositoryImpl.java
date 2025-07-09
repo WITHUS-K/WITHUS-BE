@@ -86,4 +86,12 @@ public class RecruitmentRepositoryImpl implements RecruitmentRepository {
                 .orderBy(recruitment.createdAt.desc())
                 .fetch();
     }
+
+    @Override
+    public List<Recruitment> findAllByOrganizationId(Long organizationId) {
+        return queryFactory
+                .selectFrom(recruitment)
+                .where(recruitment.organization.id.eq(organizationId))
+                .fetch();
+    }
 }

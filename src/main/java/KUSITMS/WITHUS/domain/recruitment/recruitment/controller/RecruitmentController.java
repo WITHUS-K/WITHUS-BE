@@ -88,6 +88,13 @@ public class RecruitmentController {
         return SuccessResponse.ok(result);
     }
 
+    @GetMapping("/organizations/{organizationId}")
+    @Operation(summary = "특정 조직의 모든 리크루팅 목록 조회")
+    public SuccessResponse<List<RecruitmentResponseDTO.Simple>> getAllByOrganization(@PathVariable Long organizationId) {
+        List<RecruitmentResponseDTO.Simple> result = recruitmentService.getAllOrganization(organizationId);
+        return SuccessResponse.ok(result);
+    }
+
     @GetMapping("/{organizationId}/current/summary")
     @Operation(summary = "내 조직의 현재 진행 중인 공고 요약 조회", description = "로그인한 운영진이 속한 조직의, 공고 생성일이 지났고 최종 발표일 +1일 이전인 공고들의 요약 정보를 반환합니다.")
     public SuccessResponse<List<RecruitmentResponseDTO.SummaryForHome>> getCurrentSummaries(
