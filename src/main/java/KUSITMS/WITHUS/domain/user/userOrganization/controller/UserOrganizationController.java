@@ -6,14 +6,18 @@ import KUSITMS.WITHUS.domain.user.userOrganization.dto.UserOrganizationRequestDT
 import KUSITMS.WITHUS.domain.user.userOrganization.dto.UserOrganizationResponseDTO;
 import KUSITMS.WITHUS.domain.user.userOrganization.service.UserOrganizationService;
 import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
+import KUSITMS.WITHUS.global.infra.email.MailProperties;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -23,6 +27,7 @@ import java.util.List;
 public class UserOrganizationController {
 
     private final UserOrganizationService organizationUserService;
+    private final MailProperties mailProperties;
 
     @GetMapping("/{organizationId}/users")
     @Operation(summary = "조직 사용자 목록 조회", description = "조직에 소속된 운영진 목록을 조회합니다.")
@@ -76,4 +81,10 @@ public class UserOrganizationController {
         return SuccessResponse.ok("초대 메일을 전송했습니다.");
     }
 
+    @GetMapping("/invite/accept")
+    public ResponseEntity<Void> acceptInvitation(@RequestParam String token) {
+        organizationUserService.acceptInvitation(token);
+        URI redirectUri = URI.create(mailProperties.getInviteUserUrl());
+        return ResponseEntity.status(HttpStatus.FOUND).location(redirectUri).build();
+    }
 }

@@ -10,7 +10,10 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "mail")
 public class MailProperties {
+    private String domain;
     private String logoUrl;
     private String interviewerAvailabilityUrl;
+    private String inviteUserUrl;
+    private String invitationApiPath;
 }
 
