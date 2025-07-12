@@ -1,10 +1,13 @@
 package KUSITMS.WITHUS.domain.template.service;
 
+import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
+import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.template.dto.TemplateRequestDTO;
 import KUSITMS.WITHUS.domain.template.dto.TemplateResponseDTO;
 import KUSITMS.WITHUS.domain.template.entity.Template;
 import KUSITMS.WITHUS.domain.template.enumerate.Medium;
 import KUSITMS.WITHUS.domain.template.repository.TemplateRepository;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +20,7 @@ import java.util.List;
 public class TemplateServiceImpl implements TemplateService {
 
     private final TemplateRepository templateRepository;
+    private final OrganizationRepository organizationRepository;
 
     /**
      * 문자/메일 템플릿 개별 조회
@@ -30,11 +34,15 @@ public class TemplateServiceImpl implements TemplateService {
 
     /**
      * 문자/메일 템플릿 목록 조회
-     * @return 모든 메일 템플릿의 요약 정보 리스트
+     * @return 자신이 속한 조직의 모든 메일 템플릿의 요약 정보 리스트
      */
     @Override
-    public List<TemplateResponseDTO.Summary> listAll(Medium medium) {
-        return templateRepository.findAllByMedium(medium).stream()
+    public List<TemplateResponseDTO.Summary> listAll(Medium medium, User user) {
+        List<Long> organizationIds = user.getUserOrganizations().stream()
+                .map(uo -> uo.getOrganization().getId())
+                .toList();
+
+        return templateRepository.findAllByMedium(medium, organizationIds).stream()
                 .map(TemplateResponseDTO.Summary::from)
                 .toList();
     }
@@ -47,7 +55,9 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @Transactional
     public TemplateResponseDTO.Detail create(TemplateRequestDTO.Create dto) {
-        Template ent = new Template(dto.name(), dto.subject(), dto.body(), dto.medium());
+        Organization organization = organizationRepository.getById(dto.organizationId());
+
+        Template ent = new Template(dto.name(), dto.subject(), dto.body(), dto.medium(), organization);
         Template saved = templateRepository.save(ent);
         return TemplateResponseDTO.Detail.from(saved);
     }

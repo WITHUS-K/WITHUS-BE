@@ -4,6 +4,8 @@ import KUSITMS.WITHUS.domain.template.dto.TemplateRequestDTO;
 import KUSITMS.WITHUS.domain.template.dto.TemplateResponseDTO;
 import KUSITMS.WITHUS.domain.template.enumerate.Medium;
 import KUSITMS.WITHUS.domain.template.service.TemplateService;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,11 +33,12 @@ public class TemplateController {
     }
 
     @GetMapping
-    @Operation(summary = "문자/메일 템플릿 목록 조회", description = "등록된 템플릿의 요약 리스트(ID, 이름)를 반환합니다.")
+    @Operation(summary = "문자/메일 템플릿 목록 조회", description = "내가 속한 조직에 등록된 템플릿의 요약 리스트(ID, 이름)를 반환합니다.")
     public SuccessResponse<List<TemplateResponseDTO.Summary>> list(
+            @CurrentUser User user,
             @RequestParam Medium medium
-            ) {
-        List<TemplateResponseDTO.Summary> TemplatesList = templateService.listAll(medium);
+    ) {
+        List<TemplateResponseDTO.Summary> TemplatesList = templateService.listAll(medium, user);
         return SuccessResponse.ok(TemplatesList);
     }
 

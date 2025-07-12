@@ -37,7 +37,8 @@ public class SecurityConfig {
             "/api/v1/users/**",
             "/api/v1/organizations/search",
             "/api/v1/applications",
-            "/api/v1/recruitments/slug/**"
+            "/api/v1/recruitments/slug/**",
+            "/api/v1/organizations/invite/accept",
     };
 
     private final RefreshTokenCacheUtil refreshTokenCacheUtil;
