@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.template.entity;
 
+import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.template.enumerate.Medium;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
@@ -30,7 +31,11 @@ public class Template {
     @Column(nullable = false)
     private Medium medium;
 
-    public Template(String name, String subject, String body, Medium medium) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ORGANIZATION_ID", nullable = false)
+    private Organization organization;
+
+    public Template(String name, String subject, String body, Medium medium, Organization organization) {
         if(medium == Medium.MAIL && (subject == null || subject.isBlank())) {
             throw new CustomException(ErrorCode.EMAIL_SUBJECT_REQUIRED);
         }
@@ -38,6 +43,7 @@ public class Template {
         this.subject = subject;
         this.body = body;
         this.medium = medium;
+        this.organization = organization;
     }
 }
 

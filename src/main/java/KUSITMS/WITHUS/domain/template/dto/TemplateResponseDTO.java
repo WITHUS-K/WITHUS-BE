@@ -30,13 +30,15 @@ public class TemplateResponseDTO {
     public record Summary(
             Long id,
             String name,
-            Medium medium
+            Medium medium,
+            String organizationName
     ) {
         public static Summary from(Template e) {
             return new Summary(
                     e.getId(),
                     e.getName(),
-                    e.getMedium()
+                    e.getMedium(),
+                    e.getOrganization().getName()
             );
         }
     }
