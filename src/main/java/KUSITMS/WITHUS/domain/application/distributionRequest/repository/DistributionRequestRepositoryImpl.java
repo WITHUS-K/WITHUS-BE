@@ -19,7 +19,7 @@ public class DistributionRequestRepositoryImpl implements DistributionRequestRep
         List<DistributionRequest> distributionRequests = findAllByRecruitmentIdOrderByCreatedAtDesc(recruitmentId);
 
         if (distributionRequests.isEmpty()) {
-            throw new CustomException(ErrorCode.DISTRIBUTION_HISTORY_NOT_FOUND);
+            return null;
         }
 
         return distributionRequests.get(0);

@@ -19,6 +19,7 @@ import KUSITMS.WITHUS.domain.application.applicationAcquaintance.repository.Appl
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.ApplicationAnswerRepository;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
+import KUSITMS.WITHUS.domain.application.distributionRequest.dto.DistributionRequestResponseDTO;
 import KUSITMS.WITHUS.domain.application.distributionRequest.entity.DistributionRequest;
 import KUSITMS.WITHUS.domain.application.distributionRequest.repository.DistributionRequestRepository;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
@@ -292,8 +293,14 @@ public class ApplicationServiceImpl implements ApplicationService {
      * @param recruitmentId 공고 ID
      */
     @Override
-    public DistributionRequest distributeEvaluatorsLatestRequest(Long recruitmentId) {
-        return distributionRequestRepository.findTopByRecruitmentIdOrderByCreatedAtDesc(recruitmentId);
+    public DistributionRequestResponseDTO.Detail distributeEvaluatorsLatestRequest(Long recruitmentId) {
+        DistributionRequest latest = distributionRequestRepository.findTopByRecruitmentIdOrderByCreatedAtDesc(recruitmentId);
+
+        if (latest == null) {
+            return DistributionRequestResponseDTO.Detail.empty(recruitmentId);
+        }
+
+        return DistributionRequestResponseDTO.Detail.from(latest);
     }
 
     /**
