@@ -67,7 +67,7 @@ public class EvaluatorAssignmentService {
 
         // 기존 배정 초기화
         Long recruitmentId = request.recruitmentId();
-        applicationEvaluatorRepository.deleteAllByApplication_Recruitment_Id(recruitmentId);
+        applicationEvaluatorRepository.deleteAllByApplication_Recruitment_IdAndEvaluationType(recruitmentId, request.evaluationType());
 
         // 파트별 배정
         Random rnd = new Random();

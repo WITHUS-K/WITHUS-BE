@@ -18,8 +18,8 @@ public class ApplicationEvaluatorRepositoryImpl implements ApplicationEvaluatorR
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public void deleteAllByApplication_Recruitment_Id(Long recruitmentId) {
-        applicationEvaluatorJpaRepository.deleteAllByApplication_Recruitment_Id(recruitmentId);
+    public void deleteAllByApplication_Recruitment_IdAndEvaluationType(Long recruitmentId, EvaluationType evaluationType) {
+        applicationEvaluatorJpaRepository.deleteAllByApplication_Recruitment_IdAndEvaluationType(recruitmentId, evaluationType);
     }
 
     @Override
