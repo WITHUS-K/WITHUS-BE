@@ -19,6 +19,7 @@ import KUSITMS.WITHUS.domain.application.applicationAcquaintance.repository.Appl
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.ApplicationAnswerRepository;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
+import KUSITMS.WITHUS.domain.application.distributionRequest.dto.DistributionRequestResponseDTO;
 import KUSITMS.WITHUS.domain.application.distributionRequest.entity.DistributionRequest;
 import KUSITMS.WITHUS.domain.application.distributionRequest.repository.DistributionRequestRepository;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
@@ -268,7 +269,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     public List<ApplicationResponseDTO.Summary> updateStatus(ApplicationRequestDTO.UpdateStatus request) {
         List<Application> apps = applicationRepository.findAllById(request.applicationIds());
         apps.forEach(app -> {
-            ApplicationStatus newStatus = mapToRealStatus(request.stage(), app.getStatus(), request.status());
+            ApplicationStatus newStatus = mapToRealStatus(request.stage(), request.status());
             app.updateStatus(newStatus);
         });
         return apps.stream()
@@ -292,8 +293,14 @@ public class ApplicationServiceImpl implements ApplicationService {
      * @param recruitmentId 공고 ID
      */
     @Override
-    public DistributionRequest distributeEvaluatorsLatestRequest(Long recruitmentId) {
-        return distributionRequestRepository.findTopByRecruitmentIdOrderByCreatedAtDesc(recruitmentId);
+    public DistributionRequestResponseDTO.Detail distributeEvaluatorsLatestRequest(Long recruitmentId) {
+        DistributionRequest latest = distributionRequestRepository.findTopByRecruitmentIdOrderByCreatedAtDesc(recruitmentId);
+
+        if (latest == null) {
+            return DistributionRequestResponseDTO.Detail.empty(recruitmentId);
+        }
+
+        return DistributionRequestResponseDTO.Detail.from(latest);
     }
 
     /**
@@ -337,30 +344,23 @@ public class ApplicationServiceImpl implements ApplicationService {
      */
     private ApplicationStatus mapToRealStatus(
             AdminStageFilter stage,
-            ApplicationStatus current,
             SimpleApplicationStatus simple) {
-
-        if (simple == SimpleApplicationStatus.HOLD) {
-            return ApplicationStatus.PENDING;
-        }
 
         boolean isPass = (simple == SimpleApplicationStatus.PASS);
 
         switch (stage) {
             case DOCUMENT:
-                // 기존 면접 단계였으면 INTERVIEW_
-                if (current == ApplicationStatus.INTERVIEW_PASS
-                        || current == ApplicationStatus.INTERVIEW_FAIL) {
-                    return isPass
-                            ? ApplicationStatus.INTERVIEW_PASS
-                            : ApplicationStatus.INTERVIEW_FAIL;
+                if (simple == SimpleApplicationStatus.HOLD) {
+                    return ApplicationStatus.DOX_PENDING;
                 }
-                // 그 외(PENDING, DOX_PASS, DOX_FAIL)면 DOX_
                 return isPass
                         ? ApplicationStatus.DOX_PASS
                         : ApplicationStatus.DOX_FAIL;
 
             case INTERVIEW:
+                if (simple == SimpleApplicationStatus.HOLD) {
+                    return ApplicationStatus.INTERVIEW_PENDING;
+                }
                 return isPass
                         ? ApplicationStatus.INTERVIEW_PASS
                         : ApplicationStatus.INTERVIEW_FAIL;

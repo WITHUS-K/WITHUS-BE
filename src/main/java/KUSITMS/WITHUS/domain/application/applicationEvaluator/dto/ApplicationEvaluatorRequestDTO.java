@@ -17,6 +17,10 @@ public class ApplicationEvaluatorRequestDTO {
             @NotNull
             Long recruitmentId,
 
+            @Schema(description = "평가 타입", example = "DOCUMENT | INTERVIEW")
+            @NotNull
+            EvaluationType evaluationType,
+
             @Schema(description = "파트별 평가 담당자 배정 정보 리스트")
             @NotEmpty
             List<PartAssignment> assignments

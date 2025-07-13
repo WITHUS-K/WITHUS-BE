@@ -71,8 +71,7 @@ public class AdminApplicationController {
     public SuccessResponse<DistributionRequestResponseDTO.Detail> latest(
             @PathVariable Long recruitmentId
     ) {
-        DistributionRequest record = applicationService.distributeEvaluatorsLatestRequest(recruitmentId);
-        return SuccessResponse.ok(DistributionRequestResponseDTO.Detail.from(record));
+        return SuccessResponse.ok(applicationService.distributeEvaluatorsLatestRequest(recruitmentId));
     }
 
     @PostMapping("/evaluators")
