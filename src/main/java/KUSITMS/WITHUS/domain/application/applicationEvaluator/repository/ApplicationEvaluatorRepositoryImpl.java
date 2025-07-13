@@ -55,4 +55,9 @@ public class ApplicationEvaluatorRepositoryImpl implements ApplicationEvaluatorR
     public void saveAll(List<ApplicationEvaluator> assigns) {
         applicationEvaluatorJpaRepository.saveAll(assigns);
     }
+
+    @Override
+    public void deleteAllByApplication_IdAndEvaluationType(Long id, EvaluationType evaluationType) {
+        applicationEvaluatorJpaRepository.deleteAllByApplication_IdAndEvaluationType(id, evaluationType);
+    }
 }
