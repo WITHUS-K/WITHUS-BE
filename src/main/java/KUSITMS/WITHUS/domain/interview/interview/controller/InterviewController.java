@@ -57,7 +57,7 @@ public class InterviewController {
         return SuccessResponse.ok(schedulerService.getMyInterviewTimes(interviewId, user));
     }
 
-    @GetMapping("/organizations/{organizationId}/interviews")
+    @GetMapping("/organizations/{organizationId}")
     @Operation(summary = "특정 조직의 면접 정보 조회", description = "조직 ID로 해당 조직에서 생성한 면접 정보를 조회합니다.")
     public SuccessResponse<List<InterviewScheduleDTO.InterviewScheduleSummaryDTO>> getOrganizationInterviews(
             @PathVariable Long organizationId
