@@ -20,6 +20,7 @@ public class CorsConfig {
         config.addAllowedOriginPattern("https://jk-project.site");
         config.addAllowedOriginPattern("https://www.jk-project.site");
         config.addAllowedOriginPattern("https://withus-ten.vercel.app");
+        config.addAllowedOriginPattern("https://recruit-withus.co.kr");
         for (int port = 3000; port <= 3010; port++) {
             config.addAllowedOriginPattern("http://localhost:" + port);
         }
