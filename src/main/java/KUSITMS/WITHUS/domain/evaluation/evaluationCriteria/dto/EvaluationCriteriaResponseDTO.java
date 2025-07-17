@@ -27,6 +27,7 @@ public class EvaluationCriteriaResponseDTO {
             @Schema(description = "평가 기준") String content,
             @Schema(description = "상세 내용") String description,
             @Schema(description = "평가 타입") EvaluationType type,
+            @Schema(description = "포지션 이름") String positionName,
             @Schema(description = "평가 점수 - 평가한 게 없다면 null") @Nullable Integer score
     ) {
         public static Detail from(EvaluationCriteria evaluationCriteria) {
@@ -35,6 +36,7 @@ public class EvaluationCriteriaResponseDTO {
                     evaluationCriteria.getContent(),
                     evaluationCriteria.getDescription(),
                     evaluationCriteria.getEvaluationType(),
+                    evaluationCriteria.getPosition() != null ? evaluationCriteria.getPosition().getName() : null,
                     null
             );
         }
@@ -45,6 +47,7 @@ public class EvaluationCriteriaResponseDTO {
                     evaluationCriteria.getContent(),
                     evaluationCriteria.getDescription(),
                     evaluationCriteria.getEvaluationType(),
+                    evaluationCriteria.getPosition() != null ? evaluationCriteria.getPosition().getName() : null,
                     score
             );
         }

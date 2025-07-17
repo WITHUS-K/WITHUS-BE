@@ -124,4 +124,13 @@ public class UserOrganizationRepositoryImpl implements UserOrganizationRepositor
     public boolean existsByUser_IdAndOrganization_Id(Long userId, Long organizationId) {
         return userOrganizationJpaRepository.existsByUser_IdAndOrganization_Id(userId, organizationId);
     }
+
+    @Override
+    public List<Long> findOrganizationIdsByUserId(Long userId) {
+        return queryFactory
+                .select(userOrganization.organization.id)
+                .from(userOrganization)
+                .where(userOrganization.user.id.eq(userId))
+                .fetch();
+    }
 }

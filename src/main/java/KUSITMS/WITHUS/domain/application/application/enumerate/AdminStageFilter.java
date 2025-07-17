@@ -14,10 +14,10 @@ public enum AdminStageFilter {
         return switch(this) {
             case DOCUMENT -> List.of(ApplicationStatus.values());
             case INTERVIEW -> List.of(
-                    ApplicationStatus.PENDING,
                     ApplicationStatus.DOX_PASS,
                     ApplicationStatus.INTERVIEW_PASS,
-                    ApplicationStatus.INTERVIEW_FAIL
+                    ApplicationStatus.INTERVIEW_FAIL,
+                    ApplicationStatus.INTERVIEW_PENDING
             );
             case FINAL_PASS -> List.of(
                     ApplicationStatus.INTERVIEW_PASS

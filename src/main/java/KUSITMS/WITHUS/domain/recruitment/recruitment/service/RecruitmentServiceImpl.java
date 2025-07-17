@@ -261,8 +261,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         recruitment.update(
                 request.title(), request.content(), request.documentDeadline(), request.isDocumentResultRequired(),
                 request.documentResultDate(), request.finalResultDate(), request.isInterviewRequired(), request.interviewDuration(),
-                request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
-                request.needAcademicStatus(), request.documentScaleType(), request.interviewScaleType()
+                request.needImage(), request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
+                request.needMajor(), request.needAcademicStatus(), request.documentScaleType(), request.interviewScaleType()
         );
 
         if (request.isTemporary()) recruitment.markAsTemporary();
@@ -290,10 +290,22 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      * @return 검색된 공고의 정보 반환
      */
     @Override
-    public List<RecruitmentResponseDTO.Summary> getAllByKeyword(String keyword) {
-        return recruitmentRepository.findAllByKeyword(keyword).stream()
+    public List<RecruitmentResponseDTO.Summary> getAllByKeyword(User user, String keyword) {
+        List<Long> organizationIds = userOrganizationRepository.findOrganizationIdsByUserId(user.getId());
+
+        return recruitmentRepository.findAllByKeyword(keyword, organizationIds).stream()
                 .map(RecruitmentResponseDTO.Summary::from)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RecruitmentResponseDTO.Simple> getAllOrganization(Long organizationId) {
+        List<Recruitment> recruitments = recruitmentRepository.findAllByOrganizationId(organizationId);
+
+        return recruitments.stream()
+                .map(RecruitmentResponseDTO.Simple::from)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -387,8 +399,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         return Recruitment.create(
                 request.title(), request.content(), request.documentDeadline(), request.isDocumentResultRequired(),
                 request.documentResultDate(), request.finalResultDate(), request.isInterviewRequired(), request.interviewDuration(),
-                organization, request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
-                request.needAcademicStatus(), isTemporary, request.documentScaleType(), request.interviewScaleType(),
+                organization, request.needImage(), request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
+                request.needMajor(), request.needAcademicStatus(), isTemporary, request.documentScaleType(), request.interviewScaleType(),
                 generateUniqueSlug()
         );
     }
@@ -398,8 +410,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         recruitment.update(
                 request.title(), request.content(), request.documentDeadline(), request.isDocumentResultRequired(),
                 request.documentResultDate(), request.finalResultDate(), request.isInterviewRequired(), request.interviewDuration(),
-                request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
-                request.needAcademicStatus(), request.documentScaleType(), request.interviewScaleType()
+                request.needImage(), request.needGender(), request.needAddress(), request.needSchool(), request.needBirthDate(),
+                request.needMajor(), request.needAcademicStatus(), request.documentScaleType(), request.interviewScaleType()
         );
         if (isTemporary) recruitment.markAsTemporary();
         else recruitment.markAsFinal();

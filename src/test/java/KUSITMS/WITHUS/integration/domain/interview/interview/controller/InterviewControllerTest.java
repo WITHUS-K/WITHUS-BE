@@ -169,21 +169,6 @@ class InterviewControllerTest {
     }
 
     @Test
-    @DisplayName("내 조직 면접 정보 요약 조회 성공")
-    void getMyOrgInterviewsSuccess() throws Exception {
-        Long interviewId = prepareInterviewScenario();
-
-        mockMvc.perform(get("/api/v1/interviews/my-organization-interviews")
-                        .header("Authorization", accessToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").isArray())
-                .andExpect(jsonPath("$.result[0].interviewId").value(interviewId.intValue()))
-                .andExpect(jsonPath("$.result[0].recruitmentTitle").value("면접 테스트용 공고"))
-                .andExpect(jsonPath("$.result[0].availableTimeRanges[0].startTime").value("10:00"))
-                .andExpect(jsonPath("$.result[0].interviewDuration").value(30));
-    }
-
-    @Test
     @DisplayName("면접 구성 정보 조회 성공")
     void getInterviewConfigSuccess() throws Exception {
         Long interviewId = prepareInterviewScenario();

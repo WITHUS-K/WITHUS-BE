@@ -16,6 +16,10 @@ public class DistributionRequestResponseDTO {
             @Schema(description = "공고 id") Long recruitmentId,
             @Schema(description = "최신 요청 이력 리스트") List<Assignment> assignments
     ) {
+        public static Detail empty(Long recruitmentId) {
+            return new Detail(null, recruitmentId, List.of());
+        }
+
         public static Detail from(DistributionRequest distributionRequest) {
             List<Assignment> assignments = distributionRequest.getAssignments().stream()
                     .map(Assignment::from)

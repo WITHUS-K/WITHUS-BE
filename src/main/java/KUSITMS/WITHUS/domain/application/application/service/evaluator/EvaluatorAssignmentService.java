@@ -67,7 +67,7 @@ public class EvaluatorAssignmentService {
 
         // 기존 배정 초기화
         Long recruitmentId = request.recruitmentId();
-        applicationEvaluatorRepository.deleteAllByApplication_Recruitment_Id(recruitmentId);
+        applicationEvaluatorRepository.deleteAllByApplication_Recruitment_IdAndEvaluationType(recruitmentId, request.evaluationType());
 
         // 파트별 배정
         Random rnd = new Random();
@@ -112,7 +112,10 @@ public class EvaluatorAssignmentService {
             throw new CustomException(ErrorCode.EVALUATOR_NOT_EXIST);
         }
 
-        applicationEvaluatorRepository.deleteAllByApplication_Id(application.getId());
+        applicationEvaluatorRepository.deleteAllByApplication_IdAndEvaluationType(
+                application.getId(),
+                request.evaluationType()
+        );
 
         List<ApplicationEvaluator> assigns = users.stream()
                 .map(u -> new ApplicationEvaluator(application, u, request.evaluationType()))

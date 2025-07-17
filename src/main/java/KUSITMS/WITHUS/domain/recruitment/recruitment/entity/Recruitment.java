@@ -34,6 +34,10 @@ public class Recruitment extends BaseEntity {
     private String content;
 
     @Builder.Default
+    @Column(name = "NEED_IMAGE", nullable = false)
+    private boolean needImage = false;
+
+    @Builder.Default
     @Column(name = "NEED_GENDER", nullable = false)
     private boolean needGender = false;
 
@@ -116,16 +120,18 @@ public class Recruitment extends BaseEntity {
             String title,
             String content,
             LocalDate documentDeadline,
-            boolean isDocumentResultRequired,
+            Boolean isDocumentResultRequired,
             LocalDate documentResultDate,
             LocalDate finalResultDate,
-            boolean isInterviewRequired,
+            Boolean isInterviewRequired,
             Short interviewDuration,
             Organization organization,
+            boolean needImage,
             boolean needGender,
             boolean needAddress,
             boolean needSchool,
             boolean needBirthDate,
+            boolean needMajor,
             boolean needAcademicStatus,
             boolean isTemporary,
             EvaluationScaleType documentScaleType,
@@ -136,16 +142,18 @@ public class Recruitment extends BaseEntity {
                 .title(title)
                 .content(content)
                 .documentDeadline(documentDeadline)
-                .isDocumentResultRequired(isDocumentResultRequired)
+                .isDocumentResultRequired(Boolean.TRUE.equals(isDocumentResultRequired))
                 .documentResultDate(documentResultDate)
                 .finalResultDate(finalResultDate)
-                .isInterviewRequired(isInterviewRequired)
+                .isInterviewRequired(Boolean.TRUE.equals(isInterviewRequired))
                 .interviewDuration(interviewDuration)
                 .organization(organization)
+                .needImage(needImage)
                 .needGender(needGender)
                 .needAddress(needAddress)
                 .needSchool(needSchool)
                 .needBirthDate(needBirthDate)
+                .needMajor(needMajor)
                 .needAcademicStatus(needAcademicStatus)
                 .isTemporary(isTemporary)
                 .documentScaleType(documentScaleType)
@@ -158,15 +166,17 @@ public class Recruitment extends BaseEntity {
             String title,
             String content,
             LocalDate documentDeadline,
-            boolean isDocumentResultRequired,
+            Boolean isDocumentResultRequired,
             LocalDate documentResultDate,
             LocalDate finalResultDate,
-            boolean isInterviewRequired,
+            Boolean isInterviewRequired,
             Short interviewDuration,
+            boolean needImage,
             boolean needGender,
             boolean needAddress,
             boolean needSchool,
             boolean needBirthDate,
+            boolean needMajor,
             boolean needAcademicStatus,
             EvaluationScaleType documentScaleType,
             EvaluationScaleType interviewScaleType
@@ -174,15 +184,17 @@ public class Recruitment extends BaseEntity {
         this.title = title;
         this.content = content;
         this.documentDeadline = documentDeadline;
-        this.isDocumentResultRequired = isDocumentResultRequired;
+        this.isDocumentResultRequired = Boolean.TRUE.equals(isDocumentResultRequired);
         this.documentResultDate = documentResultDate;
         this.finalResultDate = finalResultDate;
-        this.isInterviewRequired = isInterviewRequired;
+        this.isInterviewRequired = Boolean.TRUE.equals(isInterviewRequired);
         this.interviewDuration = interviewDuration;
+        this.needImage = needImage;
         this.needGender = needGender;
         this.needAddress = needAddress;
         this.needSchool = needSchool;
         this.needBirthDate = needBirthDate;
+        this.needMajor = needMajor;
         this.needAcademicStatus = needAcademicStatus;
         this.documentScaleType = documentScaleType;
         this.interviewScaleType = interviewScaleType;

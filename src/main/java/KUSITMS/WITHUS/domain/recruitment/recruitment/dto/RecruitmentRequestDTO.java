@@ -5,7 +5,7 @@ import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationS
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.dto.AvailableTimeRangeRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.dto.DocumentQuestionRequestDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -21,10 +21,10 @@ public class RecruitmentRequestDTO {
             Long recruitmentId,
 
             @Schema(description = "공고 제목", example = "2025-1 큐시즘 모집")
-            @NotBlank String title,
+            String title,
 
             @Schema(description = "공고 내용", example = "큐시즘 학회원 모집합니다.")
-            @NotBlank String content,
+            String content,
 
             @Schema(description = "등록할 포지션 이름 목록", example = "[\"백엔드\", \"디자인\"]")
             List<String> positions,
@@ -32,23 +32,26 @@ public class RecruitmentRequestDTO {
             @Schema(description = "지원서 문항 목록")
             List<DocumentQuestionRequestDTO.Create> applicationQuestions,
 
-            @Schema(description = "서류 마감일", example = "2025-06-01")
-            @NotNull @Future LocalDate documentDeadline,
+            @Schema(description = "서류 마감일", example = "2026-06-01")
+            @FutureOrPresent LocalDate documentDeadline,
 
             @Schema(description = "서류 발표 필수 여부", example = "true")
             Boolean isDocumentResultRequired,
 
-            @Schema(description = "서류 발표일", example = "2025-06-10")
-            @Future LocalDate documentResultDate,
+            @Schema(description = "서류 발표일", example = "2026-06-10")
+            @FutureOrPresent LocalDate documentResultDate,
 
-            @Schema(description = "최종 발표일", example = "2025-06-20")
-            @NotNull @Future LocalDate finalResultDate,
+            @Schema(description = "최종 발표일", example = "2026-06-20")
+            @FutureOrPresent LocalDate finalResultDate,
 
             @Schema(description = "면접 소요시간", example = "30")
             Short interviewDuration,
 
             @Schema(description = "조직 ID", example = "1")
             @NotNull Long organizationId,
+
+            @Schema(description = "사진 입력 필요 여부", example = "true")
+            boolean needImage,
 
             @Schema(description = "성별 입력 필요 여부", example = "true")
             boolean needGender,
@@ -68,7 +71,7 @@ public class RecruitmentRequestDTO {
             @Schema(description = "학적 상태 입력 필요 여부", example = "false")
             boolean needAcademicStatus,
 
-            @Schema(description = "서류 평가 방식", example = "SCORE")EvaluationScaleType documentScaleType,
+            @Schema(description = "서류 평가 방식", example = "SCORE") EvaluationScaleType documentScaleType,
             @Schema(description = "면접 평가 방식", example = "SCORE") EvaluationScaleType interviewScaleType,
 
             @Schema(description = "서류 평가 기준 목록") List<EvaluationCriteriaRequestDTO.Create> documentEvaluationCriteria,
@@ -96,24 +99,26 @@ public class RecruitmentRequestDTO {
             List<String> positions,
 
             @Schema(description = "서류 마감일", example = "2025-06-01")
-            @NotNull @Future LocalDate documentDeadline,
+            @NotNull @FutureOrPresent LocalDate documentDeadline,
 
             @Schema(description = "서류 발표 필수 여부", example = "true")
             Boolean isDocumentResultRequired,
 
             @Schema(description = "서류 발표일", example = "2025-06-10")
-            @Future LocalDate documentResultDate,
+            @FutureOrPresent LocalDate documentResultDate,
 
             @Schema(description = "최종 발표일", example = "2025-06-20")
-            @NotNull @Future LocalDate finalResultDate,
+            @NotNull @FutureOrPresent LocalDate finalResultDate,
 
             @Schema(description = "면접 소요시간")
             Short interviewDuration,
 
+            @Schema(description = "사진 입력 필요 여부") boolean needImage,
             @Schema(description = "성별 수집 여부") boolean needGender,
             @Schema(description = "주소 수집 여부") boolean needAddress,
             @Schema(description = "학교 수집 여부") boolean needSchool,
             @Schema(description = "생년월일 수집 여부") boolean needBirthDate,
+            @Schema(description = "전공 수집 여부") boolean needMajor,
             @Schema(description = "학적 상태 수집 여부") boolean needAcademicStatus,
 
             @Schema(description = "임시 저장 여부") boolean isTemporary,

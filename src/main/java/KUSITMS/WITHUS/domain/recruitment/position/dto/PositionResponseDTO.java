@@ -13,6 +13,10 @@ public class PositionResponseDTO {
             @Schema(description = "색상") String color
     ) {
         public static Detail from(Position position) {
+            if (position == null) {
+                return null;
+            }
+
             return new Detail(
                     position.getId(),
                     position.getName(),
@@ -27,10 +31,14 @@ public class PositionResponseDTO {
             @Schema(description = "지원자 수") int applicantCount
     ) {
         public static SummaryForRecruitment from(Position position) {
-            return new SummaryForRecruitment(
-                    position.getName(),
-                    position.getApplications().size()
-            );
+            if (position == null) {
+                return new SummaryForRecruitment(null, 0);
+            }
+
+            String name = position.getName();
+            int count = position.getApplications() != null ? position.getApplications().size() : 0;
+
+            return new SummaryForRecruitment(name, count);
         }
     }
 }

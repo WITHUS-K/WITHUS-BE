@@ -43,12 +43,13 @@ public class RecruitmentRepositoryImpl implements RecruitmentRepository {
     }
 
     @Override
-    public List<Recruitment> findAllByKeyword(String keyword) {
+    public List<Recruitment> findAllByKeyword(String keyword, List<Long> organizationIds) {
         return queryFactory.selectFrom(recruitment)
                 .where(
-                        recruitment.isTemporary.isFalse(),
-                        keyword != null && !keyword.isBlank() ?
-                                recruitment.title.containsIgnoreCase(keyword) : null
+                        recruitment.organization.id.in(organizationIds),
+                        keyword != null && !keyword.isBlank()
+                                ? recruitment.title.containsIgnoreCase(keyword)
+                                : null
                 )
                 .orderBy(recruitment.createdAt.desc())
                 .fetch();
@@ -82,6 +83,15 @@ public class RecruitmentRepositoryImpl implements RecruitmentRepository {
                         recruitment.organization.id.in(organizationIds),
                         recruitment.isTemporary.isFalse()
                 )
+                .orderBy(recruitment.createdAt.desc())
+                .fetch();
+    }
+
+    @Override
+    public List<Recruitment> findAllByOrganizationId(Long organizationId) {
+        return queryFactory
+                .selectFrom(recruitment)
+                .where(recruitment.organization.id.eq(organizationId))
                 .orderBy(recruitment.createdAt.desc())
                 .fetch();
     }

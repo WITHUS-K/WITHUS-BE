@@ -48,7 +48,7 @@ public class TestHelper {
                 List.of(),
                 LocalDate.now().plusDays(5), true,
                 LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
-                (short) 30, organizationId, true, true, true, true, true, false,
+                (short) 30, organizationId, false, true, true, true, true, false, true,
                 EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
                 List.of(), List.of(),
                 true,

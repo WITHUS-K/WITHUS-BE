@@ -11,6 +11,7 @@ import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRe
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.email.MailProperties;
+import KUSITMS.WITHUS.global.infra.email.provider.InvitationTokenProvider;
 import KUSITMS.WITHUS.global.infra.email.sender.MailSender;
 import KUSITMS.WITHUS.global.infra.email.template.MailTemplateProvider;
 import KUSITMS.WITHUS.global.infra.email.template.MailTemplateType;
@@ -36,6 +37,7 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
     private final MailProperties mailProperties;
     private final MailTemplateProvider templateProvider;
     private final MailSender mailSender;
+    private final InvitationTokenProvider invitationTokenProvider;
 
     /**
      * 특정 조직의 운영진을 모두 조회 - 페이지네이션
@@ -135,15 +137,35 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
         List<User> users = userRepository.findAllById(userIds);
 
         for (User user : users) {
+            String token = invitationTokenProvider.createToken(user.getId(), organizationId);
+            String link = mailProperties.getDomain()
+                    + mailProperties.getInvitationApiPath()
+                    + "?token=" + token;
+
             Map<String, String> variables = Map.of(
                     "logoUrl", mailProperties.getLogoUrl(),
                     "organizationName", org.getName(),
                     "inviterName", inviterName,
-                    "link", mailProperties.getInterviewerAvailabilityUrl()
+                    "link", link
             );
 
             String html = templateProvider.loadTemplate(MailTemplateType.INVITATION, variables);
             mailSender.send(user.getEmail(), "[WITHUS] 조직 초대 메일", html);
         }
+    }
+
+    /**
+     * 이메일 초대 수락
+     * @param token 검증할 토큰
+     */
+    @Override
+    @Transactional
+    public void acceptInvitation(String token) {
+        InvitationTokenProvider.InvitationPayload payload = invitationTokenProvider.parseToken(token);
+
+        addUserToOrganization(
+                payload.organizationId(),
+                List.of(payload.userId())
+        );
     }
 }

@@ -55,7 +55,7 @@ public class ApplicationAssembler {
                 formatInterviewDates(recruitment),
 
                 application.getId(),
-                application.getPosition().getName(),
+                application.getPosition() != null ? application.getPosition().getName() : null,
                 application.getName(),
                 application.getGender(),
                 application.getEmail(),

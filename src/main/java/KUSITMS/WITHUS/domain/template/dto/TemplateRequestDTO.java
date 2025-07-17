@@ -13,6 +13,9 @@ public class TemplateRequestDTO {
             @Schema(description = "템플릿 이름", example = "면접 일정 안내")
             @NotBlank String name,
 
+            @Schema(description = "템플릿을 만들 organizationId", example = "1")
+            Long organizationId,
+
             @Schema(description = "메일 제목", example = "[WITHUS] 면접 일정 안내")
             String subject,
 
