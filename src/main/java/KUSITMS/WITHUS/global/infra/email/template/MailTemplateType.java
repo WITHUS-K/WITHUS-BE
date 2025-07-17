@@ -7,7 +7,8 @@ public enum MailTemplateType {
     INTERVIEW_REQUEST("interview-request.html"),
     EVALUATION_REMINDER("evaluation-reminder.html"),
     INVITATION("invitation.html"),
-    VERIFICATION("verification.html");
+    VERIFICATION("verification.html"),
+    KUSITMS_APPLY_SUCCESS("kusitms-apply-success.html");
 
     private final String fileName;
 
