@@ -38,6 +38,9 @@ import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import KUSITMS.WITHUS.global.infra.email.sender.MailSender;
+import KUSITMS.WITHUS.global.infra.email.template.MailTemplateProvider;
+import KUSITMS.WITHUS.global.infra.email.template.MailTemplateType;
 import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -72,6 +75,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationAcquaintanceRepository applicationAcquaintanceRepository;
     private final DistributionRequestRepository distributionRequestRepository;
     private final FileUploadService fileUploadService;
+    private final MailSender mailSender;
+    private final MailTemplateProvider templateProvider;
 
     private final ApplicationValidator validator;
     private final ApplicationFactory factory;
@@ -114,6 +119,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         List<ApplicationAnswer> answers = factory.createAnswers(application, request.answers(), questionMap, uploadedFileUrls);
         applicationAnswerRepository.saveAll(answers);
+
+        Map<String, String> variables = Map.of();
+
+        String html = templateProvider.loadTemplate(MailTemplateType.KUSITMS_APPLY_SUCCESS, variables);
+        mailSender.send(request.email(), "[WITHUS] 지원서 접수 확인 안내", html);
 
         return ApplicationResponseDTO.Summary.from(application);
     }
