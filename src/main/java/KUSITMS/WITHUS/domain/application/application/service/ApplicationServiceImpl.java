@@ -104,7 +104,9 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         FileResponseDTO.Upload uploadData = fileUploadService.uploadProfileImage(profileImage,
                 recruitment.getOrganization().getId(), recruitment.getId(), application.getId());
-        application.updateImageUrl(uploadData.url());
+        if (uploadData != null) {
+            application.updateImageUrl(uploadData.url());
+        }
 
         saveApplicantAvailabilities(application, request.availableTimes());
 
