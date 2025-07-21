@@ -29,7 +29,7 @@ public class ApplicationValidator {
         if (recruitment.isNeedBirthDate() && request.birthDate() == null) {
             throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
         }
-        if (recruitment.isNeedAcademicStatus() && request.major() == null) {
+        if (recruitment.isNeedMajor() && request.major() == null) {
             throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
         }
         if (recruitment.isNeedAcademicStatus() && request.academicStatus() == null) {
