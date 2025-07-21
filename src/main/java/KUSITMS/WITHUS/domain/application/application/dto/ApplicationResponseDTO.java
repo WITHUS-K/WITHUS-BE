@@ -466,6 +466,7 @@ public class ApplicationResponseDTO {
     public record DetailForTimeSlot(
             @Schema(description = "지원서 ID") Long applicationId,
             @Schema(description = "지원자 이름") String name,
+            @Schema(description = "지원 파트 ID") Long appliedPosition,
             @Schema(description = "면접 일자") @DateFormatDot LocalDate date,
             @Schema(description = "면접 시작 시간") @TimeFormat LocalTime startTime,
             @Schema(description = "면접 종료 시간") @TimeFormat LocalTime endTime,
@@ -506,6 +507,7 @@ public class ApplicationResponseDTO {
             return new DetailForTimeSlot(
                     application.getId(),
                     application.getName(),
+                    application.getPosition().getId(),
                     timeSlot.getDate(),
                     timeSlot.getStartTime(),
                     timeSlot.getEndTime(),
