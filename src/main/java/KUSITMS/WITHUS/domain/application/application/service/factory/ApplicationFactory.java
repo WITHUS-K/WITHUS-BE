@@ -8,6 +8,7 @@ import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestio
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.enumerate.QuestionType;
 import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
+import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.global.infra.upload.dto.FileResponseDTO;
 import org.springframework.stereotype.Component;
 
@@ -20,9 +21,11 @@ import java.util.stream.Collectors;
 public class ApplicationFactory {
 
     public Application createApplication(ApplicationRequestDTO.Create request, Recruitment recruitment, Position position) {
+        Gender gender = request.gender() != null ? request.gender() : Gender.NONE;
+
         return Application.create(
                 request.name(),
-                request.gender(),
+                gender,
                 request.email(),
                 request.phoneNumber(),
                 request.university(),

@@ -9,7 +9,7 @@ public enum Gender {
 
     MALE("남"),
     FEMALE("여"),
-    NONE("관리자용 기본값");
+    NONE("기본값");
 
     private final String key;
 }
