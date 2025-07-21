@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,8 +29,11 @@ public class FileController {
         try {
             InputStream in = new URL(request.imageUrl()).openStream();
 
+            String encodedFileName = URLEncoder.encode(request.fileName(), StandardCharsets.UTF_8)
+                    .replaceAll("\\+", "%20");
+
             HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Disposition", "attachment; filename=" + request.fileName());
+            headers.add("Content-Disposition", "attachment; filename=" + encodedFileName);
 
             return ResponseEntity.ok()
                     .headers(headers)
