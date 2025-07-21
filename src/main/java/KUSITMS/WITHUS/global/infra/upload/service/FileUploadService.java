@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.global.infra.upload.service;
 
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import KUSITMS.WITHUS.global.infra.upload.dto.FileResponseDTO;
 import KUSITMS.WITHUS.global.infra.upload.uploader.Uploader;
 import KUSITMS.WITHUS.global.infra.upload.util.FilePathBuilder;
 import lombok.RequiredArgsConstructor;
@@ -26,29 +27,29 @@ public class FileUploadService {
     @Value("${ncp.storage.bucket-name}")
     private String bucketName;
 
-    public String uploadUserProfileImage(MultipartFile file, Long userId) {
+    public FileResponseDTO.Upload uploadUserProfileImage(MultipartFile file, Long userId) {
         if (file == null || file.isEmpty()) return null;
 
         String path = pathBuilder.buildUploadPath("users", String.valueOf(userId), "profile", file.getOriginalFilename());
         return uploader.upload(file, path);
     }
 
-    public String uploadProfileImage(MultipartFile file, Long orgId, Long recruitmentId, Long appId) {
+    public FileResponseDTO.Upload uploadProfileImage(MultipartFile file, Long orgId, Long recruitmentId, Long appId) {
         if (file == null || file.isEmpty()) return null;
 
         String path = pathBuilder.buildUploadPath("applications", String.valueOf(orgId), String.valueOf(recruitmentId), String.valueOf(appId), "profile", file.getOriginalFilename());
         return uploader.upload(file, path);
     }
 
-    public Map<String, String> uploadAnswerFiles(List<MultipartFile> files, Long orgId, Long recruitmentId, Long appId) {
-        Map<String, String> result = new HashMap<>();
+    public Map<String, FileResponseDTO.Upload> uploadAnswerFiles(List<MultipartFile> files, Long orgId, Long recruitmentId, Long appId) {
+        Map<String, FileResponseDTO.Upload> result = new HashMap<>();
         if (files == null) return result;
 
         for (MultipartFile file : files) {
             String normalizedFileName = Normalizer.normalize(Objects.requireNonNull(file.getOriginalFilename()), Normalizer.Form.NFC);
             String path = pathBuilder.buildUploadPath("applications", String.valueOf(orgId), String.valueOf(recruitmentId), String.valueOf(appId), "answer", normalizedFileName);
-            String url = uploader.upload(file, path);
-            result.put(normalizedFileName, url);
+            FileResponseDTO.Upload uploadData = uploader.upload(file, path);
+            result.put(normalizedFileName, uploadData);
         }
 
         return result;

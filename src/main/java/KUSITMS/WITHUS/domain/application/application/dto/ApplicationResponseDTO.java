@@ -22,6 +22,7 @@ import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.global.common.annotation.DateFormatDot;
 import KUSITMS.WITHUS.global.common.annotation.DateFormatSlash;
+import KUSITMS.WITHUS.global.common.annotation.DateTimeFormat;
 import KUSITMS.WITHUS.global.common.annotation.TimeFormat;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -65,7 +66,7 @@ public class ApplicationResponseDTO {
             @Schema(description = "합불 상태") ApplicationStatus status,
             @Schema(description = "지원서 항목 질문 및 답변 목록") List<ApplicationAnswerResponseDTO> documentAnswers,
 
-            @Schema(description = "면접 가능 시간") @TimeFormat List<LocalDateTime> availableTimes,
+            @Schema(description = "면접 가능 시간") @DateTimeFormat List<LocalDateTime> availableTimes,
             @Schema(description = "면접 질문 목록") List<InterviewQuestionResponseDTO.Detail> interviewQuestions,
 
             @Schema(description = "서류/면접 평가 목록") List<EvaluationResponseDTO.Detail> evaluations,

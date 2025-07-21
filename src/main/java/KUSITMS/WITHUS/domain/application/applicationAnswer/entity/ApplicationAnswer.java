@@ -30,12 +30,16 @@ public class ApplicationAnswer {
     @Column(name = "FILE_URL")
     private String fileUrl;
 
-    public static ApplicationAnswer create(Application app, DocumentQuestion question, String answerText, String fileUrl) {
+    @Column(name = "FILE_SIZE")
+    private Long fileSize;
+
+    public static ApplicationAnswer create(Application app, DocumentQuestion question, String answerText, String fileUrl, Long fileSize) {
         return ApplicationAnswer.builder()
                 .application(app)
                 .question(question)
                 .answerText(answerText)
                 .fileUrl(fileUrl)
+                .fileSize(fileSize)
                 .build();
     }
 }
