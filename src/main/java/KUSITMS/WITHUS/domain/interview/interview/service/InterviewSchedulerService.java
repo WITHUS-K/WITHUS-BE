@@ -54,6 +54,9 @@ public class InterviewSchedulerService {
         List<ApplicantAvailability> availabilityList = availabilityRepository.findByApplicationIn(applicants);
         Interview interview = interviewRepository.getById(interviewId);
 
+        // 재생성시 기존에 배정된 타임슬롯 삭제
+        timeSlotRepository.deleteAllByInterview(interview.getId());
+
         interview.setConfig(config.interviewerPerSlot, config.applicantPerSlot, config.assistantPerSlot, config.roomCount());
         interview.setRoomNames(config.roomNames());
 

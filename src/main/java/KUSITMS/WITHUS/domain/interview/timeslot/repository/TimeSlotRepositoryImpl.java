@@ -93,4 +93,9 @@ public class TimeSlotRepositoryImpl implements TimeSlotRepository {
                 .orderBy(timeSlot.date.asc(), timeSlot.startTime.asc())
                 .fetch();
     }
+
+    @Override
+    public void deleteAllByInterview(Long interviewId) {
+        timeSlotJpaRepository.deleteByInterviewId(interviewId);
+    }
 }
