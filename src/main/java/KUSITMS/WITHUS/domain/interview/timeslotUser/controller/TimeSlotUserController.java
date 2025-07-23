@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/timeslots")
-@Tag(name = "TimeSlot에 사용자 추가 API")
+@Tag(name = "TimeSlot에 사용자 추가")
 @RequiredArgsConstructor
 public class TimeSlotUserController {
 
@@ -51,4 +51,14 @@ public class TimeSlotUserController {
         timeSlotUserService.updateUsersInTimeSlot(timeSlotId, request.userIds(), request.role());
         return SuccessResponse.ok("타임슬롯 사용자 목록이 수정되었습니다.");
     }
+
+    @PostMapping("/interviews/{interviewId}/schedule")
+    @Operation(summary = "면접관 자동 배정", description = "운영진 가능 시간에 따라 타임슬롯에 면접관을 자동 배정합니다.")
+    public SuccessResponse<String> assignUsersToTimeSlots(
+            @PathVariable Long interviewId
+    ) {
+        timeSlotUserService.assignInterviewers(interviewId);
+        return SuccessResponse.ok("면접관 자동 배정이 완료되었습니다.");
+    }
+
 }
