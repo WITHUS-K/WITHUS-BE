@@ -54,6 +54,9 @@ public class InterviewSchedulerService {
         List<ApplicantAvailability> availabilityList = availabilityRepository.findByApplicationIn(applicants);
         Interview interview = interviewRepository.getById(interviewId);
 
+        // 재생성시 기존에 배정된 타임슬롯 삭제
+        timeSlotRepository.deleteAllByInterview(interview.getId());
+
         interview.setConfig(config.interviewerPerSlot, config.applicantPerSlot, config.assistantPerSlot, config.roomCount());
         interview.setRoomNames(config.roomNames());
 
@@ -194,7 +197,7 @@ public class InterviewSchedulerService {
         Interview interview = interviewRepository.getById(interviewId);
         Recruitment recruitment = interview.getRecruitment();
 
-        List<TimeSlot> slots = timeSlotRepository.findByInterview(interview);
+        List<TimeSlot> slots = timeSlotRepository.findByInterviewId(interview.getId());
         return buildScheduleDTOs(interview, recruitment, slots, false);
     }
 
@@ -213,7 +216,7 @@ public class InterviewSchedulerService {
                 .map(TimeSlot::getId)
                 .collect(Collectors.toSet());
 
-        List<TimeSlot> mySlots = timeSlotRepository.findByInterview(interview).stream()
+        List<TimeSlot> mySlots = timeSlotRepository.findByInterviewId(interview.getId()).stream()
                 .filter(slot -> mySlotIds.contains(slot.getId()))
                 .toList();
 

@@ -16,4 +16,9 @@ public class InterviewerAvailabilityRepositoryImpl implements InterviewerAvailab
     public List<InterviewerAvailability> saveAll(List<InterviewerAvailability> availabilities) {
         return availabilityJpaRepository.saveAll(availabilities);
     }
+
+    @Override
+    public List<InterviewerAvailability> findByInterviewId(Long interviewId) {
+        return availabilityJpaRepository.findByInterviewId(interviewId);
+    }
 }

@@ -15,6 +15,7 @@ public interface TimeSlotRepository {
     TimeSlot save(TimeSlot timeSlot);
     Optional<TimeSlot> findByDateTimeAndInterviewIdAndPosition(LocalDate date, LocalTime startTime, Long interviewId, Long positionId, String roomName);
     TimeSlot findOrCreate(LocalDate date, LocalTime startTime, LocalTime endTime, Interview interview, Position position, String roomName);
-    List<TimeSlot> findByInterview(Interview interview);
+    List<TimeSlot> findByInterviewId(Long interviewId);
     List<TimeSlot> findAllByUserInvolved(Long interviewId, User user);
+    void deleteAllByInterview(Long interviewId);
 }

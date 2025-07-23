@@ -1,23 +1,28 @@
 package KUSITMS.WITHUS.domain.interview.timeslotUser.service;
 
 import KUSITMS.WITHUS.domain.interview.enumerate.InterviewRole;
+import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
+import KUSITMS.WITHUS.domain.interview.interview.repository.InterviewRepository;
+import KUSITMS.WITHUS.domain.interview.interviewAvailabiliy.entity.InterviewerAvailability;
+import KUSITMS.WITHUS.domain.interview.interviewAvailabiliy.repository.InterviewerAvailabilityRepository;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.interview.timeslot.repository.TimeSlotRepository;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.repository.TimeSlotUserRepository;
+import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -26,6 +31,8 @@ public class TimeSlotUserServiceImpl implements TimeSlotUserService {
     private final TimeSlotRepository timeSlotRepository;
     private final UserRepository userRepository;
     private final TimeSlotUserRepository timeSlotUserRepository;
+    private final InterviewRepository interviewRepository;
+    private final InterviewerAvailabilityRepository interviewerAvailabilityRepository;
 
     @Override
     @Transactional
@@ -87,5 +94,92 @@ public class TimeSlotUserServiceImpl implements TimeSlotUserService {
                     .build();
             timeSlot.getTimeSlotUsers().add(newRelation);
         }
+    }
+
+    @Override
+    @Transactional
+    public void assignInterviewers(Long interviewId) {
+        // 기존 면접관 배정 삭제
+        timeSlotUserRepository.deleteByInterviewIdAndRole(interviewId, InterviewRole.INTERVIEWER);
+
+        Interview interview = interviewRepository.getById(interviewId);
+        List<TimeSlot> timeSlots = timeSlotRepository.findByInterviewId(interviewId);
+        List<InterviewerAvailability> availabilities = interviewerAvailabilityRepository.findByInterviewId(interviewId);
+
+        log.info("[1] 타임슬롯 수: {}", timeSlots.size());
+        log.info("[2] 인터뷰어 가능 시간 제출 수: {}", availabilities.size());
+
+        Map<Long, List<LocalDateTime>> userAvailableTimes = availabilities.stream()
+                .collect(Collectors.groupingBy(
+                        a -> a.getUser().getId(),
+                        Collectors.mapping(InterviewerAvailability::getAvailableTime, Collectors.toList())
+                ));
+
+        log.info("[3] 가능한 유저 수: {}", userAvailableTimes.size());
+
+        Map<Long, User> userMap = userRepository.findAllById(new ArrayList<>(userAvailableTimes.keySet()))
+                .stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+
+        Set<Long> usedUsers = new HashSet<>();
+
+        for (TimeSlot slot : timeSlots) {
+            LocalDateTime slotTime = slot.getDate().atTime(slot.getStartTime());
+            Position slotPosition = slot.getPosition();
+
+            log.info("[4] 타임슬롯 ID: {} / 시간: {} / 포지션: {}",
+                    slot.getId(), slotTime, slotPosition != null ? slotPosition.getName() : "null");
+
+            List<Long> assignableUserIds = userAvailableTimes.entrySet().stream()
+                    .filter(e -> {
+                        boolean hasTime = e.getValue().contains(slotTime);
+                        if (!hasTime) {
+                            log.debug("[FAIL] userId={} 는 시간 불일치", e.getKey());
+                        }
+                        return hasTime;
+                    })
+                    .map(Map.Entry::getKey)
+                    .filter(userId -> {
+                        User user = userMap.get(userId);
+                        boolean alreadyUsed = usedUsers.contains(userId);
+                        boolean matchRole = slotPosition == null || user.hasMatchingRole(slotPosition);
+
+                        if (alreadyUsed) {
+                            log.debug("[FAIL] userId={} ({}) 이미 배정됨", userId, user.getName());
+                            return false;
+                        }
+                        if (!matchRole) {
+                            log.debug("[FAIL] userId={} ({}) 포지션 불일치", userId, user.getName());
+                            log.debug("유저 역할 목록: {}", user.getUserOrganizationRoles().stream()
+                                    .map(r -> r.getOrganizationRole().getName())
+                                    .toList());
+                        }
+
+                        return matchRole;
+                    })
+                    .limit(interview.getInterviewerPerSlot())
+                    .toList();
+
+            for (Long userId : assignableUserIds) {
+                User user = userMap.get(userId);
+                assignToSlot(slot, user, InterviewRole.INTERVIEWER);
+                usedUsers.add(userId);
+                log.info("[SUCCESS] 배정: userId={} ({})", userId, user.getName());
+            }
+
+            if (assignableUserIds.isEmpty()) {
+                log.warn("[WARN] 배정 가능한 운영진 없음 (timeSlotId={})", slot.getId());
+            }
+        }
+    }
+    
+    private void assignToSlot(TimeSlot slot, User user, InterviewRole role) {
+        TimeSlotUser tsu = TimeSlotUser.builder()
+                .timeSlot(slot)
+                .user(user)
+                .role(role)
+                .build();
+        timeSlotUserRepository.save(tsu);
+        slot.addTimeSlotUser(tsu);
     }
 }

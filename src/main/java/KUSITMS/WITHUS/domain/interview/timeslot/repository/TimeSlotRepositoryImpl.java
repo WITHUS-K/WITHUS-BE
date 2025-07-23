@@ -73,10 +73,10 @@ public class TimeSlotRepositoryImpl implements TimeSlotRepository {
     }
 
     @Override
-    public List<TimeSlot> findByInterview(Interview interview) {
+    public List<TimeSlot> findByInterviewId(Long interviewId) {
         return queryFactory
                 .selectFrom(timeSlot)
-                .where(timeSlot.interview.eq(interview))
+                .where(timeSlot.interview.id.eq(interviewId))
                 .orderBy(timeSlot.date.asc(), timeSlot.startTime.asc())
                 .fetch();
     }
@@ -92,5 +92,10 @@ public class TimeSlotRepositoryImpl implements TimeSlotRepository {
                 )
                 .orderBy(timeSlot.date.asc(), timeSlot.startTime.asc())
                 .fetch();
+    }
+
+    @Override
+    public void deleteAllByInterview(Long interviewId) {
+        timeSlotJpaRepository.deleteByInterviewId(interviewId);
     }
 }
