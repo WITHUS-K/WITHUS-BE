@@ -42,7 +42,7 @@ public class InterviewController {
         return SuccessResponse.ok("면접 타임테이블 생성에 성공하였습니다.");
     }
 
-    @PatchMapping("/interviews/{interviewId}/schedule/reset")
+    @PatchMapping("/{interviewId}/schedule/reset")
     @Operation(summary = "면접 타임테이블 초기화", description = "기존 배정된 면접 시간표를 모두 삭제하고, 구성 설정을 0으로 초기화합니다.")
     public SuccessResponse<String> resetInterviewSchedule(@PathVariable Long interviewId) {
         schedulerService.resetInterviewSchedule(interviewId);
