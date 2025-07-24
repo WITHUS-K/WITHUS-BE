@@ -7,6 +7,7 @@ import KUSITMS.WITHUS.domain.application.applicantAvailability.repository.Applic
 import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewScheduleDTO;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.interview.repository.InterviewRepository;
+import KUSITMS.WITHUS.domain.interview.interviewAvailabiliy.repository.InterviewerAvailabilityRepository;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.interview.timeslot.repository.TimeSlotRepository;
 import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
@@ -36,6 +37,7 @@ public class InterviewSchedulerService {
     private final TimeSlotRepository timeSlotRepository;
     private final ApplicantAvailabilityRepository availabilityRepository;
     private final RecruitmentRepository recruitmentRepository;
+    private final InterviewerAvailabilityRepository interviewerAvailabilityRepository;
 
     /**
      * 면접 타임슬롯 배정
@@ -198,7 +200,7 @@ public class InterviewSchedulerService {
         Recruitment recruitment = interview.getRecruitment();
 
         List<TimeSlot> slots = timeSlotRepository.findByInterviewId(interview.getId());
-        return buildScheduleDTOs(interview, recruitment, slots, false);
+        return buildScheduleDTOs(interview, false, recruitment, slots, false);
     }
 
 
@@ -220,11 +222,14 @@ public class InterviewSchedulerService {
                 .filter(slot -> mySlotIds.contains(slot.getId()))
                 .toList();
 
-        return buildScheduleDTOs(interview, recruitment, mySlots, true);
+        // 면접 가능 시간 제출 여부 확인
+        boolean hasSubmittedAvailability = interviewerAvailabilityRepository.existsByInterviewAndUser(interview.getId(), user.getId());
+
+        return buildScheduleDTOs(interview, hasSubmittedAvailability, recruitment, mySlots, true);
     }
 
 
-    private List<InterviewScheduleDTO> buildScheduleDTOs(Interview interview, Recruitment recruitment,
+    private List<InterviewScheduleDTO> buildScheduleDTOs(Interview interview, boolean hasSubmittedAvailability, Recruitment recruitment,
                                                          List<TimeSlot> slots, boolean isMySchedule) {
         Map<LocalDate, List<TimeSlot>> slotsByDate = slots.stream()
                 .collect(Collectors.groupingBy(TimeSlot::getDate));
@@ -244,6 +249,7 @@ public class InterviewSchedulerService {
 
                     return InterviewScheduleDTO.from(
                             interview.getId(),
+                            hasSubmittedAvailability,
                             date,
                             timeRange.getStartTime(),
                             timeRange.getEndTime(),

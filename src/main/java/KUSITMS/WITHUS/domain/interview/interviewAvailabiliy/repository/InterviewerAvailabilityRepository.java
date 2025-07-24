@@ -7,4 +7,5 @@ import java.util.List;
 public interface InterviewerAvailabilityRepository {
     List<InterviewerAvailability> saveAll(List<InterviewerAvailability> availabilities);
     List<InterviewerAvailability> findByInterviewId(Long interviewId);
+    boolean existsByInterviewAndUser(Long interviewId, Long userId);
 }
