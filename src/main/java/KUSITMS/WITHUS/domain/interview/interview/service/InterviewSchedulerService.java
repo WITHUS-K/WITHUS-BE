@@ -203,7 +203,6 @@ public class InterviewSchedulerService {
         return buildScheduleDTOs(interview, false, recruitment, slots, false);
     }
 
-
     /**
      * 내 면접 시간 조회 (배정된 타임 슬롯 조회)
      * @param interviewId 조회할 면접 ID
@@ -226,6 +225,22 @@ public class InterviewSchedulerService {
         boolean hasSubmittedAvailability = interviewerAvailabilityRepository.existsByInterviewAndUser(interview.getId(), user.getId());
 
         return buildScheduleDTOs(interview, hasSubmittedAvailability, recruitment, mySlots, true);
+    }
+
+    /**
+     * 타임테이블 초기화
+     * @param interviewId 초기화 할 면접 ID
+     */
+    @Transactional
+    public void resetInterviewSchedule(Long interviewId) {
+        Interview interview = interviewRepository.getById(interviewId);
+
+        timeSlotRepository.deleteAllByInterview(interview.getId());
+
+        interview.setConfig(0, 0, 0, 0);
+        interview.setRoomNames(List.of());
+
+        System.out.println("면접 타임테이블 초기화 완료");
     }
 
 

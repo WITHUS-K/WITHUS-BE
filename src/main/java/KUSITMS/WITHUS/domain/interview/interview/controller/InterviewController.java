@@ -42,6 +42,13 @@ public class InterviewController {
         return SuccessResponse.ok("면접 타임테이블 생성에 성공하였습니다.");
     }
 
+    @PatchMapping("/interviews/{interviewId}/schedule/reset")
+    @Operation(summary = "면접 타임테이블 초기화", description = "기존 배정된 면접 시간표를 모두 삭제하고, 구성 설정을 0으로 초기화합니다.")
+    public SuccessResponse<String> resetInterviewSchedule(@PathVariable Long interviewId) {
+        schedulerService.resetInterviewSchedule(interviewId);
+        return SuccessResponse.ok("면접 스케줄이 초기화되었습니다.");
+    }
+
     @GetMapping("/{interviewId}/schedule")
     @Operation(summary = "면접 배정 결과 조회", description = "해당 인터뷰 ID에 배정된 타임슬롯과 지원자 목록을 조회합니다.")
     public SuccessResponse<List<InterviewScheduleDTO>> getSchedule(@PathVariable("interviewId") Long interviewId) {
