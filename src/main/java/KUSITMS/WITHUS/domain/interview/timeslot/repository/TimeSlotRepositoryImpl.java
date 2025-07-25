@@ -98,4 +98,9 @@ public class TimeSlotRepositoryImpl implements TimeSlotRepository {
     public void deleteAllByInterview(Long interviewId) {
         timeSlotJpaRepository.deleteByInterviewId(interviewId);
     }
+
+    @Override
+    public void deleteAll(List<TimeSlot> oldSlots) {
+        timeSlotJpaRepository.deleteAll(oldSlots);
+    }
 }

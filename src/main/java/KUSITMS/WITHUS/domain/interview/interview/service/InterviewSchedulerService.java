@@ -57,7 +57,13 @@ public class InterviewSchedulerService {
         Interview interview = interviewRepository.getById(interviewId);
 
         // 재생성시 기존에 배정된 타임슬롯 삭제
-        timeSlotRepository.deleteAllByInterview(interview.getId());
+        List<TimeSlot> oldSlots = timeSlotRepository.findByInterviewId(interview.getId());
+        for (TimeSlot slot : oldSlots) {
+            for (Application app : slot.getApplications()) {
+                app.assignTimeSlot(null);
+            }
+        }
+        timeSlotRepository.deleteAll(oldSlots);
 
         interview.setConfig(config.interviewerPerSlot, config.applicantPerSlot, config.assistantPerSlot, config.roomCount());
         interview.setRoomNames(config.roomNames());
@@ -234,6 +240,14 @@ public class InterviewSchedulerService {
     @Transactional
     public void resetInterviewSchedule(Long interviewId) {
         Interview interview = interviewRepository.getById(interviewId);
+
+        // application 삭제되지 않도록 timeSlot을 null로 초기화
+        List<TimeSlot> timeSlots = timeSlotRepository.findByInterviewId(interview.getId());
+        for (TimeSlot timeSlot : timeSlots) {
+            for (Application application : timeSlot.getApplications()) {
+                application.assignTimeSlot(null);
+            }
+        }
 
         timeSlotRepository.deleteAllByInterview(interview.getId());
 
