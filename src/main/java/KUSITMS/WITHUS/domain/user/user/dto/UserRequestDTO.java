@@ -32,7 +32,7 @@ public class UserRequestDTO {
             @Schema(description = "비밀번호", example = "Abc123!@")
             @NotBlank
             @Pattern(
-                    regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,20}$",
+                    regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+|\\-=\\[\\]{};:',.<>/?])[A-Za-z\\d!@#$%^&*()_+|\\-=\\[\\]{};:',.<>/?]{8,20}$",
                     message = "비밀번호는 영문, 숫자, 특수문자를 조합하여 8~20자로 입력해야 합니다."
             )
             String password,
