@@ -54,8 +54,7 @@ public class ApplicationEvaluatorRequestDTO {
             @NotNull EvaluationType evaluationType,
 
             @Schema(description = "새로 배정할 평가자 User ID 리스트", example = "[1,2,3]")
-            @NotEmpty
-            List<@NotNull Long> evaluatorIds
+            List<Long> evaluatorIds
     ) {}
 
 }
