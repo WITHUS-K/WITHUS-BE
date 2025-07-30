@@ -38,3 +38,5 @@ out/
 
 ### VS Code ###
 .vscode/
+/k3s.yml
+/src/main/resources/application-argo.yml
