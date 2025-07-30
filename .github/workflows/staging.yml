@@ -67,7 +67,7 @@ jobs:
       - name: Update deployment.yml
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
         run: |
           # 새 이미지 태그로 deployment.yml 업데이트
           sed -i "s|image:.*|image: ${DOCKERHUB_USERNAME}/withus:${IMAGE_TAG}|g" manifest/staging/deployment.yml
@@ -79,7 +79,7 @@ jobs:
       # 6. 변경사항 커밋 및 푸시
       - name: Commit and push changes
         env:
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
         run: |
           cd manifest
           git config --local user.email "kjeng7897@gmail.com"
