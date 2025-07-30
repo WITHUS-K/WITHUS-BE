@@ -46,22 +46,13 @@ public class TimeSlot extends BaseEntity {
     @JoinColumn(name = "POSITION_ID")
     private Position position;
 
-    @OneToMany(mappedBy = "timeSlot", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "timeSlot")
     @Builder.Default
     private List<Application> applications = new ArrayList<>();
 
     @OneToMany(mappedBy = "timeSlot", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<TimeSlotUser> timeSlotUsers = new ArrayList<>();
-
-    public void associateInterview(Interview interview) {
-        this.interview = interview;
-    }
-
-    public void addApplication(Application application) {
-        this.applications.add(application);
-        application.assignTimeSlot(this);
-    }
 
     public void addTimeSlotUser(TimeSlotUser timeSlotUser) {
         this.timeSlotUsers.add(timeSlotUser);

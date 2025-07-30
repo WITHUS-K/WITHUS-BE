@@ -40,7 +40,6 @@ public class Application extends BaseEntity {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Gender gender;
 
     @Column(nullable = false)

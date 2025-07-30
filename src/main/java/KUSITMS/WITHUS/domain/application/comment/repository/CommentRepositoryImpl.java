@@ -25,13 +25,24 @@ public class CommentRepositoryImpl implements CommentRepository {
     }
 
     @Override
-    public List<Comment> findByApplicationIdAndTypeAndCreatedBy(Long applicationId, CommentType type, Long userId) {
+    public List<Comment> findByApplicationIdAndTypeAndUser(Long applicationId, CommentType type, Long userId) {
         return queryFactory
                 .selectFrom(comment)
                 .where(
                         comment.application.id.eq(applicationId),
                         comment.type.eq(type),
                         comment.user.id.eq(userId)
+                )
+                .fetch();
+    }
+
+    @Override
+    public List<Comment> findByApplicationIdAndType(Long applicationId, CommentType type) {
+        return queryFactory
+                .selectFrom(comment)
+                .where(
+                        comment.application.id.eq(applicationId),
+                        comment.type.eq(type)
                 )
                 .fetch();
     }

@@ -7,7 +7,8 @@ import java.util.List;
 
 public interface CommentRepository {
     Comment save(Comment comment);
-    List<Comment> findByApplicationIdAndTypeAndCreatedBy(Long applicationId, CommentType type, Long userId);
+    List<Comment> findByApplicationIdAndTypeAndUser(Long applicationId, CommentType type, Long userId);
+    List<Comment> findByApplicationIdAndType(Long id, CommentType commentType);
     Comment getById(Long commentId);
     void delete(Comment comment);
 }

@@ -12,6 +12,7 @@ import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import KUSITMS.WITHUS.global.infra.upload.dto.FileResponseDTO;
 import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
 import KUSITMS.WITHUS.global.util.redis.VerificationCache;
 import lombok.Builder;
@@ -247,7 +248,8 @@ public class UserServiceImpl implements UserService {
             if (imageUrl != null) {
                 uploadService.delete(imageUrl);
             }
-            imageUrl = uploadService.uploadUserProfileImage(profileImage, user.getId());
+            FileResponseDTO.Upload uploaded = uploadService.uploadUserProfileImage(profileImage, user.getId());
+            imageUrl = uploaded != null ? uploaded.url() : null;
         }
 
         user.update(request.name(), request.phoneNumber(), encodedPassword, imageUrl);

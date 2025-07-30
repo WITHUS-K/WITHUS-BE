@@ -38,6 +38,10 @@ import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import KUSITMS.WITHUS.global.infra.email.sender.MailSender;
+import KUSITMS.WITHUS.global.infra.email.template.MailTemplateProvider;
+import KUSITMS.WITHUS.global.infra.email.template.MailTemplateType;
+import KUSITMS.WITHUS.global.infra.upload.dto.FileResponseDTO;
 import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -72,6 +76,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationAcquaintanceRepository applicationAcquaintanceRepository;
     private final DistributionRequestRepository distributionRequestRepository;
     private final FileUploadService fileUploadService;
+    private final MailSender mailSender;
+    private final MailTemplateProvider templateProvider;
 
     private final ApplicationValidator validator;
     private final ApplicationFactory factory;
@@ -96,9 +102,11 @@ public class ApplicationServiceImpl implements ApplicationService {
         Application application = factory.createApplication(request, recruitment, position);
         applicationRepository.save(application);
 
-        String imageUrl = fileUploadService.uploadProfileImage(profileImage,
+        FileResponseDTO.Upload uploadData = fileUploadService.uploadProfileImage(profileImage,
                 recruitment.getOrganization().getId(), recruitment.getId(), application.getId());
-        application.updateImageUrl(imageUrl);
+        if (uploadData != null) {
+            application.updateImageUrl(uploadData.url());
+        }
 
         saveApplicantAvailabilities(application, request.availableTimes());
 
@@ -106,7 +114,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         List<DocumentQuestion> questions = documentQuestionRepository.findCommonAndByPosition(recruitment, position);
         validator.validateFileAnswers(request.answers(), fileList, questions);
 
-        Map<String, String> uploadedFileUrls = fileUploadService.uploadAnswerFiles(fileList,
+        Map<String, FileResponseDTO.Upload> uploadedFileUrls = fileUploadService.uploadAnswerFiles(fileList,
                 recruitment.getOrganization().getId(), recruitment.getId(), application.getId());
 
         Map<Long, DocumentQuestion> questionMap = questions.stream()
@@ -114,6 +122,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         List<ApplicationAnswer> answers = factory.createAnswers(application, request.answers(), questionMap, uploadedFileUrls);
         applicationAnswerRepository.saveAll(answers);
+
+        Map<String, String> variables = Map.of();
+
+        String html = templateProvider.loadTemplate(MailTemplateType.KUSITMS_APPLY_SUCCESS, variables);
+        mailSender.send(request.email(), "[WITHUS] 지원서 접수 확인 안내", html);
 
         return ApplicationResponseDTO.Summary.from(application);
     }
@@ -339,7 +352,6 @@ public class ApplicationServiceImpl implements ApplicationService {
     /**
      * PASS/FAIL/HOLD의 간단 상태를 단계와 현재 상태에 맞춰 ApplicationStatus으로 매핑
      * @param stage   변경할 단계 (DOCUMENT, INTERVIEW, FINAL_PASS, FAIL)
-     * @param current 현재 ApplicationStatus (PENDING, DOX_PASS, 등)
      * @param simple  간단 상태 (PASS, FAIL, HOLD)
      */
     private ApplicationStatus mapToRealStatus(

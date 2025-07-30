@@ -8,6 +8,8 @@ import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestio
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.enumerate.QuestionType;
 import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
+import KUSITMS.WITHUS.global.common.enumerate.Gender;
+import KUSITMS.WITHUS.global.infra.upload.dto.FileResponseDTO;
 import org.springframework.stereotype.Component;
 
 import java.text.Normalizer;
@@ -19,9 +21,11 @@ import java.util.stream.Collectors;
 public class ApplicationFactory {
 
     public Application createApplication(ApplicationRequestDTO.Create request, Recruitment recruitment, Position position) {
+        Gender gender = request.gender() != null ? request.gender() : Gender.NONE;
+
         return Application.create(
                 request.name(),
-                request.gender(),
+                gender,
                 request.email(),
                 request.phoneNumber(),
                 request.university(),
@@ -37,16 +41,23 @@ public class ApplicationFactory {
     public List<ApplicationAnswer> createAnswers(Application application,
                                                  List<ApplicationAnswerRequestDTO> answerDTOs,
                                                  Map<Long, DocumentQuestion> questionMap,
-                                                 Map<String, String> uploadedFileUrls) {
+                                                 Map<String, FileResponseDTO.Upload> uploadedFiles) {
         return answerDTOs.stream()
                 .map(dto -> {
                     DocumentQuestion question = questionMap.get(dto.questionId());
                     String fileUrl = null;
+                    Long fileSize = null;
+
                     if (question.getType() == QuestionType.FILE && dto.fileName() != null) {
-                        String normalizedDtoFileName = Normalizer.normalize(dto.fileName(), Normalizer.Form.NFC);
-                        fileUrl = uploadedFileUrls.get(normalizedDtoFileName);
+                        String normalizedFileName = Normalizer.normalize(dto.fileName(), Normalizer.Form.NFC);
+                        FileResponseDTO.Upload fileData = uploadedFiles.get(normalizedFileName);
+
+                        if (fileData != null) {
+                            fileUrl = fileData.url();
+                            fileSize = fileData.size();
+                        }
                     }
-                    return ApplicationAnswer.create(application, question, dto.answerText(), fileUrl);
+                    return ApplicationAnswer.create(application, question, dto.answerText(), fileUrl, fileSize);
                 })
                 .collect(Collectors.toList());
     }

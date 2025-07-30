@@ -9,4 +9,5 @@ public interface TimeSlotUserService {
     void addUsersToTimeSlot(Long timeSlotId, List<Long> userIds, InterviewRole role);
     List<TimeSlotUser> getUsersByTimeSlot(Long timeSlotId);
     void updateUsersInTimeSlot(Long timeSlotId, List<Long> requestedUserIds, InterviewRole role);
+    void assignInterviewers(Long interviewId);
 }

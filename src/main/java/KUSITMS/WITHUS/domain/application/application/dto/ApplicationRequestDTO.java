@@ -28,7 +28,7 @@ public class ApplicationRequestDTO {
             @NotBlank String phoneNumber,
 
             @Schema(description = "성별", example = "MALE")
-            @NotNull Gender gender,
+            Gender gender,
 
             @Schema(description = "대학명", example = "상명대학교")
             String university,

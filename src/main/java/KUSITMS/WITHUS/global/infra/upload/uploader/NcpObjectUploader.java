@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.global.infra.upload.uploader;
 
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import KUSITMS.WITHUS.global.infra.upload.dto.FileResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -30,7 +31,7 @@ public class NcpObjectUploader implements Uploader {
     private String endpoint;
 
     @Override
-    public String upload(MultipartFile file, String pathPrefix) {
+    public FileResponseDTO.Upload upload(MultipartFile file, String pathPrefix) {
         try {
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             String key = (pathPrefix != null ? pathPrefix : "") + fileName;
@@ -45,7 +46,8 @@ public class NcpObjectUploader implements Uploader {
             PutObjectResponse response = s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
 
             if (response.sdkHttpResponse().isSuccessful()) {
-                return String.format("%s/%s/%s", endpoint, bucketName, key);
+                String url = String.format("%s/%s/%s", endpoint, bucketName, key);
+                return FileResponseDTO.Upload.from(file.getOriginalFilename(), url, file.getSize());
             } else {
                 throw new CustomException(ErrorCode.FILE_UPLOAD_FAIL);
             }
