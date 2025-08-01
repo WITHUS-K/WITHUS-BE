@@ -146,7 +146,7 @@ public class InterviewSchedulerService {
         Long applicantId = applicantIds.get(index);
         Application applicant = applicantMap.get(applicantId);
         Long positionId = hasPosition && applicant.getPosition() != null
-                ? applicant.getPosition().getId() : 0L;
+                ? applicant.getPosition().getId() : null;
 
         for (LocalDateTime time : availabilityMap.getOrDefault(applicantId, List.of())) {
             Map<Long, List<TimeSlot>> byPosition =
