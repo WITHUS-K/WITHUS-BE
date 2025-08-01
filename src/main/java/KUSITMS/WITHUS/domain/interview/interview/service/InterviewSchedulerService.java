@@ -96,7 +96,9 @@ public class InterviewSchedulerService {
         int slotMinutes = recruitment.getInterviewDuration();
 
         Map<Long, TimeSlot> finalAssignment = new HashMap<>();
-        boolean success = backtrackAssign(0, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime, config, interview, finalAssignment, hasPosition, slotMinutes);
+        Map<Long, Integer> slotAssignedCount = new HashMap<>();
+        boolean success = backtrackAssign(0, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime,
+                config, interview, finalAssignment, hasPosition, slotMinutes, slotAssignedCount);
 
         // 6. 배정 결과 저장
         if (success) {
@@ -127,7 +129,8 @@ public class InterviewSchedulerService {
             Interview interview,
             Map<Long, TimeSlot> finalAssignment,
             boolean hasPosition,
-            int slotMinutes
+            int slotMinutes,
+            Map<Long, Integer> slotAssignedCount
     ) {
         if (index == applicantIds.size()) return true;
 
@@ -148,17 +151,21 @@ public class InterviewSchedulerService {
 
             // 기존 슬롯 중 정원이 남은 슬롯이 있는지 확인
             for (TimeSlot slot : slots) {
-                long assignedCount = finalAssignment.values().stream()
-                        .filter(s -> s.getId().equals(slot.getId()))
-                        .count();
+                Long slotId = slot.getId();
+                int assignedCount = slotAssignedCount.getOrDefault(slotId, 0);
 
                 if (assignedCount < config.applicantPerSlot) {
                     finalAssignment.put(applicantId, slot);
-                    if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap, slotPool,
-                            slotsUsedPerTime, config, interview, finalAssignment, hasPosition, slotMinutes)) {
+                    slotAssignedCount.put(slotId, assignedCount + 1);
+
+                    if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap,
+                            slotPool, slotsUsedPerTime, config, interview,
+                            finalAssignment, hasPosition, slotMinutes, slotAssignedCount)) {
                         return true;
                     }
+
                     finalAssignment.remove(applicantId);
+                    slotAssignedCount.put(slotId, assignedCount);
                 }
             }
 
@@ -179,17 +186,21 @@ public class InterviewSchedulerService {
                 slotsUsedPerTime.put(time, usedRooms + 1);
 
                 finalAssignment.put(applicantId, newSlot);
+                slotAssignedCount.put(newSlot.getId(), 1);
+
+                finalAssignment.put(applicantId, newSlot);
                 if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap, slotPool,
-                        slotsUsedPerTime, config, interview, finalAssignment, hasPosition, slotMinutes)) {
+                        slotsUsedPerTime, config, interview, finalAssignment, hasPosition, slotMinutes, slotAssignedCount)) {
                     return true;
                 }
 
                 // 롤백
                 finalAssignment.remove(applicantId);
+                slotAssignedCount.remove(newSlot.getId());
                 slots.remove(newSlot);
                 positionSlotListMap.put(positionId, slots);
                 slotPool.put(time, positionSlotListMap);
-                slotsUsedPerTime.put(time, usedRooms); // 복원
+                slotsUsedPerTime.put(time, usedRooms);
             }
         }
 
