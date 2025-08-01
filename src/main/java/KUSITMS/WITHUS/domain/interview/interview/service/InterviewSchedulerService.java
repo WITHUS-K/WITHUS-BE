@@ -52,23 +52,26 @@ public class InterviewSchedulerService {
         }
 
         // 1. 서류 합격 지원자 및 가능 시간 조회
-        List<Application> applicants = new ArrayList<>(applicationRepository.findPassedByRecruitment(recruitmentId));
-        List<ApplicantAvailability> availabilityList = availabilityRepository.findByApplicationIn(applicants);
+        List<Application> applicants = new ArrayList<>(
+                applicationRepository.findPassedByRecruitment(recruitmentId));
+        List<ApplicantAvailability> availabilityList =
+                availabilityRepository.findByApplicationIn(applicants);
         Interview interview = interviewRepository.getById(interviewId);
 
-        // 재생성시 기존에 배정된 타임슬롯 삭제
+        // 기존 슬롯 초기화
         List<TimeSlot> oldSlots = timeSlotRepository.findByInterviewId(interview.getId());
-        for (TimeSlot slot : oldSlots) {
-            for (Application app : slot.getApplications()) {
-                app.assignTimeSlot(null);
-            }
-        }
+        oldSlots.forEach(slot -> slot.getApplications().forEach(app -> app.assignTimeSlot(null)));
         timeSlotRepository.deleteAll(oldSlots);
 
-        interview.setConfig(config.interviewerPerSlot, config.applicantPerSlot, config.assistantPerSlot, config.roomCount());
+        interview.setConfig(
+                config.interviewerPerSlot,
+                config.applicantPerSlot,
+                config.assistantPerSlot,
+                config.roomCount()
+        );
         interview.setRoomNames(config.roomNames());
 
-        // 2. ID로 빠르게 찾기 위한 맵 구성
+        // 2. 맵 구성
         Map<Long, Application> applicantMap = applicants.stream()
                 .collect(Collectors.toMap(Application::getId, Function.identity()));
         Map<Long, List<LocalDateTime>> availabilityMap = availabilityList.stream()
@@ -82,10 +85,8 @@ public class InterviewSchedulerService {
 
         // 3. 각 시간대별로 포지션에 따라 타임슬롯을 나누고, 해당 시간에 생성된 슬롯 개수도 함께 관리
         Map<LocalDateTime, Map<Long, List<TimeSlot>>> slotPool = new HashMap<>();
-        Map<LocalDateTime, Integer> slotsUsedPerTime = new HashMap<>();
-        for (ApplicantAvailability avail : availabilityList) {
-            slotPool.putIfAbsent(avail.getAvailableTime(), new HashMap<>());
-        }
+        availabilityList.forEach(avail ->
+                slotPool.computeIfAbsent(avail.getAvailableTime(), k -> new HashMap<>()));
 
         // 4. 가능한 시간 적은 지원자 우선 배정
         List<Long> applicantIds = new ArrayList<>(availabilityMap.keySet());
@@ -97,22 +98,29 @@ public class InterviewSchedulerService {
 
         Map<Long, TimeSlot> finalAssignment = new HashMap<>();
         Map<Long, Integer> slotAssignedCount = new HashMap<>();
-        boolean success = backtrackAssign(0, applicantIds, availabilityMap, applicantMap, slotPool, slotsUsedPerTime,
-                config, interview, finalAssignment, hasPosition, slotMinutes, slotAssignedCount);
+        boolean success = backtrackAssign(
+                0, applicantIds, availabilityMap, applicantMap,
+                slotPool, config, interview, finalAssignment,
+                hasPosition, slotMinutes, slotAssignedCount,
+                config.applicantPerSlot, config.roomCount()
+        );
 
         // 6. 배정 결과 저장
-        if (success) {
+        if (!success) {
+            System.out.println("전원 배정 실패");
+        } else {
             finalAssignment.forEach((applicantId, slot) -> {
                 Application app = applicantMap.get(applicantId);
                 app.assignTimeSlot(slot);
-                Long positionId = app.getPosition() != null ? app.getPosition().getId() : null;
-                System.out.println("배정 완료 - 지원자 ID: " + applicantId + " / 포지션: " + positionId + " / 시간: " + slot.getDate() + " " + slot.getStartTime());
+                System.out.printf(
+                        "배정 완료 - 지원자 %d / 포지션 %s / 시간 %s %s\n",
+                        applicantId,
+                        Optional.ofNullable(app.getPosition()).map(Position::getId).orElse(null),
+                        slot.getDate(), slot.getStartTime()
+                );
             });
-        } else {
-            System.out.println("전원 배정 실패");
+            System.out.printf("최종 배정: %d/%d\n", finalAssignment.size(), applicants.size());
         }
-
-        System.out.println("최종 배정 인원: " + finalAssignment.size() + " / 전체: " + applicants.size());
     }
 
     /**
@@ -124,86 +132,75 @@ public class InterviewSchedulerService {
             Map<Long, List<LocalDateTime>> availabilityMap,
             Map<Long, Application> applicantMap,
             Map<LocalDateTime, Map<Long, List<TimeSlot>>> slotPool,
-            Map<LocalDateTime, Integer> slotsUsedPerTime,
             InterviewConfig config,
             Interview interview,
             Map<Long, TimeSlot> finalAssignment,
             boolean hasPosition,
             int slotMinutes,
-            Map<Long, Integer> slotAssignedCount
+            Map<Long, Integer> slotAssignedCount,
+            int maxPerSlot,
+            int maxRooms
     ) {
         if (index == applicantIds.size()) return true;
 
         Long applicantId = applicantIds.get(index);
         Application applicant = applicantMap.get(applicantId);
-        List<LocalDateTime> times = availabilityMap.getOrDefault(applicantId, List.of());
+        Long positionId = hasPosition && applicant.getPosition() != null
+                ? applicant.getPosition().getId() : 0L;
 
-        for (LocalDateTime time : times) {
-            Position position = applicant.getPosition();
-            Long positionId = hasPosition && position != null ? position.getId() : 0L;
-
-            // slotPool 구조 초기화
-            slotPool.putIfAbsent(time, new HashMap<>());
-            Map<Long, List<TimeSlot>> positionSlotListMap = slotPool.get(time);
-            List<TimeSlot> slots = positionSlotListMap.getOrDefault(positionId, new ArrayList<>());
-
+        for (LocalDateTime time : availabilityMap.getOrDefault(applicantId, List.of())) {
+            Map<Long, List<TimeSlot>> byPosition =
+                    slotPool.computeIfAbsent(time, t -> new HashMap<>());
+            List<TimeSlot> slots = byPosition.computeIfAbsent(positionId, k -> new ArrayList<>());
             int usedRooms = slots.size();
 
             // 기존 슬롯 중 정원이 남은 슬롯이 있는지 확인
             for (TimeSlot slot : slots) {
-                Long slotId = slot.getId();
-                int assignedCount = slotAssignedCount.getOrDefault(slotId, 0);
-
-                if (assignedCount < config.applicantPerSlot) {
+                Long sid = slot.getId();
+                int assigned = slotAssignedCount.getOrDefault(sid, 0);
+                if (assigned < maxPerSlot) {
                     finalAssignment.put(applicantId, slot);
-                    slotAssignedCount.put(slotId, assignedCount + 1);
-
-                    if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap,
-                            slotPool, slotsUsedPerTime, config, interview,
-                            finalAssignment, hasPosition, slotMinutes, slotAssignedCount)) {
-                        return true;
-                    }
-
+                    slotAssignedCount.put(sid, assigned + 1);
+                    if (backtrackAssign(
+                            index + 1, applicantIds, availabilityMap, applicantMap,
+                            slotPool, config, interview, finalAssignment,
+                            hasPosition, slotMinutes, slotAssignedCount,
+                            maxPerSlot, maxRooms
+                    )) return true;
                     finalAssignment.remove(applicantId);
-                    slotAssignedCount.put(slotId, assignedCount);
+                    slotAssignedCount.put(sid, assigned);
                 }
             }
 
-            // roomCount 보다 적게 사용 중이면 새 슬롯 생성
-            if (usedRooms < config.roomCount) {
+            // 신규 슬롯 생성
+            if (usedRooms < maxRooms) {
                 LocalDate date = time.toLocalDate();
                 LocalTime start = time.toLocalTime();
                 LocalTime end = start.plusMinutes(slotMinutes);
                 String roomName = config.roomNames().get(usedRooms);
 
                 TimeSlot newSlot = timeSlotRepository.findOrCreate(
-                        date, start, end, interview, hasPosition ? position : null, roomName
+                        date, start, end, interview,
+                        hasPosition ? applicant.getPosition() : null,
+                        roomName
                 );
-
                 slots.add(newSlot);
-                positionSlotListMap.put(positionId, slots);
-                slotPool.put(time, positionSlotListMap);
-                slotsUsedPerTime.put(time, usedRooms + 1);
-
-                finalAssignment.put(applicantId, newSlot);
                 slotAssignedCount.put(newSlot.getId(), 1);
-
                 finalAssignment.put(applicantId, newSlot);
-                if (backtrackAssign(index + 1, applicantIds, availabilityMap, applicantMap, slotPool,
-                        slotsUsedPerTime, config, interview, finalAssignment, hasPosition, slotMinutes, slotAssignedCount)) {
-                    return true;
-                }
+
+                if (backtrackAssign(
+                        index + 1, applicantIds, availabilityMap, applicantMap,
+                        slotPool, config, interview, finalAssignment,
+                        hasPosition, slotMinutes, slotAssignedCount,
+                        maxPerSlot, maxRooms
+                )) return true;
 
                 // 롤백
                 finalAssignment.remove(applicantId);
                 slotAssignedCount.remove(newSlot.getId());
                 slots.remove(newSlot);
-                positionSlotListMap.put(positionId, slots);
-                slotPool.put(time, positionSlotListMap);
-                slotsUsedPerTime.put(time, usedRooms);
             }
         }
-
         return false;
     }
 
