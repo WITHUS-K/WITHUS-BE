@@ -138,6 +138,11 @@ public class InterviewSchedulerService {
 
         Long applicantId = applicantIds.get(index);
         Application applicant = applicantMap.get(applicantId);
+
+        // recruitment의 포지션 존재 여부 확인
+        Recruitment recruitment = applicant.getRecruitment();
+        boolean recruitmentHasPosition = recruitment.getPositions() != null && !recruitment.getPositions().isEmpty();
+
         Long positionId = applicant.getPosition() != null ? applicant.getPosition().getId() : 0L;
 
         for (LocalDateTime time : availabilityMap.getOrDefault(applicantId, List.of())) {
@@ -145,7 +150,14 @@ public class InterviewSchedulerService {
 
             // 기존 슬롯 중 정원이 남은 슬롯이 있는지 확인
             for (SimSlot s : slots) {
-                if (Objects.equals(s.position().getId(), positionId)) {
+                boolean samePosition;
+                if (!recruitmentHasPosition) {
+                    samePosition = true;
+                } else {
+                    samePosition = (s.position() == null && positionId == 0L)
+                            || (s.position() != null && Objects.equals(s.position().getId(), positionId));
+                }
+                if (samePosition) {
                     long used = finalAssignment.values().stream()
                             .filter(x -> x.equals(s)).count();
                     if (used < config.applicantPerSlot) {
@@ -159,13 +171,12 @@ public class InterviewSchedulerService {
                 }
             }
 
-            // 신규 슬롯 생성
             if (slots.size() < config.roomCount()) {
                 LocalDate date = time.toLocalDate();
                 LocalTime st = time.toLocalTime();
                 LocalTime en = st.plusMinutes(slotMinutes);
-                String room = config.roomNames().get(slots.size());  // 순서대로 한 번만 사용
-                SimSlot newSlot = new SimSlot(date, st, en, applicant.getPosition(), room);
+                String room = config.roomNames().get(slots.size());
+                SimSlot newSlot = new SimSlot(date, st, en, recruitmentHasPosition ? applicant.getPosition() : null, room);
 
                 slots.add(newSlot);
                 finalAssignment.put(applicantId, newSlot);
@@ -173,7 +184,6 @@ public class InterviewSchedulerService {
                         applicantMap, slotPool, config, finalAssignment, slotMinutes)) {
                     return true;
                 }
-                // 롤백
                 finalAssignment.remove(applicantId);
                 slots.remove(newSlot);
             }
