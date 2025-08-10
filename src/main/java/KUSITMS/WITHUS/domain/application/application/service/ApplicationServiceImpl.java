@@ -125,7 +125,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         Map<String, String> variables = Map.of();
 
-        String html = templateProvider.loadTemplate(MailTemplateType.KUSITMS_APPLY_SUCCESS, variables);
+        String html = templateProvider.loadTemplate(MailTemplateType.INSIDERS_APPLY_SUCCESS, variables);
         mailSender.send(request.email(), "[WITHUS] 지원서 접수 확인 안내", html);
 
         return ApplicationResponseDTO.Summary.from(application);
