@@ -8,7 +8,8 @@ public enum MailTemplateType {
     EVALUATION_REMINDER("evaluation-reminder.html"),
     INVITATION("invitation.html"),
     VERIFICATION("verification.html"),
-    KUSITMS_APPLY_SUCCESS("kusitms-apply-success.html");
+    KUSITMS_APPLY_SUCCESS("kusitms-apply-success.html"),
+    INSIDERS_APPLY_SUCCESS("insiders-apply-success.html");
 
     private final String fileName;
 
