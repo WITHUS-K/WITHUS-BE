@@ -9,8 +9,11 @@ import KUSITMS.WITHUS.domain.application.comment.repository.CommentRepository;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluation.repository.EvaluationRepository;
 import KUSITMS.WITHUS.domain.interview.timeslot.dto.Applicant;
+import KUSITMS.WITHUS.domain.interview.timeslot.dto.TimeSlotResponseDTO;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.interview.timeslot.repository.TimeSlotRepository;
+import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
+import KUSITMS.WITHUS.domain.interview.timeslotUser.repository.TimeSlotUserRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
@@ -27,6 +30,7 @@ import java.util.stream.Collectors;
 public class TimeSlotServiceImpl implements TimeSlotService {
 
     private final TimeSlotRepository timeSlotRepository;
+    private final TimeSlotUserRepository timeSlotUserRepository;
     private final EvaluationRepository evaluationRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
@@ -103,4 +107,17 @@ public class TimeSlotServiceImpl implements TimeSlotService {
         timeSlotRepository.save(timeSlot);
     }
 
+    @Override
+    public TimeSlotResponseDTO getTimeSlotDetail(Long timeSlotId, Long requesterId) {
+        TimeSlot slot = timeSlotRepository.getById(timeSlotId);
+
+        List<TimeSlotUser> users = timeSlotUserRepository.findByTimeSlotId(timeSlotId);
+
+        List<Application> apps = applicationRepository.findForTimeSlotFilteredByUser(timeSlotId, requesterId);
+        List<ApplicationResponseDTO.Applicant> applicants = apps.stream()
+                        .map(ApplicationResponseDTO.Applicant::from)
+                        .toList();
+
+        return TimeSlotResponseDTO.from(slot, users, applicants);
+    }
 }

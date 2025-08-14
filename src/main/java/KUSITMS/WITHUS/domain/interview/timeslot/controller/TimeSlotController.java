@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.domain.interview.timeslot.controller;
 
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.interview.timeslot.dto.TimeSlotRequestDTO;
+import KUSITMS.WITHUS.domain.interview.timeslot.dto.TimeSlotResponseDTO;
 import KUSITMS.WITHUS.domain.interview.timeslot.service.TimeSlotService;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
@@ -26,6 +27,15 @@ public class TimeSlotController {
     @Operation(summary = "타임 슬롯에 배정된 지원자 조회", description = "해당 타임 슬롯 ID에 배정된 모든 지원자의 상세 정보를 조회합니다.")
     public SuccessResponse<List<ApplicationResponseDTO.DetailForTimeSlot>> getApplicationsByTimeSlot(@PathVariable Long timeSlotId, @CurrentUser User user) {
         return SuccessResponse.ok(timeSlotService.getApplicationsByTimeSlotFilteredByUser(timeSlotId, user.getId()));
+    }
+
+    @GetMapping("/{timeSlotId}")
+    @Operation(summary = "타임슬롯 조회", description = "특정 타임슬롯에 배정된 사용자/지원자 목록을 조회합니다.")
+    public SuccessResponse<TimeSlotResponseDTO> getUsersByTimeSlot(
+            @PathVariable Long timeSlotId,
+            @CurrentUser User user
+    ) {
+        return SuccessResponse.ok(timeSlotService.getTimeSlotDetail(timeSlotId, user.getId()));
     }
 
     @PostMapping("/{timeSlotId}/applications")
