@@ -523,8 +523,8 @@ public class ApplicationResponseDTO {
 
     @Schema(description = "타임테이블 타임슬롯 별 후보자 응답 DTO")
     public record CandidateDTO(
-            Long applicationId,
-            String name
+            @Schema(description = "지원서 아이디", example = "1") Long applicationId,
+            @Schema(description = "지원자 이름", example = "우은진") String name
     ) {
         public static CandidateDTO from(
                 Application a
