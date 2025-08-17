@@ -26,15 +26,18 @@ public class InMemoryBusyCalendar implements BusyCalendar {
     }
 
     /** 주어진 시간대에 이미 바쁜지 확인 */
+    @Override
     public boolean isBusy(Long userId, LocalDateTime start, LocalDateTime end) {
-        for (Range range : busy.get(userId)) {
+        List<Range> ranges = busy.computeIfAbsent(userId, k -> new ArrayList<>());
+        for (Range range : ranges) {
             if (overlap(range.start, range.end, start, end)) return true;
         }
         return false;
     }
 
     /** 배정 후 바쁜 시간대 추가 */
+    @Override
     public void markBusy(Long userId, LocalDateTime start, LocalDateTime end) {
-        busy.get(userId).add(new Range(start, end));
+        busy.computeIfAbsent(userId, k -> new ArrayList<>()).add(new Range(start, end));
     }
 }
