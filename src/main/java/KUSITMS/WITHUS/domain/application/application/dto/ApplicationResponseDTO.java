@@ -521,4 +521,16 @@ public class ApplicationResponseDTO {
         }
     }
 
+    @Schema(description = "지원자 요약 정보 응답 DTO")
+    public record Applicant(
+            @Schema(description = "지원서 ID") Long id,
+            @Schema(description = "지원자 이름") String name
+    ) {
+        public static Applicant from(Application application) {
+            return new Applicant(
+                    application.getId(),
+                    application.getName()
+            );
+        }
+    }
 }

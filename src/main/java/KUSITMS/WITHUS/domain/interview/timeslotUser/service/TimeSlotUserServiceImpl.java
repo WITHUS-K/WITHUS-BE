@@ -7,6 +7,13 @@ import KUSITMS.WITHUS.domain.interview.interviewAvailabiliy.entity.InterviewerAv
 import KUSITMS.WITHUS.domain.interview.interviewAvailabiliy.repository.InterviewerAvailabilityRepository;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.interview.timeslot.repository.TimeSlotRepository;
+import KUSITMS.WITHUS.domain.interview.timeslot.service.util.*;
+import KUSITMS.WITHUS.domain.interview.timeslot.service.util.calendar.BusyCalendar;
+import KUSITMS.WITHUS.domain.interview.timeslot.service.util.calendar.InMemoryBusyCalendar;
+import KUSITMS.WITHUS.domain.interview.timeslot.service.util.candidate.CandidateIndex;
+import KUSITMS.WITHUS.domain.interview.timeslot.service.util.candidate.CandidateSelector;
+import KUSITMS.WITHUS.domain.interview.timeslot.service.util.selection.policy.FairnessPolicy;
+import KUSITMS.WITHUS.domain.interview.timeslot.service.util.selection.ordering.SlotOrderingStrategy;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.repository.TimeSlotUserRepository;
 import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
@@ -33,6 +40,11 @@ public class TimeSlotUserServiceImpl implements TimeSlotUserService {
     private final TimeSlotUserRepository timeSlotUserRepository;
     private final InterviewRepository interviewRepository;
     private final InterviewerAvailabilityRepository interviewerAvailabilityRepository;
+
+    private final SlotOrderingStrategy slotOrderingStrategy;
+    private final CandidateSelector candidateSelector;
+    private final FairnessPolicy fairnessPolicy;
+    private final AssignmentRecorder assignmentRecorder;
 
     @Override
     @Transactional
@@ -96,90 +108,91 @@ public class TimeSlotUserServiceImpl implements TimeSlotUserService {
         }
     }
 
+    /**
+     * 면접관 자동 배정 오케스트레이션
+     */
     @Override
     @Transactional
-    public void assignInterviewers(Long interviewId) {
-        // 기존 면접관 배정 삭제
+    public void assignInterviewers(final Long interviewId) {
         timeSlotUserRepository.deleteByInterviewIdAndRole(interviewId, InterviewRole.INTERVIEWER);
 
-        Interview interview = interviewRepository.getById(interviewId);
-        List<TimeSlot> timeSlots = timeSlotRepository.findByInterviewId(interviewId);
-        List<InterviewerAvailability> availabilities = interviewerAvailabilityRepository.findByInterviewId(interviewId);
+        final Interview interview = interviewRepository.getById(interviewId);
+        final List<TimeSlot> timeSlots = timeSlotRepository.findByInterviewId(interviewId);
+        final List<InterviewerAvailability> availabilities = interviewerAvailabilityRepository.findByInterviewId(interviewId);
 
         log.info("[1] 타임슬롯 수: {}", timeSlots.size());
         log.info("[2] 인터뷰어 가능 시간 제출 수: {}", availabilities.size());
 
-        Map<Long, List<LocalDateTime>> userAvailableTimes = availabilities.stream()
-                .collect(Collectors.groupingBy(
-                        a -> a.getUser().getId(),
-                        Collectors.mapping(InterviewerAvailability::getAvailableTime, Collectors.toList())
-                ));
+        final CandidateIndex index = CandidateIndex.of(availabilities, userRepository);
 
-        log.info("[3] 가능한 유저 수: {}", userAvailableTimes.size());
+        log.info("[3] 가능한 유저 수: {}", index.getAvailableTimes().size());
 
-        Map<Long, User> userMap = userRepository.findAllById(new ArrayList<>(userAvailableTimes.keySet()))
-                .stream()
-                .collect(Collectors.toMap(User::getId, Function.identity()));
+        final Map<Long, Integer> assignedCount = initAssignedCount(index.getUserMap().keySet());
+        final BusyCalendar busyCalendar = new InMemoryBusyCalendar(index.getUserMap().keySet());
 
-        Set<Long> usedUsers = new HashSet<>();
+        final List<TimeSlot> orderedSlots = slotOrderingStrategy.order(timeSlots, index);
 
-        for (TimeSlot slot : timeSlots) {
-            LocalDateTime slotTime = slot.getDate().atTime(slot.getStartTime());
-            Position slotPosition = slot.getPosition();
-
-            log.info("[4] 타임슬롯 ID: {} / 시간: {} / 포지션: {}",
-                    slot.getId(), slotTime, slotPosition != null ? slotPosition.getName() : "null");
-
-            List<Long> assignableUserIds = userAvailableTimes.entrySet().stream()
-                    .filter(e -> {
-                        boolean hasTime = e.getValue().contains(slotTime);
-                        if (!hasTime) {
-                            log.debug("[FAIL] userId={} 는 시간 불일치", e.getKey());
-                        }
-                        return hasTime;
-                    })
-                    .map(Map.Entry::getKey)
-                    .filter(userId -> {
-                        User user = userMap.get(userId);
-                        boolean alreadyUsed = usedUsers.contains(userId);
-                        boolean matchRole = slotPosition == null || user.hasMatchingRole(slotPosition);
-
-                        if (alreadyUsed) {
-                            log.debug("[FAIL] userId={} ({}) 이미 배정됨", userId, user.getName());
-                            return false;
-                        }
-                        if (!matchRole) {
-                            log.debug("[FAIL] userId={} ({}) 포지션 불일치", userId, user.getName());
-                            log.debug("유저 역할 목록: {}", user.getUserOrganizationRoles().stream()
-                                    .map(r -> r.getOrganizationRole().getName())
-                                    .toList());
-                        }
-
-                        return matchRole;
-                    })
-                    .limit(interview.getInterviewerPerSlot())
-                    .toList();
-
-            for (Long userId : assignableUserIds) {
-                User user = userMap.get(userId);
-                assignToSlot(slot, user, InterviewRole.INTERVIEWER);
-                usedUsers.add(userId);
-                log.info("[SUCCESS] 배정: userId={} ({})", userId, user.getName());
-            }
-
-            if (assignableUserIds.isEmpty()) {
-                log.warn("[WARN] 배정 가능한 운영진 없음 (timeSlotId={})", slot.getId());
-            }
+        final int needPerSlot = resolveNeedPerSlot(interview);
+        for (final TimeSlot slot : orderedSlots) {
+            processSlot(slot, needPerSlot, index, assignedCount, busyCalendar);
         }
     }
-    
-    private void assignToSlot(TimeSlot slot, User user, InterviewRole role) {
-        TimeSlotUser tsu = TimeSlotUser.builder()
-                .timeSlot(slot)
-                .user(user)
-                .role(role)
-                .build();
-        timeSlotUserRepository.save(tsu);
-        slot.addTimeSlotUser(tsu);
+
+    /** 공평 분배 카운터 초기화 */
+    private Map<Long, Integer> initAssignedCount(final Collection<Long> userIds) {
+        final Map<Long, Integer> assignedCount = new HashMap<>();
+        for (final Long uid : userIds) assignedCount.put(uid, 0);
+        return assignedCount;
+    }
+
+    /** 슬롯당 필요 면접관 수 */
+    private int resolveNeedPerSlot(final Interview interview) {
+        final Integer perSlot = interview.getInterviewerPerSlot();
+        return (perSlot != null && perSlot > 0) ? perSlot : 1;
+    }
+
+    /**
+     * 단일 슬롯 배정 처리
+     */
+    private void processSlot(final TimeSlot slot,
+                             final int needPerSlot,
+                             final CandidateIndex index,
+                             final Map<Long, Integer> assignedCount,
+                             final BusyCalendar busyCalendar) {
+
+        final LocalDateTime slotStart = slot.getDate().atTime(slot.getStartTime());
+        final LocalDateTime slotEnd   = slot.getDate().atTime(slot.getEndTime());
+        final Position slotPosition   = slot.getPosition();
+
+        log.info("[4] 타임슬롯 ID: {} / 시간: {} / 포지션: {}",
+                slot.getId(), slotStart, slotPosition != null ? slotPosition.getName() : "null");
+
+        // 시간/포지션 일치 후보
+        final List<Long> prelim = candidateSelector.preliminaryCandidates(slotStart, slotPosition, index);
+
+        // 동시간대 겹침 제거
+        final List<Long> feasible = candidateSelector.feasibleCandidates(prelim, slotStart, slotEnd, index, busyCalendar);
+
+        // 공평 분배(덜 배정된 사용자 먼저)
+        final List<Long> sorted = feasible.stream()
+                .sorted(fairnessPolicy.comparator(assignedCount))
+                .toList();
+
+        int assignedInThisSlot = 0;
+        for (final Long uid : sorted) {
+            if (assignedInThisSlot >= needPerSlot) break;
+
+            final User user = index.getUserMap().get(uid);
+            assignmentRecorder.assign(slot, user, InterviewRole.INTERVIEWER);
+            busyCalendar.markBusy(uid, slotStart, slotEnd);
+            assignedCount.merge(uid, 1, Integer::sum);
+
+            log.info("[SUCCESS] 배정: userId={} ({})", uid, user.getName());
+            assignedInThisSlot++;
+        }
+
+        if (assignedInThisSlot == 0) {
+            log.warn("[WARN] 배정 가능한 운영진 없음 (timeSlotId={})", slot.getId());
+        }
     }
 }
