@@ -17,5 +17,5 @@ public interface ApplicationRepository {
     List<Application> findAllById(List<Long> longs);
     List<Application> findDistinctByRecruitment_IdAndEvaluators_Evaluator_IdAndEvaluators_EvaluationType(Long recruitmentId, Long evaluatorId, EvaluationType evaluationType);
     Long countByRecruitmentIdAndStatusIn(Long recruitmentId, List<ApplicationStatus> statuses);
-    List<Application> findForTimeSlotFilteredByUser(Long timeSlotId, Long requesterId);
+    List<Application> findForTimeSlot(Long timeSlotId);
 }

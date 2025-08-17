@@ -9,7 +9,6 @@ import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,17 +31,16 @@ public class TimeSlotController {
     @GetMapping("/{timeSlotId}")
     @Operation(summary = "타임슬롯 조회", description = "특정 타임슬롯에 배정된 사용자/지원자 목록을 조회합니다.")
     public SuccessResponse<TimeSlotResponseDTO> getUsersByTimeSlot(
-            @PathVariable Long timeSlotId,
-            @CurrentUser User user
+            @PathVariable Long timeSlotId
     ) {
-        return SuccessResponse.ok(timeSlotService.getTimeSlotDetail(timeSlotId, user.getId()));
+        return SuccessResponse.ok(timeSlotService.getTimeSlotDetail(timeSlotId));
     }
 
     @PostMapping("/{timeSlotId}/applications")
     @Operation(summary = "타임 슬롯에 지원자 추가", description = "특정 타임 슬롯에 수동으로 지원자를 추가합니다.")
     public SuccessResponse<String> addApplicantToTimeSlot(
             @PathVariable Long timeSlotId,
-            @RequestBody @Valid TimeSlotRequestDTO.UpsertApplicant request
+            @RequestBody TimeSlotRequestDTO.UpsertApplicant request
     ) {
         timeSlotService.addApplicantToTimeSlot(timeSlotId, request.applicantIds());
         return SuccessResponse.ok("지원자가 타임슬롯에 추가되었습니다.");
@@ -52,7 +50,7 @@ public class TimeSlotController {
     @Operation(summary = "타임 슬롯 지원자 수정", description = "특정 타임 슬롯에 배정된 지원자의 정보를 수정합니다.")
     public SuccessResponse<String> updateApplicantInTimeSlot(
             @PathVariable Long timeSlotId,
-            @RequestBody @Valid TimeSlotRequestDTO.UpsertApplicant request
+            @RequestBody TimeSlotRequestDTO.UpsertApplicant request
     ) {
         timeSlotService.updateApplicantInTimeSlot(timeSlotId, request.applicantIds());
         return SuccessResponse.ok("지원자 정보가 수정되었습니다.");

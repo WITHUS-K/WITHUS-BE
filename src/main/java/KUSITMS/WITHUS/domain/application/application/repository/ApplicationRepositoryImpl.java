@@ -82,9 +82,9 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
     }
 
     @Override
-    public List<Application> findForTimeSlotFilteredByUser(Long timeSlotId, Long requesterId) {
+    public List<Application> findForTimeSlot(Long timeSlotId) {
         return queryFactory.selectFrom(application).distinct()
-                .join(application.timeSlot, timeSlot).fetchJoin()   // 필수
+                .join(application.timeSlot, timeSlot).fetchJoin()
                 .leftJoin(application.position, position).fetchJoin()
                 .leftJoin(application.user, user).fetchJoin()
                 .where(timeSlot.id.eq(timeSlotId))

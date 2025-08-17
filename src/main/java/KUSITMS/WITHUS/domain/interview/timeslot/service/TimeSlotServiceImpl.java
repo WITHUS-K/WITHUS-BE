@@ -108,12 +108,12 @@ public class TimeSlotServiceImpl implements TimeSlotService {
     }
 
     @Override
-    public TimeSlotResponseDTO getTimeSlotDetail(Long timeSlotId, Long requesterId) {
+    public TimeSlotResponseDTO getTimeSlotDetail(Long timeSlotId) {
         TimeSlot slot = timeSlotRepository.getById(timeSlotId);
 
         List<TimeSlotUser> users = timeSlotUserRepository.findByTimeSlotId(timeSlotId);
 
-        List<Application> apps = applicationRepository.findForTimeSlotFilteredByUser(timeSlotId, requesterId);
+        List<Application> apps = applicationRepository.findForTimeSlot(timeSlotId);
         List<ApplicationResponseDTO.Applicant> applicants = apps.stream()
                         .map(ApplicationResponseDTO.Applicant::from)
                         .toList();
