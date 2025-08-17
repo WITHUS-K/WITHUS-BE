@@ -349,6 +349,17 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
     }
 
+    @Override
+    public List<ApplicationResponseDTO.CandidateDTO> findTimeslotCandidates(
+            Long recruitmentId,
+            Long timeslotId,
+            String query,
+            boolean excludeCurrent
+    ) {
+        String q = (query == null || query.isBlank()) ? null : query.trim();
+        return applicationRepository.findEligibleCandidates(recruitmentId, timeslotId, q, excludeCurrent);
+    }
+
     /**
      * PASS/FAIL/HOLD의 간단 상태를 단계와 현재 상태에 맞춰 ApplicationStatus으로 매핑
      * @param stage   변경할 단계 (DOCUMENT, INTERVIEW, FINAL_PASS, FAIL)

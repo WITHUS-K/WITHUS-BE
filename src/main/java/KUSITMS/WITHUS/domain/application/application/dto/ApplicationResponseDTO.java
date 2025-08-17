@@ -521,4 +521,19 @@ public class ApplicationResponseDTO {
         }
     }
 
+    @Schema(description = "타임테이블 타임슬롯 별 후보자 응답 DTO")
+    public record CandidateDTO(
+            Long applicationId,
+            String name
+    ) {
+        public static CandidateDTO from(
+                Application a
+        ) {
+            return new CandidateDTO(
+                    a.getId(),
+                    a.getName()
+            );
+        }
+    }
+
 }
