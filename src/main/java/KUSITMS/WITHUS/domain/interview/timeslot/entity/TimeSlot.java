@@ -58,4 +58,9 @@ public class TimeSlot extends BaseEntity {
         this.timeSlotUsers.add(timeSlotUser);
         timeSlotUser.assignTimeSlot(this);
     }
+
+    public void addApplication(Application applicant) {
+        this.applications.add(applicant);
+        applicant.assignTimeSlot(this);
+    }
 }

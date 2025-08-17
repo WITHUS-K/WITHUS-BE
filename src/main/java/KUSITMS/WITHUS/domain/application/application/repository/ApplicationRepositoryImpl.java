@@ -13,6 +13,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import static KUSITMS.WITHUS.domain.application.application.entity.QApplication.application;
+import static KUSITMS.WITHUS.domain.interview.timeslot.entity.QTimeSlot.timeSlot;
+import static KUSITMS.WITHUS.domain.recruitment.position.entity.QPosition.position;
+import static KUSITMS.WITHUS.domain.user.user.entity.QUser.user;
 
 
 @Repository
@@ -47,11 +50,6 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
                         application.status.eq(ApplicationStatus.DOX_PASS)
                 )
                 .fetch();
-    }
-
-    @Override
-    public List<Application> findByRecruitmentId(Long recruitmentId) {
-        return applicationJpaRepository.findByRecruitmentId(recruitmentId);
     }
 
     @Override
@@ -119,6 +117,17 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
                         namePredicate
                 )
                 .orderBy(application.name.asc())
+                .fetch();
+    }
+
+    @Override
+    public List<Application> findForTimeSlot(Long timeSlotId) {
+        return queryFactory.selectFrom(application).distinct()
+                .join(application.timeSlot, timeSlot).fetchJoin()
+                .leftJoin(application.position, position).fetchJoin()
+                .leftJoin(application.user, user).fetchJoin()
+                .where(timeSlot.id.eq(timeSlotId))
+                .orderBy(application.createdAt.asc())
                 .fetch();
     }
 
