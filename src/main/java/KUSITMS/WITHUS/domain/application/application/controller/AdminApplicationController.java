@@ -50,6 +50,21 @@ public class AdminApplicationController {
         return SuccessResponse.ok(paged);
     }
 
+    @GetMapping("/recruitments/{recruitmentId}/timeslots/{timeslotId}/candidates")
+    @Operation(summary = "타임테이블 후보자 조회")
+    public SuccessResponse<List<ApplicationResponseDTO.CandidateDTO>> getTimetableCandidates(
+            @PathVariable Long recruitmentId,
+            @PathVariable Long timeslotId,
+            @RequestParam(required = false) String query,
+            @RequestParam(defaultValue = "true") boolean excludeCurrent
+    ) {
+        List<ApplicationResponseDTO.CandidateDTO> list = applicationService.findTimeslotCandidates(
+                recruitmentId, timeslotId, query, excludeCurrent
+        );
+        return SuccessResponse.ok(list);
+    }
+
+
     @PatchMapping("/status")
     @Operation(summary = "지원서 상태 일괄 수정", description = "지원서 ID 리스트와 변경할 상태를 받아 일괄 수정합니다.")
     public SuccessResponse<List<ApplicationResponseDTO.Summary>> updateStatus(@RequestBody @Valid ApplicationRequestDTO.UpdateStatus request) {

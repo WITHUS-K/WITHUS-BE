@@ -25,4 +25,5 @@ public interface ApplicationService {
     DistributionRequestResponseDTO.Detail distributeEvaluatorsLatestRequest(Long recruitmentId);
     void updateEvaluators(ApplicationEvaluatorRequestDTO.Update request);
     boolean toggleAcquaintance(Long applicationId, Long userId);
+    List<ApplicationResponseDTO.CandidateDTO> findTimeslotCandidates(Long recruitmentId, Long timeslotId, String query, boolean excludeCurrent);
 }

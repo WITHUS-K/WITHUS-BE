@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.application.application.repository;
 
+import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
@@ -82,6 +83,44 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
     }
 
     @Override
+    public List<ApplicationResponseDTO.CandidateDTO> findEligibleCandidates(
+            Long recruitmentId,
+            Long timeSlotId,   // 현재 타임슬롯 ID
+            String q,
+            boolean excludeCurrent // true: 어떤 타임슬롯에도 미배정만, false: 현재 타임슬롯 배정은 허용
+    ) {
+        String keyword = (q == null || q.isBlank()) ? null : q.trim();
+
+        // 이름 검색
+        com.querydsl.core.types.dsl.BooleanExpression namePredicate =
+                (keyword == null) ? null : application.name.containsIgnoreCase(keyword);
+
+        // 배정 제외 조건
+        com.querydsl.core.types.dsl.BooleanExpression assignmentPredicate =
+                excludeCurrent
+                        // 어떤 타임슬롯에도 배정되지 않은 지원자만
+                        ? application.timeSlot.isNull()
+                        // 미배정 또는 "현재" 타임슬롯에만 배정된 지원자 허용
+                        : application.timeSlot.isNull().or(application.timeSlot.id.eq(timeSlotId));
+
+        return queryFactory
+                .select(com.querydsl.core.types.Projections.constructor(
+                        ApplicationResponseDTO.CandidateDTO.class,
+                        application.id,
+                        application.name
+                ))
+                .from(application)
+                .where(
+                        application.recruitment.id.eq(recruitmentId),
+                        application.status.eq(ApplicationStatus.DOX_PASS),
+                        assignmentPredicate,
+                        namePredicate
+                )
+                .orderBy(application.name.asc())
+                .fetch();
+    }
+
+    @Override
     public List<Application> findForTimeSlot(Long timeSlotId) {
         return queryFactory.selectFrom(application).distinct()
                 .join(application.timeSlot, timeSlot).fetchJoin()
@@ -91,4 +130,5 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
                 .orderBy(application.createdAt.asc())
                 .fetch();
     }
+
 }
