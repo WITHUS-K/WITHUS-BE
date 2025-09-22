@@ -72,4 +72,19 @@ public class OrganizationResponseDTO {
         }
     }
 
+    @Schema(description = "조직 초대 코드 조회 응답 DTO")
+    public record InviteCode(
+            Long id,
+            String name,
+            String inviteCode
+    ) {
+        public static InviteCode from(Organization organization) {
+            return new InviteCode(
+                    organization.getId(),
+                    organization.getName(),
+                    organization.getInviteCode()
+            );
+        }
+    }
+
 }

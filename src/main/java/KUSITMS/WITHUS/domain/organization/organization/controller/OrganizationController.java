@@ -107,4 +107,23 @@ public class OrganizationController {
         List<OrganizationResponseDTO.Summary> dtos = organizationService.getMyOrganizations(currentUser.getId());
         return SuccessResponse.ok(dtos);
     }
+
+    @GetMapping("/{organizationId}/code")
+    @Operation(summary = "초대 코드 조회", description = "조직 ID를 기반으로 초대 코드를 생성하거나 기존 코드를 조회합니다.")
+    public SuccessResponse<OrganizationResponseDTO.InviteCode> generateOrGetInviteCode(
+            @CurrentUser User currentUser,
+            @PathVariable Long organizationId
+    ) {
+        OrganizationResponseDTO.InviteCode inviteCode = organizationService.generateOrGetInviteCode(currentUser.getId(), organizationId);
+        return SuccessResponse.ok(inviteCode);
+    }
+
+    @GetMapping("/inviteCode/exchange")
+    @Operation(summary = "초대 코드로 조직 조회", description = "초대 코드를 기반으로 조직의 상세 정보를 조회합니다.")
+    public SuccessResponse<OrganizationResponseDTO.Detail> getByInviteCode(
+            @RequestParam String inviteCode
+    ) {
+        OrganizationResponseDTO.Detail organizationDetail = organizationService.getByInviteCode(inviteCode);
+        return SuccessResponse.ok(organizationDetail);
+    }
 }

@@ -1,0 +1,25 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: withus-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"   # 빈 비밀번호 허용
+      MYSQL_DATABASE: withus
+      TZ: Asia/Seoul
+    command:
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+  redis:
+    image: redis:latest
+    container_name: withus-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+volumes:
+  mysql-data:

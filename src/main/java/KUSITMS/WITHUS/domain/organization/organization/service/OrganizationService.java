@@ -14,4 +14,6 @@ public interface OrganizationService {
     List<OrganizationResponseDTO.Summary> getAll();
     List<Organization> search(String keyword);
     List<OrganizationResponseDTO.Summary> getMyOrganizations(Long userId);
+    OrganizationResponseDTO.InviteCode generateOrGetInviteCode(Long userId, Long organizationId);
+    OrganizationResponseDTO.Detail getByInviteCode(String inviteCode);
 }

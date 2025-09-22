@@ -25,6 +25,9 @@ public class Organization extends BaseEntity {
     @Column(name = "NAME", nullable = false)
     private String name;
 
+    @Column(name = "INVTIE_CODE", unique = true)
+    private String inviteCode;
+
     @Builder.Default
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserOrganization> userOrganizations = new ArrayList<>();
@@ -50,5 +53,9 @@ public class Organization extends BaseEntity {
     public void addOrganizationRole(OrganizationRole role) {
         this.organizationRoles.add(role);
         role.associateOrganization(this);
+    }
+
+    public void setInviteCode(String inviteCode) {
+        this.inviteCode = inviteCode;
     }
 }
