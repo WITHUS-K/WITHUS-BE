@@ -99,21 +99,13 @@ public class AuthServiceImpl implements AuthService {
      * 이메일 인증 요청
      * @param name 사용자의 이름
      * @param email 사용자의 이메일
-     * @throws CustomException 사용자를 찾을 수 없거나, 사용자의 이름이 일치하지 않는 경우 예외를 발생시킵니다.
      */
     @Override
     public void requestEmailVerification(String name, String email) {
-        User user = userRepository.getByEmail(email);
-        if (!user.getName().equals(name)) {
-            throw new CustomException(ErrorCode.USER_NOT_EXIST);
-        }
-
-        String code = String.valueOf(new Random().nextInt(900000) + 100000);
-
+        String code = generateCode();
         verificationCache.saveCode(email, code, CODE_TTL);
 
         sendEmail(email, code);
-
     }
 
     /**
