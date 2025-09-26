@@ -8,6 +8,7 @@ import KUSITMS.WITHUS.global.exception.ErrorCode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -63,5 +64,12 @@ public class FakeOrganizationRepository implements OrganizationRepository {
     public boolean existsByName(String name) {
         return data.stream()
                 .anyMatch(org -> org.getName().equals(name));
+    }
+
+    @Override
+    public Optional<Organization> findByInviteCode(String inviteCode) {
+        return data.stream()
+                .filter(org -> org.getInviteCode().equals(inviteCode))
+                .findFirst();
     }
 }

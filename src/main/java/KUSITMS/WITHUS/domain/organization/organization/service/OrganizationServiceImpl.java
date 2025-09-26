@@ -6,12 +6,17 @@ import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRepository;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Random;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -103,4 +108,55 @@ public class OrganizationServiceImpl implements OrganizationService {
                 .toList();
     }
 
+    /**
+     * 조직의 초대 코드를 생성하거나 기존 코드를 반환합니다.
+     * @param userId 요청을 보낸 사용자의 ID
+     * @param organizationId 초대 코드를 생성하거나 조회할 조직의 ID
+     * @return 조직의 초대 코드 반환
+     * @throws CustomException 사용자가 조직에 속하지 않은 경우 FORBIDDEN 예외 발생
+     */
+    @Transactional
+    public OrganizationResponseDTO.InviteCode generateOrGetInviteCode(Long userId, Long organizationId) {
+        List<Long> userOrganizationIds = userOrganizationRepository.findOrganizationIdsByUserId(userId);
+
+        if (!userOrganizationIds.contains(organizationId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+
+        Organization organization = organizationRepository.getById(organizationId);
+
+        if (organization.getInviteCode() != null && !organization.getInviteCode().isEmpty()) {
+            log.info("기존 초대코드 반환: {}", organization.getInviteCode());
+            return OrganizationResponseDTO.InviteCode.from(organization);
+        }
+
+        String inviteCode = generateRandomCode();
+        log.info("새로운 초대코드 생성: {}", inviteCode);
+        organization.setInviteCode(inviteCode);
+
+        return OrganizationResponseDTO.InviteCode.from(organizationRepository.save(organization));
+    }
+
+    private String generateRandomCode() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < 6; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 초대 코드로 조직 단건 조회
+     * @param inviteCode 조회할 조직의 초대 코드 입력
+     * @return 조직 상세 정보 반환
+     */
+    @Override
+    public OrganizationResponseDTO.Detail getByInviteCode(String inviteCode) {
+        Organization organization = organizationRepository.findByInviteCode(inviteCode)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORGANIZATION_NOT_EXIST));
+
+        return OrganizationResponseDTO.Detail.from(organization);
+    }
 }

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -44,4 +45,7 @@ public class OrganizationRepositoryImpl implements OrganizationRepository {
     public boolean existsByName(String name) {
         return organizationJpaRepository.existsByName(name);
     }
+
+    @Override
+    public Optional<Organization> findByInviteCode(String inviteCode) { return organizationJpaRepository.findByInviteCode(inviteCode); }
 }

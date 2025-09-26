@@ -38,3 +38,6 @@ out/
 
 ### VS Code ###
 .vscode/
+/txt
+/withus-ssh.pem
+/src/main/resources/application-argo.yml
