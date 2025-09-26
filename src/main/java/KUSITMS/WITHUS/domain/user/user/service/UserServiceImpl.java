@@ -68,8 +68,8 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(ErrorCode.ORGANIZATION_ALREADY_EXIST);
         }
 
-        // 휴대폰 번호 인증 여부 확인
-        checkPhoneVerifiedBeforeJoin(phoneNumber);
+        // 이메일 인증 여부 확인
+        checkEmailVerifiedBeforeJoin(email);
 
         // Organization 생성 및 저장
         Organization organization = organizationRepository.save(
@@ -128,8 +128,8 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(ErrorCode.USER_ALREADY_EXIST);
         }
 
-        // 휴대폰 번호 인증 여부 확인
-        checkPhoneVerifiedBeforeJoin(phoneNumber);
+        // 이메일 인증 여부 확인
+        checkEmailVerifiedBeforeJoin(email);
 
         // 존재하는 조직 Id로 조회
         Organization organization = organizationRepository.getById(organizationId);
@@ -213,6 +213,17 @@ public class UserServiceImpl implements UserService {
      */
     public void checkPhoneVerifiedBeforeJoin(String phoneNumber) {
         if (!verificationCache.isVerified(phoneNumber)) {
+            throw new CustomException(ErrorCode.NOT_VERIFIED);
+        }
+    }
+
+    /**
+     * 회원가입 전 이메일 인증 여부 확인
+     * @param email 확인할 이메일 주소
+     * @throws CustomException 이메일 인증이 완료되지 않은 경우 예외를 발생시킵니다.
+     */
+    public void checkEmailVerifiedBeforeJoin(String email) {
+        if (!verificationCache.isVerified(email)) {
             throw new CustomException(ErrorCode.NOT_VERIFIED);
         }
     }
