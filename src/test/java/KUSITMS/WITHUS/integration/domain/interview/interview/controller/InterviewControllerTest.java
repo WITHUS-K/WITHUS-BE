@@ -63,7 +63,7 @@ class InterviewControllerTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        verificationCache.markVerified(testPhone, Duration.ofMinutes(3));
+        verificationCache.markVerified(testMail, Duration.ofMinutes(3));
         createTestUser();
         accessToken = testAuthHelper.loginAndGetAccessToken(testMail, testPassword);
     }
