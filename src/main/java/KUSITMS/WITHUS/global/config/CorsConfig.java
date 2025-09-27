@@ -25,6 +25,7 @@ public class CorsConfig {
         for (int port = 3000; port <= 3010; port++) {
             config.addAllowedOriginPattern("http://localhost:" + port);
         }
+        config.addAllowedOriginPattern("https://withus-*-chaewons-projects-*.vercel.app");
 
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
