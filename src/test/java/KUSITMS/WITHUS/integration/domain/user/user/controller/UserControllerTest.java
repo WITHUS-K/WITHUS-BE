@@ -74,7 +74,6 @@ class UserControllerTest {
 
         userRepository.save(testUser);
 
-        verificationCache.markVerified(testPhone, Duration.ofMinutes(3));
         verificationCache.markVerified(testMail, Duration.ofMinutes(3));
     }
 
@@ -90,7 +89,7 @@ class UserControllerTest {
         );
 
         String requestBody = objectMapper.writeValueAsString(request);
-        verificationCache.markVerified("01012345678", Duration.ofMinutes(3));
+        verificationCache.markVerified("admin@example.com", Duration.ofMinutes(3));
 
         mockMvc.perform(post("/api/v1/users/join/admin")
                         .contentType(APPLICATION_JSON)
@@ -113,7 +112,6 @@ class UserControllerTest {
         );
 
         String requestBody = objectMapper.writeValueAsString(joinReq);
-        verificationCache.markVerified("01012345678", Duration.ofMinutes(3));
         verificationCache.markVerified("test@example.com", Duration.ofMinutes(3));
 
         mockMvc.perform(post("/api/v1/users/join/user")
@@ -146,11 +144,14 @@ class UserControllerTest {
                 "01012345678"
         );
 
+        String requestBody = objectMapper.writeValueAsString(req);
+        verificationCache.markVerified("test2@example.com", Duration.ofMinutes(3));
+
         // When
         // Then
         mockMvc.perform(post("/api/v1/users/join/user")
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
+                        .content(requestBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("성공하였습니다."))
                 .andExpect(jsonPath("$.success").value(true));
