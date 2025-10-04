@@ -28,37 +28,35 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
     private final OrganizationRoleRepository organizationRoleRepository;
     private final UserOrganizationRoleRepository userOrganizationRoleRepository;
 
+    /**
+     * 운영진에게 역할 일괄 추가/제거
+     * @param organizationId 역할이 속한 조직 ID
+     * @param userId 역할을 부여할 사용자 ID
+     * @param roleIds 부여할 역할 ID 리스트
+     * @return 부여된 역할 정보 반환
+     */
     @Override
     @Transactional
     public List<OrganizationRoleResponseDTO.DetailForUser> assignRoleToUser(Long organizationId, Long userId, List<Long> roleIds) {
+        final List<Long> requestedRoleIds = normalizeRequestedIds(roleIds);
+
         User user = userRepository.getById(userId);
-        List<OrganizationRole> roles = organizationRoleRepository.findAllById(roleIds);
+        List<UserOrganizationRole> currentLinksInOrg = getCurrentLinksInOrg(user, organizationId);
+        Set<Long> currentRoleIds = toRoleIdSet(currentLinksInOrg);
 
-        List<OrganizationRoleResponseDTO.DetailForUser> result = new ArrayList<>();
+        Map<Long, OrganizationRole> requestedRoleMapInOrg = loadRequestedRoleMapInOrg(organizationId, requestedRoleIds);
+        Set<Long> requestedValidIds = requestedRoleMapInOrg.keySet();
 
-        for (OrganizationRole role : roles) {
-            if (!role.getOrganization().getId().equals(organizationId)) {
-                continue; // 조직 ID 불일치
-            }
+        Set<Long> toAddIds = calcToAddIds(currentRoleIds, requestedValidIds);
+        Set<Long> toRemoveIds = calcToRemoveIds(currentRoleIds, requestedValidIds);
 
-            boolean alreadyAssigned = user.getUserOrganizationRoles().stream()
-                    .anyMatch(r -> r.getOrganizationRole().getId().equals(role.getId()));
+        removeLinks(user, currentLinksInOrg, toRemoveIds);
+        addLinks(user, requestedRoleMapInOrg, toAddIds);
 
-            if (alreadyAssigned) {
-                continue; // 중복 역할
-            }
-
-            UserOrganizationRole userOrgRole = UserOrganizationRole.assign(user, role);
-
-            user.addUserOrganizationRole(userOrgRole);
-            role.addUserOrganizationRole(userOrgRole);
-
-            userOrganizationRoleRepository.save(userOrgRole);
-
-            result.add(OrganizationRoleResponseDTO.DetailForUser.from(userOrgRole));
-        }
-
-        return result;
+        return user.getUserOrganizationRoles().stream()
+                .filter(uor -> uor.getOrganizationRole().getOrganization().getId().equals(organizationId))
+                .map(OrganizationRoleResponseDTO.DetailForUser::from)
+                .toList();
     }
 
     /**
@@ -236,5 +234,68 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
         );
 
         return new ArrayList<>(resultMap.values());
+    }
+
+    private List<Long> normalizeRequestedIds(List<Long> roleIds) {
+        return (roleIds == null) ? Collections.emptyList() : roleIds.stream().distinct().toList();
+    }
+
+    private List<UserOrganizationRole> getCurrentLinksInOrg(User user, Long organizationId) {
+        return user.getUserOrganizationRoles().stream()
+                .filter(uor -> uor.getOrganizationRole() != null
+                        && uor.getOrganizationRole().getOrganization().getId().equals(organizationId))
+                .toList();
+    }
+
+    private Set<Long> toRoleIdSet(List<UserOrganizationRole> links) {
+        return links.stream()
+                .map(uor -> uor.getOrganizationRole().getId())
+                .collect(Collectors.toSet());
+    }
+
+    private Map<Long, OrganizationRole> loadRequestedRoleMapInOrg(Long organizationId, List<Long> requestedRoleIds) {
+        if (requestedRoleIds.isEmpty()) return Collections.emptyMap();
+        List<OrganizationRole> requestedRoles = organizationRoleRepository.findAllById(requestedRoleIds);
+        return requestedRoles.stream()
+                .filter(r -> r.getOrganization().getId().equals(organizationId))
+                .collect(Collectors.toMap(OrganizationRole::getId, r -> r));
+    }
+
+    private Set<Long> calcToAddIds(Set<Long> currentRoleIds, Set<Long> requestedValidIds) {
+        Set<Long> toAdd = new HashSet<>(requestedValidIds);
+        toAdd.removeAll(currentRoleIds);
+        return toAdd;
+    }
+
+    private Set<Long> calcToRemoveIds(Set<Long> currentRoleIds, Set<Long> requestedValidIds) {
+        Set<Long> toRemove = new HashSet<>(currentRoleIds);
+        toRemove.removeAll(requestedValidIds);
+        return toRemove;
+    }
+
+    private void removeLinks(User user, List<UserOrganizationRole> currentLinksInOrg, Set<Long> toRemoveIds) {
+        if (toRemoveIds.isEmpty()) return;
+
+        List<UserOrganizationRole> toRemoveLinks = currentLinksInOrg.stream()
+                .filter(link -> toRemoveIds.contains(link.getOrganizationRole().getId()))
+                .toList();
+
+        userOrganizationRoleRepository.deleteAll(toRemoveLinks);
+        user.getUserOrganizationRoles().removeAll(toRemoveLinks);
+        toRemoveLinks.forEach(link -> link.getOrganizationRole().getUserOrganizationRoles().remove(link));
+    }
+
+    private void addLinks(User user, Map<Long, OrganizationRole> requestedRoleMapInOrg, Set<Long> toAddIds) {
+        if (toAddIds.isEmpty()) return;
+
+        List<UserOrganizationRole> toAddLinks = new ArrayList<>();
+        for (Long addId : toAddIds) {
+            OrganizationRole role = requestedRoleMapInOrg.get(addId);
+            UserOrganizationRole link = UserOrganizationRole.assign(user, role);
+            user.addUserOrganizationRole(link);
+            role.addUserOrganizationRole(link);
+            toAddLinks.add(link);
+        }
+        userOrganizationRoleRepository.saveAll(toAddLinks);
     }
 }
