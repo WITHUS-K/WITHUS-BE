@@ -10,4 +10,5 @@ public interface OrganizationRoleService {
     OrganizationRoleResponseDTO.Detail createRole(Long organizationId, String name, String color);
     OrganizationRoleResponseDTO.DetailForOrganization getOrganizationRoles(Long organizationId, String keyword);
     void updateRole(Long organizationId, Long roleId, String name, String color);
+    void deleteRole(Long organizationId, Long roleId);
 }

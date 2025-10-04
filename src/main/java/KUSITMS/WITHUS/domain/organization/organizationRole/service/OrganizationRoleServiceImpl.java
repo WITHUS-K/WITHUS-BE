@@ -148,6 +148,25 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
         role.update(name, color);
     }
 
+    /**
+     * 역할 삭제
+     * @param organizationId 삭제할 역할이 속한 조직 ID
+     * @param roleId 삭제할 역할 ID
+     */
+    @Override
+    @Transactional
+    public void deleteRole(Long organizationId, Long roleId) {
+        OrganizationRole role = organizationRoleRepository.getById(roleId);
+
+        // 조직 일치 검증
+        if (!role.getOrganization().getId().equals(organizationId)) {
+            throw new CustomException(ErrorCode.ORGANIZATION_ROLE_ORG_MISMATCH);
+        }
+
+        userOrganizationRoleRepository.deleteByOrganizationRoleId(roleId);
+        organizationRoleRepository.deleteById(roleId);
+    }
+
     private OrganizationRole getValidatedRole(Long organizationId, Long roleId) {
         OrganizationRole role = organizationRoleRepository.getById(roleId);
         if (!role.getOrganization().getId().equals(organizationId)) {

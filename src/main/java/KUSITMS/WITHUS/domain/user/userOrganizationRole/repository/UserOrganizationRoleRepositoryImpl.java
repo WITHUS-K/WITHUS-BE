@@ -31,4 +31,9 @@ public class UserOrganizationRoleRepositoryImpl implements UserOrganizationRoleR
     public List<UserOrganizationRole> findAllByOrganizationRole_Id(Long organizationRoleId) {
         return userOrganizationRoleJpaRepository.findAllByOrganizationRole_Id(organizationRoleId);
     }
+
+    @Override
+    public void deleteByOrganizationRoleId(Long roleId) {
+        userOrganizationRoleJpaRepository.deleteByOrganizationRoleId(roleId);
+    }
 }
