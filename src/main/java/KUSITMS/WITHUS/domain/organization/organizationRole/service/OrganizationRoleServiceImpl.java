@@ -254,11 +254,27 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
     }
 
     private Map<Long, OrganizationRole> loadRequestedRoleMapInOrg(Long organizationId, List<Long> requestedRoleIds) {
-        if (requestedRoleIds.isEmpty()) return Collections.emptyMap();
+        if (requestedRoleIds == null || requestedRoleIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Set<Long> requestedIdSet = new HashSet<>(requestedRoleIds);
         List<OrganizationRole> requestedRoles = organizationRoleRepository.findAllById(requestedRoleIds);
-        return requestedRoles.stream()
+
+        if (requestedRoles.size() != requestedIdSet.size()) {
+            throw new CustomException(ErrorCode.ORGANIZATION_ROLE_NOT_EXIST);
+        }
+
+        Map<Long, OrganizationRole> roleMap = requestedRoles.stream()
                 .filter(r -> r.getOrganization().getId().equals(organizationId))
                 .collect(Collectors.toMap(OrganizationRole::getId, r -> r));
+
+        // 요청한 모든 ID가 동일 조직에 속해야 함
+        if (roleMap.size() != requestedIdSet.size()) {
+            throw new CustomException(ErrorCode.ORGANIZATION_ROLE_ORG_MISMATCH);
+        }
+
+        return roleMap;
     }
 
     private Set<Long> calcToAddIds(Set<Long> currentRoleIds, Set<Long> requestedValidIds) {

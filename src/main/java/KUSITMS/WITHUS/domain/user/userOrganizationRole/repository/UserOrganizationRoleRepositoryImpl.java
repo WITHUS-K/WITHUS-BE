@@ -34,6 +34,6 @@ public class UserOrganizationRoleRepositoryImpl implements UserOrganizationRoleR
 
     @Override
     public void deleteByOrganizationRoleId(Long roleId) {
-        userOrganizationRoleJpaRepository.deleteByOrganizationRoleId(roleId);
+        userOrganizationRoleJpaRepository.deleteByOrganizationRole_Id(roleId);
     }
 }
