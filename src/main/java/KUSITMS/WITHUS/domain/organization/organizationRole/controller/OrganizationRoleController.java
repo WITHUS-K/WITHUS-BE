@@ -71,4 +71,14 @@ public class OrganizationRoleController {
         organizationRoleService.updateRole(organizationId, roleId, request.name(), request.color());
         return SuccessResponse.ok("조직 내 역할 수정에 성공했습니다.");
     }
+
+    @DeleteMapping("/{organizationId}/roles/{roleId}")
+    @Operation(summary = "조직 역할 삭제", description = "배정 관계를 모두 제거한 뒤 조직 역할을 삭제합니다.")
+    public SuccessResponse<String> deleteRole(
+            @PathVariable Long organizationId,
+            @PathVariable Long roleId
+    ) {
+        organizationRoleService.deleteRole(organizationId, roleId);
+        return SuccessResponse.ok("조직 역할 삭제에 성공했습니다.");
+    }
 }

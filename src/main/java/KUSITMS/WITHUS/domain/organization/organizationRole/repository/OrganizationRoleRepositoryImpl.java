@@ -67,6 +67,11 @@ public class OrganizationRoleRepositoryImpl implements OrganizationRoleRepositor
                 .fetchFirst() != null;
     }
 
+    @Override
+    public void deleteById(Long roleId) {
+        organizationRoleJpaRepository.deleteById(roleId);
+    }
+
     private BooleanExpression keywordCondition(String keyword) {
         if (keyword == null || keyword.isBlank()) {
             return null;
