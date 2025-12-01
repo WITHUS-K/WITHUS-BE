@@ -5,4 +5,5 @@ import KUSITMS.WITHUS.domain.interview.interviewQuestion.entity.InterviewQuestio
 public interface InterviewQuestionService {
     InterviewQuestion addQuestionToApplication(Long applicationId, Long userId, String content);
     InterviewQuestion updateQuestion(Long questionId, Long id, String content);
+    Boolean deleteQuestion(Long applicationId, Long questionId, Long id);
 }

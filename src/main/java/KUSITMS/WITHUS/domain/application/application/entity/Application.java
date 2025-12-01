@@ -174,6 +174,11 @@ public class Application extends BaseEntity {
         question.associateApplication(this);
     }
 
+    public void removeInterviewQuestion(InterviewQuestion question) {
+        this.interviewQuestions.remove(question);
+        question.associateApplication(null);
+    }
+
     public void addEvaluation(Evaluation evaluation) {
         this.evaluations.add(evaluation);
         evaluation.associateApplication(this);
