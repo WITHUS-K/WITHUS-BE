@@ -51,6 +51,9 @@ public class ApplicationResponseDTO {
             @Schema(description = "최종 발표일") @DateFormatSlash LocalDate finalResultDate,
             @Schema(description = "면접 일자") List<String> interviewDates,
 
+            @Schema(description = "이전 지원자 ID") Long previousApplicationId,
+            @Schema(description = "다음 지원자 ID") Long nextApplicationId,
+
             @Schema(description = "지원서 ID") Long id,
             @Schema(description = "지원 분야명") String appliedPosition,
             @Schema(description = "지원자 이름") String name,
@@ -90,7 +93,8 @@ public class ApplicationResponseDTO {
 
 
     ) {
-        public static Detail from(Application application, List<ApplicantAvailability> availabilityList, List<Evaluation> evaluationList, List<EvaluationCriteria> evaluationCriteriaList, Long currentUserId) {
+        public static Detail from(Application application, List<ApplicantAvailability> availabilityList, List<Evaluation> evaluationList,
+                                  List<EvaluationCriteria> evaluationCriteriaList, Long currentUserId, Long previousApplicationId, Long nextApplicationId) {
             List<ApplicationAnswerResponseDTO> documentAnswers = application.getAnswers().stream()
                     .map(ApplicationAnswerResponseDTO::from)
                     .toList();
@@ -217,6 +221,8 @@ public class ApplicationResponseDTO {
                     recruitment.getDocumentResultDate(),
                     recruitment.getFinalResultDate(),
                     interviewDates,
+                    previousApplicationId,
+                    nextApplicationId,
                     application.getId(),
                     application.getPosition() != null ? application.getPosition().getName() : null,
                     application.getName(),

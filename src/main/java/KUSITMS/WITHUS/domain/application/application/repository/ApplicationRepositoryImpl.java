@@ -131,4 +131,27 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
                 .fetch();
     }
 
+    @Override
+    public Long findPreviousIdInRecruitment(Long recruitmentId, Long currentId) {
+        return queryFactory
+                .select(application.id.max())
+                .from(application)
+                .where(
+                        application.recruitment.id.eq(recruitmentId),
+                        application.id.lt(currentId)
+                )
+                .fetchOne();
+    }
+
+    @Override
+    public Long findNextIdInRecruitment(Long recruitmentId, Long currentId) {
+        return queryFactory
+                .select(application.id.min())
+                .from(application)
+                .where(
+                        application.recruitment.id.eq(recruitmentId),
+                        application.id.gt(currentId)
+                )
+                .fetchOne();
+    }
 }

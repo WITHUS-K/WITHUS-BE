@@ -150,11 +150,30 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public ApplicationResponseDTO.Detail getById(Long id, Long currentUserId) {
         Application app = applicationRepository.getById(id);
-        List<ApplicantAvailability> availabilityList = applicantAvailabilityRepository.findByApplicationId(id);
-        List<Evaluation> evaluationList = evaluationRepository.findEvaluationsForApplication(id);
-        List<EvaluationCriteria> criteriaList = evaluationCriteriaRepository.findByTypeAndRecruitment(EvaluationType.DOCUMENT, app.getRecruitment().getId());
 
-        return assembler.toDetail(app, availabilityList, evaluationList, criteriaList, currentUserId);
+        Long recruitmentId = app.getRecruitment().getId();
+        Long previousId = applicationRepository.findPreviousIdInRecruitment(recruitmentId, id);
+        Long nextId     = applicationRepository.findNextIdInRecruitment(recruitmentId, id);
+
+        List<ApplicantAvailability> availabilityList =
+                applicantAvailabilityRepository.findByApplicationId(id);
+        List<Evaluation> evaluationList =
+                evaluationRepository.findEvaluationsForApplication(id);
+        List<EvaluationCriteria> criteriaList =
+                evaluationCriteriaRepository.findByTypeAndRecruitment(
+                        EvaluationType.DOCUMENT,
+                        recruitmentId
+                );
+
+        return assembler.toDetail(
+                app,
+                availabilityList,
+                evaluationList,
+                criteriaList,
+                currentUserId,
+                previousId,
+                nextId
+        );
     }
 
     /**
