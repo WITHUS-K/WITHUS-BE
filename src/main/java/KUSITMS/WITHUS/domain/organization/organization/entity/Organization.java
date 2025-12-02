@@ -25,7 +25,7 @@ public class Organization extends BaseEntity {
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    @Column(name = "INVTIE_CODE", unique = true)
+    @Column(name = "INVITE_CODE", unique = true)
     private String inviteCode;
 
     @Builder.Default
