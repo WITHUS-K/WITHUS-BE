@@ -52,4 +52,20 @@ public class InterviewQuestionServiceImpl implements InterviewQuestionService {
 
         return question;
     }
+
+    @Override
+    @Transactional
+    public Boolean deleteQuestion(Long applicationId, Long questionId, Long userId) {
+        InterviewQuestion question = interviewQuestionRepository.getById(questionId);
+
+        if (!question.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+
+        Application application = question.getApplication();
+        application.removeInterviewQuestion(question);
+
+        interviewQuestionRepository.deleteById(question.getId());
+        return true;
+    }
 }

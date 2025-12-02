@@ -44,4 +44,14 @@ public class InterviewQuestionController {
         return SuccessResponse.ok(InterviewQuestionResponseDTO.Detail.from(updated));
     }
 
+    @DeleteMapping("/{questionId}")
+    @Operation(summary = "면접 질문 삭제", description = "면접 질문을 삭제합니다. 작성자만 삭제할 수 있습니다.")
+    public SuccessResponse<Boolean> deleteQuestion(
+            @PathVariable Long applicationId,
+            @PathVariable Long questionId,
+            @CurrentUser User currentUser
+    ) {
+        Boolean result = interviewQuestionService.deleteQuestion(applicationId, questionId, currentUser.getId());
+        return SuccessResponse.ok(result);
+    }
 }

@@ -22,4 +22,9 @@ public class InterviewQuestionRepositoryImpl implements InterviewQuestionReposit
         return interviewQuestionJpaRepository.findById(questionId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INTERVIEW_QUESTION_NOT_EXIST));
     }
+
+    @Override
+    public void deleteById(Long questionId) {
+        interviewQuestionJpaRepository.deleteById(questionId);
+    }
 }

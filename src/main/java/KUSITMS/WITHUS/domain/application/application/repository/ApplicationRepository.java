@@ -20,4 +20,6 @@ public interface ApplicationRepository {
     Long countByRecruitmentIdAndStatusIn(Long recruitmentId, List<ApplicationStatus> statuses);
     List<ApplicationResponseDTO.CandidateDTO> findEligibleCandidates(Long recruitmentId, Long timeslotId, String q, boolean excludeCurrent);
     List<Application> findForTimeSlot(Long timeSlotId);
+    Long findPreviousIdInRecruitment(Long recruitmentId, Long currentId);
+    Long findNextIdInRecruitment(Long recruitmentId, Long currentId);
 }

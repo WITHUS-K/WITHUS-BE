@@ -36,7 +36,9 @@ public class ApplicationAssembler {
             List<ApplicantAvailability> availabilityList,
             List<Evaluation> evaluationList,
             List<EvaluationCriteria> evaluationCriteriaList,
-            Long currentUserId
+            Long currentUserId,
+            Long previousApplicationId,
+            Long nextApplicationId
     ) {
         Recruitment recruitment = application.getRecruitment();
 
@@ -53,6 +55,9 @@ public class ApplicationAssembler {
                 recruitment.getDocumentResultDate(),
                 recruitment.getFinalResultDate(),
                 formatInterviewDates(recruitment),
+
+                previousApplicationId,
+                nextApplicationId,
 
                 application.getId(),
                 application.getPosition() != null ? application.getPosition().getName() : null,
