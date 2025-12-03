@@ -157,7 +157,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         );
 
         String subject = "[" + organizationName + "] 지원서 접수 확인 안내";
-        String html = templateProvider.loadTemplate(MailTemplateType.INSIDERS_APPLY_SUCCESS, variables);
+        String html = templateProvider.loadTemplate(MailTemplateType.APPLY_SUCCESS, variables);
         mailSender.send(request.email(), subject, html);
 
         return ApplicationResponseDTO.Summary.from(application);
