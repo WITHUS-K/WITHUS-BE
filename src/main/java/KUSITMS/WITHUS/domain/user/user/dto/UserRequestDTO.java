@@ -38,6 +38,7 @@ public class UserRequestDTO {
             String password,
 
             @Schema(description = "휴대폰 번호", example = "01012345678")
+            @Pattern(regexp = "^010\\d{7,8}$", message = "휴대폰 번호는 010으로 시작하는 숫자만 입력해야 합니다.")
             @NotBlank String phoneNumber
     ) {}
 
@@ -67,6 +68,7 @@ public class UserRequestDTO {
             String password,
 
             @Schema(description = "휴대폰 번호", example = "01012345678")
+            @Pattern(regexp = "^010\\d{7,8}$", message = "휴대폰 번호는 010으로 시작하는 숫자만 입력해야 합니다.")
             @NotBlank String phoneNumber
     ) {}
 
@@ -109,6 +111,7 @@ public class UserRequestDTO {
     @Schema(description = "휴대폰 인증 번호 요청 DTO")
     public record PhoneRequest(
             @Schema(description = "휴대폰 번호", example = "01012345678")
+            @Pattern(regexp = "^010\\d{7,8}$", message = "휴대폰 번호는 010으로 시작하는 숫자만 입력해야 합니다.")
             @NotBlank
             String phoneNumber
     ) {}
@@ -116,6 +119,7 @@ public class UserRequestDTO {
     @Schema(description = "휴대폰 인증 번호 확인 요청 DTO")
     public record PhoneConfirmRequest(
             @Schema(description = "휴대폰 번호", example = "01012345678")
+            @Pattern(regexp = "^010\\d{7,8}$", message = "휴대폰 번호는 010으로 시작하는 숫자만 입력해야 합니다.")
             @NotBlank
             String phoneNumber,
 
@@ -131,6 +135,7 @@ public class UserRequestDTO {
             String name,
 
             @Schema(description = "전화번호", example = "01099999999")
+            @Pattern(regexp = "^010\\d{7,8}$", message = "휴대폰 번호는 010으로 시작하는 숫자만 입력해야 합니다.")
             @NotBlank
             String phoneNumber,
 
