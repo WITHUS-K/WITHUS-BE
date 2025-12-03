@@ -170,7 +170,7 @@ public class AuthServiceImpl implements AuthService {
         );
 
         String html = templateProvider.loadTemplate(MailTemplateType.VERIFICATION, variables);
-        String subject = "[WITHUS] 비밀번호 재설정 인증 번호 발송 메일입니다.";
+        String subject = "[WITHUS] 인증 번호 발송 메일입니다.";
 
         mailSender.send(email, subject, html);
     }
