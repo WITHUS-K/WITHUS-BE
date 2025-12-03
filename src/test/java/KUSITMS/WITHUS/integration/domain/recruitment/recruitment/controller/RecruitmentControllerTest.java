@@ -13,7 +13,6 @@ import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.domain.user.userOrganization.service.UserOrganizationService;
-import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.integration.config.MockInfraBeans;
 import KUSITMS.WITHUS.integration.util.TestAuthHelper;
 import KUSITMS.WITHUS.integration.util.TestHelper;
@@ -79,7 +78,6 @@ class RecruitmentControllerTest {
                 .name("테스트유저")
                 .birthDate(LocalDate.of(1990, 1, 1))
                 .role(Role.USER)
-                .gender(Gender.FEMALE)
                 .email(testMail)
                 .phoneNumber(testPhone)
                 .password(encoder.encode("password1!"))
