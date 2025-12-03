@@ -9,7 +9,6 @@ import KUSITMS.WITHUS.domain.user.user.enumerate.ProfileColor;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
-import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.upload.dto.FileResponseDTO;
@@ -89,7 +88,6 @@ public class UserServiceImpl implements UserService {
                 .password(bCryptPasswordEncoder.encode(password))
                 .phoneNumber(phoneNumber)
                 .role(Role.ADMIN)
-                .gender(Gender.NONE)
                 .profileColor(randomColor)
                 .build();
 
@@ -117,7 +115,6 @@ public class UserServiceImpl implements UserService {
 
         String name = request.name();
         LocalDate birthDate = request.birthDate();
-        Gender gender = request.gender();
         Long organizationId = request.organizationId();
         String email = request.email();
         String password = request.password();
@@ -144,7 +141,6 @@ public class UserServiceImpl implements UserService {
         User user = User.builder()
                 .name(name)
                 .birthDate(birthDate)
-                .gender(gender)
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(password))
                 .phoneNumber(phoneNumber)

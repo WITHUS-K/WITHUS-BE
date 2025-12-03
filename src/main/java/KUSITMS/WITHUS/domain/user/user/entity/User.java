@@ -4,11 +4,10 @@ import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
 import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.domain.user.user.enumerate.ProfileColor;
-import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
+import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.UserOrganizationRole;
 import KUSITMS.WITHUS.global.common.BaseEntity;
-import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -41,10 +40,6 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "ROLE", nullable = false)
     private Role role;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "GENDER", nullable = false)
-    private Gender gender;
 
     @Column(name = "BIRTH_DATE")
     private LocalDate birthDate;

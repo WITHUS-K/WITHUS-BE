@@ -7,7 +7,6 @@ import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
-import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.global.util.redis.VerificationCache;
 import KUSITMS.WITHUS.integration.config.MockInfraBeans;
 import KUSITMS.WITHUS.integration.util.TestAuthHelper;
@@ -66,7 +65,6 @@ class UserControllerTest {
                 .name("테스트유저")
                 .birthDate(LocalDate.of(1990, 1, 1))
                 .role(Role.USER)
-                .gender(Gender.FEMALE)
                 .email(testMail)
                 .phoneNumber(testPhone)
                 .password(encoder.encode("password1!"))
@@ -105,7 +103,7 @@ class UserControllerTest {
         UserRequestDTO.UserJoin joinReq = new UserRequestDTO.UserJoin(
                 "김재관",
                 LocalDate.of(2001, 4, 23),
-                Gender.MALE, savedOrganizationId,
+                savedOrganizationId,
                 "test@example.com",
                 "Password1!",
                 "01012345678"
@@ -137,7 +135,6 @@ class UserControllerTest {
         UserRequestDTO.UserJoin req = new UserRequestDTO.UserJoin(
                 "김재관",
                 LocalDate.of(2001, 4, 23),
-                Gender.MALE,
                 savedOrganizationId,
                 "test2@example.com",
                 "Password1!",

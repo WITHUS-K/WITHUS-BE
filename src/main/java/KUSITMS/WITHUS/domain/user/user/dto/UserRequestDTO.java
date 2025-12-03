@@ -1,6 +1,5 @@
 package KUSITMS.WITHUS.domain.user.user.dto;
 
-import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -49,9 +48,6 @@ public class UserRequestDTO {
 
             @Schema(description = "생년월일", example = "2000-01-01")
             @NotNull LocalDate birthDate,
-
-            @Schema(description = "성별", example = "MALE | FEMALE | NONE")
-            @NotNull Gender gender,
 
             @Schema(description = "동아리 Id", example = "큐시즘")
             @NotNull Long organizationId,

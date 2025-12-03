@@ -77,7 +77,6 @@ class ApplicationControllerTest {
                 .name("테스트유저")
                 .birthDate(LocalDate.of(1990, 1, 1))
                 .role(Role.ADMIN)
-                .gender(Gender.FEMALE)
                 .email(testMail)
                 .phoneNumber(testPhone)
                 .password(encoder.encode("password1!"))
