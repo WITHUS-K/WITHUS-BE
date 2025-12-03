@@ -53,7 +53,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -123,10 +125,28 @@ public class ApplicationServiceImpl implements ApplicationService {
         List<ApplicationAnswer> answers = factory.createAnswers(application, request.answers(), questionMap, uploadedFileUrls);
         applicationAnswerRepository.saveAll(answers);
 
-        Map<String, String> variables = Map.of();
+        String organizationName = recruitment.getOrganization().getName();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 (E)", Locale.KOREAN);
 
+        List<String> interviewDateStrings = recruitment.getAvailableTimeRanges().stream()
+                .map(range -> range.getDate().format(formatter))
+                .toList();
+        String interviewDates = String.join("<br/>", interviewDateStrings);
+
+        Map<String, String> variables = Map.of(
+                "organizationName", organizationName,
+                "documentResultDate", recruitment.getDocumentResultDate() != null
+                        ? recruitment.getDocumentResultDate().format(formatter)
+                        : "",
+                "finalResultDate", recruitment.getFinalResultDate() != null
+                        ? recruitment.getFinalResultDate().format(formatter)
+                        : "",
+                "interviewDates", interviewDates
+        );
+
+        String subject = "[" + organizationName + "] 지원서 접수 확인 안내";
         String html = templateProvider.loadTemplate(MailTemplateType.INSIDERS_APPLY_SUCCESS, variables);
-        mailSender.send(request.email(), "[WITHUS] 지원서 접수 확인 안내", html);
+        mailSender.send(request.email(), subject, html);
 
         return ApplicationResponseDTO.Summary.from(application);
     }
