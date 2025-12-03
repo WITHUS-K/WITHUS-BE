@@ -271,6 +271,25 @@ public class UserServiceImpl implements UserService {
         return UserResponseDTO.MyPage.from(user);
     }
 
+    @Override
+    public UserResponseDTO.MyPage addOrganization(UserRequestDTO.AddOrganization request, User user) {
+
+        Long newOrganizationId = request.organizationId();
+
+        Organization organization = organizationRepository.getById(newOrganizationId);
+
+        UserOrganization newRelation = UserOrganization.builder()
+                .user(user)
+                .organization(organization)
+                .build();
+
+        // 양방향 등록
+        user.addUserOrganization(newRelation);
+        organization.addUserOrganization(newRelation);
+
+        return UserResponseDTO.MyPage.from(user);
+    }
+
     private boolean shouldUpdatePassword(UserRequestDTO.Update request) {
         return isNotBlank(request.currentPassword()) &&
                 isNotBlank(request.newPassword1()) &&

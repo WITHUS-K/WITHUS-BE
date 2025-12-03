@@ -147,4 +147,12 @@ public class UserRequestDTO {
             @Schema(description = "내가 속해 있는 조직 아이디 리스트", example = "[1, 2]")
             List<Long> organizationIds
     ) {}
+
+    @Schema(description = "조직 추가 DTO")
+    public record AddOrganization(
+
+            @Schema(description = "추가할 조직 아이디", example = "1")
+            Long organizationId
+
+    ) {}
 }

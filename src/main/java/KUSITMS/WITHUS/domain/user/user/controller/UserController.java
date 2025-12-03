@@ -91,4 +91,14 @@ public class UserController {
         UserResponseDTO.MyPage response = userService.updateUser(request, profileImage, user);
         return SuccessResponse.ok(response);
     }
+
+    @PatchMapping("/organization")
+    @Operation(summary = "조직 추가", description = "속해있는 조직을 추가합니다.")
+    public SuccessResponse<UserResponseDTO.MyPage> addOrganization(
+            @RequestBody @Valid UserRequestDTO.AddOrganization request,
+            @CurrentUser User user
+    ) {
+        UserResponseDTO.MyPage response = userService.addOrganization(request, user);
+        return SuccessResponse.ok(response);
+    }
 }

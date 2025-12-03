@@ -4,6 +4,7 @@ package KUSITMS.WITHUS.domain.user.user.service;
 import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
+import jakarta.validation.Valid;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
@@ -15,4 +16,5 @@ public interface UserService {
     boolean isEmailDuplicated(String email);
     UserResponseDTO.MyPage getMyPage(Long userId);
     UserResponseDTO.MyPage updateUser(UserRequestDTO.Update request, MultipartFile profileImage, User user);
+    UserResponseDTO.MyPage addOrganization(UserRequestDTO.AddOrganization request, User user);
 }
