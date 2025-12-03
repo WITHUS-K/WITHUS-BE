@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Schema(description = "회원 관련 요청 DTO")
 public class UserRequestDTO {
@@ -141,6 +142,9 @@ public class UserRequestDTO {
             String newPassword1,
 
             @Schema(description = "새 비밀번호 확인", example = "newPassword")
-            String newPassword2
+            String newPassword2,
+
+            @Schema(description = "내가 속해 있는 조직 아이디 리스트", example = "[1, 2]")
+            List<Long> organizationIds
     ) {}
 }

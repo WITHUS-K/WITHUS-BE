@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -265,6 +266,8 @@ public class UserServiceImpl implements UserService {
 
         user.update(request.name(), request.phoneNumber(), encodedPassword, imageUrl);
 
+        updateUserOrganizations(user, request.organizationIds());
+
         return UserResponseDTO.MyPage.from(user);
     }
 
@@ -285,6 +288,56 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(ErrorCode.USER_SAME_PASSWORD);
         }
         return bCryptPasswordEncoder.encode(request.newPassword1());
+    }
+
+    private void updateUserOrganizations(User user, List<Long> newOrganizationIds) {
+
+        if (newOrganizationIds == null) {
+            return; // 조직 수정 안 하는 경우
+        }
+
+        // 현재 유저가 속한 조직 ID
+        List<Long> currentOrgIds = user.getUserOrganizations().stream()
+                .map(uo -> uo.getOrganization().getId())
+                .toList();
+
+        // 삭제 대상: 현재는 있는데 새 목록에는 없는 조직
+        List<Long> toDelete = currentOrgIds.stream()
+                .filter(id -> !newOrganizationIds.contains(id))
+                .toList();
+
+        // 추가 대상: 현재는 없는데 새 목록에 있는 조직
+        List<Long> toAdd = newOrganizationIds.stream()
+                .filter(id -> !currentOrgIds.contains(id))
+                .toList();
+
+        // 삭제 처리
+        toDelete.forEach(id -> {
+            UserOrganization uo = user.getUserOrganizations().stream()
+                    .filter(rel -> rel.getOrganization().getId().equals(id))
+                    .findFirst()
+                    .orElse(null);
+
+            if (uo != null) {
+                // 양방향 관계 끊기
+                user.getUserOrganizations().remove(uo);
+                uo.getOrganization().getUserOrganizations().remove(uo);
+            }
+        });
+
+        // 추가 처리
+        toAdd.forEach(id -> {
+            Organization org = organizationRepository.getById(id);
+
+            UserOrganization newRelation = UserOrganization.builder()
+                    .user(user)
+                    .organization(org)
+                    .build();
+
+            // 양방향 등록
+            user.addUserOrganization(newRelation);
+            org.addUserOrganization(newRelation);
+        });
     }
 
     private boolean isNotBlank(String value) {
