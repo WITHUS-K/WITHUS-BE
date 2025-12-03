@@ -19,6 +19,21 @@ public class OrganizationResponseDTO {
         }
     }
 
+    @Schema(description = "조직 초대 코드 조회 응답 DTO")
+    public record InviteCode(
+            Long id,
+            String name,
+            String inviteCode
+    ) {
+        public static InviteCode from(Organization organization) {
+            return new InviteCode(
+                    organization.getId(),
+                    organization.getName(),
+                    organization.getInviteCode()
+            );
+        }
+    }
+
     //FIXME 아래 DTO들은 임시 생성. 이후 스프린트에서 수정 예정
     @Schema(description = "조직 정보 상세 조회 응답 DTO")
     public record Detail(
@@ -71,20 +86,4 @@ public class OrganizationResponseDTO {
             );
         }
     }
-
-    @Schema(description = "조직 초대 코드 조회 응답 DTO")
-    public record InviteCode(
-            Long id,
-            String name,
-            String inviteCode
-    ) {
-        public static InviteCode from(Organization organization) {
-            return new InviteCode(
-                    organization.getId(),
-                    organization.getName(),
-                    organization.getInviteCode()
-            );
-        }
-    }
-
 }

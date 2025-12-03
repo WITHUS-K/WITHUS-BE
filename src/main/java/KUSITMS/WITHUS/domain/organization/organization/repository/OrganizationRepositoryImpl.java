@@ -48,4 +48,7 @@ public class OrganizationRepositoryImpl implements OrganizationRepository {
 
     @Override
     public Optional<Organization> findByInviteCode(String inviteCode) { return organizationJpaRepository.findByInviteCode(inviteCode); }
+
+    @Override
+    public List<Organization> findOrganzations(List<Long> organizationIds) { return organizationJpaRepository.findAllByIdIn(organizationIds);}
 }

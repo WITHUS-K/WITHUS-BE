@@ -26,4 +26,9 @@ public class UserOrganizationRequestDTO {
             @NotEmpty List<Long> userIds
     ) {}
 
+    @Schema(description = "회원가입한 사용자 초대코드 등록 DTO")
+    public record InviteCode(
+            @Schema(description = "사용자가 입력한 초대코드", example = "jYJN5pUmgr")
+            @NotEmpty String code
+    ) {}
 }

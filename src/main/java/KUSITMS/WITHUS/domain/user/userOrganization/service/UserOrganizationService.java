@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.user.userOrganization.service;
 
+import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.userOrganization.dto.UserOrganizationResponseDTO;
 import org.springframework.data.domain.Page;
@@ -12,5 +13,5 @@ public interface UserOrganizationService {
     void removeUsers(Long organizationId, List<Long> userIds);
     List<UserResponseDTO.SummaryForSearch> getUsersWithAssignment(Long organizationId, String keyword, Long roleId);
     void sendInvitationEmails(Long organizationId, List<Long> userIds, String inviterName);
-    void acceptInvitation(String token);
+    List<OrganizationResponseDTO.Create> acceptInvitation(String inviteCode, Long userId);
 }
