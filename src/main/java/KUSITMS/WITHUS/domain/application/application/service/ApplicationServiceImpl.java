@@ -35,7 +35,9 @@ import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
+import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.email.sender.MailSender;
@@ -133,6 +135,15 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .toList();
         String interviewDates = String.join("<br/>", interviewDateStrings);
 
+        // TODO : N+1 발생하나, 추후 Role도 User가 아닌 UserOrganization 단으로 넣어야 더 맞을 것 같고 해서 일단 둠 ..
+        String adminEmail = recruitment.getOrganization()
+                .getUserOrganizations().stream()
+                .map(UserOrganization::getUser)
+                .filter(user -> user.getRole() == Role.ADMIN)
+                .map(User::getEmail)
+                .findFirst()
+                .orElse("");
+
         Map<String, String> variables = Map.of(
                 "organizationName", organizationName,
                 "documentResultDate", recruitment.getDocumentResultDate() != null
@@ -141,7 +152,8 @@ public class ApplicationServiceImpl implements ApplicationService {
                 "finalResultDate", recruitment.getFinalResultDate() != null
                         ? recruitment.getFinalResultDate().format(formatter)
                         : "",
-                "interviewDates", interviewDates
+                "interviewDates", interviewDates,
+                "adminEmail", adminEmail
         );
 
         String subject = "[" + organizationName + "] 지원서 접수 확인 안내";
