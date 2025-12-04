@@ -4,6 +4,7 @@ import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.Applicatio
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.dto.DocumentQuestionRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
 import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
+import KUSITMS.WITHUS.domain.organization.organizationRole.repository.OrganizationRoleRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 public class DocumentQuestionAppender {
 
     private final ApplicationAnswerRepository applicationAnswerRepository;
+    private final OrganizationRoleRepository organizationRoleRepository;
 
     public void append(Recruitment recruitment, List<DocumentQuestionRequestDTO.Create> questions) {
         if (questions == null) return;
@@ -32,7 +34,7 @@ public class DocumentQuestionAppender {
         recruitment.clearDocumentQuestions();
 
         questions.forEach(q -> {
-            OrganizationRole organizationRole = getOrganizationRoleIfExistsByName(q.positionName(), recruitment);
+            OrganizationRole organizationRole = getOrganizationRoleIfExistsById(q.organizationRoleId(), recruitment);
 
             DocumentQuestion question = DocumentQuestion.builder()
                     .title(q.title())
@@ -64,13 +66,20 @@ public class DocumentQuestionAppender {
         }
     }
 
-    private OrganizationRole getOrganizationRoleIfExistsByName(String roleName, Recruitment recruitment) {
-        if (roleName == null) return null;
+    private OrganizationRole getOrganizationRoleIfExistsById(Long organizationRoleId, Recruitment recruitment) {
+        if (organizationRoleId == null) return null;
 
-        return recruitment.getPositions().stream()
-                .map(ror -> ror.getOrganizationRole())
-                .filter(role -> role.getName().equals(roleName))
-                .findFirst()
-                .orElseThrow(() -> new CustomException(ErrorCode.POSITION_NOT_EXIST));
+        // OrganizationRole 조회
+        OrganizationRole organizationRole = organizationRoleRepository.getById(organizationRoleId);
+
+        // 공고에 포함된 OrganizationRole인지 검증
+        boolean isValidRole = recruitment.getPositions().stream()
+                .anyMatch(ror -> ror.getOrganizationRole().getId().equals(organizationRoleId));
+
+        if (!isValidRole) {
+            throw new CustomException(ErrorCode.ORGANIZATION_ROLE_NOT_EXIST);
+        }
+
+        return organizationRole;
     }
 }
