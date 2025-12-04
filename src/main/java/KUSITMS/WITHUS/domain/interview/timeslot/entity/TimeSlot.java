@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.domain.interview.timeslot.entity;
 
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
 import KUSITMS.WITHUS.global.common.BaseEntity;
@@ -43,8 +43,8 @@ public class TimeSlot extends BaseEntity {
     private Interview interview;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "POSITION_ID")
-    private Position position;
+    @JoinColumn(name = "ORGANIZATION_ROLE_ID")
+    private OrganizationRole organizationRole;
 
     @OneToMany(mappedBy = "timeSlot")
     @Builder.Default

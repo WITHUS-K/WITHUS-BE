@@ -35,14 +35,12 @@ public class DistributionRequestResponseDTO {
 
     @Schema(description = "평가 담당자 분배 최신 이력 리스트 DTO")
     public record Assignment(
-            @Schema(description = "지원 파트 명") String positionName,
-            @Schema(description = "organizationRole 명(평가 담당자)") String organizationRoleName,
+            @Schema(description = "지원 역할 명") String organizationRoleName,
             @Schema(description = "평가 타입") EvaluationType evaluationType,
             @Schema(description = "지원서당 배정한 평가자 수") int count
     ) {
         public static Assignment from(DistributionAssignment a) {
             return new Assignment(
-                    a.getPosition().getName(),
                     a.getOrganizationRole().getName(),
                     a.getEvaluationType(),
                     a.getCount()

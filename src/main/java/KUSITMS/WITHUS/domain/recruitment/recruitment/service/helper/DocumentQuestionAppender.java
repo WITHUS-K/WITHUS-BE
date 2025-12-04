@@ -3,7 +3,7 @@ package KUSITMS.WITHUS.domain.recruitment.recruitment.service.helper;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.ApplicationAnswerRepository;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.dto.DocumentQuestionRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
@@ -26,7 +26,7 @@ public class DocumentQuestionAppender {
         recruitment.clearDocumentQuestions();
 
         questions.forEach(q -> {
-            Position position = getPositionIfExistsByName(q.positionName(), recruitment);
+            OrganizationRole organizationRole = getOrganizationRoleIfExistsByName(q.positionName(), recruitment);
 
             DocumentQuestion question = DocumentQuestion.builder()
                     .title(q.title())
@@ -38,18 +38,19 @@ public class DocumentQuestionAppender {
                     .maxFileCount(q.maxFileCount())
                     .maxFileSizeMb(q.maxFileSizeMb())
                     .recruitment(recruitment)
-                    .position(position)
+                    .organizationRole(organizationRole)
                     .build();
 
             recruitment.addDocumentQuestion(question);
         });
     }
 
-    private Position getPositionIfExistsByName(String positionName, Recruitment recruitment) {
-        if (positionName == null) return null;
+    private OrganizationRole getOrganizationRoleIfExistsByName(String roleName, Recruitment recruitment) {
+        if (roleName == null) return null;
 
         return recruitment.getPositions().stream()
-                .filter(p -> p.getName().equals(positionName))
+                .map(ror -> ror.getOrganizationRole())
+                .filter(role -> role.getName().equals(roleName))
                 .findFirst()
                 .orElseThrow(() -> new CustomException(ErrorCode.POSITION_NOT_EXIST));
     }

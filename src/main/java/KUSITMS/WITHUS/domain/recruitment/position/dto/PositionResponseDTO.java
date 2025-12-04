@@ -36,7 +36,10 @@ public class PositionResponseDTO {
             }
 
             String name = position.getName();
-            int count = position.getApplications() != null ? position.getApplications().size() : 0;
+            // Note: Position 엔티티는 더 이상 Application과 직접 관계가 없습니다.
+            // Application은 이제 OrganizationRole을 사용합니다.
+            // Position 엔티티가 제거될 때까지 지원자 수는 0으로 반환합니다.
+            int count = 0;
 
             return new SummaryForRecruitment(name, count);
         }

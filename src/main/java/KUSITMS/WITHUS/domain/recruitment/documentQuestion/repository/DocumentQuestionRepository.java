@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.domain.recruitment.documentQuestion.repository;
 
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 
 import java.util.List;
@@ -9,5 +9,5 @@ import java.util.List;
 public interface DocumentQuestionRepository {
     DocumentQuestion getById(Long questionId);
     List<DocumentQuestion> findByRecruitment(Recruitment recruitment);
-    List<DocumentQuestion> findCommonAndByPosition(Recruitment recruitment, Position position);
+    List<DocumentQuestion> findCommonAndByOrganizationRole(Recruitment recruitment, OrganizationRole organizationRole);
 }

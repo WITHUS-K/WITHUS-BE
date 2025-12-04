@@ -224,7 +224,7 @@ public class ApplicationResponseDTO {
                     previousApplicationId,
                     nextApplicationId,
                     application.getId(),
-                    application.getPosition() != null ? application.getPosition().getName() : null,
+                    application.getOrganizationRole() != null ? application.getOrganizationRole().getName() : null,
                     application.getName(),
                     application.getGender(),
                     application.getEmail(),
@@ -269,7 +269,7 @@ public class ApplicationResponseDTO {
                     application.getId(),
                     application.getName(),
                     application.getEmail(),
-                    application.getPosition() != null ? application.getPosition().getName() : null,
+                    application.getOrganizationRole() != null ? application.getOrganizationRole().getName() : null,
                     application.getStatus()
             );
         }
@@ -328,7 +328,7 @@ public class ApplicationResponseDTO {
                     isDocumentResultAnnounced,
                     application.getId(),
                     application.getName(),
-                    application.getPosition() != null ? application.getPosition().getName() : null,
+                    application.getOrganizationRole() != null ? application.getOrganizationRole().getName() : null,
                     application.getStatus(),
                     evaluated,
                     myScoreTotal,
@@ -449,7 +449,7 @@ public class ApplicationResponseDTO {
                     seq,
                     application.getId(),
                     application.getName(),
-                    application.getPosition() != null ? application.getPosition().getName() : null,
+                    application.getOrganizationRole() != null ? application.getOrganizationRole().getName() : null,
                     application.getStatus(),
 
                     docAssignedCount,
@@ -513,7 +513,7 @@ public class ApplicationResponseDTO {
             return new DetailForTimeSlot(
                     application.getId(),
                     application.getName(),
-                    application.getPosition().getId(),
+                    application.getOrganizationRole().getId(),
                     timeSlot.getDate(),
                     timeSlot.getStartTime(),
                     timeSlot.getEndTime(),

@@ -26,7 +26,7 @@ public class DocumentQuestionResponseDTO {
             @Schema(description = "질문 설명") String description,
             @Schema(description = "질문 형식") QuestionType type,
             @Schema(description = "필수 여부") boolean required,
-            @Schema(description = "적용 파트 이름") String positionName,
+            @Schema(description = "적용 역할 이름") String organizationRoleName,
             @Schema(description = "텍스트 글자 수 제한") Integer textLimit,
             @Schema(description = "공백 포함 여부") Boolean includeWhitespace
     ) implements QuestionSummary {
@@ -37,7 +37,7 @@ public class DocumentQuestionResponseDTO {
                     question.getDescription(),
                     question.getType(),
                     question.isRequired(),
-                    question.getPosition() != null ? question.getPosition().getName() : "공통",
+                    question.getOrganizationRole() != null ? question.getOrganizationRole().getName() : "공통",
                     question.getTextLimit(),
                     question.getIncludeWhitespace()
             );
@@ -51,7 +51,7 @@ public class DocumentQuestionResponseDTO {
             @Schema(description = "질문 설명") String description,
             @Schema(description = "질문 형식") QuestionType type,
             @Schema(description = "필수 여부") boolean required,
-            @Schema(description = "적용 파트 이름") String positionName,
+            @Schema(description = "적용 역할 이름") String organizationRoleName,
             @Schema(description = "최대 파일 개수") Integer maxFileCount,
             @Schema(description = "최대 파일 크기(MB)") Integer maxFileSizeMb
     ) implements QuestionSummary {
@@ -62,7 +62,7 @@ public class DocumentQuestionResponseDTO {
                     question.getDescription(),
                     question.getType(),
                     question.isRequired(),
-                    question.getPosition() != null ? question.getPosition().getName() : "공통",
+                    question.getOrganizationRole() != null ? question.getOrganizationRole().getName() : "공통",
                     question.getMaxFileCount(),
                     question.getMaxFileSizeMb()
             );

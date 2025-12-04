@@ -64,11 +64,11 @@ public class ApplicationMailService {
             // name
             values.put("name", application.getName());
 
-            // position
-            String position = application.getPosition() != null
-                    ? application.getPosition().getName()
+            // organizationRole
+            String organizationRole = application.getOrganizationRole() != null
+                    ? application.getOrganizationRole().getName()
                     : "(불러올 수 없음)";
-            values.put("position", position);
+            values.put("position", organizationRole);
 
             // interviewDateTime
             TimeSlot ts = application.getTimeSlot();

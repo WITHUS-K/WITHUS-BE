@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.domain.recruitment.documentQuestion.repository;
 
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
@@ -34,17 +34,17 @@ public class DocumentQuestionRepositoryImpl implements DocumentQuestionRepositor
     }
 
     @Override
-    public List<DocumentQuestion> findCommonAndByPosition(Recruitment recruitment, Position position) {
-        BooleanExpression positionFilter = position == null
-                ? documentQuestion.position.isNull()
-                : documentQuestion.position.isNull()
-                .or(documentQuestion.position.eq(position));
+    public List<DocumentQuestion> findCommonAndByOrganizationRole(Recruitment recruitment, OrganizationRole organizationRole) {
+        BooleanExpression roleFilter = organizationRole == null
+                ? documentQuestion.organizationRole.isNull()
+                : documentQuestion.organizationRole.isNull()
+                .or(documentQuestion.organizationRole.eq(organizationRole));
 
         return queryFactory
                 .selectFrom(documentQuestion)
                 .where(
                         documentQuestion.recruitment.eq(recruitment)
-                                .and(positionFilter)
+                                .and(roleFilter)
                 )
                 .fetch();
     }

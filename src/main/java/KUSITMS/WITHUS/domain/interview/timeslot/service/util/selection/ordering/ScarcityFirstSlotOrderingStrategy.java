@@ -2,7 +2,7 @@ package KUSITMS.WITHUS.domain.interview.timeslot.service.util.selection.ordering
 
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.interview.timeslot.service.util.candidate.CandidateIndex;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +33,7 @@ public class ScarcityFirstSlotOrderingStrategy implements SlotOrderingStrategy {
     /** 주어진 슬롯에 배정 가능한 사용자 수를 계산 */
     private int countEligibleCandidates(final TimeSlot slot, final CandidateIndex index) {
         final LocalDateTime slotStart = slot.getDate().atTime(slot.getStartTime());
-        final Position slotPosition = slot.getPosition();
+        final OrganizationRole slotOrganizationRole = slot.getOrganizationRole();
 
         int eligibleCount = 0;
 
@@ -48,9 +48,9 @@ public class ScarcityFirstSlotOrderingStrategy implements SlotOrderingStrategy {
             final User candidate = index.getUserMap().get(userId);
             if (candidate == null) continue;
 
-            // 포지션 매칭 - 포지션이 없으면 통과
-            final boolean positionMatches = (slotPosition == null) || candidate.hasMatchingRole(slotPosition);
-            if (positionMatches) eligibleCount++;
+            // 역할 매칭 - 역할이 없으면 통과
+            final boolean roleMatches = (slotOrganizationRole == null) || candidate.hasMatchingRole(slotOrganizationRole);
+            if (roleMatches) eligibleCount++;
         }
 
         return eligibleCount;

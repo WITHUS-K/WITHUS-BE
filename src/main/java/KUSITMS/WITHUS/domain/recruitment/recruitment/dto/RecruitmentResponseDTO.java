@@ -7,7 +7,7 @@ import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationT
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.dto.AvailableTimeRangeResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.dto.DocumentQuestionResponseDTO;
-import KUSITMS.WITHUS.domain.recruitment.position.dto.PositionResponseDTO;
+import KUSITMS.WITHUS.domain.organization.organizationRole.dto.OrganizationRoleResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.global.common.annotation.DateFormatDot;
@@ -47,7 +47,7 @@ public class RecruitmentResponseDTO {
             @Schema(description = "생년월일 입력 필요 여부") boolean needBirthDate,
             @Schema(description = "전공 입력 필요 여부") boolean needMajor,
             @Schema(description = "학적 상태 입력 필요 여부") boolean needAcademicStatus,
-            @Schema(description = "포지션 목록") List<PositionResponseDTO.Detail> positions,
+            @Schema(description = "포지션 목록") List<OrganizationRoleResponseDTO.Detail> positions,
             @Schema(description = "서류 마감일") @DateFormatDot LocalDate documentDeadline,
             @Schema(description = "서류 합격 발표 필수 여부") boolean isDocumentResultRequired,
             @Schema(description = "서류 발표일") @DateFormatDot LocalDate documentResultDate,
@@ -85,8 +85,8 @@ public class RecruitmentResponseDTO {
                     .map(AvailableTimeRangeResponseDTO::from)
                     .toList();
 
-            List<PositionResponseDTO.Detail> positions = recruitment.getPositions().stream()
-                    .map(PositionResponseDTO.Detail::from)
+            List<OrganizationRoleResponseDTO.Detail> positions = recruitment.getPositions().stream()
+                    .map(ror -> OrganizationRoleResponseDTO.Detail.from(ror.getOrganizationRole()))
                     .toList();
 
             return new Detail(
@@ -142,11 +142,14 @@ public class RecruitmentResponseDTO {
             @Schema(description = "최종 발표일") @DateFormatDot LocalDate finalResultDate,
             @Schema(description = "조직명") String organizationName,
             @Schema(description = "Slug 값") String urlSlug,
-            @Schema(description = "포지션별 지원자 수") List<PositionResponseDTO.SummaryForRecruitment> positionSummaries
+            @Schema(description = "포지션별 지원자 수") List<RoleSummary> positionSummaries
     ) {
-        public static Summary from(Recruitment recruitment) {
-            List<PositionResponseDTO.SummaryForRecruitment> positionSummaries = recruitment.getPositions().stream()
-                    .map(PositionResponseDTO.SummaryForRecruitment::from)
+        public static Summary from(Recruitment recruitment, java.util.function.Function<Long, Long> getApplicantCount) {
+            List<RoleSummary> positionSummaries = recruitment.getPositions().stream()
+                    .map(ror -> new RoleSummary(
+                            ror.getOrganizationRole().getName(),
+                            getApplicantCount.apply(ror.getOrganizationRole().getId()).intValue()
+                    ))
                     .toList();
 
             return new Summary(
@@ -217,6 +220,12 @@ public class RecruitmentResponseDTO {
     public record PositionCount(
             @Schema(description = "파트명") String positionName,
             @Schema(description = "지원서 개수", example = "5") Long count
+    ) {}
+
+    @Schema(description = "역할별 지원자 수 정보")
+    public record RoleSummary(
+            @Schema(description = "역할 이름") String name,
+            @Schema(description = "지원자 수") int applicantCount
     ) {}
 
     @Schema(description = "단일 날짜의 D-Day 정보")

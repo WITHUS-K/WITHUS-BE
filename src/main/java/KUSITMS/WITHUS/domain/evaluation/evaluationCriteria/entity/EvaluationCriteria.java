@@ -2,7 +2,7 @@ package KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity;
 
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;
@@ -39,8 +39,8 @@ public class EvaluationCriteria extends BaseEntity {
     private Recruitment recruitment;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "POSITION_ID")
-    private Position position;
+    @JoinColumn(name = "ORGANIZATION_ROLE_ID")
+    private OrganizationRole organizationRole;
 
     @Builder.Default
     @OneToMany(mappedBy = "criteria", cascade = CascadeType.ALL, orphanRemoval = true)

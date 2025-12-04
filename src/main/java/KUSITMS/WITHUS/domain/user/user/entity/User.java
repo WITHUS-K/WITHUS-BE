@@ -2,7 +2,7 @@ package KUSITMS.WITHUS.domain.user.user.entity;
 
 import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.user.user.enumerate.ProfileColor;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
@@ -108,9 +108,9 @@ public class User extends BaseEntity {
         role.associateUser(this);
     }
 
-    public boolean hasMatchingRole(Position position) {
+    public boolean hasMatchingRole(OrganizationRole organizationRole) {
         return this.userOrganizationRoles.stream()
                 .map(UserOrganizationRole::getOrganizationRole)
-                .anyMatch(role1 -> role1.getName().equalsIgnoreCase(position.getName()));
+                .anyMatch(role1 -> role1.getId().equals(organizationRole.getId()));
     }
 }

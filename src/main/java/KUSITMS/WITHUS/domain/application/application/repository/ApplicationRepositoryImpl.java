@@ -14,7 +14,7 @@ import java.util.List;
 
 import static KUSITMS.WITHUS.domain.application.application.entity.QApplication.application;
 import static KUSITMS.WITHUS.domain.interview.timeslot.entity.QTimeSlot.timeSlot;
-import static KUSITMS.WITHUS.domain.recruitment.position.entity.QPosition.position;
+import static KUSITMS.WITHUS.domain.organization.organizationRole.entity.QOrganizationRole.organizationRole;
 import static KUSITMS.WITHUS.domain.user.user.entity.QUser.user;
 
 
@@ -58,13 +58,13 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
     }
 
     @Override
-    public List<Application> findByRecruitment_IdAndPosition_Id(Long recruitmentId, Long positionId) {
-        return applicationJpaRepository.findByRecruitment_IdAndPosition_Id(recruitmentId, positionId);
+    public List<Application> findByRecruitment_IdAndOrganizationRole_Id(Long recruitmentId, Long organizationRoleId) {
+        return applicationJpaRepository.findByRecruitment_IdAndOrganizationRole_Id(recruitmentId, organizationRoleId);
     }
 
     @Override
-    public Long countByRecruitment_IdAndPosition_Id(Long recruitmentId, Long positionId) {
-        return applicationJpaRepository.countByRecruitment_IdAndPosition_Id(recruitmentId, positionId);
+    public Long countByRecruitment_IdAndOrganizationRole_Id(Long recruitmentId, Long organizationRoleId) {
+        return applicationJpaRepository.countByRecruitment_IdAndOrganizationRole_Id(recruitmentId, organizationRoleId);
     }
 
     @Override
@@ -124,7 +124,7 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
     public List<Application> findForTimeSlot(Long timeSlotId) {
         return queryFactory.selectFrom(application).distinct()
                 .join(application.timeSlot, timeSlot).fetchJoin()
-                .leftJoin(application.position, position).fetchJoin()
+                .leftJoin(application.organizationRole, organizationRole).fetchJoin()
                 .leftJoin(application.user, user).fetchJoin()
                 .where(timeSlot.id.eq(timeSlotId))
                 .orderBy(application.createdAt.asc())

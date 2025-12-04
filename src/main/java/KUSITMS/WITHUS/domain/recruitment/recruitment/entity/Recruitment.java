@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.recruitment.recruitment.entity;
 
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
+import KUSITMS.WITHUS.domain.recruitment.recruitmentOrganizationRole.entity.RecruitmentOrganizationRole;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
@@ -114,7 +115,7 @@ public class Recruitment extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Position> positions = new ArrayList<>();
+    private List<RecruitmentOrganizationRole> positions = new ArrayList<>();
 
     public static Recruitment create(
             String title,
@@ -215,9 +216,9 @@ public class Recruitment extends BaseEntity {
         range.associateRecruitment(this);
     }
 
-    public void addPosition(Position position) {
-        this.positions.add(position);
-        position.associateRecruitment(this);
+    public void addOrganizationRole(OrganizationRole organizationRole) {
+        RecruitmentOrganizationRole ror = RecruitmentOrganizationRole.of(this, organizationRole);
+        this.positions.add(ror);
     }
 
     public void clearEvaluationCriteria() {
@@ -230,6 +231,10 @@ public class Recruitment extends BaseEntity {
 
     public void clearAvailableTimeRanges() {
         this.availableTimeRanges.clear();
+    }
+
+    public void clearPositions() {
+        this.positions.clear();
     }
 
     public void markAsFinal() {
