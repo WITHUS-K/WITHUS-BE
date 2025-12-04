@@ -26,8 +26,8 @@ public class RecruitmentRequestDTO {
             @Schema(description = "공고 내용", example = "큐시즘 학회원 모집합니다.")
             String content,
 
-            @Schema(description = "등록할 포지션 이름 목록", example = "[\"백엔드\", \"디자인\"]")
-            List<String> positions,
+            @Schema(description = "등록할 OrganizationRole ID 목록", example = "[1, 2]")
+            List<Long> organizationRoleIds,
 
             @Schema(description = "지원서 문항 목록")
             List<DocumentQuestionRequestDTO.Create> applicationQuestions,
@@ -95,8 +95,8 @@ public class RecruitmentRequestDTO {
             @Schema(description = "첨부 파일 URL", example = "https://withus.com/files/recruit_v2.pdf")
             String fileUrl,
 
-            @Schema(description = "등록할 포지션 이름 목록", example = "[백엔드, 디자인]")
-            List<String> positions,
+            @Schema(description = "등록할 OrganizationRole ID 목록", example = "[1, 2]")
+            List<Long> organizationRoleIds,
 
             @Schema(description = "서류 마감일", example = "2025-06-01")
             @NotNull @FutureOrPresent LocalDate documentDeadline,

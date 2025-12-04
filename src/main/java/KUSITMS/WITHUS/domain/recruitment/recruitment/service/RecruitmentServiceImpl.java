@@ -265,9 +265,9 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         if (request.isTemporary()) recruitment.markAsTemporary();
         else recruitment.markAsFinal();
 
-        // positions 업데이트
+        // organization roles 업데이트
         recruitment.clearPositions();
-        positionAppender.append(recruitment, request.positions());
+        positionAppender.append(recruitment, request.organizationRoleIds());
 
         return RecruitmentResponseDTO.Update.from(recruitment);
     }
@@ -341,7 +341,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         recruitment.clearEvaluationCriteria();
         Recruitment savedRecruitment = recruitmentRepository.save(recruitment);
 
-        positionAppender.append(recruitment, request.positions());
+        positionAppender.append(recruitment, request.organizationRoleIds());
         criteriaAppender.appendWithPositions(recruitment, request.documentEvaluationCriteria(), EvaluationType.DOCUMENT);
         criteriaAppender.appendWithPositions(recruitment, request.interviewEvaluationCriteria(), EvaluationType.INTERVIEW);
         availableTimeRangeAppender.append(recruitment, request.availableTimeRanges());

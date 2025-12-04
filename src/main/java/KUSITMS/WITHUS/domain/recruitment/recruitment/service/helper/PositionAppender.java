@@ -16,20 +16,21 @@ public class PositionAppender {
 
     private final OrganizationRoleRepository organizationRoleRepository;
 
-    public void append(Recruitment recruitment, List<String> roleNames) {
-        if (roleNames == null) return;
+    public void append(Recruitment recruitment, List<Long> organizationRoleIds) {
+        if (organizationRoleIds == null || organizationRoleIds.isEmpty()) return;
 
         Long organizationId = recruitment.getOrganization().getId();
 
-        roleNames.stream()
+        organizationRoleIds.stream()
                 .distinct()
-                .forEach(roleName -> {
-                    // 조직에 속한 OrganizationRole만 사용 가능
-                    List<OrganizationRole> roles = organizationRoleRepository.findByOrganizationIdAndKeyword(organizationId, roleName);
-                    OrganizationRole role = roles.stream()
-                            .filter(r -> r.getName().equals(roleName))
-                            .findFirst()
-                            .orElseThrow(() -> new CustomException(ErrorCode.ORGANIZATION_ROLE_NOT_EXIST));
+                .forEach(roleId -> {
+                    // OrganizationRole 조회
+                    OrganizationRole role = organizationRoleRepository.getById(roleId);
+
+                    // 조직에 속한 OrganizationRole인지 검증
+                    if (!role.getOrganization().getId().equals(organizationId)) {
+                        throw new CustomException(ErrorCode.ORGANIZATION_ROLE_NOT_EXIST);
+                    }
 
                     // 이미 추가된 역할인지 확인
                     boolean alreadyExists = recruitment.getPositions().stream()
