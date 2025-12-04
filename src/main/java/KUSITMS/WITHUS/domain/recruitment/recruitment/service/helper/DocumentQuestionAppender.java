@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -20,6 +22,10 @@ public class DocumentQuestionAppender {
 
     public void append(Recruitment recruitment, List<DocumentQuestionRequestDTO.Create> questions) {
         if (questions == null) return;
+        
+        // 같은 order가 중복되는지 검증
+        validateQuestionOrders(questions);
+        
         recruitment.getQuestions().forEach(q ->
                 applicationAnswerRepository.deleteAllByQuestionId(q.getId())
         );
@@ -39,10 +45,23 @@ public class DocumentQuestionAppender {
                     .maxFileSizeMb(q.maxFileSizeMb())
                     .recruitment(recruitment)
                     .organizationRole(organizationRole)
+                    .order(q.order())
                     .build();
 
             recruitment.addDocumentQuestion(question);
         });
+    }
+
+    private void validateQuestionOrders(List<DocumentQuestionRequestDTO.Create> questions) {
+        if (questions == null || questions.isEmpty()) return;
+        
+        Set<Integer> orderSet = questions.stream()
+                .map(DocumentQuestionRequestDTO.Create::order)
+                .collect(Collectors.toSet());
+        
+        if (orderSet.size() != questions.size()) {
+            throw new CustomException(ErrorCode.DUPLICATE_QUESTION_ORDER);
+        }
     }
 
     private OrganizationRole getOrganizationRoleIfExistsByName(String roleName, Recruitment recruitment) {

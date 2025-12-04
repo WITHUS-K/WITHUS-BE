@@ -49,6 +49,9 @@ public class DocumentQuestion extends BaseEntity {
     @JoinColumn(name = "ORGANIZATION_ROLE_ID")
     private OrganizationRole organizationRole;
 
+    @Column(name = "QUESTION_ORDER", nullable = false)
+    private Integer order;
+
     public void associateRecruitment(Recruitment recruitment) {
         this.recruitment = recruitment;
     }

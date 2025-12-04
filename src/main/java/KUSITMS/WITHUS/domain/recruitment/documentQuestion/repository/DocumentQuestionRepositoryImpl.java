@@ -30,6 +30,7 @@ public class DocumentQuestionRepositoryImpl implements DocumentQuestionRepositor
     public List<DocumentQuestion> findByRecruitment(Recruitment recruitment) {
         return queryFactory.selectFrom(documentQuestion)
                 .where(documentQuestion.recruitment.eq(recruitment))
+                .orderBy(documentQuestion.order.asc())
                 .fetch();
     }
 
@@ -46,6 +47,7 @@ public class DocumentQuestionRepositoryImpl implements DocumentQuestionRepositor
                         documentQuestion.recruitment.eq(recruitment)
                                 .and(roleFilter)
                 )
+                .orderBy(documentQuestion.order.asc())
                 .fetch();
     }
 }

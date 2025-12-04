@@ -28,7 +28,8 @@ public class DocumentQuestionResponseDTO {
             @Schema(description = "필수 여부") boolean required,
             @Schema(description = "적용 역할 이름") String organizationRoleName,
             @Schema(description = "텍스트 글자 수 제한") Integer textLimit,
-            @Schema(description = "공백 포함 여부") Boolean includeWhitespace
+            @Schema(description = "공백 포함 여부") Boolean includeWhitespace,
+            @Schema(description = "질문 순서 (1부터 시작)") Integer order
     ) implements QuestionSummary {
         public static TextQuestionSummary from(DocumentQuestion question) {
             return new TextQuestionSummary(
@@ -39,7 +40,8 @@ public class DocumentQuestionResponseDTO {
                     question.isRequired(),
                     question.getOrganizationRole() != null ? question.getOrganizationRole().getName() : "공통",
                     question.getTextLimit(),
-                    question.getIncludeWhitespace()
+                    question.getIncludeWhitespace(),
+                    question.getOrder()
             );
         }
     }
@@ -53,7 +55,8 @@ public class DocumentQuestionResponseDTO {
             @Schema(description = "필수 여부") boolean required,
             @Schema(description = "적용 역할 이름") String organizationRoleName,
             @Schema(description = "최대 파일 개수") Integer maxFileCount,
-            @Schema(description = "최대 파일 크기(MB)") Integer maxFileSizeMb
+            @Schema(description = "최대 파일 크기(MB)") Integer maxFileSizeMb,
+            @Schema(description = "질문 순서 (1부터 시작)") Integer order
     ) implements QuestionSummary {
         public static FileQuestionSummary from(DocumentQuestion question) {
             return new FileQuestionSummary(
@@ -64,7 +67,8 @@ public class DocumentQuestionResponseDTO {
                     question.isRequired(),
                     question.getOrganizationRole() != null ? question.getOrganizationRole().getName() : "공통",
                     question.getMaxFileCount(),
-                    question.getMaxFileSizeMb()
+                    question.getMaxFileSizeMb(),
+                    question.getOrder()
             );
         }
     }

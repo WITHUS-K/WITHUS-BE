@@ -74,6 +74,7 @@ public class RecruitmentResponseDTO {
                     .toList();
 
             List<DocumentQuestionResponseDTO.QuestionSummary> questions = recruitment.getQuestions().stream()
+                    .sorted((q1, q2) -> Integer.compare(q1.getOrder(), q2.getOrder()))
                     .map(q -> (DocumentQuestionResponseDTO.QuestionSummary) switch (q.getType()) {
                         case TEXT -> DocumentQuestionResponseDTO.TextQuestionSummary.from(q);
                         case FILE -> DocumentQuestionResponseDTO.FileQuestionSummary.from(q);
