@@ -171,7 +171,7 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
         addUserToOrganization(organization.id(), List.of(userId));
 
         List<Long> organizationIds = userOrganizationRepository.findOrganizationIdsByUserId(userId);
-        List<Organization> organizations = organizationRepository.findOrganzations(organizationIds);
+        List<Organization> organizations = organizationRepository.findOrganizations(organizationIds);
 
         return organizations.stream()
                 .map(OrganizationResponseDTO.Create::from)

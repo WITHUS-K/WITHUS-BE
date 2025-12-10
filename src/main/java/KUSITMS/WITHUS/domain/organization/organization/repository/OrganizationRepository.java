@@ -13,5 +13,5 @@ public interface OrganizationRepository {
     List<Organization> findByNameContaining(String keyword);
     boolean existsByName(String name);
     Optional<Organization> findByInviteCode(String inviteCode);
-    List<Organization> findOrganzations(List<Long> organizationIds);
+    List<Organization> findOrganizations(List<Long> organizationIds);
 }
