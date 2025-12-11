@@ -44,7 +44,7 @@ public class TestHelper {
 
         String recruitmentPayload = objectMapper.writeValueAsString(new RecruitmentRequestDTO.Upsert(
                 null, title, "설명",
-                List.of("백엔드"),
+                List.of(), // organizationRoleIds - 테스트에서는 빈 리스트
                 List.of(),
                 LocalDate.now().plusDays(5), true,
                 LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),

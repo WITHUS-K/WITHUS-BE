@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -196,7 +197,7 @@ class UserControllerTest {
     void updateUserSuccess() throws Exception {
         String accessToken = testAuthHelper.loginAndGetAccessToken(testMail, "password1!");
 
-        var updateReq = new UserRequestDTO.Update("홍길동", "01099999999", null, null, null);
+        var updateReq = new UserRequestDTO.Update("홍길동", "01099999999", null, null, null, List.of());
         MockMultipartFile jsonPart = new MockMultipartFile(
                 "request", "", MediaType.APPLICATION_JSON_VALUE,
                 objectMapper.writeValueAsBytes(updateReq)
