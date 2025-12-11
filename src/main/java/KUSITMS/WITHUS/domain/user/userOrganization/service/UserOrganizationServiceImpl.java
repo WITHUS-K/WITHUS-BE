@@ -1,7 +1,9 @@
 package KUSITMS.WITHUS.domain.user.userOrganization.service;
 
+import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationResponseDTO;
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
+import KUSITMS.WITHUS.domain.organization.organization.service.OrganizationService;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
@@ -38,6 +40,7 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
     private final MailTemplateProvider templateProvider;
     private final MailSender mailSender;
     private final InvitationTokenProvider invitationTokenProvider;
+    private final OrganizationService organizationService;
 
     /**
      * 특정 조직의 운영진을 모두 조회 - 페이지네이션
@@ -155,17 +158,23 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
     }
 
     /**
-     * 이메일 초대 수락
-     * @param token 검증할 토큰
+     * 초대 코드를 통해 동아리 추가 (이미 회원인 경우)
+     * @param inviteCode
+     * @param userId
      */
     @Override
     @Transactional
-    public void acceptInvitation(String token) {
-        InvitationTokenProvider.InvitationPayload payload = invitationTokenProvider.parseToken(token);
+    // AS IS 초대 검증 로직 없음 -> TO BE 초대 검증 로직 추가
+    public List<OrganizationResponseDTO.Create> acceptInvitation(String inviteCode, Long userId) {
+        OrganizationResponseDTO.Detail organization = organizationService.getByInviteCode(inviteCode);
 
-        addUserToOrganization(
-                payload.organizationId(),
-                List.of(payload.userId())
-        );
+        addUserToOrganization(organization.id(), List.of(userId));
+
+        List<Long> organizationIds = userOrganizationRepository.findOrganizationIdsByUserId(userId);
+        List<Organization> organizations = organizationRepository.findOrganizations(organizationIds);
+
+        return organizations.stream()
+                .map(OrganizationResponseDTO.Create::from)
+                .toList();
     }
 }

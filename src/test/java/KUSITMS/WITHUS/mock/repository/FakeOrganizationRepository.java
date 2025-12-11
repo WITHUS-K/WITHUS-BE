@@ -72,4 +72,11 @@ public class FakeOrganizationRepository implements OrganizationRepository {
                 .filter(org -> org.getInviteCode().equals(inviteCode))
                 .findFirst();
     }
+
+    @Override
+    public List<Organization> findOrganizations(List<Long> organizationIds) {
+        return data.stream()
+                .filter(org -> organizationIds.contains(org.getId()))
+                .collect(Collectors.toList());
+    }
 }

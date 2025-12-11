@@ -11,4 +11,6 @@ public interface OrganizationJpaRepository extends JpaRepository<Organization, L
     boolean existsByName(String name);
 
     Optional<Organization> findByInviteCode(String inviteCode);
+
+    List<Organization> findAllByIdIn(List<Long> organizationIds);
 }

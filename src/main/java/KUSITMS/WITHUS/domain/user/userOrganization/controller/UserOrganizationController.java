@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.user.userOrganization.controller;
 
+import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.userOrganization.dto.UserOrganizationRequestDTO;
@@ -81,10 +82,12 @@ public class UserOrganizationController {
         return SuccessResponse.ok("초대 메일을 전송했습니다.");
     }
 
-    @GetMapping("/invite/accept")
-    public ResponseEntity<Void> acceptInvitation(@RequestParam String token) {
-        organizationUserService.acceptInvitation(token);
-        URI redirectUri = URI.create(mailProperties.getInviteUserUrl());
-        return ResponseEntity.status(HttpStatus.FOUND).location(redirectUri).build();
+    @PostMapping("/invite/accept")
+    @Operation(summary = "초대 수락(이미 회원인 경우)", description = "초대받은 조직에 초대코드를 통해서 가입한다.")
+    public SuccessResponse<List<OrganizationResponseDTO.Create>> acceptInvitationPost(
+            @RequestBody @Valid UserOrganizationRequestDTO.InviteCode request,
+            @CurrentUser User user
+    ) {
+        return SuccessResponse.ok(organizationUserService.acceptInvitation(request.code(), user.getId()));
     }
 }
