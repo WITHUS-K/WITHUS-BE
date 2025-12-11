@@ -4,7 +4,8 @@ import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.dto.AvailableTimeRangeRequestDTO;
-import KUSITMS.WITHUS.domain.recruitment.position.dto.PositionRequestDTO;
+import KUSITMS.WITHUS.domain.organization.organizationRole.dto.OrganizationRoleRequestDTO;
+import KUSITMS.WITHUS.domain.organization.organizationRole.service.OrganizationRoleService;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,6 +32,7 @@ public class TestHelper {
     @Autowired
     private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
+    @Autowired private OrganizationRoleService organizationRoleService;
 
     public Long createRecruitment(String title, Long organizationId, String accessToken) throws Exception {
         List<AvailableTimeRangeRequestDTO> availableTimeRanges = List.of(
@@ -44,7 +46,7 @@ public class TestHelper {
 
         String recruitmentPayload = objectMapper.writeValueAsString(new RecruitmentRequestDTO.Upsert(
                 null, title, "설명",
-                List.of("백엔드"),
+                List.of(), // organizationRoleIds - 테스트에서는 빈 리스트
                 List.of(),
                 LocalDate.now().plusDays(5), true,
                 LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
@@ -74,12 +76,12 @@ public class TestHelper {
         return ((Number) JsonPath.read(result.getResponse().getContentAsString(), "$.result")).longValue();
     }
 
-    public Long createPosition(Long recruitmentId, String positionName, String accessToken) throws Exception {
-        String payload = objectMapper.writeValueAsString(new PositionRequestDTO.Create(
-                positionName, recruitmentId
+    public Long createOrganizationRole(Long organizationId, String roleName, String accessToken) throws Exception {
+        String payload = objectMapper.writeValueAsString(new OrganizationRoleRequestDTO.Create(
+                roleName, "#FF0000"
         ));
 
-        MvcResult result = mockMvc.perform(post("/api/v1/positions")
+        MvcResult result = mockMvc.perform(post("/api/v1/organizations/" + organizationId + "/roles")
                         .header("Authorization", accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
@@ -89,12 +91,12 @@ public class TestHelper {
         return ((Number) JsonPath.read(result.getResponse().getContentAsString(), "$.result.id")).longValue();
     }
 
-    public Long createApplication(String accessToken, Long recruitmentId, Long positionId, String name, String email) throws Exception {
+    public Long createApplication(String accessToken, Long recruitmentId, Long organizationRoleId, String name, String email) throws Exception {
         ApplicationRequestDTO.Create requestDto = new ApplicationRequestDTO.Create(
                 name, email, "01012341234", Gender.MALE,
                 "대학교", "전공", AcademicStatus.ENROLLED,
                 LocalDate.of(2000, 1, 1), "서울시",
-                recruitmentId, positionId,
+                recruitmentId, organizationRoleId,
                 List.of(), List.of(LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(10, 0)))
         );
 

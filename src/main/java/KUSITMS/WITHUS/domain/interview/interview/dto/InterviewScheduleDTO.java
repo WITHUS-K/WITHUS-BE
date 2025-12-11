@@ -119,15 +119,15 @@ public record InterviewScheduleDTO(
             @Schema(description = "지원서 ID") Long applicationId,
             @Schema(description = "이름") String name,
             @Schema(description = "이메일") String email,
-            @Schema(description = "파트") String positionName
+            @Schema(description = "역할") String organizationRoleName
     ) {
         public static ApplicantInfo from(Application app) {
-            String positionName = app.getPosition() != null ? app.getPosition().getName() : null;
+            String organizationRoleName = app.getOrganizationRole() != null ? app.getOrganizationRole().getName() : null;
             return new ApplicantInfo(
                     app.getId(),
                     app.getName(),
                     app.getEmail(),
-                    positionName
+                    organizationRoleName
             );
         }
     }

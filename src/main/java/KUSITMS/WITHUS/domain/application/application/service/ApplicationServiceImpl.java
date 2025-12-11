@@ -30,8 +30,8 @@ import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationT
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.repository.EvaluationCriteriaRepository;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.repository.DocumentQuestionRepository;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
-import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
+import KUSITMS.WITHUS.domain.organization.organizationRole.repository.OrganizationRoleRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
@@ -71,7 +71,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final ApplicantAvailabilityRepository applicantAvailabilityRepository;
     private final RecruitmentRepository recruitmentRepository;
-    private final PositionRepository positionRepository;
+    private final OrganizationRoleRepository organizationRoleRepository;
     private final EvaluationRepository evaluationRepository;
     private final EvaluationCriteriaRepository evaluationCriteriaRepository;
     private final DocumentQuestionRepository documentQuestionRepository;
@@ -97,13 +97,27 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Transactional
     public ApplicationResponseDTO.Summary create(ApplicationRequestDTO.Create request, MultipartFile profileImage, List<MultipartFile> files) {
         Recruitment recruitment = recruitmentRepository.getById(request.recruitmentId());
-        Position position = Optional.ofNullable(request.positionId())
-                .flatMap(positionRepository::findById)
+        OrganizationRole organizationRole = Optional.ofNullable(request.positionId())
+                .map(organizationRoleRepository::getById)
                 .orElse(null);
+
+        // 조직의 OrganizationRole인지 검증
+        if (organizationRole != null && !organizationRole.getOrganization().getId().equals(recruitment.getOrganization().getId())) {
+            throw new CustomException(ErrorCode.ORGANIZATION_ROLE_NOT_EXIST);
+        }
+
+        // 공고에 포함된 역할인지 검증
+        if (organizationRole != null) {
+            boolean isValidRole = recruitment.getPositions().stream()
+                    .anyMatch(ror -> ror.getOrganizationRole().getId().equals(organizationRole.getId()));
+            if (!isValidRole) {
+                throw new CustomException(ErrorCode.ORGANIZATION_ROLE_NOT_EXIST);
+            }
+        }
 
         validator.validateRequiredFields(recruitment, request, profileImage);
 
-        Application application = factory.createApplication(request, recruitment, position);
+        Application application = factory.createApplication(request, recruitment, organizationRole);
         applicationRepository.save(application);
 
         FileResponseDTO.Upload uploadData = fileUploadService.uploadProfileImage(profileImage,
@@ -115,7 +129,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         saveApplicantAvailabilities(application, request.availableTimes());
 
         List<MultipartFile> fileList = files != null ? files : List.of();
-        List<DocumentQuestion> questions = documentQuestionRepository.findCommonAndByPosition(recruitment, position);
+        List<DocumentQuestion> questions = documentQuestionRepository.findCommonAndByOrganizationRole(recruitment, organizationRole);
         validator.validateFileAnswers(request.answers(), fileList, questions);
 
         Map<String, FileResponseDTO.Upload> uploadedFileUrls = fileUploadService.uploadAnswerFiles(fileList,
@@ -270,7 +284,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                     );
                     break;
                 case POSITION_NAME:
-                    cmp = sa.positionName().compareToIgnoreCase(sb.positionName());
+                    cmp = sa.organizationRoleName().compareToIgnoreCase(sb.organizationRoleName());
                     break;
                 case STATUS:
                     cmp = sa.status().compareTo(sb.status());

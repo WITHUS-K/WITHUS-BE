@@ -60,7 +60,7 @@ public class ApplicationAssembler {
                 nextApplicationId,
 
                 application.getId(),
-                application.getPosition() != null ? application.getPosition().getName() : null,
+                application.getOrganizationRole() != null ? application.getOrganizationRole().getName() : null,
                 application.getName(),
                 application.getGender(),
                 application.getEmail(),

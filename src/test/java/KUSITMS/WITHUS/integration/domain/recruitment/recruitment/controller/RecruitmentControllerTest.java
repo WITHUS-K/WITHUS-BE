@@ -95,8 +95,8 @@ class RecruitmentControllerTest {
     private RecruitmentRequestDTO.Upsert createUpsertRequest(String title) {
         return new RecruitmentRequestDTO.Upsert(
                 null, title, "설명",
-                List.of("백엔드"),
-                List.of(new DocumentQuestionRequestDTO.Create("질문", "", QuestionType.TEXT, true, 500, true, null, null, null)),
+                List.of(), // organizationRoleIds - 테스트에서는 빈 리스트
+                List.of(new DocumentQuestionRequestDTO.Create("질문", "", QuestionType.TEXT, true, 500, true, null, null, null, 1)),
                 LocalDate.now().plusDays(5),
                 true, LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
                 (short) 10, savedOrganizationId,

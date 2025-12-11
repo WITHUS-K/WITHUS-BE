@@ -2,7 +2,6 @@ package KUSITMS.WITHUS.domain.application.distributionRequest.entity;
 
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import KUSITMS.WITHUS.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,11 +22,7 @@ public class DistributionAssignment extends BaseEntity {
     private DistributionRequest request;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "POSITION_ID")
-    private Position position;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ORGANIZATION_ROLE_ID")
+    @JoinColumn(name = "ORGANIZATION_ROLE_ID", nullable = false)
     private OrganizationRole organizationRole;
 
     @Enumerated(EnumType.STRING)

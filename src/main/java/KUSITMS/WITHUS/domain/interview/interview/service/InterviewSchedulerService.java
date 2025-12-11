@@ -109,7 +109,7 @@ public class InterviewSchedulerService {
         finalAssignment.forEach((aid, sim) -> {
             TimeSlot slot = timeSlotRepository.findOrCreate(
                     sim.date(), sim.start(), sim.end(),
-                    interview, sim.position(), sim.roomName()
+                    interview, sim.organizationRole(), sim.roomName()
             );
             applicantMap.get(aid).assignTimeSlot(slot);
             System.out.printf(
@@ -139,25 +139,25 @@ public class InterviewSchedulerService {
         Long applicantId = applicantIds.get(index);
         Application applicant = applicantMap.get(applicantId);
 
-        // recruitment의 포지션 존재 여부 확인
+        // recruitment의 역할 존재 여부 확인
         Recruitment recruitment = applicant.getRecruitment();
-        boolean recruitmentHasPosition = recruitment.getPositions() != null && !recruitment.getPositions().isEmpty();
+        boolean recruitmentHasOrganizationRole = recruitment.getPositions() != null && !recruitment.getPositions().isEmpty();
 
-        Long positionId = applicant.getPosition() != null ? applicant.getPosition().getId() : 0L;
+        Long organizationRoleId = applicant.getOrganizationRole() != null ? applicant.getOrganizationRole().getId() : 0L;
 
         for (LocalDateTime time : availabilityMap.getOrDefault(applicantId, List.of())) {
             List<SimSlot> slots = slotPool.computeIfAbsent(time, t -> new ArrayList<>());
 
             // 기존 슬롯 중 정원이 남은 슬롯이 있는지 확인
             for (SimSlot s : slots) {
-                boolean samePosition;
-                if (!recruitmentHasPosition) {
-                    samePosition = true;
+                boolean sameOrganizationRole;
+                if (!recruitmentHasOrganizationRole) {
+                    sameOrganizationRole = true;
                 } else {
-                    samePosition = (s.position() == null && positionId == 0L)
-                            || (s.position() != null && Objects.equals(s.position().getId(), positionId));
+                    sameOrganizationRole = (s.organizationRole() == null && organizationRoleId == 0L)
+                            || (s.organizationRole() != null && Objects.equals(s.organizationRole().getId(), organizationRoleId));
                 }
-                if (samePosition) {
+                if (sameOrganizationRole) {
                     long used = finalAssignment.values().stream()
                             .filter(x -> x.equals(s)).count();
                     if (used < config.applicantPerSlot) {
@@ -176,7 +176,7 @@ public class InterviewSchedulerService {
                 LocalTime st = time.toLocalTime();
                 LocalTime en = st.plusMinutes(slotMinutes);
                 String room = config.roomNames().get(slots.size());
-                SimSlot newSlot = new SimSlot(date, st, en, recruitmentHasPosition ? applicant.getPosition() : null, room);
+                SimSlot newSlot = new SimSlot(date, st, en, recruitmentHasOrganizationRole ? applicant.getOrganizationRole() : null, room);
 
                 slots.add(newSlot);
                 finalAssignment.put(applicantId, newSlot);

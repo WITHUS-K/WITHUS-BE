@@ -11,7 +11,7 @@ import KUSITMS.WITHUS.domain.interview.interviewQuestion.entity.InterviewQuestio
 import KUSITMS.WITHUS.domain.evaluation.evaluation.entity.Evaluation;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.global.common.BaseEntity;
@@ -85,8 +85,8 @@ public class Application extends BaseEntity {
     private Recruitment recruitment;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "POSITION_ID")
-    private Position position;
+    @JoinColumn(name = "ORGANIZATION_ROLE_ID")
+    private OrganizationRole organizationRole;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "INTERVIEW_ID")
@@ -126,7 +126,7 @@ public class Application extends BaseEntity {
 
     public static Application create(
             String name, Gender gender, String email, String phoneNumber, String university, String major,
-            AcademicStatus academicStatus, LocalDate birthDate, String address, Recruitment recruitment, Position position
+            AcademicStatus academicStatus, LocalDate birthDate, String address, Recruitment recruitment, OrganizationRole organizationRole
     ) {
         return Application.builder()
                 .name(name)
@@ -140,7 +140,7 @@ public class Application extends BaseEntity {
                 .address(address)
                 .status(ApplicationStatus.PENDING)
                 .recruitment(recruitment)
-                .position(position)
+                .organizationRole(organizationRole)
                 .build();
     }
 

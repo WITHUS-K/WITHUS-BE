@@ -24,21 +24,4 @@ public class PositionResponseDTO {
             );
         }
     }
-
-    @Schema(description = "포지션 지원자 수 정보 DTO")
-    public record SummaryForRecruitment(
-            @Schema(description = "포지션 이름") String name,
-            @Schema(description = "지원자 수") int applicantCount
-    ) {
-        public static SummaryForRecruitment from(Position position) {
-            if (position == null) {
-                return new SummaryForRecruitment(null, 0);
-            }
-
-            String name = position.getName();
-            int count = position.getApplications() != null ? position.getApplications().size() : 0;
-
-            return new SummaryForRecruitment(name, count);
-        }
-    }
 }

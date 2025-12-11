@@ -10,8 +10,6 @@ import KUSITMS.WITHUS.domain.application.distributionRequest.entity.Distribution
 import KUSITMS.WITHUS.domain.application.distributionRequest.repository.DistributionRequestRepository;
 import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.organization.organizationRole.repository.OrganizationRoleRepository;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
-import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.UserOrganizationRole;
@@ -36,7 +34,6 @@ public class EvaluatorAssignmentService {
     private final ApplicationRepository applicationRepository;
     private final UserOrganizationRoleRepository userOrganizationRoleRepository;
     private final UserRepository userRepository;
-    private final PositionRepository positionRepository;
     private final OrganizationRoleRepository organizationRoleRepository;
     private final DistributionRequestRepository distributionRequestRepository;
 
@@ -49,11 +46,8 @@ public class EvaluatorAssignmentService {
         // 요청 이력 dto -> 엔티티 매핑
         List<DistributionAssignment> assignments = request.assignments().stream()
                 .map(dto -> {
-                    Position position = positionRepository.getById(dto.positionId());
-                    OrganizationRole role =
-                            organizationRoleRepository.getById(dto.organizationRoleId());
+                    OrganizationRole role = organizationRoleRepository.getById(dto.organizationRoleId());
                     return DistributionAssignment.builder()
-                            .position(position)
                             .organizationRole(role)
                             .evaluationType(dto.evaluationType())
                             .count(dto.count())
@@ -69,12 +63,12 @@ public class EvaluatorAssignmentService {
         Long recruitmentId = request.recruitmentId();
         applicationEvaluatorRepository.deleteAllByApplication_Recruitment_IdAndEvaluationType(recruitmentId, request.evaluationType());
 
-        // 파트별 배정
+        // 역할별 배정
         Random rnd = new Random();
         for (var part : request.assignments()) {
-            // 후보 평가자 풀
+            // 후보 평가자 풀 (평가 담당자 역할을 가진 사용자들)
             List<User> pool = new ArrayList<>(userOrganizationRoleRepository
-                    .findAllByOrganizationRole_Id(part.organizationRoleId())
+                    .findAllByOrganizationRole_Id(part.evaluatorRoleId())
                     .stream()
                     .map(UserOrganizationRole::getUser)
                     .toList());
@@ -83,9 +77,9 @@ public class EvaluatorAssignmentService {
                 throw new CustomException(ErrorCode.INSUFFICIENT_EVALUATORS);
             }
 
-            // 이 파트 지원서 리스트
+            // 이 역할을 지원한 지원서 리스트
             List<Application> apps = applicationRepository
-                    .findByRecruitment_IdAndPosition_Id(recruitmentId, part.positionId());
+                    .findByRecruitment_IdAndOrganizationRole_Id(recruitmentId, part.organizationRoleId());
 
             // 각 지원서마다 랜덤 n명 배정
             for (Application app : apps) {

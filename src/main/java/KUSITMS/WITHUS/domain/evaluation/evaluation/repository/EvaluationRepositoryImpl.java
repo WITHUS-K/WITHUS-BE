@@ -53,7 +53,7 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
     @Override
     public long countFullyEvaluatedApplications(
             Long recruitmentId,
-            Long positionId,
+            Long organizationRoleId,
             EvaluationType stage,
             long requiredCriteriaCount
     ) {
@@ -62,7 +62,7 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
                 .from(evaluation)
                 .where(
                         evaluation.application.recruitment.id.eq(recruitmentId),
-                        evaluation.application.position.id.eq(positionId),
+                        evaluation.application.organizationRole.id.eq(organizationRoleId),
                         evaluation.criteria.evaluationType.eq(stage)
                 )
                 .groupBy(evaluation.application.id)

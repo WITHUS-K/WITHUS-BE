@@ -224,7 +224,7 @@ public class ApplicationResponseDTO {
                     previousApplicationId,
                     nextApplicationId,
                     application.getId(),
-                    application.getPosition() != null ? application.getPosition().getName() : null,
+                    application.getOrganizationRole() != null ? application.getOrganizationRole().getName() : null,
                     application.getName(),
                     application.getGender(),
                     application.getEmail(),
@@ -261,7 +261,7 @@ public class ApplicationResponseDTO {
             @Schema(description = "지원서 ID") Long id,
             @Schema(description = "지원자 이름") String name,
             @Schema(description = "이메일") String email,
-            @Schema(description = "파트명") String positionName,
+            @Schema(description = "역할명") String organizationRoleName,
             @Schema(description = "상태") ApplicationStatus status
     ) {
         public static Summary from(Application application) {
@@ -269,7 +269,7 @@ public class ApplicationResponseDTO {
                     application.getId(),
                     application.getName(),
                     application.getEmail(),
-                    application.getPosition() != null ? application.getPosition().getName() : null,
+                    application.getOrganizationRole() != null ? application.getOrganizationRole().getName() : null,
                     application.getStatus()
             );
         }
@@ -280,7 +280,7 @@ public class ApplicationResponseDTO {
             @Schema(description = "서류 발표 여부", example = "true") boolean documentResultAnnounced,
             @Schema(description = "지원서 ID") Long id,
             @Schema(description = "지원자 이름") String name,
-            @Schema(description = "파트명") String positionName,
+            @Schema(description = "역할명") String organizationRoleName,
             @Schema(description = "합불 상태") ApplicationStatus status,
             @Schema(description = "해당 평가자가 이 지원서를 서류 평가했는지 여부") boolean documentEvaluated,
             @Schema(description = "이 사용자가 준 총 서류 평가 점수", example = "20", nullable = true) @Nullable Integer myScoreTotal,
@@ -328,7 +328,7 @@ public class ApplicationResponseDTO {
                     isDocumentResultAnnounced,
                     application.getId(),
                     application.getName(),
-                    application.getPosition() != null ? application.getPosition().getName() : null,
+                    application.getOrganizationRole() != null ? application.getOrganizationRole().getName() : null,
                     application.getStatus(),
                     evaluated,
                     myScoreTotal,
@@ -373,7 +373,7 @@ public class ApplicationResponseDTO {
             @Schema(description = "목록 내 순번", example = "001") String sequence,
             @Schema(description = "지원서 ID") Long id,
             @Schema(description = "지원자 이름") String name,
-            @Schema(description = "파트명") String positionName,
+            @Schema(description = "역할명") String organizationRoleName,
             @Schema(description = "합불 상태") ApplicationStatus status,
 
             @Schema(description = "서류 평가 담당자 수", example = "3") int documentAssignedCount,
@@ -449,7 +449,7 @@ public class ApplicationResponseDTO {
                     seq,
                     application.getId(),
                     application.getName(),
-                    application.getPosition() != null ? application.getPosition().getName() : null,
+                    application.getOrganizationRole() != null ? application.getOrganizationRole().getName() : null,
                     application.getStatus(),
 
                     docAssignedCount,
@@ -513,7 +513,7 @@ public class ApplicationResponseDTO {
             return new DetailForTimeSlot(
                     application.getId(),
                     application.getName(),
-                    application.getPosition().getId(),
+                    application.getOrganizationRole() != null ? application.getOrganizationRole().getId() : null,
                     timeSlot.getDate(),
                     timeSlot.getStartTime(),
                     timeSlot.getEndTime(),

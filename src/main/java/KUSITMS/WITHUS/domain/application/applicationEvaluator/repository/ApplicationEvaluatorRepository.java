@@ -9,7 +9,7 @@ import java.util.List;
 public interface ApplicationEvaluatorRepository {
     void deleteAllByApplication_Recruitment_IdAndEvaluationType(Long recruitmentId, EvaluationType evaluationType);
     void deleteAllByApplication_Id(Long applicationId);
-    List<ApplicationEvaluator> findByRecruitmentAndPositionAndType(Long recruitmentId, Long positionId, EvaluationType type);
+    List<ApplicationEvaluator> findByRecruitmentAndOrganizationRoleAndType(Long recruitmentId, Long organizationRoleId, EvaluationType type);
     List<ApplicationEvaluator> findByEvaluatorAndRecruitmentAndType(Long evaluatorId, EvaluationType type, Long recruitmentId);
     void saveAll(List<ApplicationEvaluator> assigns);
     void deleteAllByApplication_IdAndEvaluationType(Long id, EvaluationType evaluationType);

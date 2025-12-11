@@ -77,6 +77,7 @@ public enum ErrorCode {
     // DocumentQuestion (지원서 서류 질문)
     DOCUMENT_QUESTION_ALREADY_EXIST("DOCUMENT_QUESTION400", "이미 존재하는 지원서 질문입니다.", HttpStatus.BAD_REQUEST),
     DOCUMENT_QUESTION_NOT_EXIST("DOCUMENT_QUESTION404", "존재하지 않는 지원서 질문입니다.", HttpStatus.NOT_FOUND),
+    DUPLICATE_QUESTION_ORDER("DOCUMENT_QUESTION400", "같은 공고 내에서 질문 순서가 중복될 수 없습니다.", HttpStatus.BAD_REQUEST),
 
     // Position (파트)
     POSITION_ALREADY_EXIST("POSITION400", "이미 해당 파트가 존재합니다.", HttpStatus.BAD_REQUEST),

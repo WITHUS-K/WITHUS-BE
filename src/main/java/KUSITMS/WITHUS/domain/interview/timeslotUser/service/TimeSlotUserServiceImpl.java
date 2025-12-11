@@ -16,7 +16,7 @@ import KUSITMS.WITHUS.domain.interview.timeslot.service.util.selection.policy.Fa
 import KUSITMS.WITHUS.domain.interview.timeslot.service.util.selection.ordering.SlotOrderingStrategy;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.repository.TimeSlotUserRepository;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -162,13 +162,13 @@ public class TimeSlotUserServiceImpl implements TimeSlotUserService {
 
         final LocalDateTime slotStart = slot.getDate().atTime(slot.getStartTime());
         final LocalDateTime slotEnd   = slot.getDate().atTime(slot.getEndTime());
-        final Position slotPosition   = slot.getPosition();
+        final OrganizationRole slotOrganizationRole = slot.getOrganizationRole();
 
-        log.info("[4] 타임슬롯 ID: {} / 시간: {} / 포지션: {}",
-                slot.getId(), slotStart, slotPosition != null ? slotPosition.getName() : "null");
+        log.info("[4] 타임슬롯 ID: {} / 시간: {} / 역할: {}",
+                slot.getId(), slotStart, slotOrganizationRole != null ? slotOrganizationRole.getName() : "null");
 
-        // 시간/포지션 일치 후보
-        final List<Long> prelim = candidateSelector.preliminaryCandidates(slotStart, slotPosition, index);
+        // 시간/역할 일치 후보
+        final List<Long> prelim = candidateSelector.preliminaryCandidates(slotStart, slotOrganizationRole, index);
 
         // 동시간대 겹침 제거
         final List<Long> feasible = candidateSelector.feasibleCandidates(prelim, slotStart, slotEnd, index, busyCalendar);

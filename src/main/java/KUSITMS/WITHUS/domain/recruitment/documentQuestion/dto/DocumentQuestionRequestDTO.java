@@ -2,6 +2,7 @@ package KUSITMS.WITHUS.domain.recruitment.documentQuestion.dto;
 
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.enumerate.QuestionType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 @Schema(description = "서류 질문 관련 요청 DTO")
@@ -28,7 +29,10 @@ public class DocumentQuestionRequestDTO {
             @Schema(description = "최대 파일 수", example = "1") Integer maxFileCount,
             @Schema(description = "최대 파일 크기(MB)", example = "10") Integer maxFileSizeMb,
 
-            @Schema(description = "적용할 파트 ID - null이면 공통", example = "백엔드") String positionName
+            @Schema(description = "적용할 OrganizationRole ID - null이면 공통", example = "1") Long organizationRoleId,
+
+            @Schema(description = "질문 순서 (1부터 시작)", example = "1")
+            @NotNull @Min(1) Integer order
     ) {}
 
 }

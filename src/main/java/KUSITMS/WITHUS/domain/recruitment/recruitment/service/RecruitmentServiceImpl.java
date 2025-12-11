@@ -13,8 +13,7 @@ import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.repository.Evaluation
 import KUSITMS.WITHUS.domain.interview.interview.repository.InterviewRepository;
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
-import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
@@ -56,7 +55,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     private final OrganizationRepository organizationRepository;
     private final UserOrganizationRepository userOrganizationRepository;
     private final ApplicationRepository applicationRepository;
-    private final PositionRepository positionRepository;
     private final EvaluationRepository evaluationRepository;
     private final EvaluationCriteriaRepository evaluationCriteriaRepository;
     private final ApplicationEvaluatorRepository applicationEvaluatorRepository;
@@ -157,8 +155,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         long requiredCriteriaCount = evaluationCriteriaRepository
                 .countByRecruitment_IdAndEvaluationType(recruitmentId, stage);
 
-        return positionRepository.findByRecruitment_Id(recruitmentId).stream()
-                .map(pos -> toTaskProgress(pos, recruitmentId, stage, requiredCriteriaCount, daysToDeadline))
+        return recruitment.getPositions().stream()
+                .map(ror -> toTaskProgress(ror.getOrganizationRole(), recruitmentId, stage, requiredCriteriaCount, daysToDeadline))
                 .toList();
     }
 
@@ -168,7 +166,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     public RecruitmentResponseDTO.PendingEvaluator getPendingEvaluators(Long recruitmentId) {
-        // 공고 조회
         Recruitment recruitment = recruitmentRepository.getById(recruitmentId);
         LocalDateTime now = LocalDateTime.now();
 
@@ -197,9 +194,9 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 .stream().map(EvaluationCriteria::getId).toList();
 
         // 파트 별 미완료 평가자 추출
-        List<RecruitmentResponseDTO.PendingEvaluatorByPosition> byPosition = positionRepository.findByRecruitment_Id(recruitmentId)
+        List<RecruitmentResponseDTO.PendingEvaluatorByPosition> byPosition = recruitment.getPositions()
                 .stream()
-                .map(pos -> toPendingEvaluatorByPosition(recruitmentId, pos, stage, criteriaIds))
+                .map(ror -> toPendingEvaluatorByPosition(recruitmentId, ror.getOrganizationRole(), stage, criteriaIds))
                 .toList();
 
         // 파트별 미완료자 수집 - 플랫하게
@@ -268,6 +265,10 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         if (request.isTemporary()) recruitment.markAsTemporary();
         else recruitment.markAsFinal();
 
+        // organization roles 업데이트
+        recruitment.clearPositions();
+        positionAppender.append(recruitment, request.organizationRoleIds());
+
         return RecruitmentResponseDTO.Update.from(recruitment);
     }
 
@@ -294,7 +295,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         List<Long> organizationIds = userOrganizationRepository.findOrganizationIdsByUserId(user.getId());
 
         return recruitmentRepository.findAllByKeyword(keyword, organizationIds).stream()
-                .map(RecruitmentResponseDTO.Summary::from)
+                .map(r -> RecruitmentResponseDTO.Summary.from(r, roleId -> applicationRepository.countByRecruitment_IdAndOrganizationRole_Id(r.getId(), roleId)))
                 .toList();
     }
 
@@ -340,7 +341,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         recruitment.clearEvaluationCriteria();
         Recruitment savedRecruitment = recruitmentRepository.save(recruitment);
 
-        positionAppender.append(recruitment, request.positions());
+        positionAppender.append(recruitment, request.organizationRoleIds());
         criteriaAppender.appendWithPositions(recruitment, request.documentEvaluationCriteria(), EvaluationType.DOCUMENT);
         criteriaAppender.appendWithPositions(recruitment, request.interviewEvaluationCriteria(), EvaluationType.INTERVIEW);
         availableTimeRangeAppender.append(recruitment, request.availableTimeRanges());
@@ -362,22 +363,22 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         return ChronoUnit.DAYS.between(today, deadline);
     }
 
-    private RecruitmentResponseDTO.TaskProgress toTaskProgress(Position pos, Long recruitmentId, EvaluationType stage, long criteriaCount, long dDay) {
-        List<Application> apps = applicationRepository.findByRecruitment_IdAndPosition_Id(recruitmentId, pos.getId());
+    private RecruitmentResponseDTO.TaskProgress toTaskProgress(OrganizationRole role, Long recruitmentId, EvaluationType stage, long criteriaCount, long dDay) {
+        List<Application> apps = applicationRepository.findByRecruitment_IdAndOrganizationRole_Id(recruitmentId, role.getId());
         List<Application> targets = apps.stream()
                 .filter(app -> stage != EvaluationType.INTERVIEW || app.getStatus() != ApplicationStatus.DOX_FAIL)
                 .toList();
 
         long total = targets.size();
-        long completed = evaluationRepository.countFullyEvaluatedApplications(recruitmentId, pos.getId(), stage, criteriaCount);
+        long completed = evaluationRepository.countFullyEvaluatedApplications(recruitmentId, role.getId(), stage, criteriaCount);
         long notCompleted = total - completed;
         int progress = total == 0 ? 0 : (int) (completed * 100 / total);
 
-        return RecruitmentResponseDTO.TaskProgress.from(pos.getName(), dDay, total, completed, notCompleted, progress);
+        return RecruitmentResponseDTO.TaskProgress.from(role.getName(), dDay, total, completed, notCompleted, progress);
     }
 
-    private RecruitmentResponseDTO.PendingEvaluatorByPosition toPendingEvaluatorByPosition(Long recruitmentId, Position pos, EvaluationType stage, List<Long> criteriaIds) {
-        List<ApplicationEvaluator> assigns = applicationEvaluatorRepository.findByRecruitmentAndPositionAndType(recruitmentId, pos.getId(), stage);
+    private RecruitmentResponseDTO.PendingEvaluatorByPosition toPendingEvaluatorByPosition(Long recruitmentId, OrganizationRole role, EvaluationType stage, List<Long> criteriaIds) {
+        List<ApplicationEvaluator> assigns = applicationEvaluatorRepository.findByRecruitmentAndOrganizationRoleAndType(recruitmentId, role.getId(), stage);
 
         Map<User, List<Application>> appsByUser = assigns.stream()
                 .collect(Collectors.groupingBy(ApplicationEvaluator::getEvaluator, Collectors.mapping(ApplicationEvaluator::getApplication, toList())));
@@ -392,7 +393,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 .distinct()
                 .toList();
 
-        return RecruitmentResponseDTO.PendingEvaluatorByPosition.from(pos.getName(), pending);
+        return RecruitmentResponseDTO.PendingEvaluatorByPosition.from(role.getName(), pending);
     }
 
     private Recruitment createRecruitment(RecruitmentRequestDTO.Upsert request, Organization organization, boolean isTemporary) {
@@ -429,9 +430,9 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 })
                 .map(r -> {
                     List<RecruitmentResponseDTO.PositionCount> counts = r.getPositions().stream()
-                            .map(pos -> new RecruitmentResponseDTO.PositionCount(
-                                    pos.getName(),
-                                    applicationRepository.countByRecruitment_IdAndPosition_Id(r.getId(), pos.getId())
+                            .map(ror -> new RecruitmentResponseDTO.PositionCount(
+                                    ror.getOrganizationRole().getName(),
+                                    applicationRepository.countByRecruitment_IdAndOrganizationRole_Id(r.getId(), ror.getOrganizationRole().getId())
                             ))
                             .toList();
                     return RecruitmentResponseDTO.SummaryForHome.from(r, counts);

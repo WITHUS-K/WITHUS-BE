@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.organization.organizationRole.entity;
 
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.UserOrganizationRole;
 import jakarta.persistence.*;
 import lombok.*;

@@ -28,12 +28,12 @@ public class ApplicationEvaluatorRepositoryImpl implements ApplicationEvaluatorR
     }
 
     @Override
-    public List<ApplicationEvaluator> findByRecruitmentAndPositionAndType(Long recruitmentId, Long positionId, EvaluationType type) {
+    public List<ApplicationEvaluator> findByRecruitmentAndOrganizationRoleAndType(Long recruitmentId, Long organizationRoleId, EvaluationType type) {
         return queryFactory
                 .selectFrom(applicationEvaluator)
                 .where(
                         applicationEvaluator.application.recruitment.id.eq(recruitmentId),
-                        applicationEvaluator.application.position.id.eq(positionId),
+                        applicationEvaluator.application.organizationRole.id.eq(organizationRoleId),
                         applicationEvaluator.evaluationType.eq(type)
                 )
                 .fetch();

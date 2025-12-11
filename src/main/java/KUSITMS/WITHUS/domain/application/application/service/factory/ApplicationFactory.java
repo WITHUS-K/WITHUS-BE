@@ -6,7 +6,7 @@ import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswer
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestion;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.enumerate.QuestionType;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.global.infra.upload.dto.FileResponseDTO;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Component
 public class ApplicationFactory {
 
-    public Application createApplication(ApplicationRequestDTO.Create request, Recruitment recruitment, Position position) {
+    public Application createApplication(ApplicationRequestDTO.Create request, Recruitment recruitment, OrganizationRole organizationRole) {
         Gender gender = request.gender() != null ? request.gender() : Gender.NONE;
 
         return Application.create(
@@ -34,7 +34,7 @@ public class ApplicationFactory {
                 request.birthDate(),
                 request.address(),
                 recruitment,
-                position
+                organizationRole
         );
     }
 

@@ -1,6 +1,6 @@
 package KUSITMS.WITHUS.domain.interview.timeslot.repository;
 
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
@@ -38,17 +38,17 @@ public class TimeSlotRepositoryImpl implements TimeSlotRepository {
     }
 
     @Override
-    public Optional<TimeSlot> findByDateTimeAndInterviewIdAndPosition(LocalDate date, LocalTime startTime, Long interviewId, Long positionId, String roomName) {
+    public Optional<TimeSlot> findByDateTimeAndInterviewIdAndPosition(LocalDate date, LocalTime startTime, Long interviewId, Long organizationRoleId, String roomName) {
         BooleanBuilder builder = new BooleanBuilder()
                 .and(timeSlot.date.eq(date))
                 .and(timeSlot.startTime.eq(startTime))
                 .and(timeSlot.interview.id.eq(interviewId))
                 .and(timeSlot.roomName.eq(roomName));
 
-        if (positionId != null) {
-            builder.and(timeSlot.position.id.eq(positionId));
+        if (organizationRoleId != null) {
+            builder.and(timeSlot.organizationRole.id.eq(organizationRoleId));
         } else {
-            builder.and(timeSlot.position.isNull());
+            builder.and(timeSlot.organizationRole.isNull());
         }
 
         return Optional.ofNullable(queryFactory
@@ -59,15 +59,15 @@ public class TimeSlotRepositoryImpl implements TimeSlotRepository {
 
 
     @Override
-    public TimeSlot findOrCreate(LocalDate date, LocalTime startTime, LocalTime endTime, Interview interview, Position position, String roomName) {
-        Long positionId = position != null ? position.getId() : null;
-        return findByDateTimeAndInterviewIdAndPosition(date, startTime, interview.getId(), positionId, roomName)
+    public TimeSlot findOrCreate(LocalDate date, LocalTime startTime, LocalTime endTime, Interview interview, OrganizationRole organizationRole, String roomName) {
+        Long organizationRoleId = organizationRole != null ? organizationRole.getId() : null;
+        return findByDateTimeAndInterviewIdAndPosition(date, startTime, interview.getId(), organizationRoleId, roomName)
                 .orElseGet(() -> save(TimeSlot.builder()
                         .date(date)
                         .startTime(startTime)
                         .endTime(endTime)
                         .interview(interview)
-                        .position(position)
+                        .organizationRole(organizationRole)
                         .roomName(roomName)
                         .build()));
     }

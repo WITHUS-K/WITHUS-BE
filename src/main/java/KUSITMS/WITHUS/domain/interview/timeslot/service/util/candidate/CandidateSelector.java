@@ -1,7 +1,7 @@
 package KUSITMS.WITHUS.domain.interview.timeslot.service.util.candidate;
 
 import KUSITMS.WITHUS.domain.interview.timeslot.service.util.calendar.BusyCalendar;
-import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +18,9 @@ import java.util.Set;
 @Slf4j
 public class CandidateSelector {
 
-    /** 1차 후보 - 시간/포지션 일치 */
+    /** 1차 후보 - 시간/역할 일치 */
     public List<Long> preliminaryCandidates(final LocalDateTime slotStart,
-                                            final Position slotPosition,
+                                            final OrganizationRole slotOrganizationRole,
                                             final CandidateIndex index) {
         final List<Long> prelim = new ArrayList<>();
 
@@ -34,10 +34,10 @@ public class CandidateSelector {
             }
 
             final User user = index.getUserMap().get(userId);
-            final boolean matchRole = (slotPosition == null) || user.hasMatchingRole(slotPosition);
+            final boolean matchRole = (slotOrganizationRole == null) || user.hasMatchingRole(slotOrganizationRole);
 
             if (!matchRole) {
-                log.debug("[FAIL] userId={} ({}) 포지션 불일치", userId, user.getName());
+                log.debug("[FAIL] userId={} ({}) 역할 불일치", userId, user.getName());
                 log.debug("유저 역할 목록: {}", user.getUserOrganizationRoles().stream()
                         .map(r -> r.getOrganizationRole().getName())
                         .toList());
