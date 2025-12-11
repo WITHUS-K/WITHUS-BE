@@ -272,6 +272,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserResponseDTO.MyPage addOrganization(UserRequestDTO.AddOrganization request, User user) {
 
         Long newOrganizationId = request.organizationId();
