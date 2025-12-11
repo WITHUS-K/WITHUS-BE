@@ -41,8 +41,8 @@ public class AdminApplicationController {
     public SuccessResponse<PagedResponse<ApplicationResponseDTO.SummaryForAdmin>> getList(
             @PathVariable Long recruitmentId,
             @RequestParam(defaultValue = "DOCUMENT") AdminStageFilter stage,
-            @RequestParam(defaultValue = "NAME") AdminApplicationSortField sortBy,
-            @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+            @RequestParam(defaultValue = "LATEST") AdminApplicationSortField sortBy,
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction,
             @PageableDefault(size = 7) Pageable pageable
     ) {
         ApplicationResponseDTO.AdminPageWithStageCounts result = applicationService.getByRecruitmentIdForAdmin(recruitmentId, stage, pageable, sortBy, direction);

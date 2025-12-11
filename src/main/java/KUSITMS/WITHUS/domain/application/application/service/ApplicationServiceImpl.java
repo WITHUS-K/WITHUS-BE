@@ -300,6 +300,9 @@ public class ApplicationServiceImpl implements ApplicationService {
                     boolean smsB = Boolean.TRUE.equals(sb.isSmsSent());
                     cmp = Boolean.compare(smsA, smsB);
                     break;
+                case LATEST:
+                    cmp = a.getCreatedAt().compareTo(b.getCreatedAt());
+                    break;
                 case NAME:
                 default:
                     cmp = sa.name().compareToIgnoreCase(sb.name());
