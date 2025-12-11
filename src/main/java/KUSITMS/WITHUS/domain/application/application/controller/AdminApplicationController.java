@@ -10,6 +10,7 @@ import KUSITMS.WITHUS.domain.application.application.service.ApplicationSmsServi
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
 import KUSITMS.WITHUS.domain.application.distributionRequest.dto.DistributionRequestResponseDTO;
 import KUSITMS.WITHUS.domain.application.distributionRequest.entity.DistributionRequest;
+import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import KUSITMS.WITHUS.global.response.PagedResponse;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,9 +44,11 @@ public class AdminApplicationController {
             @RequestParam(defaultValue = "DOCUMENT") AdminStageFilter stage,
             @RequestParam(defaultValue = "LATEST") AdminApplicationSortField sortBy,
             @RequestParam(defaultValue = "DESC") Sort.Direction direction,
+            @RequestParam(required = false) List<Long> organizationRoleIds,
+            @RequestParam(required = false) List<ApplicationStatus> statuses,
             @PageableDefault(size = 7) Pageable pageable
     ) {
-        ApplicationResponseDTO.AdminPageWithStageCounts result = applicationService.getByRecruitmentIdForAdmin(recruitmentId, stage, pageable, sortBy, direction);
+        ApplicationResponseDTO.AdminPageWithStageCounts result = applicationService.getByRecruitmentIdForAdmin(recruitmentId, stage, pageable, sortBy, direction, organizationRoleIds, statuses);
         PagedResponse<ApplicationResponseDTO.SummaryForAdmin> paged = PagedResponse.from(result.page(), result.counts());
         return SuccessResponse.ok(paged);
     }

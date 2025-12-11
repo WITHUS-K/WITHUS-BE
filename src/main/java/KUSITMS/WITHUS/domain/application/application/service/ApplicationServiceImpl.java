@@ -46,6 +46,7 @@ import KUSITMS.WITHUS.global.infra.email.template.MailTemplateType;
 import KUSITMS.WITHUS.global.infra.upload.dto.FileResponseDTO;
 import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -254,10 +255,62 @@ public class ApplicationServiceImpl implements ApplicationService {
             AdminStageFilter stage,
             Pageable pageable,
             AdminApplicationSortField sortBy,
-            Sort.Direction direction
+            Sort.Direction direction,
+            List<Long> organizationRoleIds,
+            List<ApplicationStatus> statuses
     ) {
         List<Application> allApps = applicationRepository
                 .findByRecruitmentIdAndStatusIn(recruitmentId, stage.toStatusList());
+
+        // POSITION_NAME 필터
+        if (organizationRoleIds != null && !organizationRoleIds.isEmpty()) {
+            allApps = allApps.stream()
+                    .filter(app ->
+                            app.getOrganizationRole() != null &&
+                                    organizationRoleIds.contains(app.getOrganizationRole().getId())
+                    )
+                    .collect(Collectors.toList());
+        }
+
+        // STATUS 필터
+        if (statuses != null && !statuses.isEmpty()) {
+            allApps = allApps.stream()
+                    .filter(app -> statuses.contains(app.getStatus()))
+                    .collect(Collectors.toList());
+        }
+
+        List<Application> sortedApps = getSortedApps(sortBy, direction, allApps);
+
+        List<ApplicationResponseDTO.SummaryForAdmin> allDtos = IntStream.range(0, sortedApps.size())
+                .mapToObj(i -> ApplicationResponseDTO.SummaryForAdmin.from(sortedApps.get(i), i + 1L))
+                .toList();
+
+        int start = (int) pageable.getOffset();
+        int end   = Math.min(start + pageable.getPageSize(), allDtos.size());
+        List<ApplicationResponseDTO.SummaryForAdmin> content = start > end
+                ? List.of()
+                : allDtos.subList(start, end);
+
+        Page<ApplicationResponseDTO.SummaryForAdmin> page = new PageImpl<>(content, pageable, allDtos.size());
+
+        long documentCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
+                recruitmentId, AdminStageFilter.DOCUMENT.toStatusList());
+        long interviewCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
+                recruitmentId, AdminStageFilter.INTERVIEW.toStatusList());
+        long finalPassCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
+                recruitmentId, AdminStageFilter.FINAL_PASS.toStatusList());
+        long failCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
+                recruitmentId, AdminStageFilter.FAIL.toStatusList());
+
+        ApplicationResponseDTO.StageCount counts = ApplicationResponseDTO.StageCount.from(
+                documentCnt, interviewCnt, finalPassCnt, failCnt
+        );
+
+        return ApplicationResponseDTO.AdminPageWithStageCounts.from(page, counts);
+    }
+
+    @NotNull
+    private static List<Application> getSortedApps(AdminApplicationSortField sortBy, Sort.Direction direction, List<Application> allApps) {
 
         allApps.sort((a, b) -> {
             var sa = ApplicationResponseDTO.SummaryForAdmin.from(a, 0L);
@@ -310,34 +363,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             }
             return direction.isDescending() ? -cmp : cmp;
         });
-
-
-        List<ApplicationResponseDTO.SummaryForAdmin> allDtos = IntStream.range(0, allApps.size())
-                .mapToObj(i -> ApplicationResponseDTO.SummaryForAdmin.from(allApps.get(i), i + 1L))
-                .toList();
-
-        int start = (int) pageable.getOffset();
-        int end   = Math.min(start + pageable.getPageSize(), allDtos.size());
-        List<ApplicationResponseDTO.SummaryForAdmin> content = start > end
-                ? List.of()
-                : allDtos.subList(start, end);
-
-        Page<ApplicationResponseDTO.SummaryForAdmin> page = new PageImpl<>(content, pageable, allDtos.size());
-
-        long documentCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
-                recruitmentId, AdminStageFilter.DOCUMENT.toStatusList());
-        long interviewCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
-                recruitmentId, AdminStageFilter.INTERVIEW.toStatusList());
-        long finalPassCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
-                recruitmentId, AdminStageFilter.FINAL_PASS.toStatusList());
-        long failCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
-                recruitmentId, AdminStageFilter.FAIL.toStatusList());
-
-        ApplicationResponseDTO.StageCount counts = ApplicationResponseDTO.StageCount.from(
-                documentCnt, interviewCnt, finalPassCnt, failCnt
-        );
-
-        return ApplicationResponseDTO.AdminPageWithStageCounts.from(page, counts);
+        return allApps;
     }
 
 
