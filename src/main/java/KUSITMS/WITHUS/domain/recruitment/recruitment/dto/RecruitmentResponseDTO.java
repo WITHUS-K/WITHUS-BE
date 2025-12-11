@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 @Schema(description = "리크루팅(공고) 관련 응답 DTO")
 public class RecruitmentResponseDTO {
@@ -149,7 +150,8 @@ public class RecruitmentResponseDTO {
             List<RoleSummary> positionSummaries = recruitment.getPositions().stream()
                     .map(ror -> new RoleSummary(
                             ror.getOrganizationRole().getName(),
-                            getApplicantCount.apply(ror.getOrganizationRole().getId()).intValue()
+                            Optional.ofNullable(getApplicantCount.apply(ror.getOrganizationRole().getId()))
+                                    .orElse(0L).intValue()
                     ))
                     .toList();
 
