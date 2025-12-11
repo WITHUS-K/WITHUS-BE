@@ -1,6 +1,5 @@
 package KUSITMS.WITHUS.domain.user.user.dto;
 
-import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -38,6 +37,7 @@ public class UserRequestDTO {
             String password,
 
             @Schema(description = "휴대폰 번호", example = "01012345678")
+            @Pattern(regexp = "^010\\d{7,8}$", message = "휴대폰 번호는 010으로 시작하는 숫자만 입력해야 합니다.")
             @NotBlank String phoneNumber
     ) {}
 
@@ -48,9 +48,6 @@ public class UserRequestDTO {
 
             @Schema(description = "생년월일", example = "2000-01-01")
             @NotNull LocalDate birthDate,
-
-            @Schema(description = "성별", example = "MALE | FEMALE | NONE")
-            @NotNull Gender gender,
 
             @Schema(description = "동아리 Id", example = "큐시즘")
             @NotNull Long organizationId,
@@ -67,6 +64,7 @@ public class UserRequestDTO {
             String password,
 
             @Schema(description = "휴대폰 번호", example = "01012345678")
+            @Pattern(regexp = "^010\\d{7,8}$", message = "휴대폰 번호는 010으로 시작하는 숫자만 입력해야 합니다.")
             @NotBlank String phoneNumber
     ) {}
 
@@ -109,6 +107,7 @@ public class UserRequestDTO {
     @Schema(description = "휴대폰 인증 번호 요청 DTO")
     public record PhoneRequest(
             @Schema(description = "휴대폰 번호", example = "01012345678")
+            @Pattern(regexp = "^010\\d{7,8}$", message = "휴대폰 번호는 010으로 시작하는 숫자만 입력해야 합니다.")
             @NotBlank
             String phoneNumber
     ) {}
@@ -116,6 +115,7 @@ public class UserRequestDTO {
     @Schema(description = "휴대폰 인증 번호 확인 요청 DTO")
     public record PhoneConfirmRequest(
             @Schema(description = "휴대폰 번호", example = "01012345678")
+            @Pattern(regexp = "^010\\d{7,8}$", message = "휴대폰 번호는 010으로 시작하는 숫자만 입력해야 합니다.")
             @NotBlank
             String phoneNumber,
 
@@ -131,6 +131,7 @@ public class UserRequestDTO {
             String name,
 
             @Schema(description = "전화번호", example = "01099999999")
+            @Pattern(regexp = "^010\\d{7,8}$", message = "휴대폰 번호는 010으로 시작하는 숫자만 입력해야 합니다.")
             @NotBlank
             String phoneNumber,
 

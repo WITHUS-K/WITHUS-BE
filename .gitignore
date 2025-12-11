@@ -41,3 +41,8 @@ out/
 /txt
 /withus-ssh.pem
 /src/main/resources/application-argo.yml
+
+### MacOS ###
+.DS_Store
+**/.DS_Store
+/keys/

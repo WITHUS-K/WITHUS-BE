@@ -5,7 +5,6 @@ import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
-import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.mock.container.TestContainer;
 import KUSITMS.WITHUS.util.SecurityTestUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +37,6 @@ class UserServiceImplTest {
         UserRequestDTO.UserJoin userJoinRequest = new UserRequestDTO.UserJoin(
                 "김재관",
                 LocalDate.of(2001, 4, 23),
-                Gender.MALE,
                 savedOrg.getId(),
                 "test@example.com",
                 "Abc123!@",

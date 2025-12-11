@@ -35,7 +35,9 @@ import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
+import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import KUSITMS.WITHUS.global.infra.email.sender.MailSender;
@@ -53,7 +55,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -123,10 +127,38 @@ public class ApplicationServiceImpl implements ApplicationService {
         List<ApplicationAnswer> answers = factory.createAnswers(application, request.answers(), questionMap, uploadedFileUrls);
         applicationAnswerRepository.saveAll(answers);
 
-        Map<String, String> variables = Map.of();
+        String organizationName = recruitment.getOrganization().getName();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 (E)", Locale.KOREAN);
 
-        String html = templateProvider.loadTemplate(MailTemplateType.INSIDERS_APPLY_SUCCESS, variables);
-        mailSender.send(request.email(), "[WITHUS] 지원서 접수 확인 안내", html);
+        List<String> interviewDateStrings = recruitment.getAvailableTimeRanges().stream()
+                .map(range -> range.getDate().format(formatter))
+                .toList();
+        String interviewDates = String.join("<br/>", interviewDateStrings);
+
+        // TODO : N+1 발생하나, 추후 Role도 User가 아닌 UserOrganization 단으로 넣어야 더 맞을 것 같고 해서 일단 둠 ..
+        String adminEmail = recruitment.getOrganization()
+                .getUserOrganizations().stream()
+                .map(UserOrganization::getUser)
+                .filter(user -> user.getRole() == Role.ADMIN)
+                .map(User::getEmail)
+                .findFirst()
+                .orElse("");
+
+        Map<String, String> variables = Map.of(
+                "organizationName", organizationName,
+                "documentResultDate", recruitment.getDocumentResultDate() != null
+                        ? recruitment.getDocumentResultDate().format(formatter)
+                        : "",
+                "finalResultDate", recruitment.getFinalResultDate() != null
+                        ? recruitment.getFinalResultDate().format(formatter)
+                        : "",
+                "interviewDates", interviewDates,
+                "adminEmail", adminEmail
+        );
+
+        String subject = "[" + organizationName + "] 지원서 접수 확인 안내";
+        String html = templateProvider.loadTemplate(MailTemplateType.APPLY_SUCCESS, variables);
+        mailSender.send(request.email(), subject, html);
 
         return ApplicationResponseDTO.Summary.from(application);
     }

@@ -25,6 +25,7 @@ public class ApplicationRequestDTO {
             @NotBlank @Email String email,
 
             @Schema(description = "전화번호", example = "01012341234")
+            @Pattern(regexp = "^010\\d{7,8}$", message = "휴대폰 번호는 010으로 시작하는 숫자만 입력해야 합니다.")
             @NotBlank String phoneNumber,
 
             @Schema(description = "성별", example = "MALE")

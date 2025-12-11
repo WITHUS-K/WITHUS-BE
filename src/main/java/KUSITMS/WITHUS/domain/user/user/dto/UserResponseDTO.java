@@ -109,7 +109,6 @@ public class UserResponseDTO {
             @Schema(description = "이름") String name,
             @Schema(description = "이메일") String email,
             @Schema(description = "역할") List<OrganizationRoleResponseDTO.Detail> roles,
-            @Schema(description = "성별") String gender,
             @Schema(description = "생년월일") @DateFormatDot LocalDate birthDate,
             @Schema(description = "전화번호") String phoneNumber,
             @Schema(description = "가입일자") @DateTimeFormat LocalDateTime createdAt
@@ -131,7 +130,6 @@ public class UserResponseDTO {
                                     OrganizationRoleResponseDTO.Detail.from(userOrganizationRole.getOrganizationRole())
                             )
                             .toList(),
-                    user.getGender().getKey(),
                     user.getBirthDate(),
                     user.getPhoneNumber(),
                     user.getCreatedAt()
