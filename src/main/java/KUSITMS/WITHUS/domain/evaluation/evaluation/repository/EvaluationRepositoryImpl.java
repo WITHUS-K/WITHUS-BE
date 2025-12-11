@@ -85,4 +85,9 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
     public void deleteAll(List<Evaluation> existingEvaluations) {
         evaluationJpaRepository.deleteAll(existingEvaluations);
     }
+
+    @Override
+    public List<Evaluation> findAllByApplicationIdIn(List<Long> appIds) {
+        return evaluationJpaRepository.findAllByApplicationIdIn(appIds);
+    }
 }

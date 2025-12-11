@@ -466,6 +466,96 @@ public class ApplicationServiceImpl implements ApplicationService {
         return applicationRepository.findEligibleCandidates(recruitmentId, timeslotId, q, excludeCurrent);
     }
 
+    @Override
+    public List<ApplicationResponseDTO.Detail> getAllDetailForExcel(
+            Long recruitmentId,
+            AdminStageFilter stage,
+            AdminApplicationSortField sortBy,
+            Sort.Direction direction,
+            List<Long> organizationRoleIds,
+            List<ApplicationStatus> statuses,
+            String keyword,
+            Long currentUserId
+    ) {
+
+        List<Application> apps = applicationRepository.findByRecruitmentIdAndStatusIn(
+                recruitmentId, stage.toStatusList()
+        );
+
+        // POSITION(OrganizationRole) 필터
+        if (organizationRoleIds != null && !organizationRoleIds.isEmpty()) {
+            apps = apps.stream()
+                    .filter(a -> a.getOrganizationRole() != null &&
+                            organizationRoleIds.contains(a.getOrganizationRole().getId()))
+                    .toList();
+        }
+
+        // STATUS 필터
+        if (statuses != null && !statuses.isEmpty()) {
+            apps = apps.stream()
+                    .filter(a -> statuses.contains(a.getStatus()))
+                    .toList();
+        }
+
+        // KEYWORD (name 검색)
+        if (keyword != null && !keyword.isBlank()) {
+            String kw = keyword.toLowerCase();
+            apps = apps.stream()
+                    .filter(a -> a.getName().toLowerCase().contains(kw))
+                    .toList();
+        }
+
+        // SORT
+        apps = getSortedApps(sortBy, direction, apps);
+
+
+        // 성능 최적화 - bulk 조회
+        List<Long> appIds = apps.stream()
+                .map(Application::getId)
+                .toList();
+
+        // 면접 가능 시간 전체 조회
+        List<ApplicantAvailability> allAvail =
+                applicantAvailabilityRepository.findAllByApplicationIdIn(appIds);
+
+        // 평가 전체 조회
+        List<Evaluation> allEvaluations =
+                evaluationRepository.findAllByApplicationIdIn(appIds);
+
+        // 평가 기준 (기존 단건 상세 방식과 동일)
+        // 단건에서는 DOCUMENT 기준만 가져오지만, Detail.from() 내부에서 인터뷰/서류 모두 사용하므로 recruitment.getEvaluationCriteriaList() 그대로 써도 됨.
+        Recruitment recruitment = apps.isEmpty() ? null : apps.get(0).getRecruitment();
+        List<EvaluationCriteria> criteriaList =
+                recruitment != null ? recruitment.getEvaluationCriteriaList() : List.of();
+
+
+        // previous, next → 엑셀에서는 불필요하므로 null
+        Long previous = null;
+        Long next = null;
+
+
+        // Detail DTO 변환
+        Map<Long, List<ApplicantAvailability>> availMap =
+                allAvail.stream().collect(Collectors.groupingBy(a -> a.getApplication().getId()));
+
+        Map<Long, List<Evaluation>> evalMap =
+                allEvaluations.stream().collect(Collectors.groupingBy(e -> e.getApplication().getId()));
+
+
+        return apps.stream()
+                .map(app -> assembler.toDetail(
+                        app,
+                        availMap.getOrDefault(app.getId(), List.of()),
+                        evalMap.getOrDefault(app.getId(), List.of()),
+                        criteriaList,
+                        currentUserId,
+                        previous,
+                        next
+                ))
+                .toList();
+    }
+
+
     /**
      * PASS/FAIL/HOLD의 간단 상태를 단계와 현재 상태에 맞춰 ApplicationStatus으로 매핑
      * @param stage   변경할 단계 (DOCUMENT, INTERVIEW, FINAL_PASS, FAIL)

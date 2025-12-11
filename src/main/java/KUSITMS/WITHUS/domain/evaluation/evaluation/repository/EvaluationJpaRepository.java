@@ -14,5 +14,6 @@ public interface EvaluationJpaRepository extends JpaRepository<Evaluation, Long>
     List<Evaluation> findByApplicationAndUserAndCriteriaIn(Application application, User user, List<EvaluationCriteria> criterias);
     long countByApplication_IdAndUser_IdAndCriteria_IdIn(Long applicationId, Long userId, List<Long> criteriaIds);
     long countByApplication_IdAndUser_IdAndCriteria_EvaluationType(Long id, Long userId, EvaluationType evaluationType);
+    List<Evaluation> findAllByApplicationIdIn(List<Long> appIds);
 }
 

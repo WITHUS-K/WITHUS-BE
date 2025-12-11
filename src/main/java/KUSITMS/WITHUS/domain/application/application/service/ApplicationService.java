@@ -27,4 +27,5 @@ public interface ApplicationService {
     void updateEvaluators(ApplicationEvaluatorRequestDTO.Update request);
     boolean toggleAcquaintance(Long applicationId, Long userId);
     List<ApplicationResponseDTO.CandidateDTO> findTimeslotCandidates(Long recruitmentId, Long timeslotId, String query, boolean excludeCurrent);
+    List<ApplicationResponseDTO.Detail> getAllDetailForExcel(Long recruitmentId, AdminStageFilter stage, AdminApplicationSortField sortBy, Sort.Direction direction, List<Long> organizationRoleIds, List<ApplicationStatus> statuses, String keyword, Long id);
 }

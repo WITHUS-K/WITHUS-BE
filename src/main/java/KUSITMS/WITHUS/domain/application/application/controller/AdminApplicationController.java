@@ -9,21 +9,26 @@ import KUSITMS.WITHUS.domain.application.application.service.ApplicationService;
 import KUSITMS.WITHUS.domain.application.application.service.ApplicationSmsService;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
 import KUSITMS.WITHUS.domain.application.distributionRequest.dto.DistributionRequestResponseDTO;
-import KUSITMS.WITHUS.domain.application.distributionRequest.entity.DistributionRequest;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
+import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.global.common.annotation.CurrentUser;
 import KUSITMS.WITHUS.global.response.PagedResponse;
 import KUSITMS.WITHUS.global.response.SuccessResponse;
+import KUSITMS.WITHUS.global.util.excel.ExcelExporter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -53,6 +58,42 @@ public class AdminApplicationController {
         PagedResponse<ApplicationResponseDTO.SummaryForAdmin> paged = PagedResponse.from(result.page(), result.counts());
         return SuccessResponse.ok(paged);
     }
+
+    @GetMapping("/recruitment/{recruitmentId}/excel")
+    public void downloadExcel(
+            @PathVariable Long recruitmentId,
+            @RequestParam(defaultValue = "DOCUMENT") AdminStageFilter stage,
+            @RequestParam(defaultValue = "LATEST") AdminApplicationSortField sortBy,
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction,
+            @RequestParam(required = false) List<Long> organizationRoleIds,
+            @RequestParam(required = false) List<ApplicationStatus> statuses,
+            @RequestParam(required = false) String keyword,
+            @CurrentUser User user,
+            HttpServletResponse response
+    ) throws IOException {
+
+        List<ApplicationResponseDTO.Detail> list =
+                applicationService.getAllDetailForExcel(
+                        recruitmentId,
+                        stage,
+                        sortBy,
+                        direction,
+                        organizationRoleIds,
+                        statuses,
+                        keyword,
+                        user.getId()
+                );
+
+        Workbook workbook = ExcelExporter.createExcel(list);
+
+        String fileName = "applications-detail.xlsx";
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+
+        workbook.write(response.getOutputStream());
+        workbook.close();
+    }
+
 
     @GetMapping("/recruitments/{recruitmentId}/timeslots/{timeslotId}/candidates")
     @Operation(summary = "타임테이블 후보자 조회")
