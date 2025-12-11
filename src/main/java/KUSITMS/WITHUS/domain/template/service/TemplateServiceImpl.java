@@ -62,4 +62,19 @@ public class TemplateServiceImpl implements TemplateService {
         return TemplateResponseDTO.Detail.from(saved);
     }
 
+    @Override
+    @Transactional
+    public TemplateResponseDTO.Detail update(Long templateId, TemplateRequestDTO.Update dto) {
+        Template template = templateRepository.getById(templateId);
+
+        template.update(
+                dto.name(),
+                dto.subject(),
+                dto.body(),
+                dto.medium()
+        );
+
+        return TemplateResponseDTO.Detail.from(template);
+    }
+
 }

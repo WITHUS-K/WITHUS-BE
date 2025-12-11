@@ -45,5 +45,12 @@ public class Template {
         this.medium = medium;
         this.organization = organization;
     }
+
+    public void update(String name, String subject, String body, Medium medium) {
+        this.name = name;
+        this.subject = subject;
+        this.body = body;
+        this.medium = medium;
+    }
 }
 
