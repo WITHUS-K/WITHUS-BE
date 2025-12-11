@@ -252,7 +252,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                     );
                     break;
                 case POSITION_NAME:
-                    cmp = sa.positionName().compareToIgnoreCase(sb.positionName());
+                    cmp = sa.organizationRoleName().compareToIgnoreCase(sb.organizationRoleName());
                     break;
                 case STATUS:
                     cmp = sa.status().compareTo(sb.status());

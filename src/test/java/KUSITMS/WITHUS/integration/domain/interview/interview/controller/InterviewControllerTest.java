@@ -3,9 +3,10 @@ package KUSITMS.WITHUS.integration.domain.interview.interview.controller;
 import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
 import KUSITMS.WITHUS.domain.application.application.enumerate.SimpleApplicationStatus;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.interview.interview.service.InterviewSchedulerService;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
-import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
 import KUSITMS.WITHUS.domain.user.user.dto.UserRequestDTO;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
 import KUSITMS.WITHUS.domain.user.user.service.UserService;
@@ -29,6 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -51,7 +53,6 @@ class InterviewControllerTest {
     @Autowired private UserRepository userRepository;
     @Autowired private UserService userService;
     @Autowired private OrganizationRepository organizationRepository;
-    @Autowired private PositionRepository positionRepository;
     @Autowired private VerificationCache verificationCache;
 
     private String accessToken;
@@ -100,11 +101,26 @@ class InterviewControllerTest {
     private Long prepareInterviewScenario() throws Exception {
         Long recruitmentId = testHelper.createRecruitment("면접 테스트용 공고", savedOrganizationId, accessToken);
 
-        Long positionId1 = testHelper.createPosition(recruitmentId, "백엔드", accessToken);
-        Long positionId2 = testHelper.createPosition(recruitmentId, "프론트엔드", accessToken);
+        Long organizationRoleId1 = testHelper.createOrganizationRole(savedOrganizationId, "백엔드", accessToken);
+        Long organizationRoleId2 = testHelper.createOrganizationRole(savedOrganizationId, "프론트엔드", accessToken);
+        
+        // 공고에 역할 추가
+        var updateRequest = new RecruitmentRequestDTO.Update(
+                "면접 테스트용 공고", "설명", null,
+                List.of(organizationRoleId1, organizationRoleId2),
+                LocalDate.now().plusDays(5), true, LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
+                (short) 30, false, true, true, true, true, false, true, false,
+                EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
+                List.of(), List.of(), true, List.of()
+        );
+        mockMvc.perform(put("/api/v1/recruitments/" + recruitmentId)
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
 
-        Long appId1 = testHelper.createApplication(accessToken, recruitmentId, positionId1, "지원자1", "applicant1@example.com");
-        Long appId2 = testHelper.createApplication(accessToken, recruitmentId, positionId2, "지원자2", "applicant2@example.com");
+        Long appId1 = testHelper.createApplication(accessToken, recruitmentId, organizationRoleId1, "지원자1", "applicant1@example.com");
+        Long appId2 = testHelper.createApplication(accessToken, recruitmentId, organizationRoleId2, "지원자2", "applicant2@example.com");
 
         updateApplicationStatus(List.of(appId1, appId2));
         return createAndScheduleInterview(recruitmentId);
@@ -124,9 +140,25 @@ class InterviewControllerTest {
     @DisplayName("면접 스케줄 배정 성공")
     void assignScheduleSuccess() throws Exception {
         Long recruitmentId = testHelper.createRecruitment("면접 테스트용 공고", savedOrganizationId, accessToken);
-        Long positionId = testHelper.createPosition(recruitmentId, "파트", accessToken);
-        Long appId1 = testHelper.createApplication(accessToken, recruitmentId, positionId, "지원자1", "app1@example.com");
-        Long appId2 = testHelper.createApplication(accessToken, recruitmentId, positionId, "지원자2", "app2@example.com");
+        Long organizationRoleId = testHelper.createOrganizationRole(savedOrganizationId, "파트", accessToken);
+        
+        // 공고에 역할 추가
+        var updateRequest = new RecruitmentRequestDTO.Update(
+                "면접 테스트용 공고", "설명", null,
+                List.of(organizationRoleId),
+                LocalDate.now().plusDays(5), true, LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
+                (short) 30, false, true, true, true, true, false, true, false,
+                EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
+                List.of(), List.of(), true, List.of()
+        );
+        mockMvc.perform(put("/api/v1/recruitments/" + recruitmentId)
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
+        
+        Long appId1 = testHelper.createApplication(accessToken, recruitmentId, organizationRoleId, "지원자1", "app1@example.com");
+        Long appId2 = testHelper.createApplication(accessToken, recruitmentId, organizationRoleId, "지원자2", "app2@example.com");
 
         updateApplicationStatus(List.of(appId1, appId2));
 

@@ -4,11 +4,12 @@ import KUSITMS.WITHUS.domain.application.application.dto.ApplicationRequestDTO;
 import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationRequestDTO;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.organization.organization.service.OrganizationService;
-import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
+import KUSITMS.WITHUS.domain.recruitment.recruitment.dto.RecruitmentRequestDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
@@ -58,7 +59,6 @@ class ApplicationControllerTest {
     @Autowired private OrganizationService organizationService;
     @Autowired private OrganizationRepository organizationRepository;
     @Autowired private RecruitmentRepository recruitmentRepository;
-    @Autowired private PositionRepository positionRepository;
 
     private final String testMail = "testMail@gmail.com";
     private Long savedOrganizationId;
@@ -89,14 +89,29 @@ class ApplicationControllerTest {
     @DisplayName("지원서 생성 성공")
     void createApplicationSuccess() throws Exception {
         Long recruitmentId = testHelper.createRecruitment("지원서 테스트용 공고", savedOrganizationId, accessToken);
-        Long positionId = testHelper.createPosition(recruitmentId, "백엔드", accessToken);
+        Long organizationRoleId = testHelper.createOrganizationRole(savedOrganizationId, "백엔드", accessToken);
+        
+        // 공고에 역할 추가
+        var updateRequest = new RecruitmentRequestDTO.Update(
+                "지원서 테스트용 공고", "설명", null,
+                List.of(organizationRoleId),
+                LocalDate.now().plusDays(5), true, LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
+                (short) 30, false, true, true, true, true, false, true, false,
+                EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
+                List.of(), List.of(), true, List.of()
+        );
+        mockMvc.perform(put("/api/v1/recruitments/" + recruitmentId)
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
 
         ApplicationRequestDTO.Create requestDto = new ApplicationRequestDTO.Create(
                 "김재관", "test@example.com", "01012341234", Gender.MALE,
                 "상명대학교", "컴퓨터공학과", AcademicStatus.ENROLLED,
                 LocalDate.of(2001, 1, 1), "서울시 도봉구 56로 501",
                 recruitmentId,
-                positionId,
+                organizationRoleId,
                 List.of(),
                 List.of(LocalDateTime.of(2025, 4, 22, 10, 0))
         );
@@ -111,7 +126,7 @@ class ApplicationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.name").value("김재관"))
                 .andExpect(jsonPath("$.result.email").value("test@example.com"))
-                .andExpect(jsonPath("$.result.positionName").value("백엔드"))
+                .andExpect(jsonPath("$.result.organizationRoleName").value("백엔드"))
                 .andExpect(jsonPath("$.result.status").value(ApplicationStatus.PENDING.name()));
     }
 
@@ -146,12 +161,27 @@ class ApplicationControllerTest {
     @DisplayName("지원서 단건 조회 성공")
     void getApplicationByIdSuccess() throws Exception {
         Long recruitmentId = testHelper.createRecruitment("조회용 공고", savedOrganizationId, accessToken);
-        Long positionId = testHelper.createPosition(recruitmentId, "프론트엔드", accessToken);
+        Long organizationRoleId = testHelper.createOrganizationRole(savedOrganizationId, "프론트엔드", accessToken);
+        
+        // 공고에 역할 추가
+        var updateRequest = new RecruitmentRequestDTO.Update(
+                "조회용 공고", "설명", null,
+                List.of(organizationRoleId),
+                LocalDate.now().plusDays(5), true, LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
+                (short) 30, false, true, true, true, true, false, true, false,
+                EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
+                List.of(), List.of(), true, List.of()
+        );
+        mockMvc.perform(put("/api/v1/recruitments/" + recruitmentId)
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
 
         Long appId = testHelper.createApplication(
                 accessToken,
                 recruitmentId,
-                positionId,
+                organizationRoleId,
                 "홍길동",
                 "user@example.com"
         );
@@ -175,12 +205,27 @@ class ApplicationControllerTest {
     @DisplayName("지원서 지인 여부 토글 성공")
     void toggleAcquaintanceSuccess() throws Exception {
         Long recruitmentId = testHelper.createRecruitment("지인 테스트 공고", savedOrganizationId, accessToken);
-        Long positionId = testHelper.createPosition(recruitmentId, "기획", accessToken);
+        Long organizationRoleId = testHelper.createOrganizationRole(savedOrganizationId, "기획", accessToken);
+        
+        // 공고에 역할 추가
+        var updateRequest = new RecruitmentRequestDTO.Update(
+                "지인 테스트 공고", "설명", null,
+                List.of(organizationRoleId),
+                LocalDate.now().plusDays(5), true, LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
+                (short) 30, false, true, true, true, true, false, true, false,
+                EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
+                List.of(), List.of(), true, List.of()
+        );
+        mockMvc.perform(put("/api/v1/recruitments/" + recruitmentId)
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
 
         Long appId = testHelper.createApplication(
                 accessToken,
                 recruitmentId,
-                positionId,
+                organizationRoleId,
                 "박토글",
                 "toggle@example.com"
         );
@@ -196,12 +241,27 @@ class ApplicationControllerTest {
     void getApplicationsByRecruitmentForEvaluator() throws Exception {
         // Given
         Long recruitmentId = testHelper.createRecruitment("서류 평가 공고", savedOrganizationId, accessToken);
-        Long positionId = testHelper.createPosition(recruitmentId, "백엔드", accessToken);
+        Long organizationRoleId = testHelper.createOrganizationRole(savedOrganizationId, "백엔드", accessToken);
+        
+        // 공고에 역할 추가
+        var updateRequest = new RecruitmentRequestDTO.Update(
+                "서류 평가 공고", "설명", null,
+                List.of(organizationRoleId),
+                LocalDate.now().plusDays(5), true, LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
+                (short) 30, false, true, true, true, true, false, true, false,
+                EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
+                List.of(), List.of(), true, List.of()
+        );
+        mockMvc.perform(put("/api/v1/recruitments/" + recruitmentId)
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
 
         Long applicationId = testHelper.createApplication(
                 accessToken,
                 recruitmentId,
-                positionId,
+                organizationRoleId,
                 "김김김",
                 "eval@example.com"
         );
@@ -226,7 +286,7 @@ class ApplicationControllerTest {
                         .header("Authorization", accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.data[0].name").value("김김김"))
-                .andExpect(jsonPath("$.result.data[0].positionName").value("백엔드"))
+                .andExpect(jsonPath("$.result.data[0].organizationRoleName").value("백엔드"))
                 .andExpect(jsonPath("$.result.data[0].status").value(ApplicationStatus.PENDING.name()));
     }
 
