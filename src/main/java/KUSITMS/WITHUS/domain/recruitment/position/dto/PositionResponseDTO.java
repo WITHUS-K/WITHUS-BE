@@ -24,24 +24,4 @@ public class PositionResponseDTO {
             );
         }
     }
-
-    @Schema(description = "포지션 지원자 수 정보 DTO")
-    public record SummaryForRecruitment(
-            @Schema(description = "포지션 이름") String name,
-            @Schema(description = "지원자 수") int applicantCount
-    ) {
-        public static SummaryForRecruitment from(Position position) {
-            if (position == null) {
-                return new SummaryForRecruitment(null, 0);
-            }
-
-            String name = position.getName();
-            // Note: Position 엔티티는 더 이상 Application과 직접 관계가 없습니다.
-            // Application은 이제 OrganizationRole을 사용합니다.
-            // Position 엔티티가 제거될 때까지 지원자 수는 0으로 반환합니다.
-            int count = 0;
-
-            return new SummaryForRecruitment(name, count);
-        }
-    }
 }
