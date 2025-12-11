@@ -513,7 +513,7 @@ public class ApplicationResponseDTO {
             return new DetailForTimeSlot(
                     application.getId(),
                     application.getName(),
-                    application.getOrganizationRole().getId(),
+                    application.getOrganizationRole() != null ? application.getOrganizationRole().getId() : null,
                     timeSlot.getDate(),
                     timeSlot.getStartTime(),
                     timeSlot.getEndTime(),
