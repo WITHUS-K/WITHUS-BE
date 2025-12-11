@@ -20,7 +20,7 @@ public interface ApplicationService {
     void delete(Long id);
     ApplicationResponseDTO.Detail getById(Long id, Long currentUserId);
     Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(Long recruitmentId, Long currentUserId, EvaluationStatus evaluationStatus, String keyword, Pageable pageable);
-    ApplicationResponseDTO.AdminPageWithStageCounts getByRecruitmentIdForAdmin(Long recruitmentId, AdminStageFilter stage, Pageable pageable, AdminApplicationSortField sortBy, Sort.Direction direction, List<Long> organizationRoleIds, List<ApplicationStatus> statuses);
+    ApplicationResponseDTO.AdminPageWithStageCounts getByRecruitmentIdForAdmin(Long recruitmentId, AdminStageFilter stage, Pageable pageable, AdminApplicationSortField sortBy, Sort.Direction direction, List<Long> organizationRoleIds, List<ApplicationStatus> statuses, String keyword);
     List<ApplicationResponseDTO.Summary> updateStatus(ApplicationRequestDTO.UpdateStatus request);
     void distributeEvaluators(ApplicationEvaluatorRequestDTO.Distribute request);
     DistributionRequestResponseDTO.Detail distributeEvaluatorsLatestRequest(Long recruitmentId);

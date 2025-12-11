@@ -46,9 +46,10 @@ public class AdminApplicationController {
             @RequestParam(defaultValue = "DESC") Sort.Direction direction,
             @RequestParam(required = false) List<Long> organizationRoleIds,
             @RequestParam(required = false) List<ApplicationStatus> statuses,
+            @RequestParam(required = false) String keyword,
             @PageableDefault(size = 7) Pageable pageable
     ) {
-        ApplicationResponseDTO.AdminPageWithStageCounts result = applicationService.getByRecruitmentIdForAdmin(recruitmentId, stage, pageable, sortBy, direction, organizationRoleIds, statuses);
+        ApplicationResponseDTO.AdminPageWithStageCounts result = applicationService.getByRecruitmentIdForAdmin(recruitmentId, stage, pageable, sortBy, direction, organizationRoleIds, statuses, keyword);
         PagedResponse<ApplicationResponseDTO.SummaryForAdmin> paged = PagedResponse.from(result.page(), result.counts());
         return SuccessResponse.ok(paged);
     }

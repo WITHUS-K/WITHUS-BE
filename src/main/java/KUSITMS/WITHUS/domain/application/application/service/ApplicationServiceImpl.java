@@ -257,7 +257,8 @@ public class ApplicationServiceImpl implements ApplicationService {
             AdminApplicationSortField sortBy,
             Sort.Direction direction,
             List<Long> organizationRoleIds,
-            List<ApplicationStatus> statuses
+            List<ApplicationStatus> statuses,
+            String keyword
     ) {
         List<Application> allApps = applicationRepository
                 .findByRecruitmentIdAndStatusIn(recruitmentId, stage.toStatusList());
@@ -276,6 +277,17 @@ public class ApplicationServiceImpl implements ApplicationService {
         if (statuses != null && !statuses.isEmpty()) {
             allApps = allApps.stream()
                     .filter(app -> statuses.contains(app.getStatus()))
+                    .collect(Collectors.toList());
+        }
+
+        // NAME KEYWORD 필터
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String lower = keyword.toLowerCase();
+            allApps = allApps.stream()
+                    .filter(app ->
+                            app.getName() != null &&
+                                    app.getName().toLowerCase().contains(lower)
+                    )
                     .collect(Collectors.toList());
         }
 
