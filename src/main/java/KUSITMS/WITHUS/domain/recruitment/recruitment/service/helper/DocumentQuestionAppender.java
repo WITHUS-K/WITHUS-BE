@@ -56,6 +56,13 @@ public class DocumentQuestionAppender {
 
     private void validateQuestionOrders(List<DocumentQuestionRequestDTO.Create> questions) {
         if (questions == null || questions.isEmpty()) return;
+
+        // null order 검증
+        boolean hasNullOrder = questions.stream()
+                .anyMatch(q -> q.order() == null);
+        if (hasNullOrder) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST); // 또는 적절한 에러 코드
+        }
         
         Set<Integer> orderSet = questions.stream()
                 .map(DocumentQuestionRequestDTO.Create::order)
