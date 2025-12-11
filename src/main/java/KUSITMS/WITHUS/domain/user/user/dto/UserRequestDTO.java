@@ -152,6 +152,7 @@ public class UserRequestDTO {
     public record AddOrganization(
 
             @Schema(description = "추가할 조직 아이디", example = "1")
+            @NotNull
             Long organizationId
 
     ) {}
