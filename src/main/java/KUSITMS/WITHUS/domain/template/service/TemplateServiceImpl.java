@@ -67,6 +67,8 @@ public class TemplateServiceImpl implements TemplateService {
     public TemplateResponseDTO.Detail update(Long templateId, TemplateRequestDTO.Update dto) {
         Template template = templateRepository.getById(templateId);
 
+        // TODO: 사용자가 속한 조직의 템플릿만 수정하도록 검증 추가 필요
+
         template.update(
                 dto.name(),
                 dto.subject(),
