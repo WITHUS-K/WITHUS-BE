@@ -487,14 +487,14 @@ public class ApplicationServiceImpl implements ApplicationService {
             apps = apps.stream()
                     .filter(a -> a.getOrganizationRole() != null &&
                             organizationRoleIds.contains(a.getOrganizationRole().getId()))
-                    .toList();
+                    .collect(Collectors.toList());
         }
 
         // STATUS 필터
         if (statuses != null && !statuses.isEmpty()) {
             apps = apps.stream()
                     .filter(a -> statuses.contains(a.getStatus()))
-                    .toList();
+                    .collect(Collectors.toList());
         }
 
         // KEYWORD (name 검색)
@@ -502,7 +502,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             String kw = keyword.toLowerCase();
             apps = apps.stream()
                     .filter(a -> a.getName().toLowerCase().contains(kw))
-                    .toList();
+                    .collect(Collectors.toList());
         }
 
         // SORT
