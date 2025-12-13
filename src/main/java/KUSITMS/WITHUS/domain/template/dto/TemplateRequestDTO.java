@@ -32,7 +32,7 @@ public class TemplateRequestDTO {
             @NotBlank String name,
 
             @Schema(description = "메일 제목", example = "[WITHUS] 면접 일정 안내")
-            @NotBlank String subject,
+            String subject,
 
             @Schema(description = "메일 본문", example = "<p>안녕하세요, {{applicantName}}님!</p>")
             @NotBlank String body,
