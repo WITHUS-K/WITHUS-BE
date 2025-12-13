@@ -84,14 +84,13 @@ public class AdminApplicationController {
                         user.getId()
                 );
 
-        Workbook workbook = ExcelExporter.createExcel(list);
-
         String fileName = "applications-detail.xlsx";
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
 
-        workbook.write(response.getOutputStream());
-        workbook.close();
+        try (Workbook workbook = ExcelExporter.createExcel(list)) {
+            workbook.write(response.getOutputStream());
+        }
     }
 
 
