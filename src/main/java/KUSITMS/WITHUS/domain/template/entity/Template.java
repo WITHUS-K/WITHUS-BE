@@ -47,6 +47,9 @@ public class Template {
     }
 
     public void update(String name, String subject, String body, Medium medium) {
+        if(medium == Medium.MAIL && (subject == null || subject.isBlank())) {
+            throw new CustomException(ErrorCode.EMAIL_SUBJECT_REQUIRED);
+        }
         this.name = name;
         this.subject = subject;
         this.body = body;
