@@ -9,4 +9,5 @@ import java.util.List;
 public interface ApplicantAvailabilityRepository extends JpaRepository<ApplicantAvailability, Long> {
     List<ApplicantAvailability> findByApplicationIn(List<Application> applications);
     List<ApplicantAvailability> findByApplicationId(Long id);
+    List<ApplicantAvailability> findAllByApplicationIdIn(List<Long> appIds);
 }

@@ -46,6 +46,7 @@ import KUSITMS.WITHUS.global.infra.email.template.MailTemplateType;
 import KUSITMS.WITHUS.global.infra.upload.dto.FileResponseDTO;
 import KUSITMS.WITHUS.global.infra.upload.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -254,10 +255,74 @@ public class ApplicationServiceImpl implements ApplicationService {
             AdminStageFilter stage,
             Pageable pageable,
             AdminApplicationSortField sortBy,
-            Sort.Direction direction
+            Sort.Direction direction,
+            List<Long> organizationRoleIds,
+            List<ApplicationStatus> statuses,
+            String keyword
     ) {
         List<Application> allApps = applicationRepository
                 .findByRecruitmentIdAndStatusIn(recruitmentId, stage.toStatusList());
+
+        // POSITION_NAME 필터
+        if (organizationRoleIds != null && !organizationRoleIds.isEmpty()) {
+            allApps = allApps.stream()
+                    .filter(app ->
+                            app.getOrganizationRole() != null &&
+                                    organizationRoleIds.contains(app.getOrganizationRole().getId())
+                    )
+                    .collect(Collectors.toList());
+        }
+
+        // STATUS 필터
+        if (statuses != null && !statuses.isEmpty()) {
+            allApps = allApps.stream()
+                    .filter(app -> statuses.contains(app.getStatus()))
+                    .collect(Collectors.toList());
+        }
+
+        // NAME KEYWORD 필터
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String lower = keyword.trim().toLowerCase(Locale.ROOT);
+            allApps = allApps.stream()
+                    .filter(app ->
+                            app.getName() != null &&
+                                    app.getName().toLowerCase().contains(lower)
+                    )
+                    .collect(Collectors.toList());
+        }
+
+        List<Application> sortedApps = getSortedApps(sortBy, direction, allApps);
+
+        List<ApplicationResponseDTO.SummaryForAdmin> allDtos = IntStream.range(0, sortedApps.size())
+                .mapToObj(i -> ApplicationResponseDTO.SummaryForAdmin.from(sortedApps.get(i), i + 1L))
+                .toList();
+
+        int start = (int) pageable.getOffset();
+        int end   = Math.min(start + pageable.getPageSize(), allDtos.size());
+        List<ApplicationResponseDTO.SummaryForAdmin> content = start > end
+                ? List.of()
+                : allDtos.subList(start, end);
+
+        Page<ApplicationResponseDTO.SummaryForAdmin> page = new PageImpl<>(content, pageable, allDtos.size());
+
+        long documentCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
+                recruitmentId, AdminStageFilter.DOCUMENT.toStatusList());
+        long interviewCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
+                recruitmentId, AdminStageFilter.INTERVIEW.toStatusList());
+        long finalPassCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
+                recruitmentId, AdminStageFilter.FINAL_PASS.toStatusList());
+        long failCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
+                recruitmentId, AdminStageFilter.FAIL.toStatusList());
+
+        ApplicationResponseDTO.StageCount counts = ApplicationResponseDTO.StageCount.from(
+                documentCnt, interviewCnt, finalPassCnt, failCnt
+        );
+
+        return ApplicationResponseDTO.AdminPageWithStageCounts.from(page, counts);
+    }
+
+    @NotNull
+    private static List<Application> getSortedApps(AdminApplicationSortField sortBy, Sort.Direction direction, List<Application> allApps) {
 
         allApps.sort((a, b) -> {
             var sa = ApplicationResponseDTO.SummaryForAdmin.from(a, 0L);
@@ -300,6 +365,9 @@ public class ApplicationServiceImpl implements ApplicationService {
                     boolean smsB = Boolean.TRUE.equals(sb.isSmsSent());
                     cmp = Boolean.compare(smsA, smsB);
                     break;
+                case LATEST:
+                    cmp = a.getCreatedAt().compareTo(b.getCreatedAt());
+                    break;
                 case NAME:
                 default:
                     cmp = sa.name().compareToIgnoreCase(sb.name());
@@ -307,34 +375,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             }
             return direction.isDescending() ? -cmp : cmp;
         });
-
-
-        List<ApplicationResponseDTO.SummaryForAdmin> allDtos = IntStream.range(0, allApps.size())
-                .mapToObj(i -> ApplicationResponseDTO.SummaryForAdmin.from(allApps.get(i), i + 1L))
-                .toList();
-
-        int start = (int) pageable.getOffset();
-        int end   = Math.min(start + pageable.getPageSize(), allDtos.size());
-        List<ApplicationResponseDTO.SummaryForAdmin> content = start > end
-                ? List.of()
-                : allDtos.subList(start, end);
-
-        Page<ApplicationResponseDTO.SummaryForAdmin> page = new PageImpl<>(content, pageable, allDtos.size());
-
-        long documentCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
-                recruitmentId, AdminStageFilter.DOCUMENT.toStatusList());
-        long interviewCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
-                recruitmentId, AdminStageFilter.INTERVIEW.toStatusList());
-        long finalPassCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
-                recruitmentId, AdminStageFilter.FINAL_PASS.toStatusList());
-        long failCnt = applicationRepository.countByRecruitmentIdAndStatusIn(
-                recruitmentId, AdminStageFilter.FAIL.toStatusList());
-
-        ApplicationResponseDTO.StageCount counts = ApplicationResponseDTO.StageCount.from(
-                documentCnt, interviewCnt, finalPassCnt, failCnt
-        );
-
-        return ApplicationResponseDTO.AdminPageWithStageCounts.from(page, counts);
+        return allApps;
     }
 
 
@@ -424,6 +465,99 @@ public class ApplicationServiceImpl implements ApplicationService {
         String q = (query == null || query.isBlank()) ? null : query.trim();
         return applicationRepository.findEligibleCandidates(recruitmentId, timeslotId, q, excludeCurrent);
     }
+
+    @Override
+    public List<ApplicationResponseDTO.Detail> getAllDetailForExcel(
+            Long recruitmentId,
+            AdminStageFilter stage,
+            AdminApplicationSortField sortBy,
+            Sort.Direction direction,
+            List<Long> organizationRoleIds,
+            List<ApplicationStatus> statuses,
+            String keyword,
+            Long currentUserId
+    ) {
+
+        List<Application> apps = applicationRepository.findByRecruitmentIdAndStatusIn(
+                recruitmentId, stage.toStatusList()
+        );
+
+        // POSITION(OrganizationRole) 필터
+        if (organizationRoleIds != null && !organizationRoleIds.isEmpty()) {
+            apps = apps.stream()
+                    .filter(a -> a.getOrganizationRole() != null &&
+                            organizationRoleIds.contains(a.getOrganizationRole().getId()))
+                    .collect(Collectors.toList());
+        }
+
+        // STATUS 필터
+        if (statuses != null && !statuses.isEmpty()) {
+            apps = apps.stream()
+                    .filter(a -> statuses.contains(a.getStatus()))
+                    .collect(Collectors.toList());
+        }
+
+        // KEYWORD (name 검색)
+        if (keyword != null && !keyword.isBlank()) {
+            String kw = keyword.trim().toLowerCase(Locale.ROOT);
+            apps = apps.stream()
+                    .filter(a -> a.getName() != null && a.getName().toLowerCase().contains(kw))
+                    .collect(Collectors.toList());
+        }
+
+        // SORT
+        apps = getSortedApps(sortBy, direction, apps);
+
+        if (apps.isEmpty()) {
+            return List.of();
+        }
+
+        // 성능 최적화 - bulk 조회
+        List<Long> appIds = apps.stream()
+                .map(Application::getId)
+                .toList();
+
+        // 면접 가능 시간 전체 조회
+        List<ApplicantAvailability> allAvail =
+                applicantAvailabilityRepository.findAllByApplicationIdIn(appIds);
+
+        // 평가 전체 조회
+        List<Evaluation> allEvaluations =
+                evaluationRepository.findAllByApplicationIdIn(appIds);
+
+        // 평가 기준 (기존 단건 상세 방식과 동일)
+        // 단건에서는 DOCUMENT 기준만 가져오지만, Detail.from() 내부에서 인터뷰/서류 모두 사용하므로 recruitment.getEvaluationCriteriaList() 그대로 써도 됨.
+        Recruitment recruitment = apps.isEmpty() ? null : apps.get(0).getRecruitment();
+        List<EvaluationCriteria> criteriaList =
+                recruitment != null ? recruitment.getEvaluationCriteriaList() : List.of();
+
+
+        // previous, next → 엑셀에서는 불필요하므로 null
+        Long previous = null;
+        Long next = null;
+
+
+        // Detail DTO 변환
+        Map<Long, List<ApplicantAvailability>> availMap =
+                allAvail.stream().collect(Collectors.groupingBy(a -> a.getApplication().getId()));
+
+        Map<Long, List<Evaluation>> evalMap =
+                allEvaluations.stream().collect(Collectors.groupingBy(e -> e.getApplication().getId()));
+
+
+        return apps.stream()
+                .map(app -> assembler.toDetail(
+                        app,
+                        availMap.getOrDefault(app.getId(), List.of()),
+                        evalMap.getOrDefault(app.getId(), List.of()),
+                        criteriaList,
+                        currentUserId,
+                        previous,
+                        next
+                ))
+                .toList();
+    }
+
 
     /**
      * PASS/FAIL/HOLD의 간단 상태를 단계와 현재 상태에 맞춰 ApplicationStatus으로 매핑

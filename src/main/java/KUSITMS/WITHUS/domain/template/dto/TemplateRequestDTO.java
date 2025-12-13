@@ -25,4 +25,19 @@ public class TemplateRequestDTO {
             @Schema(description = "템플릿 타입", example = "SMS | MAIL")
             @NotNull Medium medium
             ) {}
+
+    @Schema(description = "문자/메일 템플릿 수정 요청 DTO")
+    public record Update(
+            @Schema(description = "템플릿 이름", example = "면접 일정 안내")
+            @NotBlank String name,
+
+            @Schema(description = "메일 제목", example = "[WITHUS] 면접 일정 안내")
+            String subject,
+
+            @Schema(description = "메일 본문", example = "<p>안녕하세요, {{applicantName}}님!</p>")
+            @NotBlank String body,
+
+            @Schema(description = "템플릿 타입", example = "SMS | MAIL")
+            @NotNull Medium medium
+    ) {}
 }

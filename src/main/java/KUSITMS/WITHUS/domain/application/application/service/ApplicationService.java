@@ -7,6 +7,7 @@ import KUSITMS.WITHUS.domain.application.application.enumerate.AdminStageFilter;
 import KUSITMS.WITHUS.domain.application.application.enumerate.EvaluationStatus;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
 import KUSITMS.WITHUS.domain.application.distributionRequest.dto.DistributionRequestResponseDTO;
+import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -19,11 +20,12 @@ public interface ApplicationService {
     void delete(Long id);
     ApplicationResponseDTO.Detail getById(Long id, Long currentUserId);
     Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(Long recruitmentId, Long currentUserId, EvaluationStatus evaluationStatus, String keyword, Pageable pageable);
-    ApplicationResponseDTO.AdminPageWithStageCounts getByRecruitmentIdForAdmin(Long recruitmentId, AdminStageFilter stage, Pageable pageable, AdminApplicationSortField sortBy, Sort.Direction direction);
+    ApplicationResponseDTO.AdminPageWithStageCounts getByRecruitmentIdForAdmin(Long recruitmentId, AdminStageFilter stage, Pageable pageable, AdminApplicationSortField sortBy, Sort.Direction direction, List<Long> organizationRoleIds, List<ApplicationStatus> statuses, String keyword);
     List<ApplicationResponseDTO.Summary> updateStatus(ApplicationRequestDTO.UpdateStatus request);
     void distributeEvaluators(ApplicationEvaluatorRequestDTO.Distribute request);
     DistributionRequestResponseDTO.Detail distributeEvaluatorsLatestRequest(Long recruitmentId);
     void updateEvaluators(ApplicationEvaluatorRequestDTO.Update request);
     boolean toggleAcquaintance(Long applicationId, Long userId);
     List<ApplicationResponseDTO.CandidateDTO> findTimeslotCandidates(Long recruitmentId, Long timeslotId, String query, boolean excludeCurrent);
+    List<ApplicationResponseDTO.Detail> getAllDetailForExcel(Long recruitmentId, AdminStageFilter stage, AdminApplicationSortField sortBy, Sort.Direction direction, List<Long> organizationRoleIds, List<ApplicationStatus> statuses, String keyword, Long id);
 }

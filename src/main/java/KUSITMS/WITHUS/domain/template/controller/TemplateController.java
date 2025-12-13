@@ -51,5 +51,15 @@ public class TemplateController {
         return SuccessResponse.ok(created);
     }
 
+    @PutMapping("/{templateId}")
+    @Operation(summary = "문자/메일 템플릿 수정", description = "기존에 등록된 템플릿의 정보를 수정합니다.")
+    public SuccessResponse<TemplateResponseDTO.Detail> update(
+            @PathVariable Long templateId,
+            @RequestBody @Valid TemplateRequestDTO.Update dto
+    ) {
+        TemplateResponseDTO.Detail updated = templateService.update(templateId, dto);
+        return SuccessResponse.ok(updated);
+    }
+
 }
 

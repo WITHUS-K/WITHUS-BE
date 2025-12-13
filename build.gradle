@@ -75,6 +75,9 @@ dependencies {
 
 	// H2 (테스트 환경)
 	testImplementation 'com.h2database:h2'
+
+	// Excel
+	implementation 'org.apache.poi:poi-ooxml:5.2.3'
 }
 
 test {
