@@ -282,7 +282,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         // NAME KEYWORD 필터
         if (keyword != null && !keyword.trim().isEmpty()) {
-            String lower = keyword.toLowerCase();
+            String lower = keyword.trim().toLowerCase(Locale.ROOT);
             allApps = allApps.stream()
                     .filter(app ->
                             app.getName() != null &&
@@ -499,15 +499,18 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         // KEYWORD (name 검색)
         if (keyword != null && !keyword.isBlank()) {
-            String kw = keyword.toLowerCase();
+            String kw = keyword.trim().toLowerCase(Locale.ROOT);
             apps = apps.stream()
-                    .filter(a -> a.getName().toLowerCase().contains(kw))
+                    .filter(a -> a.getName() != null && a.getName().toLowerCase().contains(kw))
                     .collect(Collectors.toList());
         }
 
         // SORT
         apps = getSortedApps(sortBy, direction, apps);
 
+        if (apps.isEmpty()) {
+            return List.of();
+        }
 
         // 성능 최적화 - bulk 조회
         List<Long> appIds = apps.stream()
