@@ -206,10 +206,13 @@ public class ApplicationServiceImpl implements ApplicationService {
                 applicantAvailabilityRepository.findByApplicationId(id);
         List<Evaluation> evaluationList =
                 evaluationRepository.findEvaluationsForApplication(id);
+
+        // 공통 평가 기준(organizationRole이 null) + 해당 지원서의 organizationRole과 일치하는 평가 기준만 조회
         List<EvaluationCriteria> criteriaList =
-                evaluationCriteriaRepository.findByTypeAndRecruitment(
+                evaluationCriteriaRepository.findCommonAndByOrganizationRole(
+                        recruitmentId,
                         EvaluationType.DOCUMENT,
-                        recruitmentId
+                        app.getOrganizationRole()
                 );
 
         return assembler.toDetail(
