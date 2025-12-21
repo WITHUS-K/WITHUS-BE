@@ -134,6 +134,7 @@ public enum ErrorCode {
 
     // TEMPLATE
     TEMPLATE_NOT_FOUND("TEMPLATE404", "존재하지 않는 템플릿입니다.", HttpStatus.NOT_FOUND),
+    TEMPLATE_NO_PERMISSION("TEMPLATE403", "해당 템플릿에 대한 권한이 없습니다.", HttpStatus.FORBIDDEN),
     EMAIL_SUBJECT_REQUIRED("TEMPLATE402", "이메일 템플릿의 경우 제목이 필요합니다.", HttpStatus.BAD_REQUEST),
 
     // EMAIL

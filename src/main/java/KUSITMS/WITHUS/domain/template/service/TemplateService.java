@@ -11,5 +11,6 @@ public interface TemplateService {
     TemplateResponseDTO.Detail getById(Long templateId);
     List<TemplateResponseDTO.Summary> listAll(Medium medium, User user);
     TemplateResponseDTO.Detail create(TemplateRequestDTO.Create dto);
-    TemplateResponseDTO.Detail update(Long templateId, TemplateRequestDTO.Update dto);
+    TemplateResponseDTO.Detail update(Long templateId, TemplateRequestDTO.Update dto, User user);
+    void delete(Long templateId, User user);
 }

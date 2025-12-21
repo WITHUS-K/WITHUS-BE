@@ -52,13 +52,24 @@ public class TemplateController {
     }
 
     @PutMapping("/{templateId}")
-    @Operation(summary = "문자/메일 템플릿 수정", description = "기존에 등록된 템플릿의 정보를 수정합니다.")
+    @Operation(summary = "문자/메일 템플릿 수정", description = "기존에 등록된 템플릿의 정보를 수정합니다. 자신이 속한 조직의 템플릿만 수정 가능합니다.")
     public SuccessResponse<TemplateResponseDTO.Detail> update(
             @PathVariable Long templateId,
-            @RequestBody @Valid TemplateRequestDTO.Update dto
+            @RequestBody @Valid TemplateRequestDTO.Update dto,
+            @CurrentUser User user
     ) {
-        TemplateResponseDTO.Detail updated = templateService.update(templateId, dto);
+        TemplateResponseDTO.Detail updated = templateService.update(templateId, dto, user);
         return SuccessResponse.ok(updated);
+    }
+
+    @DeleteMapping("/{templateId}")
+    @Operation(summary = "문자/메일 템플릿 삭제", description = "등록된 템플릿을 삭제합니다. 자신이 속한 조직의 템플릿만 삭제 가능합니다.")
+    public SuccessResponse<String> delete(
+            @PathVariable Long templateId,
+            @CurrentUser User user
+    ) {
+        templateService.delete(templateId, user);
+        return SuccessResponse.ok("템플릿이 삭제되었습니다.");
     }
 
 }
