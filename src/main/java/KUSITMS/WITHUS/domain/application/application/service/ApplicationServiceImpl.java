@@ -469,6 +469,20 @@ public class ApplicationServiceImpl implements ApplicationService {
         return applicationRepository.findEligibleCandidates(recruitmentId, timeslotId, q, excludeCurrent);
     }
 
+    /**
+     * 메일/문자 발송용 지원자 검색
+     * @param recruitmentId 공고 ID
+     * @param keyword 검색어 (지원자 이름 또는 이메일)
+     * @return 지원자 목록 (지원서 ID, 이름, 이메일, 프로필 사진 URL)
+     */
+    @Override
+    public List<ApplicationResponseDTO.ApplicantForMailSms> searchApplicantsForMailSms(Long recruitmentId, String keyword) {
+        List<Application> applications = applicationRepository.findByRecruitmentIdAndNameOrEmail(recruitmentId, keyword);
+        return applications.stream()
+                .map(ApplicationResponseDTO.ApplicantForMailSms::from)
+                .toList();
+    }
+
     @Override
     public List<ApplicationResponseDTO.Detail> getAllDetailForExcel(
             Long recruitmentId,

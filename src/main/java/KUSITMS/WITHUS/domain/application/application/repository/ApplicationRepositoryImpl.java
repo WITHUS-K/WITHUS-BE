@@ -159,4 +159,25 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
                 )
                 .fetchOne();
     }
+
+    @Override
+    public List<Application> findByRecruitmentIdAndNameOrEmail(Long recruitmentId, String keyword) {
+        com.querydsl.core.types.dsl.BooleanExpression searchPredicate = null;
+        
+        // 키워드가 있으면 이름 또는 이메일로 검색, 없으면 전체 목록 조회
+        if (keyword != null && !keyword.isBlank()) {
+            String searchKeyword = keyword.trim();
+            searchPredicate = application.name.containsIgnoreCase(searchKeyword)
+                    .or(application.email.containsIgnoreCase(searchKeyword));
+        }
+
+        return queryFactory
+                .selectFrom(application)
+                .where(
+                        application.recruitment.id.eq(recruitmentId),
+                        searchPredicate  // null이면 검색 조건 무시되어 전체 목록 조회
+                )
+                .orderBy(application.name.asc())
+                .fetch();
+    }
 }

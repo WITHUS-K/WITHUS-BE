@@ -23,4 +23,5 @@ public interface ApplicationRepository {
     List<Application> findForTimeSlot(Long timeSlotId);
     Long findPreviousIdInRecruitment(Long recruitmentId, Long currentId);
     Long findNextIdInRecruitment(Long recruitmentId, Long currentId);
+    List<Application> findByRecruitmentIdAndNameOrEmail(Long recruitmentId, String keyword);
 }

@@ -156,6 +156,16 @@ public class AdminApplicationController {
         return SuccessResponse.ok("메일을 발송 요청을 보냈습니다.");
     }
 
+    @GetMapping("/recruitment/{recruitmentId}/search")
+    @Operation(summary = "공고 전체 지원자 검색", description = "메일/문자 발송용으로 공고의 전체 지원자를 이름 또는 이메일로 검색합니다.")
+    public SuccessResponse<List<ApplicationResponseDTO.ApplicantForMailSms>> searchApplicants(
+            @PathVariable Long recruitmentId,
+            @RequestParam(required = false) String keyword
+    ) {
+        List<ApplicationResponseDTO.ApplicantForMailSms> applicants = applicationService.searchApplicantsForMailSms(recruitmentId, keyword);
+        return SuccessResponse.ok(applicants);
+    }
+
     @PostMapping("/bulk-sms")
     @Operation(summary = "지원서 대상 다중 문자 발송", description = "복수의 수신자 전화번호와 메시지, 첨부파일(MMS)을 받아 일괄 발송합니다.")
     public SuccessResponse<String> sendBulkSms(
