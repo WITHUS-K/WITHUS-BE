@@ -46,7 +46,9 @@ public class EvaluatorAssignmentService {
         // 요청 이력 dto -> 엔티티 매핑
         List<DistributionAssignment> assignments = request.assignments().stream()
                 .map(dto -> {
-                    OrganizationRole role = organizationRoleRepository.getById(dto.organizationRoleId());
+                    OrganizationRole role = dto.organizationRoleId() != null
+                            ? organizationRoleRepository.getById(dto.organizationRoleId())
+                            : null;
                     return DistributionAssignment.builder()
                             .organizationRole(role)
                             .evaluationType(dto.evaluationType())
@@ -77,9 +79,10 @@ public class EvaluatorAssignmentService {
                 throw new CustomException(ErrorCode.INSUFFICIENT_EVALUATORS);
             }
 
-            // 이 역할을 지원한 지원서 리스트
-            List<Application> apps = applicationRepository
-                    .findByRecruitment_IdAndOrganizationRole_Id(recruitmentId, part.organizationRoleId());
+            // 이 역할을 지원한 지원서 리스트 (organizationRoleId가 null이면 공통(역할 미지정) 지원서 조회)
+            List<Application> apps = part.organizationRoleId() == null
+                    ? applicationRepository.findByRecruitment_IdAndOrganizationRoleIsNull(recruitmentId)
+                    : applicationRepository.findByRecruitment_IdAndOrganizationRole_Id(recruitmentId, part.organizationRoleId());
 
             // 각 지원서마다 랜덤 n명 배정
             for (Application app : apps) {

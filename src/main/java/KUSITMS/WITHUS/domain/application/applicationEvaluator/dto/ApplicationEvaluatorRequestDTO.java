@@ -27,8 +27,7 @@ public class ApplicationEvaluatorRequestDTO {
     ) {
         @Schema(description = "지원 역할(OrganizationRole)별 평가 담당자 배정 정보")
         public record PartAssignment(
-                @Schema(description = "지원 역할(OrganizationRole) ID - 지원서가 지원한 역할", example = "4")
-                @NotNull
+                @Schema(description = "지원 역할(OrganizationRole) ID - null이면 공통(역할 미지정 지원서) 대상", example = "4")
                 Long organizationRoleId,
 
                 @Schema(description = "평가 담당자 Role(OrganizationRole) ID - 평가를 담당할 역할", example = "7")

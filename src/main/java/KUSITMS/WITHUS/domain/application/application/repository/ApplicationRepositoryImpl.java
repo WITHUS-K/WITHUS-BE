@@ -63,6 +63,11 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
     }
 
     @Override
+    public List<Application> findByRecruitment_IdAndOrganizationRoleIsNull(Long recruitmentId) {
+        return applicationJpaRepository.findByRecruitment_IdAndOrganizationRoleIsNull(recruitmentId);
+    }
+
+    @Override
     public Long countByRecruitment_IdAndOrganizationRole_Id(Long recruitmentId, Long organizationRoleId) {
         return applicationJpaRepository.countByRecruitment_IdAndOrganizationRole_Id(recruitmentId, organizationRoleId);
     }
