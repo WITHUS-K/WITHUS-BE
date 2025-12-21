@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.recruitment.position.dto;
 
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.recruitment.position.entity.Position;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -21,6 +22,18 @@ public class PositionResponseDTO {
                     position.getId(),
                     position.getName(),
                     position.getColor()
+            );
+        }
+
+        public static Detail from(OrganizationRole organizationRole) {
+            if (organizationRole == null) {
+                return null;
+            }
+
+            return new Detail(
+                    organizationRole.getId(),
+                    organizationRole.getName(),
+                    organizationRole.getColor()
             );
         }
     }
