@@ -8,6 +8,8 @@ import KUSITMS.WITHUS.domain.template.entity.Template;
 import KUSITMS.WITHUS.domain.template.enumerate.Medium;
 import KUSITMS.WITHUS.domain.template.repository.TemplateRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,12 +64,25 @@ public class TemplateServiceImpl implements TemplateService {
         return TemplateResponseDTO.Detail.from(saved);
     }
 
+    /**
+     * 사용자가 속한 조직의 템플릿인지 검증
+     */
+    private void validateUserHasAccess(Template template, User user) {
+        Long templateOrganizationId = template.getOrganization().getId();
+        
+        boolean hasAccess = user.getUserOrganizations().stream()
+                .anyMatch(uo -> uo.getOrganization().getId().equals(templateOrganizationId));
+        
+        if (!hasAccess) {
+            throw new CustomException(ErrorCode.TEMPLATE_NO_PERMISSION);
+        }
+    }
+
     @Override
     @Transactional
-    public TemplateResponseDTO.Detail update(Long templateId, TemplateRequestDTO.Update dto) {
+    public TemplateResponseDTO.Detail update(Long templateId, TemplateRequestDTO.Update dto, User user) {
         Template template = templateRepository.getById(templateId);
-
-        // TODO: 사용자가 속한 조직의 템플릿만 수정하도록 검증 추가 필요
+        validateUserHasAccess(template, user);
 
         template.update(
                 dto.name(),
@@ -77,6 +92,19 @@ public class TemplateServiceImpl implements TemplateService {
         );
 
         return TemplateResponseDTO.Detail.from(template);
+    }
+
+    /**
+     * 문자/메일 템플릿 삭제
+     * @param templateId 삭제할 템플릿 ID
+     * @param user 현재 사용자
+     */
+    @Override
+    @Transactional
+    public void delete(Long templateId, User user) {
+        Template template = templateRepository.getById(templateId);
+        validateUserHasAccess(template, user);
+        templateRepository.delete(templateId);
     }
 
 }

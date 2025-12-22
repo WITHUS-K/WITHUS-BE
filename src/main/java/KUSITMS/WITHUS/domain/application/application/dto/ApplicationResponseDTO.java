@@ -555,4 +555,21 @@ public class ApplicationResponseDTO {
         }
     }
 
+    @Schema(description = "메일/문자 발송용 지원자 검색 응답 DTO")
+    public record ApplicantForMailSms(
+            @Schema(description = "지원서 ID", example = "1") Long applicationId,
+            @Schema(description = "지원자 이름", example = "홍길동") String name,
+            @Schema(description = "지원자 이메일", example = "hong@example.com") String email,
+            @Schema(description = "프로필 사진 URL", example = "https://example.com/profile.jpg") String profileImageUrl
+    ) {
+        public static ApplicantForMailSms from(Application application) {
+            return new ApplicantForMailSms(
+                    application.getId(),
+                    application.getName(),
+                    application.getEmail(),
+                    application.getImageUrl()
+            );
+        }
+    }
+
 }

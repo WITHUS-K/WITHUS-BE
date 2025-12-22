@@ -41,7 +41,7 @@ public class DistributionRequestResponseDTO {
     ) {
         public static Assignment from(DistributionAssignment a) {
             return new Assignment(
-                    a.getOrganizationRole().getName(),
+                    a.getOrganizationRole() != null ? a.getOrganizationRole().getName() : "공통",
                     a.getEvaluationType(),
                     a.getCount()
             );

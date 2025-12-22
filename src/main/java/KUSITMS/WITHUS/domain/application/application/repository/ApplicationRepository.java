@@ -14,6 +14,7 @@ public interface ApplicationRepository {
     List<Application> findPassedByRecruitment(Long recruitmentId);
     List<Application> findByRecruitmentIdAndStatusIn(Long recruitmentId, List<ApplicationStatus> statuses);
     List<Application> findByRecruitment_IdAndOrganizationRole_Id(Long recruitmentId, Long organizationRoleId);
+    List<Application> findByRecruitment_IdAndOrganizationRoleIsNull(Long recruitmentId);
     Long countByRecruitment_IdAndOrganizationRole_Id(Long recruitmentId, Long organizationRoleId);
     List<Application> findAllById(List<Long> longs);
     List<Application> findDistinctByRecruitment_IdAndEvaluators_Evaluator_IdAndEvaluators_EvaluationType(Long recruitmentId, Long evaluatorId, EvaluationType evaluationType);
@@ -22,4 +23,5 @@ public interface ApplicationRepository {
     List<Application> findForTimeSlot(Long timeSlotId);
     Long findPreviousIdInRecruitment(Long recruitmentId, Long currentId);
     Long findNextIdInRecruitment(Long recruitmentId, Long currentId);
+    List<Application> findByRecruitmentIdAndNameOrEmail(Long recruitmentId, String keyword);
 }

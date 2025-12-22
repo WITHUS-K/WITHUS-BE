@@ -7,11 +7,19 @@ import KUSITMS.WITHUS.domain.recruitment.position.enumerate.PositionColor;
 import KUSITMS.WITHUS.domain.recruitment.position.repository.PositionRepository;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static KUSITMS.WITHUS.domain.recruitment.recruitment.entity.QRecruitment.recruitment;
+import static KUSITMS.WITHUS.domain.recruitment.recruitmentOrganizationRole.entity.QRecruitmentOrganizationRole.recruitmentOrganizationRole;
+import static KUSITMS.WITHUS.domain.organization.organizationRole.entity.QOrganizationRole.organizationRole;
+
+import KUSITMS.WITHUS.global.exception.CustomException;
+import KUSITMS.WITHUS.global.exception.ErrorCode;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,6 +28,7 @@ public class PositionServiceImpl implements PositionService {
 
     private final PositionRepository positionRepository;
     private final RecruitmentRepository recruitmentRepository;
+    private final JPAQueryFactory queryFactory;
 
     /**
      * 파트 생성
@@ -53,8 +62,20 @@ public class PositionServiceImpl implements PositionService {
 
     @Override
     public List<PositionResponseDTO.Detail> findAllByRecruitmentId(Long recruitmentId) {
-        return positionRepository.findAllByRecruitmentId(recruitmentId).stream()
-                .map(PositionResponseDTO.Detail::from)
+        // Recruitment의 RecruitmentOrganizationRole 리스트와 각각의 OrganizationRole을 함께 조회하기 위해 fetch join 사용
+        Recruitment found = queryFactory
+                .selectFrom(recruitment)
+                .leftJoin(recruitment.positions, recruitmentOrganizationRole).fetchJoin()
+                .leftJoin(recruitmentOrganizationRole.organizationRole, organizationRole).fetchJoin()
+                .where(recruitment.id.eq(recruitmentId))
+                .fetchOne();
+
+        if (found == null) {
+            throw new CustomException(ErrorCode.RECRUITMENT_NOT_EXIST);
+        }
+
+        return found.getPositions().stream()
+                .map(ror -> PositionResponseDTO.Detail.from(ror.getOrganizationRole()))
                 .toList();
     }
 }

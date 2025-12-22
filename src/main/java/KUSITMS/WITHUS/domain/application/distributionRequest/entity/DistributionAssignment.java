@@ -22,7 +22,7 @@ public class DistributionAssignment extends BaseEntity {
     private DistributionRequest request;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ORGANIZATION_ROLE_ID", nullable = false)
+    @JoinColumn(name = "ORGANIZATION_ROLE_ID")
     private OrganizationRole organizationRole;
 
     @Enumerated(EnumType.STRING)

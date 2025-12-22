@@ -9,4 +9,5 @@ public interface TemplateRepository {
     Template getById(Long templateId);
     List<Template> findAllByMedium(Medium medium, List<Long> organizationIds);
     Template save(Template template);
+    void delete(Long templateId);
 }

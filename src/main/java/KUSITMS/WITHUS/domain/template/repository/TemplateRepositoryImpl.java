@@ -22,8 +22,17 @@ public class TemplateRepositoryImpl implements TemplateRepository{
 
     @Override
     public Template getById(Long templateId) {
-        return templateJpaRepository.findById(templateId)
-                .orElseThrow(() -> new CustomException(ErrorCode.TEMPLATE_NOT_FOUND));
+        Template found = queryFactory
+                .selectFrom(template)
+                .join(template.organization, organization).fetchJoin()
+                .where(template.id.eq(templateId))
+                .fetchOne();
+        
+        if (found == null) {
+            throw new CustomException(ErrorCode.TEMPLATE_NOT_FOUND);
+        }
+        
+        return found;
     }
 
     @Override
@@ -40,5 +49,11 @@ public class TemplateRepositoryImpl implements TemplateRepository{
     @Override
     public Template save(Template template) {
         return templateJpaRepository.save(template);
+    }
+
+    @Override
+    public void delete(Long templateId) {
+        Template template = getById(templateId);
+        templateJpaRepository.delete(template);
     }
 }
