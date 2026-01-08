@@ -2,7 +2,9 @@ name: Deployment Workflow
 
 on:
   push:
-    branches: ["develop"]
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
 
 jobs:
   build-and-push:
@@ -35,8 +37,8 @@ jobs:
       - name: Docker login
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME_SH }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD_SH }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -55,7 +57,7 @@ jobs:
           file: deploy/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/withus:${{ env.IMAGE_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME_SH }}/withus-be:${{ env.IMAGE_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -68,13 +70,13 @@ jobs:
 
       - name: Update deployment.yml
         env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME_SH }}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
         run: |
           dir="manifest-oracle"
           file="$dir/staging/deployment.yml"
 
-          sed -i "s|image:.*|image: ${DOCKERHUB_USERNAME}/withus:${IMAGE_TAG}|g" "$file"
+          sed -i "s|image:.*|image: ${DOCKERHUB_USERNAME}/withus-be:${IMAGE_TAG}|g" "$file"
           echo "Updated $file:"
           cat "$file"
 
