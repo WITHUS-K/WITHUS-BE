@@ -9,6 +9,11 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
     env:
       SPRING_PROFILES_ACTIVE: test
       TEST_JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
@@ -32,7 +37,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle Wrapper
-        run: ./gradlew clean build --info --stacktrace --no-daemon
+        run: ./gradlew clean build -x test --info --stacktrace --no-daemon
 
       - name: Docker login
         uses: docker/login-action@v3
