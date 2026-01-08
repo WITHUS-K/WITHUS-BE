@@ -5,7 +5,7 @@ COPY . .
 RUN ./gradlew build -x test
 
 # Runtime stage
-FROM eclipse-temurin:17-jre-alpine AS runtime
+FROM eclipse-temurin:17-jre AS runtime
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 EXPOSE 8080
