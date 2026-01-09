@@ -102,7 +102,7 @@ public class RecruitmentController {
             @CurrentUser User currentUser
     ) {
         List<RecruitmentResponseDTO.SummaryForHome> dtos =
-                recruitmentService.getCurrentSummariesForUser(organizationId, currentUser.getId());
+                recruitmentService.getCurrentSummariesForUser(currentUser.getId(), organizationId);
         return SuccessResponse.ok(dtos);
     }
 
