@@ -1,0 +1,103 @@
+name: Deployment Workflow
+
+on:
+  push:
+    branches: [ "develop" ]
+#  pull_request:
+#    branches: [ "develop" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+    env:
+      SPRING_PROFILES_ACTIVE: test
+      TEST_JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle Wrapper
+        run: ./gradlew clean build -x test --info --stacktrace --no-daemon
+
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME_SH }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD_SH }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set image tag
+        id: vars
+        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME_SH }}/withus-be:${{ env.IMAGE_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Checkout manifest repository (oracle)
+        uses: actions/checkout@v4
+        with:
+          repository: "WITHUS-K/WITHUS_MANIFEST_ORACLE"
+          token: ${{ secrets.PAT }}
+          path: "manifest-oracle"
+
+      - name: Update deployment.yml
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME_SH }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+        run: |
+          dir="manifest-oracle"
+          file="$dir/staging/deployment.yml"
+
+          sed -i "s|image:.*|image: ${DOCKERHUB_USERNAME}/withus-be:${IMAGE_TAG}|g" "$file"
+          echo "Updated $file:"
+          cat "$file"
+
+      - name: Commit and push changes
+        env:
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+        run: |
+          dir="manifest-oracle"
+          git -C "$dir" config --local user.email "kjeng7897@gmail.com"
+          git -C "$dir" config --local user.name "SeongHo5356"
+          git -C "$dir" add staging/deployment.yml
+
+          if [ -z "$(git -C "$dir" status --porcelain)" ]; then
+            echo "No changes to commit in $dir"
+            exit 0
+          fi
+
+          git -C "$dir" commit -m "Update image tag to $IMAGE_TAG"
+          git -C "$dir" push
