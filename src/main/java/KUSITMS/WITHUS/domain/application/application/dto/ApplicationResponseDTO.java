@@ -17,6 +17,7 @@ import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.entity.EvaluationCrit
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.interview.interviewQuestion.dto.InterviewQuestionResponseDTO;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
@@ -289,17 +290,20 @@ public class ApplicationResponseDTO {
     ) {
         public static SummaryForUser from(Application application, Long currentUserId) {
             Recruitment recruitment = application.getRecruitment();
+            OrganizationRole appRole = application.getOrganizationRole();
 
             int documentCriteriaCount = (int) recruitment
                     .getEvaluationCriteriaList()
                     .stream()
                     .filter(c -> c.getEvaluationType() == EvaluationType.DOCUMENT)
+                    .filter(c -> matchesOrganizationRole(c, appRole))
                     .count();
             int documentMaxScore = documentCriteriaCount * 10;
 
             List<Evaluation> userDocsEvaluations = application.getEvaluations().stream()
                     .filter(e -> e.getUser().getId().equals(currentUserId))
                     .filter(e -> e.getCriteria().getEvaluationType() == EvaluationType.DOCUMENT)
+                    .filter(e -> matchesOrganizationRole(e.getCriteria(), appRole))
                     .toList();
 
             boolean evaluated = !(documentCriteriaCount > userDocsEvaluations.size() || userDocsEvaluations.isEmpty());
@@ -335,6 +339,17 @@ public class ApplicationResponseDTO {
                     documentMaxScore,
                     interviewSchedule
             );
+        }
+
+        private static boolean matchesOrganizationRole(EvaluationCriteria criteria, OrganizationRole appRole) {
+            OrganizationRole criteriaRole = criteria.getOrganizationRole();
+            if (criteriaRole == null) {
+                return true;
+            }
+            if (appRole == null) {
+                return false;
+            }
+            return criteriaRole.getId().equals(appRole.getId());
         }
     }
 
