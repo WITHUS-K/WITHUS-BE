@@ -36,4 +36,14 @@ public class TimeSlotUserRepositoryImpl implements TimeSlotUserRepository {
                 )
                 .execute();
     }
+
+    @Override
+    public List<Long> findMyTimeSlotIds(Long id, InterviewRole role) {
+        return timeSlotUserJpaRepository.findMyTimeSlotIds(id, role);
+    }
+
+    @Override
+    public List<TimeSlotUser> findAllByTimeSlotIdInWithUser(List<Long> timeSlotIds) {
+        return timeSlotUserJpaRepository.findAllByTimeSlotIdInWithUser(timeSlotIds);
+    }
 }
