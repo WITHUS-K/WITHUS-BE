@@ -108,7 +108,7 @@ public class TimeSlotServiceImpl implements TimeSlotService {
     }
 
     @Override
-    public TimeSlotResponseDTO getTimeSlotDetail(Long timeSlotId) {
+    public TimeSlotResponseDTO.Detail getTimeSlotDetail(Long timeSlotId) {
         TimeSlot slot = timeSlotRepository.getById(timeSlotId);
 
         List<TimeSlotUser> users = timeSlotUserRepository.findByTimeSlotId(timeSlotId);
@@ -118,6 +118,6 @@ public class TimeSlotServiceImpl implements TimeSlotService {
                         .map(ApplicationResponseDTO.Applicant::from)
                         .toList();
 
-        return TimeSlotResponseDTO.from(slot, users, applicants);
+        return TimeSlotResponseDTO.Detail.from(slot, users, applicants);
     }
 }

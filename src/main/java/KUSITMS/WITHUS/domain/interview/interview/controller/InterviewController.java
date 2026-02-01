@@ -82,11 +82,11 @@ public class InterviewController {
 
     @GetMapping("/me/schedules")
     @Operation(summary = "내 전체 면접자/안내자 배정 결과 조회", description = "로그인한 사용자의 면접자/안내자 배정 결과를 조회합니다. 면접자/안내자로 필터링하여 조회 가능합니다.")
-    public SuccessResponse<InterviewResponseDTO.MyInterviewSchedule> getMyInterviewSchedule(
+    public SuccessResponse<InterviewResponseDTO.Schedule> getMyInterviewSchedule(
             @CurrentUser User user,
             @RequestParam InterviewRole role
     ) {
-        InterviewResponseDTO.MyInterviewSchedule userHome = interviewService.getMyInterviewSchedule(user, role);
+        InterviewResponseDTO.Schedule userHome = interviewService.getMyInterviewSchedule(user, role);
         return SuccessResponse.ok(userHome);
     }
 }

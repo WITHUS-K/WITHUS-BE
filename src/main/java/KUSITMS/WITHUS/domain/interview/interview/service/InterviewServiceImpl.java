@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.interview.interview.service;
 
+import KUSITMS.WITHUS.domain.application.application.dto.ApplicationResponseDTO;
 import KUSITMS.WITHUS.domain.application.application.entity.Application;
 import KUSITMS.WITHUS.domain.application.application.repository.ApplicationRepository;
 import KUSITMS.WITHUS.domain.interview.enumerate.InterviewRole;
@@ -7,6 +8,7 @@ import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewResponseDTO;
 import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewScheduleDTO;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.interview.repository.InterviewRepository;
+import KUSITMS.WITHUS.domain.interview.timeslot.dto.TimeSlotResponseDTO;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.interview.timeslot.repository.TimeSlotRepository;
 import KUSITMS.WITHUS.domain.interview.timeslotUser.entity.TimeSlotUser;
@@ -14,6 +16,7 @@ import KUSITMS.WITHUS.domain.interview.timeslotUser.repository.TimeSlotUserRepos
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.dto.AvailableTimeRangeResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
+import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -102,71 +105,54 @@ public class InterviewServiceImpl implements InterviewService {
 
     @Override
     @Transactional(readOnly = true)
-    public InterviewResponseDTO.MyInterviewSchedule getMyInterviewSchedule(User user, InterviewRole role) {
+    public InterviewResponseDTO.Schedule getMyInterviewSchedule(User user, InterviewRole role) {
 
         List<Long> timeSlotIds = timeSlotUserRepository.findMyTimeSlotIds(user.getId(), role);
         if (timeSlotIds.isEmpty()) {
-            return new InterviewResponseDTO.MyInterviewSchedule(role, List.of());
+            return InterviewResponseDTO.Schedule.from(role, List.of());
         }
 
-        // 1) 슬롯 + (interview/recruitment) + applications 로딩
+        // 타임슬롯 + (interview/recruitment) + applications 로딩
         List<TimeSlot> slots = timeSlotRepository.findAllByIdIn(timeSlotIds);
 
-        // 2) 슬롯에 연결된 TimeSlotUser(+User) 로딩
+        // 타임슬롯에 연결된 TimeSlotUser(+User) 로딩
         List<TimeSlotUser> tsUsers = timeSlotUserRepository.findAllByTimeSlotIdInWithUser(timeSlotIds);
 
         Map<Long, List<TimeSlotUser>> tsUsersBySlotId = tsUsers.stream()
                 .collect(Collectors.groupingBy(tsu -> tsu.getTimeSlot().getId()));
 
-        // 3) DTO로 변환
-        List<InterviewResponseDTO.MyInterviewSchedule.SlotCard> cards = slots.stream()
+        // DTO로 변환
+        List<TimeSlotResponseDTO.ScheduleCard> cards = slots.stream()
                 .map(slot -> {
-                    List<InterviewResponseDTO.MyInterviewSchedule.ApplicantSimple> applicants =
+                    List<ApplicationResponseDTO.Applicant> applicants =
                             slot.getApplications().stream()
-                                    .map(app -> new InterviewResponseDTO.MyInterviewSchedule.ApplicantSimple(app.getId(), app.getName()))
+                                    .map(ApplicationResponseDTO.Applicant::from)
                                     .toList();
 
                     List<TimeSlotUser> usersInSlot = tsUsersBySlotId.getOrDefault(slot.getId(), List.of());
 
-                    List<InterviewResponseDTO.MyInterviewSchedule.UserSimple> interviewers =
+                    List<UserResponseDTO.Summary> interviewers =
                             usersInSlot.stream()
                                     .filter(u -> u.getRole() == InterviewRole.INTERVIEWER)
-                                    .map(u -> new InterviewResponseDTO.MyInterviewSchedule.UserSimple(
-                                            u.getUser().getId(),
-                                            u.getUser().getName(),
-                                            u.getUser().getProfileImageUrl()
-                                    ))
+                                    .map(u -> UserResponseDTO.Summary.from(u.getUser()))
                                     .toList();
 
-                    List<InterviewResponseDTO.MyInterviewSchedule.UserSimple> assistants =
+                    List<UserResponseDTO.Summary> assistants =
                             usersInSlot.stream()
                                     .filter(u -> u.getRole() == InterviewRole.ASSISTANT)
-                                    .map(u -> new InterviewResponseDTO.MyInterviewSchedule.UserSimple(
-                                            u.getUser().getId(),
-                                            u.getUser().getName(),
-                                            u.getUser().getProfileImageUrl()
-                                    ))
+                                    .map(u -> UserResponseDTO.Summary.from(u.getUser()))
                                     .toList();
 
-                    return new InterviewResponseDTO.MyInterviewSchedule.SlotCard(
-                            slot.getId(),
-                            slot.getInterview().getId(),
-                            slot.getRoomName(),
-                            slot.getStartTime(),
-                            slot.getEndTime(),
-                            applicants,
-                            interviewers,
-                            assistants
-                    );
+                    return TimeSlotResponseDTO.ScheduleCard.from(slot, applicants, interviewers, assistants);
                 })
                 // 시간순 정렬(같은 날짜 안에서)
                 .sorted(Comparator
-                        .comparing(InterviewResponseDTO.MyInterviewSchedule.SlotCard::startTime)
-                        .thenComparing(InterviewResponseDTO.MyInterviewSchedule.SlotCard::timeSlotId))
+                        .comparing(TimeSlotResponseDTO.ScheduleCard::startTime)
+                        .thenComparing(TimeSlotResponseDTO.ScheduleCard::timeSlotId))
                 .toList();
 
-        // 4) 날짜별 그룹핑
-        Map<LocalDate, List<InterviewResponseDTO.MyInterviewSchedule.SlotCard>> byDate = new LinkedHashMap<>();
+        // 날짜별 그룹핑
+        Map<LocalDate, List<TimeSlotResponseDTO.ScheduleCard>> byDate = new LinkedHashMap<>();
         for (TimeSlot slot : slots.stream()
                 .sorted(Comparator.comparing(TimeSlot::getDate).thenComparing(TimeSlot::getStartTime))
                 .toList()) {
@@ -177,16 +163,16 @@ public class InterviewServiceImpl implements InterviewService {
         Map<Long, LocalDate> slotDateMap = slots.stream()
                 .collect(Collectors.toMap(TimeSlot::getId, TimeSlot::getDate));
 
-        for (InterviewResponseDTO.MyInterviewSchedule.SlotCard card : cards) {
+        for (TimeSlotResponseDTO.ScheduleCard card : cards) {
             LocalDate d = slotDateMap.get(card.timeSlotId());
             byDate.computeIfAbsent(d, k -> new ArrayList<>()).add(card);
         }
 
-        List<InterviewResponseDTO.MyInterviewSchedule.DateGroup> dateGroups = byDate.entrySet().stream()
-                .map(e -> new InterviewResponseDTO.MyInterviewSchedule.DateGroup(e.getKey(), e.getValue()))
+        List<InterviewResponseDTO.Schedule.DateGroup> dateGroups = byDate.entrySet().stream()
+                .map(e -> InterviewResponseDTO.Schedule.DateGroup.from(e.getKey(), e.getValue()))
                 .toList();
 
-        return new InterviewResponseDTO.MyInterviewSchedule(role, dateGroups);
+        return new InterviewResponseDTO.Schedule(role, dateGroups);
     }
 
     @Override

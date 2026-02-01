@@ -13,5 +13,5 @@ public interface InterviewService {
     Interview getById(Long interviewId);
     InterviewResponseDTO.Config getInterviewConfig(Long interviewId);
     List<InterviewScheduleDTO.InterviewScheduleSummaryDTO> getOrganizationInterviews(Long organizationId);
-    InterviewResponseDTO.MyInterviewSchedule getMyInterviewSchedule(User user, InterviewRole role);
+    InterviewResponseDTO.Schedule getMyInterviewSchedule(User user, InterviewRole role);
 }

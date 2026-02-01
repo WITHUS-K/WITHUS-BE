@@ -2,10 +2,11 @@ package KUSITMS.WITHUS.domain.interview.interview.dto;
 
 import KUSITMS.WITHUS.domain.interview.enumerate.InterviewRole;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
+import KUSITMS.WITHUS.domain.interview.timeslot.dto.TimeSlotResponseDTO;
+import KUSITMS.WITHUS.global.common.annotation.DateFormatSlash;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @Schema(description = "면접 관련 응답 DTO")
@@ -28,36 +29,22 @@ public class InterviewResponseDTO {
         }
     }
 
-    public record MyInterviewSchedule(
-            InterviewRole role,
-            List<DateGroup> dates
+    public record Schedule(
+            @Schema(description = "면접관/안내자 역할") InterviewRole role,
+            @Schema(description = "날짜") List<DateGroup> dates
     ) {
+        public static Schedule from(InterviewRole role, List<DateGroup> dates) {
+            return new InterviewResponseDTO.Schedule(role, dates);
+        }
+
         public record DateGroup(
-                LocalDate date,
-                List<SlotCard> timeSlots
-        ) {}
-
-        public record SlotCard(
-                Long timeSlotId,
-                Long interviewId,
-                String roomName,
-                LocalTime startTime,
-                LocalTime endTime,
-                List<ApplicantSimple> applicants,
-                List<UserSimple> interviewers,
-                List<UserSimple> assistants
-        ) {}
-
-        public record ApplicantSimple(
-                Long applicationId,
-                String name
-        ) {}
-
-        public record UserSimple(
-                Long userId,
-                String name,
-                String profileImageUrl
-        ) {}
+                @DateFormatSlash LocalDate date,
+                List<TimeSlotResponseDTO.ScheduleCard> timeSlots
+        ) {
+            public static DateGroup from(LocalDate date, List<TimeSlotResponseDTO.ScheduleCard> timeSlots) {
+                return new DateGroup(date, timeSlots);
+            }
+        }
     }
 
 }

@@ -30,7 +30,7 @@ public class TimeSlotController {
 
     @GetMapping("/{timeSlotId}")
     @Operation(summary = "타임슬롯 조회", description = "특정 타임슬롯에 배정된 사용자/지원자 목록을 조회합니다.")
-    public SuccessResponse<TimeSlotResponseDTO> getUsersByTimeSlot(
+    public SuccessResponse<TimeSlotResponseDTO.Detail> getUsersByTimeSlot(
             @PathVariable Long timeSlotId
     ) {
         return SuccessResponse.ok(timeSlotService.getTimeSlotDetail(timeSlotId));
