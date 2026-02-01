@@ -103,4 +103,9 @@ public class TimeSlotRepositoryImpl implements TimeSlotRepository {
     public void deleteAll(List<TimeSlot> oldSlots) {
         timeSlotJpaRepository.deleteAll(oldSlots);
     }
+
+    @Override
+    public List<TimeSlot> findAllByIdIn(List<Long> timeSlotIds) {
+        return timeSlotJpaRepository.findAllByIdIn(timeSlotIds);
+    }
 }

@@ -19,4 +19,5 @@ public interface TimeSlotRepository {
     List<TimeSlot> findAllByUserInvolved(Long interviewId, User user);
     void deleteAllByInterview(Long interviewId);
     void deleteAll(List<TimeSlot> oldSlots);
+    List<TimeSlot> findAllByIdIn(List<Long> timeSlotIds);
 }

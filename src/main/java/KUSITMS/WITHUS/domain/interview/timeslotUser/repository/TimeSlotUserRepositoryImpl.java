@@ -36,4 +36,29 @@ public class TimeSlotUserRepositoryImpl implements TimeSlotUserRepository {
                 )
                 .execute();
     }
+
+    @Override
+    public List<Long> findMyTimeSlotIds(Long userId, InterviewRole role) {
+        return queryFactory
+                .select(timeSlotUser.timeSlot.id)
+                .from(timeSlotUser)
+                .where(
+                        timeSlotUser.user.id.eq(userId),
+                        timeSlotUser.role.eq(role)
+                )
+                .distinct()
+                .fetch();
+    }
+
+    @Override
+    public List<TimeSlotUser> findAllByTimeSlotIdInWithUser(List<Long> timeSlotIds) {
+        return queryFactory
+                .selectFrom(timeSlotUser)
+                .distinct()
+                .join(timeSlotUser.user).fetchJoin()
+                .join(timeSlotUser.timeSlot).fetchJoin()
+                .where(timeSlotUser.timeSlot.id.in(timeSlotIds))
+                .fetch();
+
+    }
 }

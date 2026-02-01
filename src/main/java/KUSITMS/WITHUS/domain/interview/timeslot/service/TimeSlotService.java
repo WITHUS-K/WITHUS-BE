@@ -9,5 +9,5 @@ public interface TimeSlotService {
     List<ApplicationResponseDTO.DetailForTimeSlot> getApplicationsByTimeSlotFilteredByUser(Long timeSlotId, Long currentUserId);
     void addApplicantToTimeSlot(Long timeSlotId, List<Long> applicantIds);
     void updateApplicantInTimeSlot(Long timeSlotId, List<Long> applicantIds);
-    TimeSlotResponseDTO getTimeSlotDetail(Long timeSlotId);
+    TimeSlotResponseDTO.Detail getTimeSlotDetail(Long timeSlotId);
 }

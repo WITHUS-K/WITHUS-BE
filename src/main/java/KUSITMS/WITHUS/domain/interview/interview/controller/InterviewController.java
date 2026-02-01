@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.interview.interview.controller;
 
+import KUSITMS.WITHUS.domain.interview.enumerate.InterviewRole;
 import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewResponseDTO;
 import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewScheduleDTO;
 import KUSITMS.WITHUS.domain.interview.interview.service.InterviewSchedulerService;
@@ -56,7 +57,7 @@ public class InterviewController {
     }
 
     @GetMapping("/{interviewId}/my-time-slots")
-    @Operation(summary = "내 면접 배정 결과 조회", description = "해당 인터뷰 ID에 배정된 본인의 정보를 조회합니다.")
+    @Operation(summary = "특정 인터뷰의 내 면접 배정 결과 조회", description = "해당 인터뷰 ID에 배정된 본인의 정보를 조회합니다.")
     public SuccessResponse<List<InterviewScheduleDTO>> getSchedule(
             @PathVariable("interviewId") Long interviewId,
             @CurrentUser User user
@@ -77,5 +78,15 @@ public class InterviewController {
     public SuccessResponse<InterviewResponseDTO.Config> getInterviewConfig(@PathVariable Long interviewId) {
         InterviewResponseDTO.Config config = interviewService.getInterviewConfig(interviewId);
         return SuccessResponse.ok(config);
+    }
+
+    @GetMapping("/me/schedules")
+    @Operation(summary = "내 전체 면접자/안내자 배정 결과 조회", description = "로그인한 사용자의 면접자/안내자 배정 결과를 조회합니다. 면접자/안내자로 필터링하여 조회 가능합니다.")
+    public SuccessResponse<InterviewResponseDTO.Schedule> getMyInterviewSchedule(
+            @CurrentUser User user,
+            @RequestParam InterviewRole role
+    ) {
+        InterviewResponseDTO.Schedule userHome = interviewService.getMyInterviewSchedule(user, role);
+        return SuccessResponse.ok(userHome);
     }
 }
