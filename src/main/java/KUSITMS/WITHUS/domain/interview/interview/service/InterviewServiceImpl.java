@@ -8,6 +8,7 @@ import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewResponseDTO;
 import KUSITMS.WITHUS.domain.interview.interview.dto.InterviewScheduleDTO;
 import KUSITMS.WITHUS.domain.interview.interview.entity.Interview;
 import KUSITMS.WITHUS.domain.interview.interview.repository.InterviewRepository;
+import KUSITMS.WITHUS.domain.interview.interview.service.assembler.InterviewScheduleAssembler;
 import KUSITMS.WITHUS.domain.interview.timeslot.dto.TimeSlotResponseDTO;
 import KUSITMS.WITHUS.domain.interview.timeslot.entity.TimeSlot;
 import KUSITMS.WITHUS.domain.interview.timeslot.repository.TimeSlotRepository;
@@ -37,6 +38,7 @@ public class InterviewServiceImpl implements InterviewService {
     private final RecruitmentRepository recruitmentRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final TimeSlotUserRepository timeSlotUserRepository;
+    private final InterviewScheduleAssembler scheduleAssembler;
 
     @Override
     @Transactional
@@ -106,71 +108,19 @@ public class InterviewServiceImpl implements InterviewService {
     @Override
     @Transactional(readOnly = true)
     public InterviewResponseDTO.Schedule getMyInterviewSchedule(User user, InterviewRole role) {
-
         List<Long> timeSlotIds = timeSlotUserRepository.findMyTimeSlotIds(user.getId(), role);
         if (timeSlotIds.isEmpty()) {
             return InterviewResponseDTO.Schedule.from(role, List.of());
         }
 
-        // 타임슬롯 + (interview/recruitment) + applications 로딩
         List<TimeSlot> slots = timeSlotRepository.findAllByIdIn(timeSlotIds);
+        Map<Long, List<TimeSlotUser>> tsUsersBySlotId = scheduleAssembler.loadTimeSlotUsersGrouped(timeSlotIds);
 
-        // 타임슬롯에 연결된 TimeSlotUser(+User) 로딩
-        List<TimeSlotUser> tsUsers = timeSlotUserRepository.findAllByTimeSlotIdInWithUser(timeSlotIds);
+        List<TimeSlotResponseDTO.ScheduleCard> cards =
+                scheduleAssembler.buildScheduleCards(slots, tsUsersBySlotId);
 
-        Map<Long, List<TimeSlotUser>> tsUsersBySlotId = tsUsers.stream()
-                .collect(Collectors.groupingBy(tsu -> tsu.getTimeSlot().getId()));
-
-        // DTO로 변환
-        List<TimeSlotResponseDTO.ScheduleCard> cards = slots.stream()
-                .map(slot -> {
-                    List<ApplicationResponseDTO.Applicant> applicants =
-                            slot.getApplications().stream()
-                                    .map(ApplicationResponseDTO.Applicant::from)
-                                    .toList();
-
-                    List<TimeSlotUser> usersInSlot = tsUsersBySlotId.getOrDefault(slot.getId(), List.of());
-
-                    List<UserResponseDTO.Summary> interviewers =
-                            usersInSlot.stream()
-                                    .filter(u -> u.getRole() == InterviewRole.INTERVIEWER)
-                                    .map(u -> UserResponseDTO.Summary.from(u.getUser()))
-                                    .toList();
-
-                    List<UserResponseDTO.Summary> assistants =
-                            usersInSlot.stream()
-                                    .filter(u -> u.getRole() == InterviewRole.ASSISTANT)
-                                    .map(u -> UserResponseDTO.Summary.from(u.getUser()))
-                                    .toList();
-
-                    return TimeSlotResponseDTO.ScheduleCard.from(slot, applicants, interviewers, assistants);
-                })
-                // 시간순 정렬(같은 날짜 안에서)
-                .sorted(Comparator
-                        .comparing(TimeSlotResponseDTO.ScheduleCard::startTime)
-                        .thenComparing(TimeSlotResponseDTO.ScheduleCard::timeSlotId))
-                .toList();
-
-        // 날짜별 그룹핑
-        Map<LocalDate, List<TimeSlotResponseDTO.ScheduleCard>> byDate = new LinkedHashMap<>();
-        for (TimeSlot slot : slots.stream()
-                .sorted(Comparator.comparing(TimeSlot::getDate).thenComparing(TimeSlot::getStartTime))
-                .toList()) {
-            byDate.putIfAbsent(slot.getDate(), new ArrayList<>());
-        }
-
-        // cards는 slotId 기반이라 date 매핑이 필요함
-        Map<Long, LocalDate> slotDateMap = slots.stream()
-                .collect(Collectors.toMap(TimeSlot::getId, TimeSlot::getDate));
-
-        for (TimeSlotResponseDTO.ScheduleCard card : cards) {
-            LocalDate d = slotDateMap.get(card.timeSlotId());
-            byDate.computeIfAbsent(d, k -> new ArrayList<>()).add(card);
-        }
-
-        List<InterviewResponseDTO.Schedule.DateGroup> dateGroups = byDate.entrySet().stream()
-                .map(e -> InterviewResponseDTO.Schedule.DateGroup.from(e.getKey(), e.getValue()))
-                .toList();
+        List<InterviewResponseDTO.Schedule.DateGroup> dateGroups =
+                scheduleAssembler.groupCardsByDate(slots, cards);
 
         return new InterviewResponseDTO.Schedule(role, dateGroups);
     }
@@ -186,4 +136,5 @@ public class InterviewServiceImpl implements InterviewService {
                 interview.getAssistantPerSlot()
         );
     }
+
 }
