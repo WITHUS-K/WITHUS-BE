@@ -53,7 +53,7 @@ public class TimeSlotResponseDTO {
         public static TimeSlotResponseDTO.ScheduleCard from(TimeSlot slot, List<ApplicationResponseDTO.Applicant> applicants, List<UserResponseDTO.Summary> interviewers, List<UserResponseDTO.Summary> assistants) {
             return new TimeSlotResponseDTO.ScheduleCard(
                     slot.getId(),
-                    slot.getInterview().getId(),
+                    slot.getInterview() != null ? slot.getInterview().getId() : null,
                     slot.getRoomName(),
                     slot.getStartTime(),
                     slot.getEndTime(),
