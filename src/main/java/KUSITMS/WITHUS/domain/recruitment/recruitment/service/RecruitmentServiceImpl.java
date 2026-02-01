@@ -269,7 +269,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
         // organization roles 업데이트
         recruitment.clearPositions();
-        entityManager.flush();
         positionAppender.append(recruitment, request.organizationRoleIds());
 
         return RecruitmentResponseDTO.Update.from(recruitment);
@@ -419,6 +418,11 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         );
         if (isTemporary) recruitment.markAsTemporary();
         else recruitment.markAsFinal();
+
+        // organization roles 업데이트
+        recruitment.clearPositions();
+        positionAppender.append(recruitment, request.organizationRoleIds());
+
         return recruitment;
     }
 
