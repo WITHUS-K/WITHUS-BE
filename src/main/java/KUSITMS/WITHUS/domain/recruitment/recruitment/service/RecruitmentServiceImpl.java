@@ -29,6 +29,7 @@ import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,6 +67,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     private final EvaluationCriteriaAppender criteriaAppender;
 
     private final RecruitmentValidator validator;
+    private final EntityManager entityManager;
 
     private static final int MAX_ATTEMPTS = 10;
 
@@ -267,6 +269,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
         // organization roles 업데이트
         recruitment.clearPositions();
+        entityManager.flush();
         positionAppender.append(recruitment, request.organizationRoleIds());
 
         return RecruitmentResponseDTO.Update.from(recruitment);
