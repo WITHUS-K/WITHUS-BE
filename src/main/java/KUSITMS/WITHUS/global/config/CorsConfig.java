@@ -19,6 +19,8 @@ public class CorsConfig {
         config.addAllowedOriginPattern("http://localhost:8080");
         config.addAllowedOriginPattern("https://jk-project.site");
         config.addAllowedOriginPattern("https://www.jk-project.site");
+        config.addAllowedOriginPattern("https://prd.ilhaeng.cloud");
+        config.addAllowedOriginPattern("https://stg.ilhaeng.cloud");
         config.addAllowedOriginPattern("https://withus-ten.vercel.app");
         config.addAllowedOriginPattern("https://recruit-withus.co.kr");
         config.addAllowedOriginPattern("https://www.recruit-withus.co.kr");

@@ -20,7 +20,9 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .servers(List.of(
-                        new Server().url("https://jk-project.site").description("Production Server"),
+                        new Server().url("https://prd.ilhaeng.cloud").description("Oracle Production Server"),
+                        new Server().url("https://stg.ilhaeng.cloud").description("Oracle Staging Server"),
+                        new Server().url("https://jk-project.site").description("NCP Production Server"),
                         new Server().url("http://localhost:8080").description("Local Server")
                 ))
                 .components(components())
