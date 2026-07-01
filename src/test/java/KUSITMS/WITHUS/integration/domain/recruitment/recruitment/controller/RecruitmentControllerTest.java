@@ -146,6 +146,47 @@ class RecruitmentControllerTest {
     }
 
     @Test
+    @DisplayName("공고 상세 조회 성공 - 공통 질문과 역할별 질문 포함")
+    void getRecruitmentByIdIncludesCommonAndRoleQuestions() throws Exception {
+        Long backendRoleId = testHelper.createOrganizationRole(savedOrganizationId, "백엔드", accessToken);
+        Long designRoleId = testHelper.createOrganizationRole(savedOrganizationId, "디자인", accessToken);
+        var request = new RecruitmentRequestDTO.Upsert(
+                null, "질문 포함 공고", "설명",
+                List.of(backendRoleId, designRoleId),
+                List.of(
+                        new DocumentQuestionRequestDTO.Create("공통 질문", "", QuestionType.TEXT, true, 500, true, null, null, null, 1),
+                        new DocumentQuestionRequestDTO.Create("백엔드 질문", "", QuestionType.TEXT, true, 500, true, null, null, backendRoleId, 2),
+                        new DocumentQuestionRequestDTO.Create("디자인 질문", "", QuestionType.TEXT, true, 500, true, null, null, designRoleId, 3)
+                ),
+                LocalDate.now().plusDays(5),
+                true, LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
+                (short) 10, savedOrganizationId,
+                true, true, true, true, true, false, true,
+                EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
+                List.of(), List.of(),
+                true,
+                List.of(new AvailableTimeRangeRequestDTO(LocalDate.now().plusDays(2), LocalTime.of(10, 0), LocalTime.of(12, 0)))
+        );
+
+        String createResponse = performWithAuth(post("/api/v1/recruitments/publish"), objectMapper.writeValueAsString(request))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        Long recruitmentId = ((Number) JsonPath.read(createResponse, "$.result.recruitmentId")).longValue();
+
+        mockMvc.perform(get("/api/v1/recruitments/" + recruitmentId)
+                        .header("Authorization", accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.applicationQuestions[0].title").value("공통 질문"))
+                .andExpect(jsonPath("$.result.applicationQuestions[0].organizationRoleName").value("공통"))
+                .andExpect(jsonPath("$.result.applicationQuestions[1].title").value("백엔드 질문"))
+                .andExpect(jsonPath("$.result.applicationQuestions[1].organizationRoleName").value("백엔드"))
+                .andExpect(jsonPath("$.result.applicationQuestions[2].title").value("디자인 질문"))
+                .andExpect(jsonPath("$.result.applicationQuestions[2].organizationRoleName").value("디자인"));
+    }
+
+    @Test
     @DisplayName("공고 삭제 성공")
     void deleteRecruitment() throws Exception {
         mockMvc.perform(delete("/api/v1/recruitments/" + savedRecruitmentId)
