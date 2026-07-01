@@ -391,7 +391,20 @@ class ApplicationControllerTest {
         mockMvc.perform(patch("/api/v1/applications/" + appId + "/acquaintance")
                         .header("Authorization", accessToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.acquainted").isBoolean());
+                .andExpect(jsonPath("$.result.acquainted").value(true));
+        entityManager.flush();
+        entityManager.clear();
+
+        mockMvc.perform(get("/api/v1/applications/" + appId)
+                        .header("Authorization", accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.acquaintanceCount").value(1))
+                .andExpect(jsonPath("$.result.acquaintances[0].name").value("테스트유저"));
+
+        mockMvc.perform(patch("/api/v1/applications/" + appId + "/acquaintance")
+                        .header("Authorization", accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.acquainted").value(false));
     }
 
     @Test
