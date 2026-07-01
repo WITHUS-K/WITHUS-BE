@@ -84,6 +84,39 @@ class ApplicationControllerTest {
         userRepository.save(user);
     }
 
+    private void addRolesToRecruitment(Long recruitmentId, String title, List<Long> organizationRoleIds) throws Exception {
+        var updateRequest = new RecruitmentRequestDTO.Update(
+                title, "설명", null,
+                organizationRoleIds,
+                LocalDate.now().plusDays(5), true, LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
+                (short) 30, false, true, true, true, true, false, true, false,
+                EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
+                List.of(), List.of(), true, List.of()
+        );
+
+        mockMvc.perform(put("/api/v1/recruitments/" + recruitmentId)
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
+    }
+
+    private MockMultipartFile applicationRequestPart(Long recruitmentId, Long organizationRoleId, String email) throws Exception {
+        ApplicationRequestDTO.Create requestDto = new ApplicationRequestDTO.Create(
+                "역할검증", email, "01012341234", Gender.MALE,
+                "상명대학교", "컴퓨터공학과", AcademicStatus.ENROLLED,
+                LocalDate.of(2001, 1, 1), "서울시 도봉구 56로 501",
+                recruitmentId,
+                organizationRoleId,
+                List.of(),
+                List.of(LocalDateTime.of(2025, 4, 22, 10, 0))
+        );
+
+        return new MockMultipartFile(
+                "request", "", "application/json", objectMapper.writeValueAsBytes(requestDto)
+        );
+    }
+
     @Test
     @DisplayName("지원서 생성 성공")
     void createApplicationSuccess() throws Exception {
@@ -154,6 +187,36 @@ class ApplicationControllerTest {
                         .header("Authorization", accessToken)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isPreconditionFailed());
+    }
+
+    @Test
+    @DisplayName("지원서 생성 실패 - 공고에 포함되지 않은 조직 역할")
+    void createApplicationWithRoleNotIncludedInRecruitmentShouldReturnNotFound() throws Exception {
+        Long recruitmentId = testHelper.createRecruitment("역할 검증 공고", savedOrganizationId, accessToken);
+        Long backendRoleId = testHelper.createOrganizationRole(savedOrganizationId, "백엔드", accessToken);
+        Long frontendRoleId = testHelper.createOrganizationRole(savedOrganizationId, "프론트엔드", accessToken);
+        addRolesToRecruitment(recruitmentId, "역할 검증 공고", List.of(backendRoleId));
+
+        mockMvc.perform(multipart("/api/v1/applications")
+                        .file(applicationRequestPart(recruitmentId, frontendRoleId, "not-included-role@example.com"))
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("지원서 생성 실패 - 다른 조직의 역할")
+    void createApplicationWithOtherOrganizationRoleShouldReturnNotFound() throws Exception {
+        Long recruitmentId = testHelper.createRecruitment("다른 조직 역할 검증 공고", savedOrganizationId, accessToken);
+        Long backendRoleId = testHelper.createOrganizationRole(savedOrganizationId, "백엔드", accessToken);
+        addRolesToRecruitment(recruitmentId, "다른 조직 역할 검증 공고", List.of(backendRoleId));
+
+        Long otherOrganizationId = organizationService.create(new OrganizationRequestDTO.Create("다른 테스트 조직")).id();
+        Long otherOrganizationRoleId = testHelper.createOrganizationRole(otherOrganizationId, "디자인", accessToken);
+
+        mockMvc.perform(multipart("/api/v1/applications")
+                        .file(applicationRequestPart(recruitmentId, otherOrganizationRoleId, "other-org-role@example.com"))
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isNotFound());
     }
 
     @Test
