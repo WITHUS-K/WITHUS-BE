@@ -405,6 +405,13 @@ class ApplicationControllerTest {
                         .header("Authorization", accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.acquainted").value(false));
+        entityManager.flush();
+        entityManager.clear();
+
+        mockMvc.perform(get("/api/v1/applications/" + appId)
+                        .header("Authorization", accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.acquaintanceCount").value(0));
     }
 
     @Test
