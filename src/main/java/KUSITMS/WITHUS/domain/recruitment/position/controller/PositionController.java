@@ -30,9 +30,9 @@ public class PositionController {
 
     @DeleteMapping("/{positionId}")
     @Operation(summary = "파트 삭제", description = "해당 ID의 파트를 삭제합니다.")
-    public SuccessResponse<String> delete(@PathVariable Long id) {
-        positionService.delete(id);
-        return SuccessResponse.ok("파트 생성에 성공하였습니다.");
+    public SuccessResponse<String> delete(@PathVariable Long positionId) {
+        positionService.delete(positionId);
+        return SuccessResponse.ok("파트 삭제에 성공하였습니다.");
     }
 
     @GetMapping("/recruitment/{recruitmentId}")
