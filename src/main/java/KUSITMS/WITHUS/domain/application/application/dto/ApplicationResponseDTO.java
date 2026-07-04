@@ -57,6 +57,7 @@ public class ApplicationResponseDTO {
 
             @Schema(description = "지원서 ID") Long id,
             @Schema(description = "지원 분야명") String appliedPosition,
+            @Schema(description = "지원 분야 목록") List<String> appliedPositions,
             @Schema(description = "지원자 이름") String name,
             @Schema(description = "성별") Gender gender,
             @Schema(description = "이메일") String email,
@@ -226,6 +227,7 @@ public class ApplicationResponseDTO {
                     nextApplicationId,
                     application.getId(),
                     application.getOrganizationRole() != null ? application.getOrganizationRole().getName() : null,
+                    appliedPositionNames(application),
                     application.getName(),
                     application.getGender(),
                     application.getEmail(),
@@ -263,6 +265,7 @@ public class ApplicationResponseDTO {
             @Schema(description = "지원자 이름") String name,
             @Schema(description = "이메일") String email,
             @Schema(description = "역할명") String organizationRoleName,
+            @Schema(description = "역할명 목록") List<String> appliedPositions,
             @Schema(description = "상태") ApplicationStatus status
     ) {
         public static Summary from(Application application) {
@@ -271,9 +274,24 @@ public class ApplicationResponseDTO {
                     application.getName(),
                     application.getEmail(),
                     application.getOrganizationRole() != null ? application.getOrganizationRole().getName() : null,
+                    appliedPositionNames(application),
                     application.getStatus()
             );
         }
+    }
+
+    private static List<String> appliedPositionNames(Application application) {
+        List<String> selectedNames = application.getApplicationOrganizationRoles().stream()
+                .map(link -> link.getOrganizationRole().getName())
+                .toList();
+
+        if (!selectedNames.isEmpty()) {
+            return selectedNames;
+        }
+
+        return application.getOrganizationRole() == null
+                ? List.of()
+                : List.of(application.getOrganizationRole().getName());
     }
 
     @Schema(description = "사용자용 지원서 요약 응답 DTO")

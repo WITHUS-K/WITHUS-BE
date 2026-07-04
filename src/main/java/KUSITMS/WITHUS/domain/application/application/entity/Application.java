@@ -4,6 +4,7 @@ import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
 import KUSITMS.WITHUS.domain.application.applicationAcquaintance.entity.ApplicationAcquaintance;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.entity.ApplicationEvaluator;
+import KUSITMS.WITHUS.domain.application.applicationOrganizationRole.entity.ApplicationOrganizationRole;
 import KUSITMS.WITHUS.domain.application.applicantAvailability.entity.ApplicantAvailability;
 import KUSITMS.WITHUS.domain.application.comment.entity.Comment;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
@@ -120,6 +121,10 @@ public class Application extends BaseEntity {
     @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ApplicationAcquaintance> acquaintances = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ApplicationOrganizationRole> applicationOrganizationRoles = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TIME_SLOT_ID")
     private TimeSlot timeSlot;
@@ -182,6 +187,11 @@ public class Application extends BaseEntity {
     public void addEvaluation(Evaluation evaluation) {
         this.evaluations.add(evaluation);
         evaluation.associateApplication(this);
+    }
+
+    public void addApplicationOrganizationRole(ApplicationOrganizationRole applicationOrganizationRole) {
+        this.applicationOrganizationRoles.add(applicationOrganizationRole);
+        applicationOrganizationRole.assignApplication(this);
     }
 
     public void assignTimeSlot(TimeSlot timeSlot) {

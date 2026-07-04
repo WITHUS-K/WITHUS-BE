@@ -43,9 +43,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -117,6 +120,7 @@ class ApplicationControllerTest {
                 LocalDate.of(2001, 1, 1), "서울시 도봉구 56로 501",
                 recruitmentId,
                 organizationRoleId,
+                null,
                 List.of(),
                 List.of(LocalDateTime.of(2025, 4, 22, 10, 0))
         );
@@ -153,6 +157,7 @@ class ApplicationControllerTest {
                 LocalDate.of(2001, 1, 1), "서울시 도봉구 56로 501",
                 recruitmentId,
                 organizationRoleId,
+                null,
                 List.of(),
                 List.of(LocalDateTime.of(2025, 4, 22, 10, 0))
         );
@@ -181,6 +186,7 @@ class ApplicationControllerTest {
                 null,
                 "대학", "전공", AcademicStatus.ENROLLED,
                 LocalDate.of(2000, 1, 1), "주소",
+                null,
                 null,
                 null,
                 List.of(),
@@ -316,6 +322,7 @@ class ApplicationControllerTest {
                 LocalDate.of(2001, 1, 1), "서울시",
                 recruitmentId,
                 backendRoleId,
+                null,
                 List.of(
                         new ApplicationAnswerRequestDTO(commonQuestionId, "공통 답변입니다.", null),
                         new ApplicationAnswerRequestDTO(backendQuestionId, "백엔드 답변입니다.", null)
@@ -349,6 +356,126 @@ class ApplicationControllerTest {
                 .getResultList();
 
         assertThat(savedAnswerTexts).containsExactly("공통 답변입니다.", "백엔드 답변입니다.");
+    }
+
+    @Test
+    @DisplayName("지원서 생성 성공 - 여러 역할 그룹에서 선택한 파트별 질문 답변 저장")
+    void createApplicationWithMultipleRoleGroupsSavesSelectedRoleAnswers() throws Exception {
+        Long generalGroupId = createOrganizationRoleGroup("일반 파트");
+        Long executiveGroupId = createOrganizationRoleGroup("운영진 팀");
+
+        Long backendRoleId = testHelper.createOrganizationRole(savedOrganizationId, "백엔드", accessToken);
+        Long frontendRoleId = testHelper.createOrganizationRole(savedOrganizationId, "프론트엔드", accessToken);
+        Long educationRoleId = testHelper.createOrganizationRole(savedOrganizationId, "교육기획팀", accessToken);
+
+        assignRolesToGroup(generalGroupId, List.of(backendRoleId, frontendRoleId));
+        assignRolesToGroup(executiveGroupId, List.of(educationRoleId));
+
+        var recruitmentRequest = new RecruitmentRequestDTO.Upsert(
+                null, "다중 파트 공고", "설명",
+                List.of(backendRoleId, frontendRoleId, educationRoleId),
+                List.of(
+                        new DocumentQuestionRequestDTO.Create("공통 자기소개", "", QuestionType.TEXT, true, 500, true, null, null, null, 1),
+                        new DocumentQuestionRequestDTO.Create("백엔드 경험", "", QuestionType.TEXT, true, 500, true, null, null, backendRoleId, 2),
+                        new DocumentQuestionRequestDTO.Create("프론트엔드 경험", "", QuestionType.TEXT, true, 500, true, null, null, frontendRoleId, 3),
+                        new DocumentQuestionRequestDTO.Create("교육기획 경험", "", QuestionType.TEXT, true, 500, true, null, null, educationRoleId, 4)
+                ),
+                LocalDate.now().plusDays(5), true,
+                LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
+                (short) 30, savedOrganizationId,
+                false, true, true, true, true, false, true,
+                EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
+                List.of(), List.of(),
+                true,
+                List.of(new AvailableTimeRangeRequestDTO(LocalDate.now().plusDays(1), LocalTime.of(10, 0), LocalTime.of(18, 0)))
+        );
+
+        String recruitmentResponse = mockMvc.perform(post("/api/v1/recruitments/publish")
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(recruitmentRequest)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        Long recruitmentId = ((Number) JsonPath.read(recruitmentResponse, "$.result.recruitmentId")).longValue();
+        entityManager.flush();
+        entityManager.clear();
+
+        Long commonQuestionId = findQuestionId(recruitmentId, "공통 자기소개");
+        Long backendQuestionId = findQuestionId(recruitmentId, "백엔드 경험");
+        Long educationQuestionId = findQuestionId(recruitmentId, "교육기획 경험");
+
+        Map<String, Object> request = baseApplicationRequest(recruitmentId, "multi-role@example.com");
+        request.put("positionIds", List.of(educationRoleId, backendRoleId));
+        request.put("answers", List.of(
+                new ApplicationAnswerRequestDTO(commonQuestionId, "공통 답변입니다.", null),
+                new ApplicationAnswerRequestDTO(backendQuestionId, "백엔드 답변입니다.", null),
+                new ApplicationAnswerRequestDTO(educationQuestionId, "교육기획 답변입니다.", null)
+        ));
+
+        MockMultipartFile jsonPart = new MockMultipartFile(
+                "request", "", "application/json", objectMapper.writeValueAsBytes(request)
+        );
+
+        String applicationResponse = mockMvc.perform(multipart("/api/v1/applications")
+                        .file(jsonPart)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.organizationRoleName").value("백엔드"))
+                .andExpect(jsonPath("$.result.appliedPositions[*]").value(containsInAnyOrder("교육기획팀", "백엔드")))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        Long applicationId = ((Number) JsonPath.read(applicationResponse, "$.result.id")).longValue();
+
+        entityManager.flush();
+        entityManager.clear();
+
+        List<String> answerTexts = entityManager.createQuery("""
+                        select answer.answerText
+                        from ApplicationAnswer answer
+                        where answer.application.id = :applicationId
+                        """, String.class)
+                .setParameter("applicationId", applicationId)
+                .getResultList();
+
+        assertThat(answerTexts).containsExactlyInAnyOrder("공통 답변입니다.", "백엔드 답변입니다.", "교육기획 답변입니다.");
+
+        mockMvc.perform(get("/api/v1/applications/" + applicationId)
+                        .header("Authorization", accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.appliedPosition").value("백엔드"))
+                .andExpect(jsonPath("$.result.appliedPositions[*]").value(containsInAnyOrder("교육기획팀", "백엔드")))
+                .andExpect(jsonPath("$.result.documentAnswers[*].answerText")
+                        .value(containsInAnyOrder("공통 답변입니다.", "백엔드 답변입니다.", "교육기획 답변입니다.")));
+    }
+
+    @Test
+    @DisplayName("지원서 생성 실패 - 다중 역할 공고에서 필수 역할 그룹 미선택")
+    void createApplicationWithMissingRequiredRoleGroupShouldReturnBadRequest() throws Exception {
+        Long generalGroupId = createOrganizationRoleGroup("일반 파트");
+        Long executiveGroupId = createOrganizationRoleGroup("운영진 팀");
+
+        Long backendRoleId = testHelper.createOrganizationRole(savedOrganizationId, "백엔드", accessToken);
+        Long educationRoleId = testHelper.createOrganizationRole(savedOrganizationId, "교육기획팀", accessToken);
+
+        assignRolesToGroup(generalGroupId, List.of(backendRoleId));
+        assignRolesToGroup(executiveGroupId, List.of(educationRoleId));
+
+        Long recruitmentId = createRecruitmentWithRoles("필수 그룹 검증 공고", List.of(backendRoleId, educationRoleId));
+
+        Map<String, Object> request = baseApplicationRequest(recruitmentId, "missing-group@example.com");
+        request.put("positionIds", List.of(backendRoleId));
+
+        MockMultipartFile jsonPart = new MockMultipartFile(
+                "request", "", "application/json", objectMapper.writeValueAsBytes(request)
+        );
+
+        mockMvc.perform(multipart("/api/v1/applications")
+                        .file(jsonPart)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -466,6 +593,88 @@ class ApplicationControllerTest {
                 .andExpect(jsonPath("$.result.data[0].name").value("김김김"))
                 .andExpect(jsonPath("$.result.data[0].organizationRoleName").value("백엔드"))
                 .andExpect(jsonPath("$.result.data[0].status").value(ApplicationStatus.PENDING.name()));
+    }
+
+    private Long createOrganizationRoleGroup(String name) throws Exception {
+        String payload = """
+                {
+                  "name": "%s",
+                  "selectionMinCount": 1,
+                  "selectionMaxCount": 1
+                }
+                """.formatted(name);
+
+        String response = mockMvc.perform(post("/api/v1/organizations/" + savedOrganizationId + "/role-groups")
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        return ((Number) JsonPath.read(response, "$.result.id")).longValue();
+    }
+
+    private void assignRolesToGroup(Long groupId, List<Long> roleIds) throws Exception {
+        Map<String, Object> payload = Map.of("roleIds", roleIds);
+
+        mockMvc.perform(put("/api/v1/organizations/" + savedOrganizationId + "/role-groups/" + groupId + "/roles")
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isOk());
+    }
+
+    private Long findQuestionId(Long recruitmentId, String title) {
+        return recruitmentRepository.getById(recruitmentId).getQuestions().stream()
+                .filter(question -> question.getTitle().equals(title))
+                .findFirst()
+                .orElseThrow()
+                .getId();
+    }
+
+    private Long createRecruitmentWithRoles(String title, List<Long> roleIds) throws Exception {
+        var recruitmentRequest = new RecruitmentRequestDTO.Upsert(
+                null, title, "설명",
+                roleIds,
+                List.of(),
+                LocalDate.now().plusDays(5), true,
+                LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
+                (short) 30, savedOrganizationId,
+                false, true, true, true, true, false, true,
+                EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
+                List.of(), List.of(),
+                true,
+                List.of(new AvailableTimeRangeRequestDTO(LocalDate.now().plusDays(1), LocalTime.of(10, 0), LocalTime.of(18, 0)))
+        );
+
+        String recruitmentResponse = mockMvc.perform(post("/api/v1/recruitments/publish")
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(recruitmentRequest)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        return ((Number) JsonPath.read(recruitmentResponse, "$.result.recruitmentId")).longValue();
+    }
+
+    private Map<String, Object> baseApplicationRequest(Long recruitmentId, String email) {
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put("name", "다중지원자");
+        request.put("email", email);
+        request.put("phoneNumber", "01012341234");
+        request.put("gender", Gender.MALE);
+        request.put("university", "상명대학교");
+        request.put("major", "컴퓨터공학과");
+        request.put("academicStatus", AcademicStatus.ENROLLED);
+        request.put("birthDate", LocalDate.of(2001, 1, 1));
+        request.put("address", "서울시");
+        request.put("recruitmentId", recruitmentId);
+        request.put("answers", List.of());
+        request.put("availableTimes", List.of(LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(10, 0))));
+        return request;
     }
 
 }

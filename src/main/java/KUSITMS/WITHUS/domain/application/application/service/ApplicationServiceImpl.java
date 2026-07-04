@@ -19,6 +19,7 @@ import KUSITMS.WITHUS.domain.application.applicationAcquaintance.repository.Appl
 import KUSITMS.WITHUS.domain.application.applicationAnswer.entity.ApplicationAnswer;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.repository.ApplicationAnswerRepository;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
+import KUSITMS.WITHUS.domain.application.applicationOrganizationRole.entity.ApplicationOrganizationRole;
 import KUSITMS.WITHUS.domain.application.distributionRequest.dto.DistributionRequestResponseDTO;
 import KUSITMS.WITHUS.domain.application.distributionRequest.entity.DistributionRequest;
 import KUSITMS.WITHUS.domain.application.distributionRequest.repository.DistributionRequestRepository;
@@ -32,6 +33,7 @@ import KUSITMS.WITHUS.domain.recruitment.documentQuestion.entity.DocumentQuestio
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.repository.DocumentQuestionRepository;
 import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
 import KUSITMS.WITHUS.domain.organization.organizationRole.repository.OrganizationRoleRepository;
+import KUSITMS.WITHUS.domain.organization.organizationRoleGroup.entity.OrganizationRoleGroup;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
@@ -57,10 +59,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -98,27 +101,13 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Transactional
     public ApplicationResponseDTO.Summary create(ApplicationRequestDTO.Create request, MultipartFile profileImage, List<MultipartFile> files) {
         Recruitment recruitment = recruitmentRepository.getById(request.recruitmentId());
-        OrganizationRole organizationRole = Optional.ofNullable(request.positionId())
-                .map(organizationRoleRepository::getById)
-                .orElse(null);
-
-        // 조직의 OrganizationRole인지 검증
-        if (organizationRole != null && !organizationRole.getOrganization().getId().equals(recruitment.getOrganization().getId())) {
-            throw new CustomException(ErrorCode.ORGANIZATION_ROLE_NOT_EXIST);
-        }
-
-        // 공고에 포함된 역할인지 검증
-        if (organizationRole != null) {
-            boolean isValidRole = recruitment.getPositions().stream()
-                    .anyMatch(ror -> ror.getOrganizationRole().getId().equals(organizationRole.getId()));
-            if (!isValidRole) {
-                throw new CustomException(ErrorCode.ORGANIZATION_ROLE_NOT_EXIST);
-            }
-        }
+        List<OrganizationRole> selectedRoles = resolveSelectedRoles(request, recruitment);
+        OrganizationRole organizationRole = chooseRepresentativeRole(selectedRoles);
 
         validator.validateRequiredFields(recruitment, request, profileImage);
 
         Application application = factory.createApplication(request, recruitment, organizationRole);
+        selectedRoles.forEach(role -> application.addApplicationOrganizationRole(ApplicationOrganizationRole.of(application, role)));
         applicationRepository.save(application);
 
         FileResponseDTO.Upload uploadData = fileUploadService.uploadProfileImage(profileImage,
@@ -130,7 +119,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         saveApplicantAvailabilities(application, request.availableTimes());
 
         List<MultipartFile> fileList = files != null ? files : List.of();
-        List<DocumentQuestion> questions = documentQuestionRepository.findCommonAndByOrganizationRole(recruitment, organizationRole);
+        List<DocumentQuestion> questions = documentQuestionRepository.findCommonAndByOrganizationRoles(recruitment, selectedRoles);
         validator.validateFileAnswers(request.answers(), fileList, questions);
 
         Map<String, FileResponseDTO.Upload> uploadedFileUrls = fileUploadService.uploadAnswerFiles(fileList,
@@ -614,6 +603,106 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .map(time -> ApplicantAvailability.of(application, time))
                 .toList();
         applicantAvailabilityRepository.saveAll(availabilities);
+    }
+
+    private List<OrganizationRole> resolveSelectedRoles(ApplicationRequestDTO.Create request, Recruitment recruitment) {
+        List<Long> requestedRoleIds = normalizeRequestedRoleIds(request);
+        if (requestedRoleIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<OrganizationRole> selectedRoles = organizationRoleRepository.findAllById(requestedRoleIds);
+        if (selectedRoles.size() != requestedRoleIds.size()) {
+            throw new CustomException(ErrorCode.ORGANIZATION_ROLE_NOT_EXIST);
+        }
+
+        validateRolesBelongToRecruitmentOrganization(selectedRoles, recruitment);
+        validateRolesIncludedInRecruitment(selectedRoles, recruitment);
+        validateRoleGroupSelection(selectedRoles, recruitment);
+
+        return selectedRoles;
+    }
+
+    private List<Long> normalizeRequestedRoleIds(ApplicationRequestDTO.Create request) {
+        boolean hasPositionId = request.positionId() != null;
+        boolean hasPositionIds = request.positionIds() != null && !request.positionIds().isEmpty();
+
+        if (hasPositionId && hasPositionIds) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        List<Long> roleIds = hasPositionIds ? request.positionIds() : hasPositionId ? List.of(request.positionId()) : List.of();
+        List<Long> distinctRoleIds = roleIds.stream().distinct().toList();
+        if (distinctRoleIds.size() != roleIds.size()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+        return distinctRoleIds;
+    }
+
+    private void validateRolesBelongToRecruitmentOrganization(List<OrganizationRole> selectedRoles, Recruitment recruitment) {
+        boolean hasOtherOrganizationRole = selectedRoles.stream()
+                .anyMatch(role -> !role.getOrganization().getId().equals(recruitment.getOrganization().getId()));
+
+        if (hasOtherOrganizationRole) {
+            throw new CustomException(ErrorCode.ORGANIZATION_ROLE_NOT_EXIST);
+        }
+    }
+
+    private void validateRolesIncludedInRecruitment(List<OrganizationRole> selectedRoles, Recruitment recruitment) {
+        Set<Long> recruitmentRoleIds = recruitment.getPositions().stream()
+                .map(ror -> ror.getOrganizationRole().getId())
+                .collect(Collectors.toSet());
+
+        boolean hasRoleNotInRecruitment = selectedRoles.stream()
+                .map(OrganizationRole::getId)
+                .anyMatch(roleId -> !recruitmentRoleIds.contains(roleId));
+
+        if (hasRoleNotInRecruitment) {
+            throw new CustomException(ErrorCode.ORGANIZATION_ROLE_NOT_EXIST);
+        }
+    }
+
+    private void validateRoleGroupSelection(List<OrganizationRole> selectedRoles, Recruitment recruitment) {
+        Map<Long, OrganizationRoleGroup> recruitmentGroups = recruitment.getPositions().stream()
+                .map(ror -> ror.getOrganizationRole().getOrganizationRoleGroup())
+                .filter(group -> group != null)
+                .collect(Collectors.toMap(
+                        OrganizationRoleGroup::getId,
+                        group -> group,
+                        (left, right) -> left,
+                        LinkedHashMap::new
+                ));
+
+        if (recruitmentGroups.isEmpty()) {
+            return;
+        }
+
+        Map<Long, Long> selectedCountByGroupId = selectedRoles.stream()
+                .map(OrganizationRole::getOrganizationRoleGroup)
+                .filter(group -> group != null)
+                .collect(Collectors.groupingBy(
+                        OrganizationRoleGroup::getId,
+                        Collectors.counting()
+                ));
+
+        for (OrganizationRoleGroup group : recruitmentGroups.values()) {
+            long selectedCount = selectedCountByGroupId.getOrDefault(group.getId(), 0L);
+            if (selectedCount < group.getSelectionMinCount() || selectedCount > group.getSelectionMaxCount()) {
+                throw new CustomException(ErrorCode.INVALID_REQUEST);
+            }
+        }
+    }
+
+    private OrganizationRole chooseRepresentativeRole(List<OrganizationRole> selectedRoles) {
+        if (selectedRoles.isEmpty()) {
+            return null;
+        }
+
+        return selectedRoles.stream()
+                .filter(role -> role.getOrganizationRoleGroup() != null)
+                .filter(role -> role.getOrganizationRoleGroup().getName().contains("일반"))
+                .findFirst()
+                .orElse(selectedRoles.get(0));
     }
 
     private boolean matchStatus(ApplicationResponseDTO.SummaryForUser dto, EvaluationStatus status) {
