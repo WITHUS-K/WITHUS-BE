@@ -34,8 +34,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -84,7 +88,88 @@ class EvaluationControllerTest {
     @Test
     @DisplayName("지원서 평가 등록 성공")
     void evaluateApplicationSuccess() throws Exception {
+        EvaluationTarget target = createEvaluationTarget(List.of("성실성"));
+
+        EvaluationRequestDTO.Create request = new EvaluationRequestDTO.Create(
+                target.applicationId(),
+                target.criteriaIdsByContent().get("성실성"),
+                8
+        );
+
+        mockMvc.perform(post("/api/v1/evaluations")
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.score").value(8))
+                .andExpect(jsonPath("$.result.criteria.content").value("성실성"))
+                .andExpect(jsonPath("$.result.user.name").value("평가자"));
+    }
+
+    @Test
+    @DisplayName("같은 평가자가 동일 지원서와 동일 기준에 중복 평가하면 실패")
+    void evaluateApplicationDuplicateFail() throws Exception {
+        EvaluationTarget target = createEvaluationTarget(List.of("성실성"));
+        EvaluationRequestDTO.Create request = new EvaluationRequestDTO.Create(
+                target.applicationId(),
+                target.criteriaIdsByContent().get("성실성"),
+                8
+        );
+
+        mockMvc.perform(post("/api/v1/evaluations")
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/v1/evaluations")
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("EVALUATION400"));
+    }
+
+    @Test
+    @DisplayName("지원서 평가 벌크 등록 성공")
+    void bulkEvaluateApplicationSuccess() throws Exception {
+        EvaluationTarget target = createEvaluationTarget(List.of("성실성", "전문성"));
+
+        EvaluationRequestDTO.BulkCreate request = new EvaluationRequestDTO.BulkCreate(
+                target.applicationId(),
+                List.of(
+                        new EvaluationRequestDTO.BulkCreate.EvaluationItem(
+                                target.criteriaIdsByContent().get("성실성"),
+                                7
+                        ),
+                        new EvaluationRequestDTO.BulkCreate.EvaluationItem(
+                                target.criteriaIdsByContent().get("전문성"),
+                                9
+                        )
+                )
+        );
+
+        mockMvc.perform(post("/api/v1/evaluations/bulk")
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result", hasSize(2)))
+                .andExpect(jsonPath("$.result[*].score", containsInAnyOrder(7, 9)))
+                .andExpect(jsonPath("$.result[*].criteria.content", containsInAnyOrder("성실성", "전문성")))
+                .andExpect(jsonPath("$.result[*].user.name", containsInAnyOrder("평가자", "평가자")));
+    }
+
+    private EvaluationTarget createEvaluationTarget(List<String> criteriaContents) throws Exception {
         Long backendRoleId = testHelper.createOrganizationRole(savedOrganizationId, "백엔드", accessToken);
+        List<EvaluationCriteriaRequestDTO.Create> criteriaRequests = criteriaContents.stream()
+                .map(content -> new EvaluationCriteriaRequestDTO.Create(
+                        content,
+                        content + " 설명",
+                        EvaluationType.DOCUMENT,
+                        backendRoleId
+                ))
+                .toList();
         RecruitmentRequestDTO.Upsert recruitmentRequest = new RecruitmentRequestDTO.Upsert(
                 null, "평가 테스트 공고", "설명",
                 List.of(backendRoleId),
@@ -94,7 +179,7 @@ class EvaluationControllerTest {
                 (short) 30, savedOrganizationId,
                 false, true, true, true, true, false, true,
                 EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
-                List.of(new EvaluationCriteriaRequestDTO.Create("성실성", "꾸준히 참여할 수 있는지", EvaluationType.DOCUMENT, backendRoleId)),
+                criteriaRequests,
                 List.of(),
                 true,
                 List.of(new AvailableTimeRangeRequestDTO(LocalDate.now().plusDays(1), LocalTime.of(10, 0), LocalTime.of(18, 0)))
@@ -112,11 +197,9 @@ class EvaluationControllerTest {
         entityManager.flush();
         entityManager.clear();
 
-        Long criteriaId = recruitmentRepository.getById(recruitmentId).getEvaluationCriteriaList().stream()
-                .filter(criteria -> criteria.getContent().equals("성실성"))
-                .findFirst()
-                .orElseThrow()
-                .getId();
+        Map<String, Long> criteriaIdsByContent = new LinkedHashMap<>();
+        recruitmentRepository.getById(recruitmentId).getEvaluationCriteriaList()
+                .forEach(criteria -> criteriaIdsByContent.put(criteria.getContent(), criteria.getId()));
         Long applicationId = testHelper.createApplication(
                 accessToken,
                 recruitmentId,
@@ -125,15 +208,9 @@ class EvaluationControllerTest {
                 "evaluation-applicant@example.com"
         );
 
-        EvaluationRequestDTO.Create request = new EvaluationRequestDTO.Create(applicationId, criteriaId, 8);
+        return new EvaluationTarget(applicationId, criteriaIdsByContent);
+    }
 
-        mockMvc.perform(post("/api/v1/evaluations")
-                        .header("Authorization", accessToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.score").value(8))
-                .andExpect(jsonPath("$.result.criteria.content").value("성실성"))
-                .andExpect(jsonPath("$.result.user.name").value("평가자"));
+    private record EvaluationTarget(Long applicationId, Map<String, Long> criteriaIdsByContent) {
     }
 }
