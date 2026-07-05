@@ -7,6 +7,8 @@ import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationT
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.dto.AvailableTimeRangeResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.availableTimeRange.entity.AvailableTimeRange;
 import KUSITMS.WITHUS.domain.recruitment.documentQuestion.dto.DocumentQuestionResponseDTO;
+import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRole;
+import KUSITMS.WITHUS.domain.organization.organizationRoleGroup.entity.OrganizationRoleGroup;
 import KUSITMS.WITHUS.domain.organization.organizationRole.dto.OrganizationRoleResponseDTO;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.user.user.dto.UserResponseDTO;
@@ -17,7 +19,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Schema(description = "리크루팅(공고) 관련 응답 DTO")
@@ -49,6 +54,7 @@ public class RecruitmentResponseDTO {
             @Schema(description = "전공 입력 필요 여부") boolean needMajor,
             @Schema(description = "학적 상태 입력 필요 여부") boolean needAcademicStatus,
             @Schema(description = "포지션 목록") List<OrganizationRoleResponseDTO.Detail> positions,
+            @Schema(description = "공고에 포함된 포지션의 역할 그룹 목록") List<RoleGroup> roleGroups,
             @Schema(description = "서류 마감일") @DateFormatDot LocalDate documentDeadline,
             @Schema(description = "서류 합격 발표 필수 여부") boolean isDocumentResultRequired,
             @Schema(description = "서류 발표일") @DateFormatDot LocalDate documentResultDate,
@@ -91,6 +97,12 @@ public class RecruitmentResponseDTO {
                     .map(ror -> OrganizationRoleResponseDTO.Detail.from(ror.getOrganizationRole()))
                     .toList();
 
+            List<RoleGroup> roleGroups = RoleGroup.fromRecruitmentRoles(
+                    recruitment.getPositions().stream()
+                            .map(ror -> ror.getOrganizationRole())
+                            .toList()
+            );
+
             return new Detail(
                     recruitment.getId(),
                     recruitment.getOrganization().getId(),
@@ -105,6 +117,7 @@ public class RecruitmentResponseDTO {
                     recruitment.isNeedMajor(),
                     recruitment.isNeedAcademicStatus(),
                     positions,
+                    roleGroups,
                     recruitment.getDocumentDeadline(),
                     recruitment.isDocumentResultRequired(),
                     recruitment.getDocumentResultDate(),
@@ -118,6 +131,55 @@ public class RecruitmentResponseDTO {
                     questions,
                     recruitment.isInterviewRequired(),
                     timeRanges
+            );
+        }
+    }
+
+    @Schema(description = "공고 상세 역할 그룹 응답 DTO")
+    public record RoleGroup(
+            @Schema(description = "역할 그룹 ID") Long id,
+            @Schema(description = "역할 그룹 이름") String name,
+            @Schema(description = "최소 선택 개수") int selectionMinCount,
+            @Schema(description = "최대 선택 개수") int selectionMaxCount,
+            @Schema(description = "공고에 포함된 역할 목록") List<OrganizationRoleResponseDTO.Detail> roles
+    ) {
+        private static List<RoleGroup> fromRecruitmentRoles(List<OrganizationRole> roles) {
+            Map<Long, RoleGroupAccumulator> groups = new LinkedHashMap<>();
+
+            for (OrganizationRole role : roles) {
+                OrganizationRoleGroup group = role.getOrganizationRoleGroup();
+                if (group == null) {
+                    continue;
+                }
+
+                groups.computeIfAbsent(group.getId(), id -> new RoleGroupAccumulator(group))
+                        .roles()
+                        .add(role);
+            }
+
+            return groups.values().stream()
+                    .map(RoleGroupAccumulator::toRoleGroup)
+                    .toList();
+        }
+    }
+
+    private record RoleGroupAccumulator(
+            OrganizationRoleGroup group,
+            List<OrganizationRole> roles
+    ) {
+        private RoleGroupAccumulator(OrganizationRoleGroup group) {
+            this(group, new ArrayList<>());
+        }
+
+        private RoleGroup toRoleGroup() {
+            return new RoleGroup(
+                    group.getId(),
+                    group.getName(),
+                    group.getSelectionMinCount(),
+                    group.getSelectionMaxCount(),
+                    roles.stream()
+                            .map(OrganizationRoleResponseDTO.Detail::from)
+                            .toList()
             );
         }
     }
