@@ -407,6 +407,7 @@ public class ApplicationResponseDTO {
             @Schema(description = "지원서 ID") Long id,
             @Schema(description = "지원자 이름") String name,
             @Schema(description = "역할명") String organizationRoleName,
+            @Schema(description = "역할명 목록") List<String> appliedPositions,
             @Schema(description = "합불 상태") ApplicationStatus status,
 
             @Schema(description = "서류 평가 담당자 수", example = "3") int documentAssignedCount,
@@ -483,6 +484,7 @@ public class ApplicationResponseDTO {
                     application.getId(),
                     application.getName(),
                     application.getOrganizationRole() != null ? application.getOrganizationRole().getName() : null,
+                    appliedPositionNames(application),
                     application.getStatus(),
 
                     docAssignedCount,

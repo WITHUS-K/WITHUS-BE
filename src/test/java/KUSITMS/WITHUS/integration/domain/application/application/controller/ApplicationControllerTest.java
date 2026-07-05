@@ -479,6 +479,87 @@ class ApplicationControllerTest {
     }
 
     @Test
+    @DisplayName("관리자 지원서 목록 조회 - 다중 선택 역할 목록 응답 및 선택 역할 기준 필터")
+    void getAdminApplicationsWithMultipleSelectedRolesShouldUseAllSelectedRoles() throws Exception {
+        Long generalGroupId = createOrganizationRoleGroup("일반 파트");
+        Long executiveGroupId = createOrganizationRoleGroup("운영진 팀");
+
+        Long backendRoleId = testHelper.createOrganizationRole(savedOrganizationId, "백엔드", accessToken);
+        Long designRoleId = testHelper.createOrganizationRole(savedOrganizationId, "디자인", accessToken);
+        Long educationRoleId = testHelper.createOrganizationRole(savedOrganizationId, "교육기획팀", accessToken);
+        Long managementRoleId = testHelper.createOrganizationRole(savedOrganizationId, "경영총괄팀", accessToken);
+
+        assignRolesToGroup(generalGroupId, List.of(backendRoleId, designRoleId));
+        assignRolesToGroup(executiveGroupId, List.of(educationRoleId, managementRoleId));
+
+        Long recruitmentId = createRecruitmentWithRoles(
+                "관리자 다중 파트 목록 공고",
+                List.of(backendRoleId, designRoleId, educationRoleId, managementRoleId)
+        );
+
+        Long educationBackendApplicationId = createApplicationWithPositionIds(recruitmentId, "education-backend@example.com", List.of(educationRoleId, backendRoleId));
+        createApplicationWithPositionIds(recruitmentId, "management-design@example.com", List.of(managementRoleId, designRoleId));
+
+        entityManager.flush();
+        entityManager.clear();
+
+        List<String> selectedRoleNames = entityManager.createQuery("""
+                        select role.name
+                        from ApplicationOrganizationRole link
+                        join link.organizationRole role
+                        where link.application.email = :email
+                        """, String.class)
+                .setParameter("email", "education-backend@example.com")
+                .getResultList();
+
+        assertThat(selectedRoleNames).containsExactlyInAnyOrder("교육기획팀", "백엔드");
+
+        mockMvc.perform(get("/api/v1/admin/applications/recruitment/" + recruitmentId)
+                        .header("Authorization", accessToken)
+                        .param("organizationRoleIds", String.valueOf(educationRoleId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.data[0].id").value(educationBackendApplicationId))
+                .andExpect(jsonPath("$.result.data[0].name").value("다중지원자"))
+                .andExpect(jsonPath("$.result.data[0].organizationRoleName").value("백엔드"))
+                .andExpect(jsonPath("$.result.data[0].appliedPositions[*]").value(containsInAnyOrder("교육기획팀", "백엔드")))
+                .andExpect(jsonPath("$.result.data.length()").value(1));
+    }
+
+    @Test
+    @DisplayName("관리자 지원서 목록 조회 - 다중 선택 역할 목록 기준 파트명 정렬")
+    void getAdminApplicationsSortByPositionNameShouldUseAllSelectedRoles() throws Exception {
+        Long generalGroupId = createOrganizationRoleGroup("일반 파트");
+        Long executiveGroupId = createOrganizationRoleGroup("운영진 팀");
+
+        Long backendRoleId = testHelper.createOrganizationRole(savedOrganizationId, "백엔드", accessToken);
+        Long educationRoleId = testHelper.createOrganizationRole(savedOrganizationId, "교육기획팀", accessToken);
+        Long managementRoleId = testHelper.createOrganizationRole(savedOrganizationId, "경영총괄팀", accessToken);
+
+        assignRolesToGroup(generalGroupId, List.of(backendRoleId));
+        assignRolesToGroup(executiveGroupId, List.of(educationRoleId, managementRoleId));
+
+        Long recruitmentId = createRecruitmentWithRoles(
+                "관리자 다중 파트 정렬 공고",
+                List.of(backendRoleId, educationRoleId, managementRoleId)
+        );
+
+        createApplicationWithPositionIds(recruitmentId, "education-backend@example.com", List.of(educationRoleId, backendRoleId));
+        Long managementBackendApplicationId = createApplicationWithPositionIds(recruitmentId, "management-backend@example.com", List.of(managementRoleId, backendRoleId));
+
+        entityManager.flush();
+        entityManager.clear();
+
+        mockMvc.perform(get("/api/v1/admin/applications/recruitment/" + recruitmentId)
+                        .header("Authorization", accessToken)
+                        .param("sortBy", "POSITION_NAME")
+                        .param("direction", "ASC"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.data[0].id").value(managementBackendApplicationId))
+                .andExpect(jsonPath("$.result.data[0].organizationRoleName").value("백엔드"))
+                .andExpect(jsonPath("$.result.data[0].appliedPositions[*]").value(containsInAnyOrder("경영총괄팀", "백엔드")));
+    }
+
+    @Test
     @DisplayName("지원서 단건 조회 실패 - 존재하지 않는 ID")
     void getApplication_notFound_shouldReturn404() throws Exception {
         mockMvc.perform(get("/api/v1/applications/999999")
@@ -624,6 +705,25 @@ class ApplicationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isOk());
+    }
+
+    private Long createApplicationWithPositionIds(Long recruitmentId, String email, List<Long> positionIds) throws Exception {
+        Map<String, Object> request = baseApplicationRequest(recruitmentId, email);
+        request.put("positionIds", positionIds);
+
+        MockMultipartFile jsonPart = new MockMultipartFile(
+                "request", "", "application/json", objectMapper.writeValueAsBytes(request)
+        );
+
+        String response = mockMvc.perform(multipart("/api/v1/applications")
+                        .file(jsonPart)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        return ((Number) JsonPath.read(response, "$.result.id")).longValue();
     }
 
     private Long findQuestionId(Long recruitmentId, String title) {

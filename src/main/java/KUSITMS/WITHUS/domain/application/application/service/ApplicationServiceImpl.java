@@ -258,10 +258,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         // POSITION_NAME 필터
         if (organizationRoleIds != null && !organizationRoleIds.isEmpty()) {
             allApps = allApps.stream()
-                    .filter(app ->
-                            app.getOrganizationRole() != null &&
-                                    organizationRoleIds.contains(app.getOrganizationRole().getId())
-                    )
+                    .filter(app -> hasAnySelectedRole(app, organizationRoleIds))
                     .collect(Collectors.toList());
         }
 
@@ -341,7 +338,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                     );
                     break;
                 case POSITION_NAME:
-                    cmp = sa.organizationRoleName().compareToIgnoreCase(sb.organizationRoleName());
+                    cmp = selectedRoleSortKey(a).compareToIgnoreCase(selectedRoleSortKey(b));
                     break;
                 case STATUS:
                     cmp = sa.status().compareTo(sb.status());
@@ -491,8 +488,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         // POSITION(OrganizationRole) 필터
         if (organizationRoleIds != null && !organizationRoleIds.isEmpty()) {
             apps = apps.stream()
-                    .filter(a -> a.getOrganizationRole() != null &&
-                            organizationRoleIds.contains(a.getOrganizationRole().getId()))
+                    .filter(app -> hasAnySelectedRole(app, organizationRoleIds))
                     .collect(Collectors.toList());
         }
 
@@ -703,6 +699,38 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .filter(role -> role.getOrganizationRoleGroup().getName().contains("일반"))
                 .findFirst()
                 .orElse(selectedRoles.get(0));
+    }
+
+    private static boolean hasAnySelectedRole(Application application, List<Long> organizationRoleIds) {
+        List<Long> selectedRoleIds = selectedRoleIds(application);
+        return selectedRoleIds.stream().anyMatch(organizationRoleIds::contains);
+    }
+
+    private static List<Long> selectedRoleIds(Application application) {
+        List<Long> selectedRoleIds = application.getApplicationOrganizationRoles().stream()
+                .map(link -> link.getOrganizationRole().getId())
+                .toList();
+
+        if (!selectedRoleIds.isEmpty()) {
+            return selectedRoleIds;
+        }
+
+        return application.getOrganizationRole() == null
+                ? List.of()
+                : List.of(application.getOrganizationRole().getId());
+    }
+
+    private static String selectedRoleSortKey(Application application) {
+        List<String> selectedRoleNames = application.getApplicationOrganizationRoles().stream()
+                .map(link -> link.getOrganizationRole().getName())
+                .sorted(String::compareToIgnoreCase)
+                .toList();
+
+        if (!selectedRoleNames.isEmpty()) {
+            return String.join(" / ", selectedRoleNames);
+        }
+
+        return application.getOrganizationRole() == null ? "" : application.getOrganizationRole().getName();
     }
 
     private boolean matchStatus(ApplicationResponseDTO.SummaryForUser dto, EvaluationStatus status) {
