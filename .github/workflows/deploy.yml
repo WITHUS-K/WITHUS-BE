@@ -80,6 +80,10 @@ jobs:
           username: ${{ secrets.NCP_USER }}
           key: ${{ secrets.NCP_SSH_KEY }}
           script: |
+            MAIL_PROVIDER="${{ secrets.MAIL_PROVIDER }}" \
+            SENDGRID_API_KEY="${{ secrets.SENDGRID_API_KEY }}" \
+            MAIL_FROM_EMAIL="${{ secrets.MAIL_FROM_EMAIL }}" \
+            MAIL_FROM_NAME="${{ secrets.MAIL_FROM_NAME }}" \
             bash /home/ubuntu/deploy/blue-green.sh \
               "${{ secrets.DB_URL }}" \
               "${{ secrets.DB_USERNAME }}" \
