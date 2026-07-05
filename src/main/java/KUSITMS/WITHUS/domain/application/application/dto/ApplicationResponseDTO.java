@@ -39,6 +39,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Schema(description = "지원서 응답 DTO")
@@ -300,6 +301,7 @@ public class ApplicationResponseDTO {
             @Schema(description = "지원서 ID") Long id,
             @Schema(description = "지원자 이름") String name,
             @Schema(description = "역할명") String organizationRoleName,
+            @Schema(description = "역할명 목록") List<String> appliedPositions,
             @Schema(description = "합불 상태") ApplicationStatus status,
             @Schema(description = "해당 평가자가 이 지원서를 서류 평가했는지 여부") boolean documentEvaluated,
             @Schema(description = "이 사용자가 준 총 서류 평가 점수", example = "20", nullable = true) @Nullable Integer myScoreTotal,
@@ -307,21 +309,25 @@ public class ApplicationResponseDTO {
             @Schema(description = "면접 일정", example = "4/18 (금) 10:00 - 10:30", nullable = true) String interviewSchedule
     ) {
         public static SummaryForUser from(Application application, Long currentUserId) {
+            return from(application, currentUserId, Set.of());
+        }
+
+        public static SummaryForUser from(Application application, Long currentUserId, Set<Long> currentUserRoleIds) {
             Recruitment recruitment = application.getRecruitment();
-            OrganizationRole appRole = application.getOrganizationRole();
+            Set<Long> evaluationRoleIds = evaluationRoleIds(application, currentUserRoleIds);
 
             int documentCriteriaCount = (int) recruitment
                     .getEvaluationCriteriaList()
                     .stream()
                     .filter(c -> c.getEvaluationType() == EvaluationType.DOCUMENT)
-                    .filter(c -> matchesOrganizationRole(c, appRole))
+                    .filter(c -> matchesOrganizationRole(c, evaluationRoleIds))
                     .count();
             int documentMaxScore = documentCriteriaCount * 10;
 
             List<Evaluation> userDocsEvaluations = application.getEvaluations().stream()
                     .filter(e -> e.getUser().getId().equals(currentUserId))
                     .filter(e -> e.getCriteria().getEvaluationType() == EvaluationType.DOCUMENT)
-                    .filter(e -> matchesOrganizationRole(e.getCriteria(), appRole))
+                    .filter(e -> matchesOrganizationRole(e.getCriteria(), evaluationRoleIds))
                     .toList();
 
             boolean evaluated = !(documentCriteriaCount > userDocsEvaluations.size() || userDocsEvaluations.isEmpty());
@@ -351,6 +357,7 @@ public class ApplicationResponseDTO {
                     application.getId(),
                     application.getName(),
                     application.getOrganizationRole() != null ? application.getOrganizationRole().getName() : null,
+                    appliedPositionNames(application),
                     application.getStatus(),
                     evaluated,
                     myScoreTotal,
@@ -359,15 +366,42 @@ public class ApplicationResponseDTO {
             );
         }
 
-        private static boolean matchesOrganizationRole(EvaluationCriteria criteria, OrganizationRole appRole) {
+        private static Set<Long> evaluationRoleIds(Application application, Set<Long> currentUserRoleIds) {
+            Set<Long> selectedRoleIds = selectedRoleIds(application);
+            Set<Long> matchedRoleIds = selectedRoleIds.stream()
+                    .filter(currentUserRoleIds::contains)
+                    .collect(Collectors.toSet());
+
+            if (!matchedRoleIds.isEmpty()) {
+                return matchedRoleIds;
+            }
+
+            return selectedRoleIds;
+        }
+
+        private static Set<Long> selectedRoleIds(Application application) {
+            Set<Long> linkedRoleIds = application.getApplicationOrganizationRoles().stream()
+                    .map(link -> link.getOrganizationRole().getId())
+                    .collect(Collectors.toSet());
+
+            if (!linkedRoleIds.isEmpty()) {
+                return linkedRoleIds;
+            }
+
+            return application.getOrganizationRole() == null
+                    ? Set.of()
+                    : Set.of(application.getOrganizationRole().getId());
+        }
+
+        private static boolean matchesOrganizationRole(EvaluationCriteria criteria, Set<Long> evaluationRoleIds) {
             OrganizationRole criteriaRole = criteria.getOrganizationRole();
             if (criteriaRole == null) {
                 return true;
             }
-            if (appRole == null) {
+            if (evaluationRoleIds.isEmpty()) {
                 return false;
             }
-            return criteriaRole.getId().equals(appRole.getId());
+            return evaluationRoleIds.contains(criteriaRole.getId());
         }
     }
 

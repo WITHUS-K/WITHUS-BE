@@ -5,6 +5,7 @@ import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
 import KUSITMS.WITHUS.domain.application.applicationAnswer.dto.ApplicationAnswerRequestDTO;
 import KUSITMS.WITHUS.domain.application.applicationEvaluator.dto.ApplicationEvaluatorRequestDTO;
 import KUSITMS.WITHUS.domain.application.enumerate.ApplicationStatus;
+import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteriaRequestDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
 import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationRequestDTO;
@@ -676,6 +677,70 @@ class ApplicationControllerTest {
                 .andExpect(jsonPath("$.result.data[0].status").value(ApplicationStatus.PENDING.name()));
     }
 
+    @Test
+    @DisplayName("서류 평가 목록 조회 - 사용자 역할과 다중 선택 역할이 매칭되면 조회")
+    void getApplicationsByRecruitmentForEvaluatorShouldIncludeApplicationsMatchingAnySelectedRole() throws Exception {
+        Long generalGroupId = createOrganizationRoleGroup("일반 파트");
+        Long executiveGroupId = createOrganizationRoleGroup("운영진 팀");
+
+        Long backendRoleId = testHelper.createOrganizationRole(savedOrganizationId, "백엔드", accessToken);
+        Long educationRoleId = testHelper.createOrganizationRole(savedOrganizationId, "교육기획팀", accessToken);
+        Long managementRoleId = testHelper.createOrganizationRole(savedOrganizationId, "경영총괄팀", accessToken);
+
+        assignRolesToGroup(generalGroupId, List.of(backendRoleId));
+        assignRolesToGroup(executiveGroupId, List.of(educationRoleId, managementRoleId));
+
+        var recruitmentRequest = new RecruitmentRequestDTO.Upsert(
+                null, "역할 기반 평가 목록 공고", "설명",
+                List.of(backendRoleId, educationRoleId, managementRoleId),
+                List.of(),
+                LocalDate.now().plusDays(5), true,
+                LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
+                (short) 30, savedOrganizationId,
+                false, true, true, true, true, false, true,
+                EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
+                List.of(
+                        new EvaluationCriteriaRequestDTO.Create("공통 평가", "", EvaluationType.DOCUMENT, null),
+                        new EvaluationCriteriaRequestDTO.Create("백엔드 평가", "", EvaluationType.DOCUMENT, backendRoleId),
+                        new EvaluationCriteriaRequestDTO.Create("경영총괄 평가", "", EvaluationType.DOCUMENT, managementRoleId)
+                ),
+                List.of(),
+                true,
+                List.of(new AvailableTimeRangeRequestDTO(LocalDate.now().plusDays(1), LocalTime.of(10, 0), LocalTime.of(18, 0)))
+        );
+
+        String recruitmentResponse = mockMvc.perform(post("/api/v1/recruitments/publish")
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(recruitmentRequest)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        Long recruitmentId = ((Number) JsonPath.read(recruitmentResponse, "$.result.recruitmentId")).longValue();
+
+        Long applicationId = createApplicationWithPositionIds(
+                recruitmentId,
+                "management-backend-role-match@example.com",
+                List.of(managementRoleId, backendRoleId)
+        );
+
+        User backendEvaluator = createEvaluatorUser("백엔드평가자", "backend-evaluator@example.com");
+        assignRolesToUser(backendEvaluator.getId(), List.of(educationRoleId, backendRoleId));
+        String evaluatorAccessToken = testAuthHelper.loginAndGetAccessToken("backend-evaluator@example.com", "password1!");
+
+        entityManager.flush();
+        entityManager.clear();
+
+        mockMvc.perform(get("/api/v1/applications/recruitment/" + recruitmentId)
+                        .header("Authorization", evaluatorAccessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.data.length()").value(1))
+                .andExpect(jsonPath("$.result.data[0].id").value(applicationId))
+                .andExpect(jsonPath("$.result.data[0].appliedPositions[*]").value(containsInAnyOrder("경영총괄팀", "백엔드")))
+                .andExpect(jsonPath("$.result.data[0].documentMaxScore").value(20));
+    }
+
     private Long createOrganizationRoleGroup(String name) throws Exception {
         String payload = """
                 {
@@ -705,6 +770,31 @@ class ApplicationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isOk());
+    }
+
+    private void assignRolesToUser(Long userId, List<Long> roleIds) throws Exception {
+        Map<String, Object> payload = Map.of(
+                "userId", userId,
+                "roleIds", roleIds
+        );
+
+        mockMvc.perform(post("/api/v1/organizations/" + savedOrganizationId + "/assign-role")
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isOk());
+    }
+
+    private User createEvaluatorUser(String name, String email) {
+        User user = User.builder()
+                .name(name)
+                .birthDate(LocalDate.of(1995, 1, 1))
+                .role(Role.USER)
+                .email(email)
+                .phoneNumber("01099998888")
+                .password(encoder.encode("password1!"))
+                .build();
+        return userRepository.save(user);
     }
 
     private Long createApplicationWithPositionIds(Long recruitmentId, String email, List<Long> positionIds) throws Exception {

@@ -186,6 +186,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public ApplicationResponseDTO.Detail getById(Long id, Long currentUserId) {
         Application app = applicationRepository.getById(id);
+        Set<Long> currentUserRoleIds = currentUserRoleIds(currentUserId);
 
         Long recruitmentId = app.getRecruitment().getId();
         Long previousId = applicationRepository.findPreviousIdInRecruitment(recruitmentId, id);
@@ -196,13 +197,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         List<Evaluation> evaluationList =
                 evaluationRepository.findEvaluationsForApplication(id);
 
-        // 공통 평가 기준(organizationRole이 null) + 해당 지원서의 organizationRole과 일치하는 평가 기준만 조회
-        List<EvaluationCriteria> criteriaList =
-                evaluationCriteriaRepository.findCommonAndByOrganizationRole(
-                        recruitmentId,
-                        EvaluationType.DOCUMENT,
-                        app.getOrganizationRole()
-                );
+        List<EvaluationCriteria> criteriaList = findDocumentCriteriaForCurrentUser(app, currentUserRoleIds);
 
         return assembler.toDetail(
                 app,
@@ -222,10 +217,18 @@ public class ApplicationServiceImpl implements ApplicationService {
      */
     @Override
     public Page<ApplicationResponseDTO.SummaryForUser> getByRecruitmentId(Long recruitmentId, Long currentUserId, EvaluationStatus evaluationStatus, String keyword, Pageable pageable) {
-        List<Application> apps = applicationRepository.findDistinctByRecruitment_IdAndEvaluators_Evaluator_IdAndEvaluators_EvaluationType(recruitmentId, currentUserId, EvaluationType.DOCUMENT);
+        Set<Long> currentUserRoleIds = currentUserRoleIds(currentUserId);
+        List<Application> assignedApps = applicationRepository.findDistinctByRecruitment_IdAndEvaluators_Evaluator_IdAndEvaluators_EvaluationType(recruitmentId, currentUserId, EvaluationType.DOCUMENT);
+        List<Application> roleMatchedApps = applicationRepository.findByRecruitmentIdAndNameOrEmail(recruitmentId, null).stream()
+                .filter(app -> hasAnySelectedRole(app, currentUserRoleIds))
+                .toList();
 
-        List<ApplicationResponseDTO.SummaryForUser> filtered = apps.stream()
-                .map(app -> ApplicationResponseDTO.SummaryForUser.from(app, currentUserId))
+        Map<Long, Application> appsById = new LinkedHashMap<>();
+        assignedApps.forEach(app -> appsById.put(app.getId(), app));
+        roleMatchedApps.forEach(app -> appsById.putIfAbsent(app.getId(), app));
+
+        List<ApplicationResponseDTO.SummaryForUser> filtered = appsById.values().stream()
+                .map(app -> ApplicationResponseDTO.SummaryForUser.from(app, currentUserId, currentUserRoleIds))
                 .filter(dto -> matchStatus(dto, evaluationStatus) && matchKeyword(dto, keyword))
                 .toList();
 
@@ -706,6 +709,11 @@ public class ApplicationServiceImpl implements ApplicationService {
         return selectedRoleIds.stream().anyMatch(organizationRoleIds::contains);
     }
 
+    private static boolean hasAnySelectedRole(Application application, Set<Long> organizationRoleIds) {
+        List<Long> selectedRoleIds = selectedRoleIds(application);
+        return selectedRoleIds.stream().anyMatch(organizationRoleIds::contains);
+    }
+
     private static List<Long> selectedRoleIds(Application application) {
         List<Long> selectedRoleIds = application.getApplicationOrganizationRoles().stream()
                 .map(link -> link.getOrganizationRole().getId())
@@ -731,6 +739,28 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         return application.getOrganizationRole() == null ? "" : application.getOrganizationRole().getName();
+    }
+
+    private Set<Long> currentUserRoleIds(Long currentUserId) {
+        return userRepository.getById(currentUserId).getUserOrganizationRoles().stream()
+                .map(userOrganizationRole -> userOrganizationRole.getOrganizationRole().getId())
+                .collect(Collectors.toSet());
+    }
+
+    private List<EvaluationCriteria> findDocumentCriteriaForCurrentUser(Application app, Set<Long> currentUserRoleIds) {
+        Set<Long> selectedRoleIds = Set.copyOf(selectedRoleIds(app));
+        Set<Long> matchedRoleIds = selectedRoleIds.stream()
+                .filter(currentUserRoleIds::contains)
+                .collect(Collectors.toSet());
+        Set<Long> targetRoleIds = matchedRoleIds.isEmpty() ? selectedRoleIds : matchedRoleIds;
+
+        return app.getRecruitment().getEvaluationCriteriaList().stream()
+                .filter(criteria -> criteria.getEvaluationType() == EvaluationType.DOCUMENT)
+                .filter(criteria -> {
+                    OrganizationRole criteriaRole = criteria.getOrganizationRole();
+                    return criteriaRole == null || targetRoleIds.contains(criteriaRole.getId());
+                })
+                .toList();
     }
 
     private boolean matchStatus(ApplicationResponseDTO.SummaryForUser dto, EvaluationStatus status) {

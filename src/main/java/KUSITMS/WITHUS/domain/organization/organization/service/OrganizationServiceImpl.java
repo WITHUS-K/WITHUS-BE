@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Random;
 
 @Slf4j
@@ -100,10 +102,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public List<OrganizationResponseDTO.Summary> getMyOrganizations(Long userId) {
-        return userOrganizationRepository
-                .findByUser_Id(userId)
-                .stream()
+        Map<Long, Organization> organizationsById = new LinkedHashMap<>();
+
+        userOrganizationRepository.findByUser_Id(userId).stream()
                 .map(UserOrganization::getOrganization)
+                .forEach(organization -> organizationsById.put(organization.getId(), organization));
+
+        organizationRepository.findAll().stream()
+                .filter(organization -> organization.getOrganizationRoles().stream()
+                        .flatMap(role -> role.getUserOrganizationRoles().stream())
+                        .anyMatch(link -> link.getUser().getId().equals(userId)))
+                .forEach(organization -> organizationsById.putIfAbsent(organization.getId(), organization));
+
+        return organizationsById.values().stream()
                 .map(OrganizationResponseDTO.Summary::from)
                 .toList();
     }
