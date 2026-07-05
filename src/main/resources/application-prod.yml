@@ -58,6 +58,11 @@ ncp:
     secretKey: ${NCP_OS_SECRET_KEY}
 
 mail:
+  provider: ${MAIL_PROVIDER:smtp}
+  from-email: ${MAIL_FROM_EMAIL:${MAIL_USERNAME}}
+  from-name: ${MAIL_FROM_NAME:WITHUS}
+  sendgrid-api-key: ${SENDGRID_API_KEY:}
+  sendgrid-endpoint: ${SENDGRID_ENDPOINT:https://api.sendgrid.com/v3/mail/send}
   domain: ${SERVER_DOMAIN}
   logo-url: ${MAIL_LOGO_URL}
   interviewer-availability-url: ${MAIL_INTERVIEWER_AVAILABILITY_URL}

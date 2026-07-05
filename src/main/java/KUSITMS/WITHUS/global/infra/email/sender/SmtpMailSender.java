@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.mail.MailException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import java.util.List;
 @Slf4j
 @Component
 @Profile("!test")
+@ConditionalOnProperty(name = "mail.provider", havingValue = "smtp", matchIfMissing = true)
 @RequiredArgsConstructor
 public class SmtpMailSender implements MailSender {
 
