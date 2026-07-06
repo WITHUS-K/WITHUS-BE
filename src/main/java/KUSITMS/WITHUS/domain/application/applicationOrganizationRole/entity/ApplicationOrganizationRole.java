@@ -6,7 +6,13 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "APPLICATION_ORGANIZATION_ROLE")
+@Table(
+        name = "APPLICATION_ORGANIZATION_ROLE",
+        uniqueConstraints = @UniqueConstraint(
+                name = "UK_APPLICATION_ORGANIZATION_ROLE",
+                columnNames = {"APPLICATION_ID", "ORGANIZATION_ROLE_ID"}
+        )
+)
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

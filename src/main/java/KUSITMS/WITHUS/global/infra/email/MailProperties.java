@@ -15,6 +15,7 @@ public class MailProperties {
     private String fromName = "WITHUS";
     private String sendgridApiKey;
     private String sendgridEndpoint = "https://api.sendgrid.com/v3/mail/send";
+    private String sendgridEventWebhookPublicKey;
     private String domain;
     private String logoUrl;
     private String interviewerAvailabilityUrl;

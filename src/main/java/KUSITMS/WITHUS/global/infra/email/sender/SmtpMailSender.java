@@ -13,6 +13,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
@@ -30,7 +32,7 @@ public class SmtpMailSender implements MailSender {
 
     @Override
     public void send(String to, String subject, String text) {
-        sendWithRetry(to, subject, () -> {
+        sendWithRetryAfterCommit(to, subject, () -> {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
 
@@ -49,7 +51,7 @@ public class SmtpMailSender implements MailSender {
             String to, String subject, String html,
             List<InputStreamSource> attachments
     ) throws MessagingException {
-        sendWithRetry(to, subject, () -> {
+        sendWithRetryAfterCommit(to, subject, () -> {
             MimeMessage msg = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(msg, true, "utf-8");
 
@@ -68,6 +70,24 @@ public class SmtpMailSender implements MailSender {
 
             javaMailSender.send(msg);
             log.info("Email accepted by SMTP: [{}] subject: {}", to, subject);
+        });
+    }
+
+    private void sendWithRetryAfterCommit(String to, String subject, MailSendOperation operation) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            sendWithRetry(to, subject, operation);
+            return;
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                try {
+                    sendWithRetry(to, subject, operation);
+                } catch (CustomException e) {
+                    log.error("Email send failed after transaction commit: [{}] subject: {}", to, subject, e);
+                }
+            }
         });
     }
 

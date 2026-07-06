@@ -6,7 +6,7 @@ import KUSITMS.WITHUS.domain.organization.organizationRoleGroup.dto.Organization
 import java.util.List;
 
 public interface OrganizationRoleGroupService {
-    OrganizationRoleGroupResponseDTO.Detail create(Long organizationId, OrganizationRoleGroupRequestDTO.Create request);
-    OrganizationRoleGroupResponseDTO.Detail assignRoles(Long organizationId, Long groupId, OrganizationRoleGroupRequestDTO.AssignRoles request);
-    List<OrganizationRoleGroupResponseDTO.Detail> getGroups(Long organizationId);
+    OrganizationRoleGroupResponseDTO.Detail create(Long userId, Long organizationId, OrganizationRoleGroupRequestDTO.Create request);
+    OrganizationRoleGroupResponseDTO.Detail assignRoles(Long userId, Long organizationId, Long groupId, OrganizationRoleGroupRequestDTO.AssignRoles request);
+    List<OrganizationRoleGroupResponseDTO.Detail> getGroups(Long userId, Long organizationId);
 }

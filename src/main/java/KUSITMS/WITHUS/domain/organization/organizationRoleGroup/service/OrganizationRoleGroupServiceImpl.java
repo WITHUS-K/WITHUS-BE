@@ -8,6 +8,7 @@ import KUSITMS.WITHUS.domain.organization.organizationRoleGroup.dto.Organization
 import KUSITMS.WITHUS.domain.organization.organizationRoleGroup.dto.OrganizationRoleGroupResponseDTO;
 import KUSITMS.WITHUS.domain.organization.organizationRoleGroup.entity.OrganizationRoleGroup;
 import KUSITMS.WITHUS.domain.organization.organizationRoleGroup.repository.OrganizationRoleGroupJpaRepository;
+import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,10 +27,12 @@ public class OrganizationRoleGroupServiceImpl implements OrganizationRoleGroupSe
     private final OrganizationRepository organizationRepository;
     private final OrganizationRoleRepository organizationRoleRepository;
     private final OrganizationRoleGroupJpaRepository organizationRoleGroupJpaRepository;
+    private final UserOrganizationRepository userOrganizationRepository;
 
     @Override
     @Transactional
-    public OrganizationRoleGroupResponseDTO.Detail create(Long organizationId, OrganizationRoleGroupRequestDTO.Create request) {
+    public OrganizationRoleGroupResponseDTO.Detail create(Long userId, Long organizationId, OrganizationRoleGroupRequestDTO.Create request) {
+        validateOrganizationAccess(userId, organizationId);
         validateSelectionCount(request.selectionMinCount(), request.selectionMaxCount());
 
         Organization organization = organizationRepository.getById(organizationId);
@@ -43,13 +48,25 @@ public class OrganizationRoleGroupServiceImpl implements OrganizationRoleGroupSe
 
     @Override
     @Transactional
-    public OrganizationRoleGroupResponseDTO.Detail assignRoles(Long organizationId, Long groupId, OrganizationRoleGroupRequestDTO.AssignRoles request) {
+    public OrganizationRoleGroupResponseDTO.Detail assignRoles(Long userId, Long organizationId, Long groupId, OrganizationRoleGroupRequestDTO.AssignRoles request) {
+        validateOrganizationAccess(userId, organizationId);
         OrganizationRoleGroup group = getGroupInOrganization(groupId, organizationId);
-        List<OrganizationRole> roles = organizationRoleRepository.findAllById(request.roleIds());
+        List<Long> distinctRoleIds = request.roleIds().stream().distinct().toList();
+        if (distinctRoleIds.size() != request.roleIds().size()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
 
-        if (roles.size() != request.roleIds().stream().distinct().count()) {
+        List<OrganizationRole> roles = organizationRoleRepository.findAllById(distinctRoleIds);
+
+        if (roles.size() != distinctRoleIds.size()) {
             throw new CustomException(ErrorCode.ORGANIZATION_ROLE_NOT_EXIST);
         }
+
+        Set<Long> requestedRoleIds = distinctRoleIds.stream().collect(Collectors.toSet());
+        List<OrganizationRole> currentRoles = List.copyOf(group.getOrganizationRoles());
+        currentRoles.stream()
+                .filter(role -> !requestedRoleIds.contains(role.getId()))
+                .forEach(role -> role.assignGroup(null));
 
         for (OrganizationRole role : roles) {
             if (!role.getOrganization().getId().equals(organizationId)) {
@@ -62,7 +79,8 @@ public class OrganizationRoleGroupServiceImpl implements OrganizationRoleGroupSe
     }
 
     @Override
-    public List<OrganizationRoleGroupResponseDTO.Detail> getGroups(Long organizationId) {
+    public List<OrganizationRoleGroupResponseDTO.Detail> getGroups(Long userId, Long organizationId) {
+        validateOrganizationAccess(userId, organizationId);
         organizationRepository.getById(organizationId);
         return organizationRoleGroupJpaRepository.findByOrganizationIdOrderByIdAsc(organizationId).stream()
                 .map(OrganizationRoleGroupResponseDTO.Detail::from)
@@ -83,6 +101,12 @@ public class OrganizationRoleGroupServiceImpl implements OrganizationRoleGroupSe
     private void validateSelectionCount(int min, int max) {
         if (min < 0 || max < 1 || min > max) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+    }
+
+    private void validateOrganizationAccess(Long userId, Long organizationId) {
+        if (!userOrganizationRepository.existsByUserIdAndOrganizationId(userId, organizationId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
         }
     }
 }

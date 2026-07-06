@@ -69,12 +69,13 @@ class RecruitmentControllerTest {
     @BeforeEach
     void setup() throws Exception {
         savedOrganizationId = organizationService.create(new OrganizationRequestDTO.Create("테스트 조직")).id();
-        createTestUser();
+        Long userId = createTestUser();
+        addUserToOrganization(userId, savedOrganizationId);
         accessToken = testAuthHelper.loginAndGetAccessToken(testMail, "password1!");
         savedRecruitmentId = testHelper.createRecruitment("기본 공고", savedOrganizationId, accessToken);
     }
 
-    private void createTestUser() {
+    private Long createTestUser() {
         String testPhone = "01000001111";
         var user = User.builder()
                 .name("테스트유저")
@@ -84,7 +85,11 @@ class RecruitmentControllerTest {
                 .phoneNumber(testPhone)
                 .password(encoder.encode("password1!"))
                 .build();
-        userRepository.save(user);
+        return userRepository.save(user).getId();
+    }
+
+    private void addUserToOrganization(Long userId, Long organizationId) {
+        userOrganizationService.addUserToOrganization(organizationId, List.of(userId));
     }
 
     private ResultActions performWithAuth(MockHttpServletRequestBuilder requestBuilder, String content) throws Exception {
@@ -286,10 +291,6 @@ class RecruitmentControllerTest {
     @Test
     @DisplayName("내 조직의 공고 목록 조회 성공")
     void getAllMyOrganizationRecruitments() throws Exception {
-        Long userId = userRepository.getByEmail(testMail).getId();
-
-        userOrganizationService.addUserToOrganization(savedOrganizationId, List.of(userId));
-
         mockMvc.perform(get("/api/v1/recruitments/my-organizations")
                         .header("Authorization", accessToken))
                 .andExpect(status().isOk())

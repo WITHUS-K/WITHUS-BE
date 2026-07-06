@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.domain.user.userOrganizationRole.repository;
 
+import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.UserOrganizationRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -35,5 +36,10 @@ public class UserOrganizationRoleRepositoryImpl implements UserOrganizationRoleR
     @Override
     public void deleteByOrganizationRoleId(Long roleId) {
         userOrganizationRoleJpaRepository.deleteByOrganizationRole_Id(roleId);
+    }
+
+    @Override
+    public List<Organization> findDistinctOrganizationsByUserId(Long userId) {
+        return userOrganizationRoleJpaRepository.findDistinctOrganizationsByUserId(userId);
     }
 }

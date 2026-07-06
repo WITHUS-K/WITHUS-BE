@@ -11,7 +11,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 @Entity
-@Table(name = "EMAIL_DELIVERY_EVENT")
+@Table(
+        name = "EMAIL_DELIVERY_EVENT",
+        uniqueConstraints = @UniqueConstraint(
+                name = "UK_EMAIL_DELIVERY_EVENT_SG_EVENT_ID",
+                columnNames = "SG_EVENT_ID"
+        )
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EmailDeliveryEvent extends BaseEntity {
@@ -29,6 +35,7 @@ public class EmailDeliveryEvent extends BaseEntity {
 
     private String sgMessageId;
 
+    @Column(name = "SG_EVENT_ID")
     private String sgEventId;
 
     @Column(length = 1000)

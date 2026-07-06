@@ -607,6 +607,9 @@ public class ApplicationServiceImpl implements ApplicationService {
     private List<OrganizationRole> resolveSelectedRoles(ApplicationRequestDTO.Create request, Recruitment recruitment) {
         List<Long> requestedRoleIds = normalizeRequestedRoleIds(request);
         if (requestedRoleIds.isEmpty()) {
+            if (!recruitment.getPositions().isEmpty()) {
+                throw new CustomException(ErrorCode.INVALID_REQUEST);
+            }
             return List.of();
         }
 

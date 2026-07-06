@@ -1,11 +1,14 @@
 package KUSITMS.WITHUS.integration.domain.organization.organizationRoleGroup.controller;
 
 import KUSITMS.WITHUS.domain.organization.organization.dto.OrganizationRequestDTO;
+import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.organization.organization.service.OrganizationService;
 import KUSITMS.WITHUS.domain.organization.organizationRoleGroup.dto.OrganizationRoleGroupRequestDTO;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
+import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
+import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRepository;
 import KUSITMS.WITHUS.integration.config.MockInfraBeans;
 import KUSITMS.WITHUS.integration.util.TestAuthHelper;
 import KUSITMS.WITHUS.integration.util.TestHelper;
@@ -47,7 +50,9 @@ class OrganizationRoleGroupControllerTest {
     @Autowired private ObjectMapper objectMapper;
     @Autowired private BCryptPasswordEncoder encoder;
     @Autowired private OrganizationService organizationService;
+    @Autowired private OrganizationRepository organizationRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private UserOrganizationRepository userOrganizationRepository;
     @Autowired private TestAuthHelper testAuthHelper;
     @Autowired private TestHelper testHelper;
 
@@ -57,7 +62,8 @@ class OrganizationRoleGroupControllerTest {
     @BeforeEach
     void setUp() throws Exception {
         organizationId = organizationService.create(new OrganizationRequestDTO.Create("테스트 조직")).id();
-        createUser("관리자", "admin@example.com", "01000001111", Role.ADMIN);
+        Long adminUserId = createUser("관리자", "admin@example.com", "01000001111", Role.ADMIN);
+        addUserToOrganization(adminUserId, organizationId);
         accessToken = testAuthHelper.loginAndGetAccessToken("admin@example.com", "password1!");
     }
 
@@ -88,9 +94,33 @@ class OrganizationRoleGroupControllerTest {
     }
 
     @Test
+    @DisplayName("역할 그룹 배정은 요청 역할 목록으로 전체 교체된다")
+    void assignOrganizationRoleGroupReplacesRoles() throws Exception {
+        Long backendRoleId = testHelper.createOrganizationRole(organizationId, "백엔드", accessToken);
+        Long designRoleId = testHelper.createOrganizationRole(organizationId, "디자인", accessToken);
+        Long groupId = createRoleGroup("일반 파트", 1, 1);
+
+        mockMvc.perform(put("/api/v1/organizations/" + organizationId + "/role-groups/" + groupId + "/roles")
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new OrganizationRoleGroupRequestDTO.AssignRoles(List.of(backendRoleId, designRoleId)))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.roles", hasSize(2)));
+
+        mockMvc.perform(put("/api/v1/organizations/" + organizationId + "/role-groups/" + groupId + "/roles")
+                        .header("Authorization", accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new OrganizationRoleGroupRequestDTO.AssignRoles(List.of(backendRoleId)))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.roles", hasSize(1)))
+                .andExpect(jsonPath("$.result.roles[0].roleName").value("백엔드"));
+    }
+
+    @Test
     @DisplayName("다른 조직 역할을 역할 그룹에 배정하면 실패")
     void assignOtherOrganizationRoleToGroupFail() throws Exception {
         Long otherOrganizationId = organizationService.create(new OrganizationRequestDTO.Create("다른 조직")).id();
+        addUserToOrganization(userRepository.getByEmail("admin@example.com").getId(), otherOrganizationId);
         Long otherRoleId = testHelper.createOrganizationRole(otherOrganizationId, "교육기획팀", accessToken);
         Long groupId = createRoleGroup("운영진 팀", 1, 1);
         var assignRequest = new OrganizationRoleGroupRequestDTO.AssignRoles(List.of(otherRoleId));
@@ -101,6 +131,18 @@ class OrganizationRoleGroupControllerTest {
                         .content(objectMapper.writeValueAsString(assignRequest)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("ORGANIZATION_ROLE403"));
+    }
+
+    @Test
+    @DisplayName("조직에 속하지 않은 사용자는 역할 그룹을 조회할 수 없다")
+    void getRoleGroupsFailWhenUserIsNotOrganizationMember() throws Exception {
+        createUser("다른 관리자", "other-admin@example.com", "01000002222", Role.ADMIN);
+        String otherAccessToken = testAuthHelper.loginAndGetAccessToken("other-admin@example.com", "password1!");
+
+        mockMvc.perform(get("/api/v1/organizations/" + organizationId + "/role-groups")
+                        .header("Authorization", otherAccessToken))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("COMMON403"));
     }
 
     private Long createRoleGroup(String name, int selectionMinCount, int selectionMaxCount) throws Exception {
@@ -126,5 +168,14 @@ class OrganizationRoleGroupControllerTest {
                 .password(encoder.encode("password1!"))
                 .build();
         return userRepository.save(user).getId();
+    }
+
+    private void addUserToOrganization(Long userId, Long organizationId) {
+        User user = userRepository.getById(userId);
+        var organization = organizationRepository.getById(organizationId);
+        userOrganizationRepository.save(UserOrganization.builder()
+                .user(user)
+                .organization(organization)
+                .build());
     }
 }

@@ -11,6 +11,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
 import java.net.URI;
@@ -37,7 +39,7 @@ public class SendGridMailSender implements MailSender {
 
     @Override
     public void send(String to, String subject, String text) {
-        sendMail(to, subject, text, List.of());
+        sendMailAfterCommit(to, subject, text, List.of());
     }
 
     @Override
@@ -47,7 +49,25 @@ public class SendGridMailSender implements MailSender {
             String html,
             List<InputStreamSource> attachments
     ) throws MessagingException {
-        sendMail(to, subject, html, attachments);
+        sendMailAfterCommit(to, subject, html, attachments);
+    }
+
+    private void sendMailAfterCommit(String to, String subject, String html, List<InputStreamSource> attachments) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            sendMail(to, subject, html, attachments);
+            return;
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                try {
+                    sendMail(to, subject, html, attachments);
+                } catch (CustomException e) {
+                    log.error("SendGrid email send failed after transaction commit: [{}] subject: {}", to, subject, e);
+                }
+            }
+        });
     }
 
     private void sendMail(String to, String subject, String html, List<InputStreamSource> attachments) {

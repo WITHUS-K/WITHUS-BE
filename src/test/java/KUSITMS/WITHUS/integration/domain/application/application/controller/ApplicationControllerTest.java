@@ -19,6 +19,8 @@ import KUSITMS.WITHUS.domain.recruitment.recruitment.repository.RecruitmentRepos
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
+import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
+import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRepository;
 import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import KUSITMS.WITHUS.integration.config.MockInfraBeans;
 import KUSITMS.WITHUS.integration.util.TestAuthHelper;
@@ -70,6 +72,7 @@ class ApplicationControllerTest {
     @Autowired private UserRepository userRepository;
     @Autowired private OrganizationService organizationService;
     @Autowired private OrganizationRepository organizationRepository;
+    @Autowired private UserOrganizationRepository userOrganizationRepository;
     @Autowired private RecruitmentRepository recruitmentRepository;
     @Autowired private EntityManager entityManager;
 
@@ -80,11 +83,12 @@ class ApplicationControllerTest {
     @BeforeEach
     void setUp() throws Exception {
         savedOrganizationId = organizationService.create(new OrganizationRequestDTO.Create("테스트 조직")).id();
-        createTestUser();
+        Long userId = createTestUser();
+        addUserToOrganization(userId, savedOrganizationId);
         accessToken = testAuthHelper.loginAndGetAccessToken(testMail, "password1!");
     }
 
-    private void createTestUser() {
+    private Long createTestUser() {
         String testPhone = "01000001111";
         var user = User.builder()
                 .name("테스트유저")
@@ -94,7 +98,16 @@ class ApplicationControllerTest {
                 .phoneNumber(testPhone)
                 .password(encoder.encode("password1!"))
                 .build();
-        userRepository.save(user);
+        return userRepository.save(user).getId();
+    }
+
+    private void addUserToOrganization(Long userId, Long organizationId) {
+        User user = userRepository.getById(userId);
+        var organization = organizationRepository.getById(organizationId);
+        userOrganizationRepository.save(UserOrganization.builder()
+                .user(user)
+                .organization(organization)
+                .build());
     }
 
     private void addRolesToRecruitment(Long recruitmentId, String title, List<Long> organizationRoleIds) throws Exception {
@@ -203,6 +216,35 @@ class ApplicationControllerTest {
                         .header("Authorization", accessToken)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isPreconditionFailed());
+    }
+
+    @Test
+    @DisplayName("지원서 생성 실패 - 공고 역할이 있는데 선택 역할이 없음")
+    void createApplicationWithoutRoleWhenRecruitmentHasRolesShouldReturnBadRequest() throws Exception {
+        Long recruitmentId = testHelper.createRecruitment("역할 필수 공고", savedOrganizationId, accessToken);
+        Long backendRoleId = testHelper.createOrganizationRole(savedOrganizationId, "백엔드", accessToken);
+        addRolesToRecruitment(recruitmentId, "역할 필수 공고", List.of(backendRoleId));
+
+        ApplicationRequestDTO.Create requestDto = new ApplicationRequestDTO.Create(
+                "김지원", "missing-role@example.com", "01012341234", Gender.MALE,
+                "상명대학교", "컴퓨터공학과", AcademicStatus.ENROLLED,
+                LocalDate.of(2001, 1, 1), "서울시 도봉구 56로 501",
+                recruitmentId,
+                null,
+                null,
+                List.of(),
+                List.of(LocalDateTime.of(2025, 4, 22, 10, 0))
+        );
+
+        MockMultipartFile jsonPart = new MockMultipartFile(
+                "request", "", "application/json", objectMapper.writeValueAsBytes(requestDto)
+        );
+
+        mockMvc.perform(multipart("/api/v1/applications")
+                        .file(jsonPart)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("COMMON400"));
     }
 
     @Test
