@@ -97,6 +97,7 @@ public class TestHelper {
                 "대학교", "전공", AcademicStatus.ENROLLED,
                 LocalDate.of(2000, 1, 1), "서울시",
                 recruitmentId, organizationRoleId,
+                null,
                 List.of(), List.of(LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(10, 0)))
         );
 
@@ -114,4 +115,3 @@ public class TestHelper {
         return ((Number) JsonPath.read(result.getResponse().getContentAsString(), "$.result.id")).longValue();
     }
 }
-

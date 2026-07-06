@@ -6,6 +6,7 @@ import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
 import KUSITMS.WITHUS.domain.organization.organization.repository.OrganizationRepository;
 import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
 import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRepository;
+import KUSITMS.WITHUS.domain.user.userOrganizationRole.repository.UserOrganizationRoleRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
 import KUSITMS.WITHUS.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Random;
 
 @Slf4j
@@ -24,6 +27,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private final OrganizationRepository organizationRepository;
     private final UserOrganizationRepository userOrganizationRepository;
+    private final UserOrganizationRoleRepository userOrganizationRoleRepository;
 
     /**
      * 조직 생성
@@ -100,10 +104,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public List<OrganizationResponseDTO.Summary> getMyOrganizations(Long userId) {
-        return userOrganizationRepository
-                .findByUser_Id(userId)
-                .stream()
+        Map<Long, Organization> organizationsById = new LinkedHashMap<>();
+
+        userOrganizationRepository.findByUser_Id(userId).stream()
                 .map(UserOrganization::getOrganization)
+                .forEach(organization -> organizationsById.put(organization.getId(), organization));
+
+        userOrganizationRoleRepository.findDistinctOrganizationsByUserId(userId).stream()
+                .forEach(organization -> organizationsById.putIfAbsent(organization.getId(), organization));
+
+        return organizationsById.values().stream()
                 .map(OrganizationResponseDTO.Summary::from)
                 .toList();
     }

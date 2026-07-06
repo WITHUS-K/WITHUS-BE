@@ -61,6 +61,7 @@ public class ApplicationAssembler {
 
                 application.getId(),
                 application.getOrganizationRole() != null ? application.getOrganizationRole().getName() : null,
+                getAppliedPositionNames(application),
                 application.getName(),
                 application.getGender(),
                 application.getEmail(),
@@ -109,6 +110,20 @@ public class ApplicationAssembler {
                 .sorted()
                 .map(DATE_FORMATTER::format)
                 .toList();
+    }
+
+    private List<String> getAppliedPositionNames(Application application) {
+        List<String> selectedNames = application.getApplicationOrganizationRoles().stream()
+                .map(link -> link.getOrganizationRole().getName())
+                .toList();
+
+        if (!selectedNames.isEmpty()) {
+            return selectedNames;
+        }
+
+        return application.getOrganizationRole() == null
+                ? List.of()
+                : List.of(application.getOrganizationRole().getName());
     }
 
     private List<CommentResponseDTO.Detail> getComments(Application application, CommentType type) {

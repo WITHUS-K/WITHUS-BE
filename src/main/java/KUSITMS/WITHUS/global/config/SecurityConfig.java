@@ -40,6 +40,7 @@ public class SecurityConfig {
             "/api/v1/recruitments/slug/**",
             "/api/v1/organizations/invite/accept",
             "/api/v1/organizations/inviteCode/exchange",
+            "/api/v1/mail/sendgrid/events",
     };
 
     private final RefreshTokenCacheUtil refreshTokenCacheUtil;

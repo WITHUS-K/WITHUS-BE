@@ -50,4 +50,22 @@ public class DocumentQuestionRepositoryImpl implements DocumentQuestionRepositor
                 .orderBy(documentQuestion.order.asc())
                 .fetch();
     }
+
+    @Override
+    public List<DocumentQuestion> findCommonAndByOrganizationRoles(Recruitment recruitment, List<OrganizationRole> organizationRoles) {
+        List<OrganizationRole> roles = organizationRoles == null ? List.of() : organizationRoles;
+        BooleanExpression roleFilter = roles.isEmpty()
+                ? documentQuestion.organizationRole.isNull()
+                : documentQuestion.organizationRole.isNull()
+                .or(documentQuestion.organizationRole.in(roles));
+
+        return queryFactory
+                .selectFrom(documentQuestion)
+                .where(
+                        documentQuestion.recruitment.eq(recruitment)
+                                .and(roleFilter)
+                )
+                .orderBy(documentQuestion.order.asc())
+                .fetch();
+    }
 }

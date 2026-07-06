@@ -10,10 +10,15 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "mail")
 public class MailProperties {
+    private String provider = "smtp";
+    private String fromEmail;
+    private String fromName = "WITHUS";
+    private String sendgridApiKey;
+    private String sendgridEndpoint = "https://api.sendgrid.com/v3/mail/send";
+    private String sendgridEventWebhookPublicKey;
     private String domain;
     private String logoUrl;
     private String interviewerAvailabilityUrl;
     private String inviteUserUrl;
     private String invitationApiPath;
 }
-

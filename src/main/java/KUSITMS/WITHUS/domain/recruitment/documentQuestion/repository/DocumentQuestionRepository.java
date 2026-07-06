@@ -10,4 +10,5 @@ public interface DocumentQuestionRepository {
     DocumentQuestion getById(Long questionId);
     List<DocumentQuestion> findByRecruitment(Recruitment recruitment);
     List<DocumentQuestion> findCommonAndByOrganizationRole(Recruitment recruitment, OrganizationRole organizationRole);
+    List<DocumentQuestion> findCommonAndByOrganizationRoles(Recruitment recruitment, List<OrganizationRole> organizationRoles);
 }

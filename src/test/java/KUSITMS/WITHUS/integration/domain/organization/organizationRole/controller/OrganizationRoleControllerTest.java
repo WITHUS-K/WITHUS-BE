@@ -6,6 +6,7 @@ import KUSITMS.WITHUS.domain.organization.organizationRole.dto.OrganizationRoleR
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.enumerate.Role;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
+import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRepository;
 import KUSITMS.WITHUS.integration.config.MockInfraBeans;
 import KUSITMS.WITHUS.integration.util.TestAuthHelper;
 import KUSITMS.WITHUS.integration.util.TestHelper;
@@ -46,6 +47,7 @@ class OrganizationRoleControllerTest {
     @Autowired private BCryptPasswordEncoder encoder;
     @Autowired private OrganizationService organizationService;
     @Autowired private UserRepository userRepository;
+    @Autowired private UserOrganizationRepository userOrganizationRepository;
     @Autowired private TestAuthHelper testAuthHelper;
     @Autowired private TestHelper testHelper;
 
@@ -115,6 +117,42 @@ class OrganizationRoleControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.roles[?(@.roleName == '백엔드')].assignedUserCount").value(1))
                 .andExpect(jsonPath("$.result.roles[?(@.roleName == '교육기획팀')].assignedUserCount").value(1));
+    }
+
+    @Test
+    @DisplayName("운영진에게 역할 부여 시 내 조직 목록에서도 조회")
+    void assignRoleToUserAddsUserToOrganization() throws Exception {
+        Long backendRoleId = testHelper.createOrganizationRole(organizationId, "백엔드", accessToken);
+        Long educationRoleId = testHelper.createOrganizationRole(organizationId, "교육기획팀", accessToken);
+
+        assignRoles(targetUserId, List.of(backendRoleId, educationRoleId));
+
+        String staffAccessToken = testAuthHelper.loginAndGetAccessToken("staff@example.com", "password1!");
+
+        mockMvc.perform(get("/api/v1/organizations/me")
+                        .header("Authorization", staffAccessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result", hasSize(1)))
+                .andExpect(jsonPath("$.result[0].id").value(organizationId.intValue()))
+                .andExpect(jsonPath("$.result[0].name").value("테스트 조직"));
+    }
+
+    @Test
+    @DisplayName("내 조직 목록 조회 시 기존 역할 연결만 있어도 조직 조회")
+    void getMyOrganizationsIncludesOrganizationFromAssignedRoles() throws Exception {
+        Long backendRoleId = testHelper.createOrganizationRole(organizationId, "백엔드", accessToken);
+
+        assignRoles(targetUserId, List.of(backendRoleId));
+        userOrganizationRepository.deleteAllInBatch(userOrganizationRepository.findByUser_Id(targetUserId));
+
+        String staffAccessToken = testAuthHelper.loginAndGetAccessToken("staff@example.com", "password1!");
+
+        mockMvc.perform(get("/api/v1/organizations/me")
+                        .header("Authorization", staffAccessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result", hasSize(1)))
+                .andExpect(jsonPath("$.result[0].id").value(organizationId.intValue()))
+                .andExpect(jsonPath("$.result[0].name").value("테스트 조직"));
     }
 
     @Test

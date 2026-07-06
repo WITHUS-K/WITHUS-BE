@@ -7,6 +7,8 @@ import KUSITMS.WITHUS.domain.organization.organizationRole.entity.OrganizationRo
 import KUSITMS.WITHUS.domain.organization.organizationRole.repository.OrganizationRoleRepository;
 import KUSITMS.WITHUS.domain.user.user.entity.User;
 import KUSITMS.WITHUS.domain.user.user.repository.UserRepository;
+import KUSITMS.WITHUS.domain.user.userOrganization.entity.UserOrganization;
+import KUSITMS.WITHUS.domain.user.userOrganization.repository.UserOrganizationRepository;
 import KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.UserOrganizationRole;
 import KUSITMS.WITHUS.domain.user.userOrganizationRole.repository.UserOrganizationRoleRepository;
 import KUSITMS.WITHUS.global.exception.CustomException;
@@ -27,6 +29,7 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
     private final OrganizationRepository organizationRepository;
     private final OrganizationRoleRepository organizationRoleRepository;
     private final UserOrganizationRoleRepository userOrganizationRoleRepository;
+    private final UserOrganizationRepository userOrganizationRepository;
 
     /**
      * 운영진에게 역할 일괄 추가/제거
@@ -51,6 +54,9 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
         Set<Long> toRemoveIds = calcToRemoveIds(currentRoleIds, requestedValidIds);
 
         removeLinks(user, currentLinksInOrg, toRemoveIds);
+        if (!requestedValidIds.isEmpty()) {
+            ensureUserOrganizationMembership(user, organizationId);
+        }
         addLinks(user, requestedRoleMapInOrg, toAddIds);
 
         return user.getUserOrganizationRoles().stream()
@@ -201,6 +207,7 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
         List<UserOrganizationRole> newAssignments = new ArrayList<>();
 
         for (User user : toAddUsers) {
+            ensureUserOrganizationMembership(user, role.getOrganization().getId());
             UserOrganizationRole assignment = UserOrganizationRole.assign(user, role);
             user.addUserOrganizationRole(assignment);
             role.addUserOrganizationRole(assignment);
@@ -313,5 +320,21 @@ public class OrganizationRoleServiceImpl implements OrganizationRoleService {
             toAddLinks.add(link);
         }
         userOrganizationRoleRepository.saveAll(toAddLinks);
+    }
+
+    private void ensureUserOrganizationMembership(User user, Long organizationId) {
+        if (userOrganizationRepository.existsByUserIdAndOrganizationId(user.getId(), organizationId)) {
+            return;
+        }
+
+        Organization organization = organizationRepository.getById(organizationId);
+        UserOrganization userOrganization = UserOrganization.builder()
+                .user(user)
+                .organization(organization)
+                .build();
+
+        user.addUserOrganization(userOrganization);
+        organization.addUserOrganization(userOrganization);
+        userOrganizationRepository.save(userOrganization);
     }
 }

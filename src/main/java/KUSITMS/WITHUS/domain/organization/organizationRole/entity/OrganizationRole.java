@@ -1,6 +1,7 @@
 package KUSITMS.WITHUS.domain.organization.organizationRole.entity;
 
 import KUSITMS.WITHUS.domain.organization.organization.entity.Organization;
+import KUSITMS.WITHUS.domain.organization.organizationRoleGroup.entity.OrganizationRoleGroup;
 import KUSITMS.WITHUS.domain.recruitment.recruitment.entity.Recruitment;
 import KUSITMS.WITHUS.domain.user.userOrganizationRole.entity.UserOrganizationRole;
 import jakarta.persistence.*;
@@ -32,6 +33,10 @@ public class OrganizationRole {
     @JoinColumn(name = "ORGANIZATION_ID", nullable = false)
     private Organization organization;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ORGANIZATION_ROLE_GROUP_ID")
+    private OrganizationRoleGroup organizationRoleGroup;
+
     @Builder.Default
     @OneToMany(mappedBy = "organizationRole", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserOrganizationRole> userOrganizationRoles = new ArrayList<>();
@@ -48,5 +53,18 @@ public class OrganizationRole {
     public void addUserOrganizationRole(UserOrganizationRole role) {
         this.userOrganizationRoles.add(role);
         role.associateOrganizationRole(this);
+    }
+
+    public void assignGroup(OrganizationRoleGroup group) {
+        if (this.organizationRoleGroup == group) {
+            return;
+        }
+        if (this.organizationRoleGroup != null) {
+            this.organizationRoleGroup.getOrganizationRoles().remove(this);
+        }
+        this.organizationRoleGroup = group;
+        if (group != null && !group.getOrganizationRoles().contains(this)) {
+            group.getOrganizationRoles().add(this);
+        }
     }
 }

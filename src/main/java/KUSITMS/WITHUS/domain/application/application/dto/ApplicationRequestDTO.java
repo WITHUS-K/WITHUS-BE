@@ -52,6 +52,9 @@ public class ApplicationRequestDTO {
             @Schema(description = "파트 ID", example = "1")
             Long positionId,
 
+            @Schema(description = "다중 선택 파트 ID 목록", example = "[1, 2]")
+            List<Long> positionIds,
+
             @Schema(description = "지원서 질문 답변 목록")
             List<ApplicationAnswerRequestDTO> answers,
 
