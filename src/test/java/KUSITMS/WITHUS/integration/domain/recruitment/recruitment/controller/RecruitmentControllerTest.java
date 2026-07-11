@@ -1,5 +1,6 @@
 package KUSITMS.WITHUS.integration.domain.recruitment.recruitment.controller;
 
+import KUSITMS.WITHUS.domain.application.application.enumerate.AcademicStatus;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.dto.EvaluationCriteriaRequestDTO;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationScaleType;
 import KUSITMS.WITHUS.domain.evaluation.evaluationCriteria.enumerate.EvaluationType;
@@ -17,6 +18,7 @@ import KUSITMS.WITHUS.domain.user.userOrganization.service.UserOrganizationServi
 import KUSITMS.WITHUS.integration.config.MockInfraBeans;
 import KUSITMS.WITHUS.integration.util.TestAuthHelper;
 import KUSITMS.WITHUS.integration.util.TestHelper;
+import KUSITMS.WITHUS.global.common.enumerate.Gender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,12 +36,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
+import static org.hamcrest.Matchers.contains;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -245,6 +253,46 @@ class RecruitmentControllerTest {
     }
 
     @Test
+    @DisplayName("공고 목록과 홈 요약은 다중 선택된 모든 역할의 지원자 수를 카운트")
+    void recruitmentSummariesCountApplicationsByAllSelectedRoles() throws Exception {
+        Long generalGroupId = createOrganizationRoleGroup("일반 파트", 1, 1);
+        Long executiveGroupId = createOrganizationRoleGroup("운영진 팀", 1, 1);
+
+        Long planningRoleId = testHelper.createOrganizationRole(savedOrganizationId, "기획", accessToken);
+        Long backendRoleId = testHelper.createOrganizationRole(savedOrganizationId, "백엔드", accessToken);
+        Long managementRoleId = testHelper.createOrganizationRole(savedOrganizationId, "경영총괄팀", accessToken);
+
+        assignRolesToGroup(generalGroupId, List.of(planningRoleId, backendRoleId));
+        assignRolesToGroup(executiveGroupId, List.of(managementRoleId));
+
+        Long recruitmentId = createRecruitmentWithRoles(
+                "다중 선택 카운트 공고",
+                List.of(managementRoleId, planningRoleId, backendRoleId)
+        );
+        createApplicationWithPositionIds(
+                recruitmentId,
+                "management-planning@example.com",
+                List.of(managementRoleId, planningRoleId)
+        );
+
+        mockMvc.perform(get("/api/v1/recruitments")
+                        .header("Authorization", accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result[?(@.recruitmentId == %d)].positionSummaries[?(@.name == '경영총괄팀')].applicantCount".formatted(recruitmentId)).value(contains(1)))
+                .andExpect(jsonPath("$.result[?(@.recruitmentId == %d)].positionSummaries[?(@.name == '기획')].applicantCount".formatted(recruitmentId)).value(contains(1)))
+                .andExpect(jsonPath("$.result[?(@.recruitmentId == %d)].positionSummaries[?(@.name == '백엔드')].applicantCount".formatted(recruitmentId)).value(contains(0)));
+
+        String adminToken = createAdminAndLogin();
+
+        mockMvc.perform(get("/api/v1/admin/recruitments/current/summary")
+                        .header("Authorization", adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result[?(@.recruitmentId == %d)].positionCounts[?(@.positionName == '경영총괄팀')].count".formatted(recruitmentId)).value(contains(1)))
+                .andExpect(jsonPath("$.result[?(@.recruitmentId == %d)].positionCounts[?(@.positionName == '기획')].count".formatted(recruitmentId)).value(contains(1)))
+                .andExpect(jsonPath("$.result[?(@.recruitmentId == %d)].positionCounts[?(@.positionName == '백엔드')].count".formatted(recruitmentId)).value(contains(0)));
+    }
+
+    @Test
     @DisplayName("공고 삭제 성공")
     void deleteRecruitment() throws Exception {
         mockMvc.perform(delete("/api/v1/recruitments/" + savedRecruitmentId)
@@ -329,5 +377,73 @@ class RecruitmentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
+    }
+
+    private Long createRecruitmentWithRoles(String title, List<Long> roleIds) throws Exception {
+        var request = new RecruitmentRequestDTO.Upsert(
+                null, title, "설명",
+                roleIds,
+                List.of(),
+                LocalDate.now().plusDays(5),
+                true, LocalDate.now().plusDays(10), LocalDate.now().plusDays(15),
+                (short) 10, savedOrganizationId,
+                false, true, true, true, true, false, true,
+                EvaluationScaleType.SCORE, EvaluationScaleType.SCORE,
+                List.of(), List.of(),
+                true,
+                List.of(new AvailableTimeRangeRequestDTO(LocalDate.now().plusDays(2), LocalTime.of(10, 0), LocalTime.of(12, 0)))
+        );
+
+        String response = performWithAuth(post("/api/v1/recruitments/publish"), objectMapper.writeValueAsString(request))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        return ((Number) JsonPath.read(response, "$.result.recruitmentId")).longValue();
+    }
+
+    private Long createApplicationWithPositionIds(Long recruitmentId, String email, List<Long> positionIds) throws Exception {
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put("name", "다중지원자");
+        request.put("email", email);
+        request.put("phoneNumber", "01012341234");
+        request.put("gender", Gender.MALE);
+        request.put("university", "상명대학교");
+        request.put("major", "컴퓨터공학과");
+        request.put("academicStatus", AcademicStatus.ENROLLED);
+        request.put("birthDate", LocalDate.of(2001, 1, 1));
+        request.put("address", "서울시");
+        request.put("recruitmentId", recruitmentId);
+        request.put("positionIds", positionIds);
+        request.put("answers", List.of());
+        request.put("availableTimes", List.of(LocalDateTime.of(LocalDate.now().plusDays(2), LocalTime.of(10, 0))));
+
+        MockMultipartFile jsonPart = new MockMultipartFile(
+                "request", "", "application/json", objectMapper.writeValueAsBytes(request)
+        );
+
+        MvcResult result = mockMvc.perform(multipart("/api/v1/applications")
+                        .file(jsonPart)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andReturn();
+        assertEquals(200, result.getResponse().getStatus(), result.getResponse().getContentAsString());
+
+        return ((Number) JsonPath.read(result.getResponse().getContentAsString(), "$.result.id")).longValue();
+    }
+
+    private String createAdminAndLogin() throws Exception {
+        String email = "admin-summary@example.com";
+        User admin = User.builder()
+                .name("관리자")
+                .birthDate(LocalDate.of(1990, 1, 1))
+                .role(Role.ADMIN)
+                .email(email)
+                .phoneNumber("01000002222")
+                .password(encoder.encode("password1!"))
+                .build();
+        Long adminId = userRepository.save(admin).getId();
+        addUserToOrganization(adminId, savedOrganizationId);
+        return testAuthHelper.loginAndGetAccessToken(email, "password1!");
     }
 }

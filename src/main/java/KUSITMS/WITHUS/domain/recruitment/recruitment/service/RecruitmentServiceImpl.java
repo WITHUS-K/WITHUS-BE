@@ -297,7 +297,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         List<Long> organizationIds = userOrganizationRepository.findOrganizationIdsByUserId(user.getId());
 
         return recruitmentRepository.findAllByKeyword(keyword, organizationIds).stream()
-                .map(r -> RecruitmentResponseDTO.Summary.from(r, roleId -> applicationRepository.countByRecruitment_IdAndOrganizationRole_Id(r.getId(), roleId)))
+                .map(r -> RecruitmentResponseDTO.Summary.from(r, roleId -> applicationRepository.countByRecruitmentIdAndSelectedOrganizationRoleId(r.getId(), roleId)))
                 .toList();
     }
 
@@ -439,7 +439,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                     List<RecruitmentResponseDTO.PositionCount> counts = r.getPositions().stream()
                             .map(ror -> new RecruitmentResponseDTO.PositionCount(
                                     ror.getOrganizationRole().getName(),
-                                    applicationRepository.countByRecruitment_IdAndOrganizationRole_Id(r.getId(), ror.getOrganizationRole().getId())
+                                    applicationRepository.countByRecruitmentIdAndSelectedOrganizationRoleId(r.getId(), ror.getOrganizationRole().getId())
                             ))
                             .toList();
                     return RecruitmentResponseDTO.SummaryForHome.from(r, counts);

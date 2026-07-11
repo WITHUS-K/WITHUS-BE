@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import static KUSITMS.WITHUS.domain.application.application.entity.QApplication.application;
+import static KUSITMS.WITHUS.domain.application.applicationOrganizationRole.entity.QApplicationOrganizationRole.applicationOrganizationRole;
 import static KUSITMS.WITHUS.domain.interview.timeslot.entity.QTimeSlot.timeSlot;
 import static KUSITMS.WITHUS.domain.organization.organizationRole.entity.QOrganizationRole.organizationRole;
 import static KUSITMS.WITHUS.domain.user.user.entity.QUser.user;
@@ -70,6 +71,23 @@ public class ApplicationRepositoryImpl implements ApplicationRepository {
     @Override
     public Long countByRecruitment_IdAndOrganizationRole_Id(Long recruitmentId, Long organizationRoleId) {
         return applicationJpaRepository.countByRecruitment_IdAndOrganizationRole_Id(recruitmentId, organizationRoleId);
+    }
+
+    @Override
+    public Long countByRecruitmentIdAndSelectedOrganizationRoleId(Long recruitmentId, Long organizationRoleId) {
+        Long count = queryFactory
+                .select(application.id.countDistinct())
+                .from(application)
+                .leftJoin(application.applicationOrganizationRoles, applicationOrganizationRole)
+                .where(
+                        application.recruitment.id.eq(recruitmentId),
+                        applicationOrganizationRole.organizationRole.id.eq(organizationRoleId)
+                                .or(applicationOrganizationRole.id.isNull()
+                                        .and(application.organizationRole.id.eq(organizationRoleId)))
+                )
+                .fetchOne();
+
+        return count == null ? 0L : count;
     }
 
     @Override
