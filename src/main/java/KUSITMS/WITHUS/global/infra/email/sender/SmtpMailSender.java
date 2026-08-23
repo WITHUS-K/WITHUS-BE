@@ -41,8 +41,6 @@ public class SmtpMailSender implements MailSender {
             helper.setText(text, true);
 
             javaMailSender.send(message);
-
-            log.info("Email accepted by SMTP: [{}] subject: {}", to, subject);
         });
     }
 
@@ -69,7 +67,6 @@ public class SmtpMailSender implements MailSender {
             }
 
             javaMailSender.send(msg);
-            log.info("Email accepted by SMTP: [{}] subject: {}", to, subject);
         });
     }
 
@@ -93,10 +90,19 @@ public class SmtpMailSender implements MailSender {
 
     private void sendWithRetry(String to, String subject, MailSendOperation operation) {
         Exception lastException = null;
+        long startedAt = System.nanoTime();
 
         for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
             try {
                 operation.send();
+                log.info(
+                        "Email accepted by SMTP in {}ms (attempt {}/{}): [{}] subject: {}",
+                        elapsedMs(startedAt),
+                        attempt,
+                        MAX_ATTEMPTS,
+                        to,
+                        subject
+                );
                 return;
             } catch (MessagingException | MailException e) {
                 lastException = e;
@@ -115,8 +121,18 @@ public class SmtpMailSender implements MailSender {
             }
         }
 
-        log.error("Email send failed after retries: [{}] subject: {}", to, subject, lastException);
+        log.error(
+                "Email send failed after retries in {}ms: [{}] subject: {}",
+                elapsedMs(startedAt),
+                to,
+                subject,
+                lastException
+        );
         throw new CustomException(ErrorCode.EMAIL_SEND_FAIL);
+    }
+
+    private long elapsedMs(long startedAt) {
+        return (System.nanoTime() - startedAt) / 1_000_000L;
     }
 
     private void sleepBeforeRetry() {
