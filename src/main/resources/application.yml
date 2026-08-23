@@ -1,3 +1,9 @@
 spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+
+mail:
+  # provider=noop 일 때 실제 발송 대신 흉내낼 지연(ms).
+  # relaxed binding 으로는 MAIL_NOOPDELAYMS 가 되어 헷갈리므로,
+  # 환경변수 이름을 플레이스홀더로 명시해 둔다.
+  noop-delay-ms: ${MAIL_NOOP_DELAY_MS:0}
