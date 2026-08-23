@@ -83,10 +83,14 @@ public class SendGridMailSender implements MailSender {
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
+            long startedAt = System.nanoTime();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            long elapsedMs = (System.nanoTime() - startedAt) / 1_000_000L;
+
             if (response.statusCode() != ACCEPTED) {
                 log.error(
-                        "SendGrid rejected email: status={} to={} subject={} body={}",
+                        "SendGrid rejected email in {}ms: status={} to={} subject={} body={}",
+                        elapsedMs,
                         response.statusCode(),
                         to,
                         subject,
@@ -96,7 +100,13 @@ public class SendGridMailSender implements MailSender {
             }
 
             String messageId = response.headers().firstValue("X-Message-Id").orElse("unknown");
-            log.info("Email accepted by SendGrid: [{}] subject: {} messageId: {}", to, subject, messageId);
+            log.info(
+                    "Email accepted by SendGrid in {}ms: [{}] subject: {} messageId: {}",
+                    elapsedMs,
+                    to,
+                    subject,
+                    messageId
+            );
         } catch (CustomException e) {
             throw e;
         } catch (IOException e) {
